@@ -79,11 +79,6 @@
 ;; magik-patch-options files held last time we looked so that we know
 ;; when to go to the trouble of parsing them again.
 ;;
-;;
-;;The require of MPDE package is deliberately omitted to allow this code
-;;to be loaded independently. The interface to MPDE in this file is protected
-;;by a (featurep 'mpde-boot) check. Only the byte-compiler warns of a missing function
-;;mpde-add-to-list but this is harmless.
 
 ;;; Code:
 
@@ -287,41 +282,6 @@ This hook should come last."
 ;;defined when you load this file.
 ;;Note that magik-template-dir still needs to be set too.
 ;;(magik-template-file-type-alist-add "Template" t magik-template-file-type-templates-default)
-
-;;Configure this package with the MPDE package.
-
-(defun magik-template-mpde-copy (var alist &rest args)
-  "Function to copy the magik-template files with the MPDE package.
-This function is run by the `mpde-refresh-configuration-hook'."
-  (mapcar
-   (lambda (al)
-     (let* ((template-type (car al))
-	    (source (magik-template-file template-type
-					 (get 'magik-template-dir 'master)))
-	    (destination (magik-template-file template-type
-					      (get 'magik-template-dir (symbol-value 'mpde-configuration-current)))))
-       (insert (format "Copying template file %s to %s..." source destination) "\n")
-       (if (symbol-value 'mpde-debug) ;; simply to avoid compiler warnings
-	   (insert "DEBUG: ")
-	 (and (file-exists-p destination) (delete-file destination))
-	 (copy-file source destination t))
-       (insert (format "Copying template file %s to %s... done" source destination) "\n")))
-   alist))
-
-(if (featurep 'mpde-boot)
-    (progn
-      (require 'mpde-env)
-      (mpde-register-variable 'magik-template-dir
-			      (get 'mpde-env-proposed-patches-dir 'master)
-			      'master
-			      'mpde-refresh-action-make-directory
-			      'directory)
-      (mpde-register-variable 'magik-template-alist
-			      magik-template-alist
-			      nil
-			      'magik-template-mpde-copy
-			      'data)
-      ))
 
 (provide 'magik-template)
 ;;; magik-template.el ends here
