@@ -33,10 +33,7 @@
   (defvar ac-modes)
   (require 'magik-indent)
   (require 'magik-electric)
-  (require 'magik-pragma)
-  (defvar gis-buffer)
-  (defvar gis-prompt)
-  )
+  (require 'magik-pragma))
 
 (require 'imenu)
 (require 'magik-template)
@@ -97,15 +94,15 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
 (easy-menu-define magik-menu magik-mode-map
   "Menu for Magik Mode."
   `(,"Magik"
-    [,"Transmit Method"   magik-transmit-method         :active (sw-buffer-mode-list 'gis-mode)
+    [,"Transmit Method"   magik-transmit-method         :active (sw-buffer-mode-list 'magik-shell-mode)
      :keys "f7, f2 f7, f2 m"]
-    [,"Transmit Region"   magik-transmit-region         :active (sw-buffer-mode-list 'gis-mode)
+    [,"Transmit Region"   magik-transmit-region         :active (sw-buffer-mode-list 'magik-shell-mode)
      :keys "f8, f2 f8, f2 r"]
-    [,"Transmit Buffer"   magik-transmit-buffer         :active (sw-buffer-mode-list 'gis-mode)
+    [,"Transmit Buffer"   magik-transmit-buffer         :active (sw-buffer-mode-list 'magik-shell-mode)
      :keys "f2 b"]
-    [,"Transmit Chunk"    magik-transmit-$-chunk        :active (sw-buffer-mode-list 'gis-mode)
+    [,"Transmit Chunk"    magik-transmit-$-chunk        :active (sw-buffer-mode-list 'magik-shell-mode)
      :keys "f2 $"]
-    [,"Transmit Thing"    magik-transmit-thing          :active (sw-buffer-mode-list 'gis-mode)
+    [,"Transmit Thing"    magik-transmit-thing          :active (sw-buffer-mode-list 'magik-shell-mode)
      :keys "f2 RET"]
     "---"
     [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   :active t :keys "f4 r"]
@@ -120,9 +117,9 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
     "---"
     [,"Add Debug Statement"         magik-add-debug-statement     :active t :keys "f4 s"]
     [,"Trace Statement"             magik-trace-curr-statement    :active t :keys "f2 t"]
-    [,"Symbol Complete"          magik-symbol-complete          :active (sw-buffer-mode-list 'gis-mode) :keys "f4 f4"]
+    [,"Symbol Complete"          magik-symbol-complete          :active (sw-buffer-mode-list 'magik-shell-mode) :keys "f4 f4"]
     [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
-								      (sw-buffer-mode-list 'gis-mode))
+								      (sw-buffer-mode-list 'magik-shell-mode))
      :keys "f2 x"]
     "---"
     [,"Heading"           magik-heading                 :active t :keys "f2 h"]
@@ -898,8 +895,8 @@ Optional argument ARG .."
 (defun magik-newline ()
   "Insert a newline and indent.  (To insert a newline and not indent, use C-j)."
   (interactive "*")
-  (if (eq major-mode 'gis-mode)
-      (error "Your gis buffer has got into magik mode!  To recover, type `M-x gis-mode'.  Please report this bug."))
+  (if (eq major-mode 'magik-shell-mode)
+      (error "Your magik shell buffer has got into magik mode!  To recover, type `M-x magik-shell-mode'.  Please report this bug."))
   (if abbrev-mode (save-excursion (expand-abbrev)))
   (if (save-excursion
         (back-to-indentation)
@@ -1151,10 +1148,10 @@ Optional argument ARGS ..."
 Optional argument GIS ..."
   (interactive)
   (let ((gis (sw-get-buffer-mode gis
-				 'gis-mode
-				 "Enter Gis process buffer:"
-				 gis-buffer
-				 'gis-buffer-alist-prefix-function))
+				 'magik-shell-mode
+				 "Enter Magik process buffer:"
+				 magik-shell-buffer
+				 'magik-shell-buffer-alist-prefix-function))
 	pt)
     (save-excursion
       (set-buffer gis)
@@ -1163,7 +1160,7 @@ Optional argument GIS ..."
       (cond ((equal (current-word) "True")
 	     nil) ;;Code loading successful.
 	    ((re-search-backward (concat "^\\*\\*\\*\\*.*" "on line" " \\([0-9]+\\)$")
-				 (save-excursion (re-search-backward gis-prompt nil t)) t)
+				 (save-excursion (re-search-backward magik-shell-prompt nil t)) t)
 	     (setq pt (point)))
 	    (t ;no "on line" errors found.
 	     nil)))
@@ -1348,10 +1345,10 @@ another file shall be written."
 If this command is repeated before the previous file has been processed by Magik,
 another file shall be written."
   (let* ((gis (sw-get-buffer-mode gis
-				  'gis-mode
-				  "Enter Gis process buffer:"
-				  gis-buffer
-				  'gis-buffer-alist-prefix-function))
+				  'magik-shell-mode
+				  "Enter Magik process buffer:"
+				  magik-shell-buffer
+				  'magik-shell-buffer-alist-prefix-function))
 	 (process (barf-if-no-gis gis process))
 	 (orig-buf  (buffer-name))
 	 (orig-file (or (buffer-file-name) ""))
@@ -1754,10 +1751,10 @@ With a prefix arg, ask user for GIS buffer to use."
   (interactive "*")
   ;; the actual completion is done by the process filter: gis-filter-completion-action
   (setq buffer (sw-get-buffer-mode buffer
-				   'gis-mode
-				   "Enter Gis process buffer:"
-				   gis-buffer
-				   'gis-buffer-alist-prefix-function))
+				   'magik-shell-mode
+				   "Enter Magik process buffer:"
+				   magik-shell-buffer
+				   'magik-shell-buffer-alist-prefix-function))
   (barf-if-no-gis buffer)
 
   (if (equal (sw-curr-word) "")

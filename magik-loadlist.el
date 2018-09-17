@@ -83,6 +83,7 @@ Intial ^ and final $ is automatically added in `loadlist-ignore'."
   (interactive)
   (customize-group 'magik-loadlist))
 
+;;;###autoload
 (defun magik-loadlist-mode ()
   "Major mode for editing Magik load_list.txt files.
 
