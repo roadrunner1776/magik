@@ -94,15 +94,15 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
 (easy-menu-define magik-menu magik-mode-map
   "Menu for Magik Mode."
   `(,"Magik"
-    [,"Transmit Method"   magik-transmit-method         :active (sw-buffer-mode-list 'magik-shell-mode)
+    [,"Transmit Method"   magik-transmit-method         :active (magik-utils-buffer-mode-list 'magik-shell-mode)
      :keys "f7, f2 f7, f2 m"]
-    [,"Transmit Region"   magik-transmit-region         :active (sw-buffer-mode-list 'magik-shell-mode)
+    [,"Transmit Region"   magik-transmit-region         :active (magik-utils-buffer-mode-list 'magik-shell-mode)
      :keys "f8, f2 f8, f2 r"]
-    [,"Transmit Buffer"   magik-transmit-buffer         :active (sw-buffer-mode-list 'magik-shell-mode)
+    [,"Transmit Buffer"   magik-transmit-buffer         :active (magik-utils-buffer-mode-list 'magik-shell-mode)
      :keys "f2 b"]
-    [,"Transmit Chunk"    magik-transmit-$-chunk        :active (sw-buffer-mode-list 'magik-shell-mode)
+    [,"Transmit Chunk"    magik-transmit-$-chunk        :active (magik-utils-buffer-mode-list 'magik-shell-mode)
      :keys "f2 $"]
-    [,"Transmit Thing"    magik-transmit-thing          :active (sw-buffer-mode-list 'magik-shell-mode)
+    [,"Transmit Thing"    magik-transmit-thing          :active (magik-utils-buffer-mode-list 'magik-shell-mode)
      :keys "f2 RET"]
     "---"
     [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   :active t :keys "f4 r"]
@@ -117,9 +117,9 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
     "---"
     [,"Add Debug Statement"         magik-add-debug-statement     :active t :keys "f4 s"]
     [,"Trace Statement"             magik-trace-curr-statement    :active t :keys "f2 t"]
-    [,"Symbol Complete"          magik-symbol-complete          :active (sw-buffer-mode-list 'magik-shell-mode) :keys "f4 f4"]
+    [,"Symbol Complete"          magik-symbol-complete          :active (magik-utils-buffer-mode-list 'magik-shell-mode) :keys "f4 f4"]
     [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
-								      (sw-buffer-mode-list 'magik-shell-mode))
+								      (magik-utils-buffer-mode-list 'magik-shell-mode))
      :keys "f2 x"]
     "---"
     [,"Heading"           magik-heading                 :active t :keys "f2 h"]
@@ -745,19 +745,19 @@ Use auto-complete mode \"g\" symbol convention to represent a global.")
 (defun magik-expand-abbrev ()
   (save-excursion
     (let*
-        ((toks (progn (insert ? )  ;; so that the token closes!
-                      (prog1
-                          (magik-tokenise-region-no-eol (line-beginning-position) (point))
-                        (delete-backward-char 1))))
-         (last-tok (car (last toks)))
-         (last-tok-pos (cdr last-tok)))
+	((toks (progn (insert ? )  ;; so that the token closes!
+		      (prog1
+			  (magik-tokenise-region-no-eol (line-beginning-position) (point))
+			(delete-backward-char 1))))
+	 (last-tok (car (last toks)))
+	 (last-tok-pos (cdr last-tok)))
       (backward-word 1)
       (if (and (eq (point) last-tok-pos)
-               (/= (preceding-char) ?.))
-          (insert ?_))
+	       (/= (preceding-char) ?.))
+	  (insert ?_))
       (if (and (eq major-mode 'magik-mode)
-               (looking-at "_else\\|_elif\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
-          (magik-indent-command)))))
+	       (looking-at "_else\\|_elif\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
+	  (magik-indent-command)))))
 
 ;;Actually only used by the Magik-Patch minor mode but we need a hook here
 ;;because a function must be referred to in font-lock-defaults.
@@ -870,7 +870,7 @@ Optional argument ARG .."
   "Add a debug statement at the current line of magik."
   (interactive)
   (let
-      ((var (sw-find-tag-default))
+      ((var (magik-utils-find-tag-default))
        (pos (point))
        line
        col
@@ -899,8 +899,8 @@ Optional argument ARG .."
       (error "Your magik shell buffer has got into magik mode!  To recover, type `M-x magik-shell-mode'.  Please report this bug."))
   (if abbrev-mode (save-excursion (expand-abbrev)))
   (if (save-excursion
-        (back-to-indentation)
-        (looking-at "[]})]\\|_else\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
+	(back-to-indentation)
+	(looking-at "[]})]\\|_else\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
       (magik-indent-command))
   (newline-and-indent))
 
@@ -1147,11 +1147,11 @@ Optional argument ARGS ..."
   "Goto the previous magik error.
 Optional argument GIS ..."
   (interactive)
-  (let ((gis (sw-get-buffer-mode gis
-				 'magik-shell-mode
-				 "Enter Magik process buffer:"
-				 magik-shell-buffer
-				 'magik-shell-buffer-alist-prefix-function))
+  (let ((gis (magik-utils-get-buffer-mode gis
+					  'magik-shell-mode
+					  "Enter Magik process buffer:"
+					  magik-shell-buffer
+					  'magik-shell-buffer-alist-prefix-function))
 	pt)
     (save-excursion
       (set-buffer gis)
@@ -1177,7 +1177,7 @@ Optional argument GIS ..."
   (let ((literal (not regexp-flag))
 	(search-function (if regexp-flag 're-search-forward 'search-forward)))
     (while (and (not (eobp))
-                (funcall search-function from nil t))
+		(funcall search-function from nil t))
       (replace-match to t literal))))
 
 (defun magik-transmit-method-eom-mode (arg)
@@ -1232,36 +1232,36 @@ The rule is that the thing must start against the left margin."
        (beg (point))
        (stack nil))
     (if (re-search-backward "^\\w" nil t)
-        (progn
-          (setq beg (point))
-          (forward-line -1)
-          (while
-              (and (not (bobp))
-                   (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
-            (setq beg (point))
-            (forward-line -1))
-          (goto-char beg)
-          (while
-              (and (not (eq (point) (point-max)))
-                   (or (< (point) original-point)
-                       stack))
-            (dolist (tok (magik-tokenise-line))
-              (cond
-               ((assoc (car tok) magik-begins-and-ends)
-                (push (car tok) stack))
-               ((assoc (car tok) magik-ends-and-begins)
-                (if (equal (cdr (assoc (car stack) magik-begins-and-ends)) (car tok))
-                    (pop stack)
-                  (goto-char (cdr tok))
-                  (error "Found '%s' when expecting '%s'"
-                         (car tok)
-                         (cdr (assoc (car stack) magik-begins-and-ends)))))))
-            (forward-line))
-          (if (< (point) original-point)
-              (progn
-                (goto-char original-point)
-                (error "Don't know what to transmit"))
-            (magik-transmit-region beg (point)))))
+	(progn
+	  (setq beg (point))
+	  (forward-line -1)
+	  (while
+	      (and (not (bobp))
+		   (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
+	    (setq beg (point))
+	    (forward-line -1))
+	  (goto-char beg)
+	  (while
+	      (and (not (eq (point) (point-max)))
+		   (or (< (point) original-point)
+		       stack))
+	    (dolist (tok (magik-tokenise-line))
+	      (cond
+	       ((assoc (car tok) magik-begins-and-ends)
+		(push (car tok) stack))
+	       ((assoc (car tok) magik-ends-and-begins)
+		(if (equal (cdr (assoc (car stack) magik-begins-and-ends)) (car tok))
+		    (pop stack)
+		  (goto-char (cdr tok))
+		  (error "Found '%s' when expecting '%s'"
+			 (car tok)
+			 (cdr (assoc (car stack) magik-begins-and-ends)))))))
+	    (forward-line))
+	  (if (< (point) original-point)
+	      (progn
+		(goto-char original-point)
+		(error "Don't know what to transmit"))
+	    (magik-transmit-region beg (point)))))
     (goto-char original-point)))
 (defalias 'transmit-thing-to-magik 'magik-transmit-thing)
 
@@ -1344,11 +1344,11 @@ another file shall be written."
   "Generalised function to send code to Magik via a temporary file.
 If this command is repeated before the previous file has been processed by Magik,
 another file shall be written."
-  (let* ((gis (sw-get-buffer-mode gis
-				  'magik-shell-mode
-				  "Enter Magik process buffer:"
-				  magik-shell-buffer
-				  'magik-shell-buffer-alist-prefix-function))
+  (let* ((gis (magik-utils-get-buffer-mode gis
+					   'magik-shell-mode
+					   "Enter Magik process buffer:"
+					   magik-shell-buffer
+					   'magik-shell-buffer-alist-prefix-function))
 	 (process (barf-if-no-gis gis process))
 	 (orig-buf  (buffer-name))
 	 (orig-file (or (buffer-file-name) ""))
@@ -1356,7 +1356,7 @@ another file shall be written."
 	 (filename (concat (concat (getenv "TEMP") "\\T")
 			   (user-login-name)
 			   (number-to-string (process-id process))))
-         (package (or package "\n")) ;need a newline to ensure fixed number of lines for gis-goto-error
+	 (package (or package "\n")) ;need a newline to ensure fixed number of lines for gis-goto-error
 	 (coding-system buffer-file-coding-system))
 
     (setq filename (loop
@@ -1379,7 +1379,7 @@ another file shall be written."
 	      str)
       (goto-char (point-min))
       (if magik-transmit-debug-p
-          (magik-perform-replace-no-set-mark "#DEBUG" "" nil))
+	  (magik-perform-replace-no-set-mark "#DEBUG" "" nil))
       (write-region (point-min) (point-max) filename nil 'xxx)
 					;(kill-buffer (current-buffer))
       )
@@ -1494,7 +1494,7 @@ With a negative numeric arg, remove  method name from the mode line."
 	(if (null arg)
 	    (not magik-method-name-mode)
 	  (> (prefix-numeric-value arg) 0)))
-  (dolist (buf (sw-buffer-mode-list 'magik-mode))
+  (dolist (buf (magik-utils-buffer-mode-list 'magik-mode))
     (with-current-buffer buf
       (magik-method-name-set)
       (force-mode-line-update)))
@@ -1648,10 +1648,10 @@ If PT is given, goto that char position."
     (beginning-of-line)
     (indent-to col)
     (insert "write(\""
-            ;; (make-string col ? ) ;;;; withdrawn.
-            "+++ "
-            str
-            " +++\")\n")))
+	    ;; (make-string col ? ) ;;;; withdrawn.
+	    "+++ "
+	    str
+	    " +++\")\n")))
 
 
 
@@ -1680,8 +1680,8 @@ The format is # (or ##) <tab> followed by each character uppercased and single s
   (interactive "*")
   (save-excursion
     (if (progn
-          (back-to-indentation)
-          (looking-at "\\(##?\\)[ \t]+[^ \t\n]"))
+	  (back-to-indentation)
+	  (looking-at "\\(##?\\)[ \t]+[^ \t\n]"))
 	(let*
 	    ((comment-str (match-string 1))
 	     (regexp-str (concat
@@ -1750,20 +1750,20 @@ process running in the BUFFER named in the variable, `gis-buffer'.
 With a prefix arg, ask user for GIS buffer to use."
   (interactive "*")
   ;; the actual completion is done by the process filter: gis-filter-completion-action
-  (setq buffer (sw-get-buffer-mode buffer
-				   'magik-shell-mode
-				   "Enter Magik process buffer:"
-				   magik-shell-buffer
-				   'magik-shell-buffer-alist-prefix-function))
+  (setq buffer (magik-utils-get-buffer-mode buffer
+					    'magik-shell-mode
+					    "Enter Magik process buffer:"
+					    magik-shell-buffer
+					    'magik-shell-buffer-alist-prefix-function))
   (barf-if-no-gis buffer)
 
-  (if (equal (sw-curr-word) "")
+  (if (equal (magik-utils-curr-word) "")
       (message "Doing a completion on the empty string would take too long")
-    (if (<= (length (sw-curr-word)) 2)
-        (message "Symbol is already complete or is too short."))
+    (if (<= (length (magik-utils-curr-word)) 2)
+	(message "Symbol is already complete or is too short."))
     (process-send-string
      (get-buffer-process buffer)
-     (concat "symbol_table.emacs_write_completions(\"" (sw-curr-word) "\")\n$\n"))))
+     (concat "symbol_table.emacs_write_completions(\"" (magik-utils-curr-word) "\")\n$\n"))))
 
 (defun magik-compare-methods (ignore-whitespace)
   "Compare Methods in two windows using \\[compare-windows].
@@ -1914,10 +1914,10 @@ provide extra control over the name that appears in the index."
 
   (let ((index-alist (list 'dummy))
 	prev-pos beg
-        (case-fold-search imenu-case-fold-search)
-        (old-table (syntax-table))
-        (table (copy-syntax-table (syntax-table)))
-        (slist imenu-syntax-alist))
+	(case-fold-search imenu-case-fold-search)
+	(old-table (syntax-table))
+	(table (copy-syntax-table (syntax-table)))
+	(slist imenu-syntax-alist))
     ;; Modify the syntax table used while matching regexps.
     (while slist
       ;; The character(s) to modify may be a single char or a string.
@@ -2116,8 +2116,8 @@ closing bracket into the new \"{...}\" notation."
   (let ((abbrevs-changed nil))
     (mapcar
      #'(lambda (str)
-         (define-abbrev magik-mode-abbrev-table
-           str str 'magik-expand-abbrev))
+	 (define-abbrev magik-mode-abbrev-table
+	   str str 'magik-expand-abbrev))
 
      (append magik-keyword-constants magik-keyword-operators
 	     magik-keyword-class magik-keyword-statements

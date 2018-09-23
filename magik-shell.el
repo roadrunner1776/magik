@@ -259,7 +259,7 @@ this variable buffer-local by putting the following in your .emacs
   "Keymap for Jumping to error messages.")
 
 (define-key magik-shell-mode-error-map [mouse-2]  'magik-shell-error-goto-mouse)
-(sw-define-key magik-shell-mode-error-map [C-return] 'magik-shell-error-goto)
+(define-key magik-shell-mode-error-map [C-return] 'magik-shell-error-goto)
 
 (defvar magik-shell-process nil
   "The process object of the command running in the buffer.")
@@ -478,7 +478,7 @@ and return a list of all the components of the command."
     (if (and buf
 	     (save-excursion
 	       (set-buffer buf)
-	       (sw-buffer-mode-list-predicate-p predicate)))
+	       (magik-utils-buffer-mode-list-predicate-p predicate)))
 	t
       (error "No GIS buffer"))
     buf))
@@ -492,8 +492,8 @@ and return a list of all the components of the command."
 	(save-match-data
 	  (if (string-match "^\\[[^\]]*\\]" command)
 	      (setq label
-		    (concat (sw-file-name-display (match-string 0 command)
-						  magik-shell-command-history-max-length-dir)
+		    (concat (magik-utils-file-name-display (match-string 0 command)
+							   magik-shell-command-history-max-length-dir)
 			    "..."))))
 	(concat label (substring command (+ command-len (length label)))))))
 
@@ -548,7 +548,7 @@ and return a list of all the components of the command."
 			  (list "---"
 				(apply 'vector (magik-shell-command-display magik-shell-current-command)
 				       'ignore ':active nil (list ':key-sequence nil
-							      ':help (purecopy magik-shell-current-command)))
+								  ':help (purecopy magik-shell-current-command)))
 				(apply 'vector "Start New Magik Shell" 'magik-shell-new-buffer
 				       ':active t
 				       ':keys '("C-u f2 z"))))))
@@ -559,8 +559,8 @@ and return a list of all the components of the command."
 
 (defun magik-shell-update-sw-shell-menu ()
   "Update GIS shell submenu in SW menu bar."
-  (let ((shell-bufs (sw-buffer-mode-list 'shell-mode
-					 (function (lambda () (getenv "SMALLWORLD_GIS")))))
+  (let ((shell-bufs (magik-utils-buffer-mode-list 'shell-mode
+						  (function (lambda () (getenv "SMALLWORLD_GIS")))))
 	shell-list)
     (loop for buf in shell-bufs
 	  do (push (vector buf (list 'switch-to-buffer buf) t) shell-list))
@@ -732,9 +732,9 @@ Adds `magik-shell-current-command' to `magik-shell-command-history' if not alrea
 
     ;;MF New bit for connecting to the method finder:
     ;;MF We nuke the current cb first and reconnect later.
-    (when (and cb-dynamic (get-buffer magik-shell-cb-buffer))
-      (let ((cb-process (get-buffer-process magik-shell-cb-buffer)))
-	(if cb-process (delete-process cb-process)))
+    (when (and magik-cb-dynamic (get-buffer magik-shell-cb-buffer))
+      (let ((magik-cb-process (get-buffer-process magik-shell-cb-buffer)))
+	(if magik-cb-process (delete-process magik-cb-process)))
       (process-send-string magik-shell-process "_if method_finder _isnt _unset\n_then\n  method_finder.lazy_start?\n  method_finder.send_socket_to_emacs()\n_endif\n$\n"))
     (sit-for 0.01)
     (run-hooks 'magik-shell-start-process-post-hook)))
@@ -788,14 +788,14 @@ there is not, prompt for a command to run, and then run it."
 	(alias-buffer "*temp gis alias buffer*")
 	(keepgoing t)
 	(magik-shell-start-process-pre-hook magik-shell-start-process-pre-hook)
-	(buffer (sw-get-buffer-mode (cond (buffer buffer)
-					  ((eq major-mode 'magik-shell-mode) (buffer-name))
-					  (t nil))
-				    'magik-shell-mode
-				    "Enter Magik process buffer:"
-				    (or magik-shell-buffer magik-shell-buffer-default-name)
-				    'magik-shell-buffer-alist-prefix-function
-				    (generate-new-buffer-name magik-shell-buffer-default-name)))
+	(buffer (magik-utils-get-buffer-mode (cond (buffer buffer)
+						   ((eq major-mode 'magik-shell-mode) (buffer-name))
+						   (t nil))
+					     'magik-shell-mode
+					     "Enter Magik process buffer:"
+					     (or magik-shell-buffer magik-shell-buffer-default-name)
+					     'magik-shell-buffer-alist-prefix-function
+					     (generate-new-buffer-name magik-shell-buffer-default-name)))
 	(rev-1920-regexp " +\\[rev\\(19\\|20\\)\\] +")
 	(alias-subst-regexp "\\\\!\\(\\\\\\)?\\*"))
     (if (and (get-buffer-process buffer)
@@ -899,7 +899,7 @@ Uses `magik-shell-kill-process-function' function to kill the process given in `
   "Ask and then comint-interrupt-subjob."
   (interactive)
   (if (y-or-n-p "Kill the Magik process? ")
-	  (comint-kill-subjob)))
+      (comint-kill-subjob)))
 
 (defun magik-shell-query-quit-shell-subjob ()
   "Ask and then comint-quit-subjob."

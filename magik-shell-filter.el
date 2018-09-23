@@ -156,11 +156,11 @@ from magik-shell-prev-cmds."
 
 With a prefix arg, ask user for GIS buffer to use."
   (interactive)
-  (setq buffer (sw-get-buffer-mode buffer
-				   'magik-shell-mode
-				   "Enter Gis process buffer: "
-				   magik-shell-buffer
-				   'magik-shell-buffer-alist-prefix-function))
+  (setq buffer (magik-utils-get-buffer-mode buffer
+					    'magik-shell-mode
+					    "Enter Gis process buffer: "
+					    magik-shell-buffer
+					    'magik-shell-buffer-alist-prefix-function))
   (barf-if-no-gis buffer)
 
   (let ((process (get-buffer-process buffer)))
@@ -330,11 +330,11 @@ The behaviour is undefined if any search key and line or column are used."
 
 (defun magik-shell-filter-action-cb-mf (proc socketname)
   "Magik has started a method_finder and tells Emacs what the socketname is."
-  (setq cb--mf-socket-synchronised socketname))
+  (setq magik-cb--mf-socket-synchronised socketname))
 
 (defun magik-shell-filter-action-cb-goto-method (proc str)
   "GIS Filter Action interface for cb-goto-method."
-  (cb-goto-method str nil))
+  (magik-cb-goto-method str nil))
 
 (defun magik-shell-filter-action-magik-shell-prompt-set (proc str)
   "Gis Filter Action for setting `magik-shell-prompt' variable."
