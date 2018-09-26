@@ -39,7 +39,7 @@ Emacs session back to the original startup settings.")
 (defun barf-if-no-gis (&optional buffer process)
   "Return process object of GIS process.
 Signal an error if no gis is running."
-  (setq buffer  (or buffer gis-buffer)
+  (setq buffer  (or buffer magik-shell-buffer)
 	process (or process (get-buffer-process buffer)))
   (or process
       (error resources-sw-no-gis-process-error buffer)))

@@ -122,7 +122,7 @@ You can customise Product Mode with the `product-mode-hook'."
 	require-final-newline t
 	imenu-generic-expression magik-product-imenu-generic-expression
 	font-lock-defaults
-	'(product-font-lock-keywords
+	'(magik-product-font-lock-keywords
 	  nil t))
 
   (run-hooks 'magik-product-mode-hook))

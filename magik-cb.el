@@ -81,7 +81,6 @@
 
 (eval-when-compile
   (require 'cl)
-  (defvar mode-line-format-sym)
   (defvar msb-menu-cond)
   (defvar ac-triggered)
   (defvar ac-prefix)
@@ -670,7 +669,7 @@ To view the help on these variables type C-h v [Return] [variable-name]"
 	buffer-undo-list t
 	font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w"))))
 
-  (add-hook menu-bar-update-hook-sym 'magik-cb-update-sw-menu)
+  (add-hook 'menu-bar-update-hook 'magik-cb-update-sw-menu)
   (add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t) ;local hook
   (run-hooks 'magik-cb-mode-hook))
 
@@ -1820,27 +1819,27 @@ Also delete the end-of-line character."
 modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
   (save-excursion
     (set-buffer (magik-cb-buffer))
-    (set mode-line-format-sym
-	 (concat
-	  (make-string (max 0 (- 5 (length magik-cb-n-methods-str))) ? )
-	  magik-cb-n-methods-str  "    "
-	  (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point-min) (point)))
-	  (if (eq magik-cb-cursor-pos 'method-name) magik-cb-mode-line-cursor "")
-	  (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point) (point-max)))
-	  magik-cb-in-keyword
-	  (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point-min) (point)))
-	  (if (eq magik-cb-cursor-pos 'method-name) "" magik-cb-mode-line-cursor)
-	  (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point) (point-max)))
-	  "          "
-	  (magik-cb-modeline-flags)))
+    (setq mode-line-format
+	  (concat
+	   (make-string (max 0 (- 5 (length magik-cb-n-methods-str))) ? )
+	   magik-cb-n-methods-str  "    "
+	   (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point-min) (point)))
+	   (if (eq magik-cb-cursor-pos 'method-name) magik-cb-mode-line-cursor "")
+	   (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point) (point-max)))
+	   magik-cb-in-keyword
+	   (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point-min) (point)))
+	   (if (eq magik-cb-cursor-pos 'method-name) "" magik-cb-mode-line-cursor)
+	   (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point) (point-max)))
+	   "          "
+	   (magik-cb-modeline-flags)))
     (set-buffer-modified-p (buffer-modified-p))
 
     ;;update CB2 if buffer exists.
     (let ((cb2 (magik-cb2-buffer))
-	  (mode-line (symbol-value mode-line-format-sym)))
+	  (mode-line (symbol-value 'mode-line-format)))
       (when (get-buffer cb2)
 	(set-buffer cb2)
-	(set mode-line-format-sym mode-line)
+	(setq mode-line-format mode-line)
 	(set-buffer-modified-p (buffer-modified-p))))))
 
 (defun magik-cb-modeline-flags ()
@@ -2687,6 +2686,50 @@ AC-PREFIX is of the form \"CLASS\".\"METHOD_NAME_PREFIX\"
 
 (eval-after-load 'msb
   '(magik-cb-msb-configuration))
+
+(progn
+  ;; ----------------------- cb mode ------------------------
+
+  (loop for i from ?  to ?~ do
+	(define-key magik-cb-mode-map (char-to-string i) 'magik-cb-insert-command))
+
+  (define-key magik-cb-mode-map [f1]        'magik-cb-help)
+  (define-key magik-cb-mode-map [delete]    'magik-cb-delete-char)
+  (define-key magik-cb-mode-map [backspace] 'magik-cb-backward-delete-char)
+  (define-key magik-cb-mode-map "\C-k"      'magik-cb-kill-line)
+  (define-key magik-cb-mode-map "\C-y"      'magik-cb-yank)
+  (define-key magik-cb-mode-map "\ey"       'magik-cb-yank-pop)
+  (define-key magik-cb-mode-map "\C-a"      'magik-cb-beginning-of-line)
+  (define-key magik-cb-mode-map "\C-e"      'magik-cb-end-of-line)
+  (define-key magik-cb-mode-map "\t"        'magik-cb-tab)
+  (define-key magik-cb-mode-map " "         'magik-cb-quit)
+  (define-key magik-cb-mode-map ";"         'magik-cb-edit-topics-and-flags)
+  (define-key magik-cb-mode-map "/"         'magik-cb-clear)
+  (define-key magik-cb-mode-map "\C-b"      'magik-cb-backward-char)
+  (define-key magik-cb-mode-map "\C-f"      'magik-cb-forward-char)
+
+  (define-key magik-cb-mode-map [left]    'magik-cb-backward-char)
+  (define-key magik-cb-mode-map [right]   'magik-cb-forward-char)
+  (define-key magik-cb-mode-map [mouse-2] 'magik-cb-mouse)
+
+  (define-key magik-cb-mode-map [mode-line mouse-1] 'magik-cb-mode-line-click)
+  (define-key magik-cb-mode-map [mode-line mouse-2] 'magik-cb-mode-line-click)
+
+  (define-key magik-cb-mode-map (kbd "<f3> <up>")   'magik-cb-fold)
+  (define-key magik-cb-mode-map (kbd "<f3> <down>") 'magik-cb-unfold)
+  (define-key magik-cb-mode-map (kbd "<f3> $")      'magik-cb-gis-shell)
+  (define-key magik-cb-mode-map (kbd "<f3> F")      'magik-cb-toggle-override-flags)
+  (define-key magik-cb-mode-map (kbd "<f3> T")      'magik-cb-toggle-override-topics)
+  (define-key magik-cb-mode-map (kbd "<f3> 2")      'magik-cb-toggle-override-200-limit)
+  (define-key magik-cb-mode-map (kbd "<f3> f")      'magik-cb-family)
+  (define-key magik-cb-mode-map (kbd "<f3> g")      'magik-cb-gis)
+  (define-key magik-cb-mode-map (kbd "<f3> h")      'magik-cb-quit)
+  (define-key magik-cb-mode-map (kbd "<f3> j")      'magik-cb-jump-to-source)
+  (define-key magik-cb-mode-map (kbd "<f3> l")      'magik-cb-next-inheritance-setting)
+  (define-key magik-cb-mode-map (kbd "<f3> r")      'magik-cb-reset)
+  (define-key magik-cb-mode-map (kbd "<f3> o")      'magik-cb-toggle-override-flags)
+  (define-key magik-cb-mode-map (kbd "<f3> s")      'magik-cb-edit-topics-and-flags)
+  (define-key magik-cb-mode-map (kbd "<f3> t")      'magik-cb-toggle-all-topics))
 
 (provide 'magik-cb)
 ;;; magik-cb.el ends here

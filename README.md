@@ -8,8 +8,11 @@ See [Emacs Wiki](https://www.emacswiki.org/emacs/InstallingPackages) for instruc
 The alternative, and recommended, way of installing [magik-mode](https://github.com/roadrunner1776/magik) is using [use-package](https://github.com/jwiegley/use-package):
 
 ``` emacs-lisp
-(use-package magik
+(use-package magik-mode
   :ensure t
-  :mode (("\\.magik\\'". magik-mode)))
+  :config
+  (progn 
+	(magik-global-bindings)
+	(magik-menu-set-menus)))
 ```
 

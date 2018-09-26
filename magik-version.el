@@ -76,7 +76,8 @@ This provides an alternative interface to a gis_version program.
   "*Hook to run after a selection has been made."
   :group 'magik-version
   :type  'hook)
-(add-hook 'magik-version-select-hook  'magik-aliases-update-sw-menu)
+
+(add-hook 'magik-version-select-hook  'magik-aliases-update-menu)
 
 (defcustom magik-version-help "Select a Smallworld Core Product Installation.\n\nThe product you select will define the environment for any new Smallworld\nsessions that `F2 z' runs.\n\nTo make the selection, move the cursor to the line you want and press RETURN.\n\nPress q to exit and do nothing.\n\n"
   "Help text displayed at top of gis_version buffer."

@@ -177,7 +177,7 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook."
 	'(magik-aliases-font-lock-keywords
 	  nil nil))
 
-  (add-hook menu-bar-update-hook-sym 'magik-aliases-update-menu)
+  (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu)
   (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t)
   ;;Avoid menu-bar-update-hook, since this is executed
   ;;many times and the magik-aliases-update-sw-menu function does
@@ -375,44 +375,42 @@ Returns nil if FILE cannot be expanded."
 (defun magik-aliases-update-sw-menu ()
   "Update 'resources-menu-sw-alias-files' submenu in SW menu bar."
   (interactive)
-  (if (and (boundp 'sw-set-keys) (symbol-value 'sw-set-keys))
-      (let (default-files
-	     lp-files
-	     buffers
-	     (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t))))
-	(dolist (f (append magik-aliases-user-file-list magik-aliases-common-file-list ))
-	  (push `[,f
-		  (progn
-		    (find-file (magik-aliases-expand-file ,f))
-		    (magik-aliases-mode))
-		  (and ,f (magik-aliases-expand-file ,f))
-		  ]
-		default-files))
+  (let (default-files
+	 lp-files
+	 buffers
+	 (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t))))
+    (dolist (f (append magik-aliases-user-file-list magik-aliases-common-file-list ))
+      (push `[,f
+	      (progn
+		(find-file (magik-aliases-expand-file ,f))
+		(magik-aliases-mode))
+	      (and ,f (magik-aliases-expand-file ,f))
+	      ]
+	    default-files))
 
-	(when (getenv "SMALLWORLD_GIS")
-	  (dolist (lp (magik-aliases-layered-products-file
-		       (magik-aliases-expand-file "$SMALLWORLD_GIS/../smallworld_registry/LAYERED_PRODUCTS")))
-	    (push `[,(format "%s: %s" (car lp) (cdr lp))
-		    (progn
-		      (find-file ,(concat (cdr lp) "/config/gis_aliases"))
-		      (magik-aliases-mode))
-		    ,(cdr lp)
-		    ]
-		  lp-files))
-	  (push "---" lp-files))
+    (when (getenv "SMALLWORLD_GIS")
+      (dolist (lp (magik-aliases-layered-products-file
+		   (magik-aliases-expand-file "$SMALLWORLD_GIS/../smallworld_registry/LAYERED_PRODUCTS")))
+	(push `[,(format "%s: %s" (car lp) (cdr lp))
+		(progn
+		  (find-file ,(concat (cdr lp) "/config/gis_aliases"))
+		  (magik-aliases-mode))
+		,(cdr lp)
+		]
+	      lp-files))
+      (push "---" lp-files))
 
-	(loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)
-	      do (push (vector (buffer-file-name (get-buffer buf))
-			       (list 'switch-to-buffer buf)
-			       t) buffers))
-	(or (eq (length buffers) 0) (push "---" buffers))
+    (loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)
+	  do (push (vector (buffer-file-name (get-buffer buf))
+			   (list 'switch-to-buffer buf)
+			   t) buffers))
+    (or (eq (length buffers) 0) (push "---" buffers))
 
-	(easy-menu-change (list "SW")
-			  "Alias Files"
-			  (append default-files lp-files buffers rescan)))))
+    (easy-menu-change (list "Tools" "Magik")
+		      "Alias Files"
+		      (append default-files lp-files buffers rescan))))
 
 ;;; Package initialisation
-(magik-aliases-update-sw-menu)
 (add-hook 'magik-aliases-mode-hook 'magik-aliases-update-sw-menu)
 
 (if magik-aliases-mode-syntax-table

@@ -175,7 +175,7 @@ You can customise msg-mode with the msg-mode-hook."
 	require-final-newline t
 	imenu-generic-expression magik-msg-imenu-generic-expression
 	font-lock-defaults
-	'(msg-font-lock-keywords
+	'(magik-msg-font-lock-keywords
 	  nil t)
 	outline-regexp "^:\\(\\sw+\\).*")
 

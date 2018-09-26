@@ -179,7 +179,7 @@ You can customise Module Mode with the `module-mode-hook'."
 	require-final-newline t
 	imenu-generic-expression magik-module-imenu-generic-expression
 	font-lock-defaults
-	'(module-font-lock-keywords
+	'(magik-module-font-lock-keywords
 	  nil t))
 
   (run-hooks 'magik-module-mode-hook))

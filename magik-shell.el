@@ -675,16 +675,16 @@ Entry to this mode calls the value of magik-shell-mode-hook."
 	    magik-shell-process-environment (copy-list (or magik-shell-process-environment
 							   process-environment))))
 
-    (set mode-line-process-sym '(": %s"))
+    (setq mode-line-process '(": %s"))
 
     (abbrev-mode 1)
     (save-excursion
       (set-buffer (get-buffer-create (concat " *filter*" (buffer-name))))
       (erase-buffer))
 
-    (add-hook menu-bar-update-hook-sym 'magik-shell-update-gis-menu)
-    (add-hook menu-bar-update-hook-sym 'magik-shell-update-sw-menu)
-    (add-hook menu-bar-update-hook-sym 'magik-shell-update-sw-shell-menu)
+    (add-hook 'menu-bar-update-hook 'magik-shell-update-gis-menu)
+    (add-hook 'menu-bar-update-hook 'magik-shell-update-sw-menu)
+    (add-hook 'menu-bar-update-hook 'magik-shell-update-sw-shell-menu)
     (add-hook 'kill-buffer-hook 'magik-shell-buffer-alist-remove nil t) ;local hook
     (run-hooks 'magik-shell-mode-hook)))
 
@@ -1627,6 +1627,51 @@ where MODE is the name of the major mode with the '-mode' postfix."
 
 (eval-after-load 'auto-complete
   '(add-to-list 'ac-modes 'magik-shell-mode))
+
+(progn
+  ;; ---------------------- magik shell mode -------------------------
+
+  (loop for i from ?  to ?~ do
+	(define-key magik-shell-mode-map (char-to-string i) 'magik-shell-insert-char))
+
+  (define-key magik-shell-mode-map [f1]        'magik-shell-help)
+  (define-key magik-shell-mode-map "\ep"       'magik-shell-recall-prev-cmd)
+  (define-key magik-shell-mode-map "\en"       'magik-shell-recall-next-cmd)
+  (define-key magik-shell-mode-map "\r"        'magik-shell-newline)
+  (define-key magik-shell-mode-map " "         'magik-shell-electric-magik-space)
+  (define-key magik-shell-mode-map "\C-?"      'magik-shell-backward-delete-char)
+  (define-key magik-shell-mode-map "\C-a"      'magik-shell-beginning-of-line)
+  (define-key magik-shell-mode-map "\C-d"      'magik-shell-delete-char)
+  (define-key magik-shell-mode-map "\ed"       'magik-shell-kill-word)
+  (define-key magik-shell-mode-map "\e\C-?"    'magik-shell-backward-kill-word)
+  (define-key magik-shell-mode-map "\C-k"      'magik-shell-kill-line)
+  (define-key magik-shell-mode-map "\C-w"      'magik-shell-kill-region)
+  (define-key magik-shell-mode-map [f8]        'magik-shell-send-command-at-point)
+  (define-key magik-shell-mode-map "\C-c\C-c"  'magik-shell-kill-process)
+  (define-key magik-shell-mode-map "\C-c\C-\\" 'query-quit-shell-subjob)
+  (define-key magik-shell-mode-map "\C-c\C-z"  'query-stop-shell-subjob)
+  (define-key magik-shell-mode-map "\C-c\C-d"  'query-shell-send-eof)
+
+  (define-key magik-shell-mode-map (kbd "<f2> <up>")   'display-gis-history)
+  (define-key magik-shell-mode-map (kbd "<f2> \C-p")   'display-gis-history)
+  (define-key magik-shell-mode-map (kbd "<f2> <down>") 'undisplay-gis-history)
+  (define-key magik-shell-mode-map (kbd "<f2> \C-n")   'undisplay-gis-history)
+  (define-key magik-shell-mode-map (kbd "<f2> =")      'magik-shell-traceback-print)
+  (define-key magik-shell-mode-map (kbd "<f2> f")      'toggle-gis-filter)
+  (define-key magik-shell-mode-map (kbd "<f2> p")      'magik-shell-recall-prev-matching-cmd)
+  (define-key magik-shell-mode-map (kbd "<f2> n")      'magik-shell-recall-next-matching-cmd)
+
+  (define-key magik-shell-mode-map (kbd "<f4> <f4>")   'magik-symbol-complete)
+  (define-key magik-shell-mode-map (kbd "<f4> <up>")   'magik-shell-traceback-up)
+  (define-key magik-shell-mode-map (kbd "<f4> <down>") 'magik-shell-traceback-down)
+  (define-key magik-shell-mode-map (kbd "<f4> $")      'magik-shell-shell)
+  (define-key magik-shell-mode-map (kbd "<f4> g")      'magik-shell-error-goto)
+  (define-key magik-shell-mode-map (kbd "<f4> m")      'magik-copy-method-to-buffer)
+  (define-key magik-shell-mode-map (kbd "<f4> r")      'magik-copy-region-to-buffer)
+  (define-key magik-shell-mode-map (kbd "<f4> s")      'magik-add-debug-statement)
+  (define-key magik-shell-mode-map (kbd "<f4> w")      'magik-set-work-buffer)
+  (define-key magik-shell-mode-map (kbd "<f4> P")      'magik-shell-traceback-print)
+  (define-key magik-shell-mode-map (kbd "<f4> S")      'magik-shell-traceback-save))
 
 (provide 'magik-shell)
 ;;; magik-shell.el ends here
