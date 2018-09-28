@@ -772,7 +772,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
 					':active t
 					':keys (format "M-%d f3 f3" i))))))))
 
-    (easy-menu-change (list "SW")
+    (easy-menu-change (list "Tools" "Magik")
 		      "Class Browser Processes"
 		      (if (eq (length cb-list) 1)
 			  (list "No Processes")

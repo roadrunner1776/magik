@@ -450,7 +450,10 @@ and return a list of all the components of the command."
 		   do (progn
 			(setq start-char
 			      (save-excursion
-				(skip-chars-forward " \t"))) ;skip intervening white space
+				(skip-chars-forward " \t") ;skip intervening white space
+				(and (looking-at "[\"\']") (forward-char 1)) ;strip begin-quote
+				(point)))
+
 			(forward-sexp)
 			(setq substr (buffer-substring start-char (point)))
 			(if (string-match "[\"\']$" substr) ;strip end-quote if any
@@ -514,7 +517,7 @@ and return a list of all the components of the command."
 					':keys (format "M-%d f2 z" i))))))))
     ;;GIS buffers ordered according to when they were started.
     ;;killed session numbers are reused.
-    (easy-menu-change (list "SW")
+    (easy-menu-change (list "Tools" "Magik")
 		      "Magik Shell Processes"
 		      (or magik-shell-list (list "No Processes")))))
 
@@ -564,7 +567,7 @@ and return a list of all the components of the command."
 	shell-list)
     (loop for buf in shell-bufs
 	  do (push (vector buf (list 'switch-to-buffer buf) t) shell-list))
-    (easy-menu-change (list "SW")
+    (easy-menu-change (list "Tools" "Magik")
 		      "External Shell Processes"
 		      (or shell-list (list "No Processes")))))
 

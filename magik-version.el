@@ -338,7 +338,7 @@ suitable for selection."
 			  'magik-version-read-smallworld-gis-completion
 			  nil t nil nil (getenv "SMALLWORLD_GIS"))))
     (setq path (directory-file-name (file-name-directory path)))
-	(subst-char-in-string ?/ ?\\ path t)
+    (subst-char-in-string ?/ ?\\ path t)
     path))
 
 (defun magik-version-file-add (root name version)
@@ -514,12 +514,16 @@ Return (STREAM VERSION SMALLWORLD_GIS)."
       (error "No Environment on this line"))
     (if (not (and magik-version-current
 		  (string-equal stream magik-version-current)))
-	(magik-version-set-environment smallworld-gis
-				     stream
-				     version
-				     (if (and magik-version-program
-					      (not magik-version-file))
-					 magik-version-program)))
+	(progn
+	  (setq process-environment (copy-list magik-utils-original-process-environment)
+		exec-path           (copy-list magik-utils-original-exec-path))
+
+	  (magik-version-set-environment smallworld-gis
+					 stream
+					 version
+					 (if (and magik-version-program
+						  (not magik-version-file))
+					     magik-version-program))))
     (list stream version smallworld-gis)))
 
 (defun magik-version-set-environment (smallworld-gis stream version program)
@@ -587,7 +591,7 @@ by the current Smallworld version."
 	    new (mapconcat 'directory-file-name
 			   (append sw-list new-list)
 			   path-separator))
-	  (subst-char-in-string ?/ ?\\ new))))
+      (subst-char-in-string ?/ ?\\ new))))
 
 (defun magik-version-set-emacs-environment ()
   "Update `process-environment' and `exec-path' variables."
