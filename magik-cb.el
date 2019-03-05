@@ -1571,7 +1571,7 @@ be careful to preserve the position in \"*cb2*\"."
   (setq major-mode 'magik-cb2-mode
 	buffer-read-only t
 	buffer-undo-list t
-	font-lock-defaults '(magik-cb2font-lock-keywords nil t ((?_ . "w"))))
+	font-lock-defaults '(magik-cb2-font-lock-keywords nil t ((?_ . "w"))))
 
   (use-local-map magik-cb-mode-map)
   (set-syntax-table (copy-syntax-table magik-mode-syntax-table))
