@@ -373,7 +373,7 @@ Returns nil if FILE cannot be expanded."
 			  (or entries (list "No Aliases found"))))))
 
 (defun magik-aliases-update-sw-menu ()
-  "Update 'resources-menu-sw-alias-files' submenu in SW menu bar."
+  "Update 'Alias Files' submenu in SW menu bar."
   (interactive)
   (let (default-files
 	 lp-files

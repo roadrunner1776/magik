@@ -42,7 +42,7 @@ Signal an error if no gis is running."
   (setq buffer  (or buffer magik-shell-buffer)
 	process (or process (get-buffer-process buffer)))
   (or process
-      (error resources-sw-no-gis-process-error buffer)))
+      (error "There is no GIS process running in buffer '%s'" buffer)))
 
 (defun gsub (str from to)
   "return a string with any matches for the regexp, `from', replaced by `to'."
@@ -103,8 +103,7 @@ If FIRST is true just return the first one found."
   (let* ((default (magik-utils-find-tag-default))
 	 (spec (read-string
 		(if default
-		    (format (concat resources-sw-find-tag-default-prompt " ")
-			    string default)
+		    (format "%s (default %s) " string default)
 		  string))))
     (list (if (equal spec "")
 	      default
