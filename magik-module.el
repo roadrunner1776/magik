@@ -331,6 +331,7 @@ Called by `gis-drag-n-drop-load' when a Module file is dropped."
 
 ;;; Package registration
 
+;;;###autoload
 (or (assoc "module\\.def$" auto-mode-alist)
     (push '("module\\.def$" . magik-module-mode) auto-mode-alist))
 

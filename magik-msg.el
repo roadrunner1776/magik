@@ -253,6 +253,7 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
 
 ;;; Package registration
 
+;;;###autoload
 (or (assoc "\\.msg$" auto-mode-alist)
     (push '("\\.msg$" . magik-msg-mode) auto-mode-alist))
 (or (assoc "\\.hmsg$" auto-mode-alist)

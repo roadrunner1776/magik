@@ -190,6 +190,7 @@ Called by `gis-drag-n-drop-load' when a Product file is dropped."
 
 ;;; Package registration
 
+;;;###autoload
 (or (assoc "product\\.def$" auto-mode-alist)
     (push '("product\\.def$" . magik-product-mode) auto-mode-alist))
 
