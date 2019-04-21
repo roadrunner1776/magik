@@ -33,7 +33,7 @@
 (defcustom magik-aliases-user-file-list '("$HOME/gis_aliases")
   "A list of a User's personal gis_aliases files."
   :group 'magik-aliases
-  :type  'file)
+  :type  '(repeat file))
 
 (defcustom magik-aliases-common-file-list nil
   "*List of common gis_aliases files.
