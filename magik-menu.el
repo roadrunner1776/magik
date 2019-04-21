@@ -49,7 +49,7 @@
     (,"External Shell Processes")
     [,"List Processes"    list-processes t]
     "---"
-    [,"Customize" sw-customize
+    [,"Customize" magik-customize
      :active t] ;; :key-sequence nil
     (,"Help")))
 
