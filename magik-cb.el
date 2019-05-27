@@ -1957,9 +1957,9 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
   "Move the cb modeline 'cursor'."
   (interactive "@e")
   (let*
-      ((b (event-buffer event))
+      ((b (window-buffer (posn-window (event-start event))))
        (p (get-buffer-process b))
-       (x (event-x event))
+       (x (car (posn-col-row (event-start event))))
        (effective-len-cb-n-methods-str 1)
        (cursor-pos (save-excursion (set-buffer b) magik-cb-cursor-pos))
        (offset1 (- x (length "    ") effective-len-cb-n-methods-str (length "    ")))
