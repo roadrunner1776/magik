@@ -412,7 +412,7 @@ because it does not have an _ preceding like all the other Magik keywords.")
   "List of keywords relating to statements to highlight for font-lock.")
 
 (defvar magik-keyword-loop
-  '("iter" "continue" "finally" "for" "loop" "endloop" "loopbody" "over" "leave")
+  '("iter" "continue" "finally" "for" "loop" "endloop" "loopbody" "over" "leave" "while")
   "List of keywords relating to loops to highlight for font-lock.")
 
 (defvar magik-keyword-arguments
@@ -420,7 +420,7 @@ because it does not have an _ preceding like all the other Magik keywords.")
   "List of keywords relating to arguments to highlight for font-lock.")
 
 (defvar magik-keyword-variable
-  '("dynamic" "global" "import" "local" "recursive")
+  '("class" "dynamic" "global" "import" "local" "recursive")
   "List of keywords relating to variables to highlight for font-lock.")
 
 (defvar magik-keyword-obsolete

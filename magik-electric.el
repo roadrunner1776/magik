@@ -88,6 +88,7 @@ usage={})") ("_iter _method " prev_class_name) "\t## " "\t## " -
      ("try" e 1 "_try" - "_when" - "_endtry")
      ("proc" e 0 "_proc " - "_endproc")
      ("loop" e 1 "_loop" - "_endloop")
+     ("while" e 0 "_while " "_loop" - "_endloop")
      ("for" 2 0 "_for  _over " "_loop" - "_endloop"))
    magik-electric-templates-methods)
   "*An association list of magik templates.")
