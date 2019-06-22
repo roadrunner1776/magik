@@ -19,9 +19,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
 (require 'font-lock)
 
 (defgroup magik-loadlist nil
@@ -234,10 +231,10 @@ With a prefix arg accept all changes without prompting."
   "Load the loadlist.txt into the GIS process."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-shell-mode
+					   'magik-session-mode
 					   "Enter Magik process buffer:"
-					   magik-shell-buffer
-					   'magik-shell-buffer-alist-prefix-function))
+					   magik-session-buffer
+					   'magik-session-buffer-alist-prefix-function))
 	 (process (barf-if-no-gis gis))
 	 (dir  (file-name-directory buffer-file-name))
 	 (file (file-name-nondirectory buffer-file-name)))

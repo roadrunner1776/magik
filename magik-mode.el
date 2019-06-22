@@ -24,7 +24,6 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl)
   (require 'imenu)
   (require 'font-lock)
   (defvar msb-menu-cond)
@@ -94,15 +93,15 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
 (easy-menu-define magik-menu magik-mode-map
   "Menu for Magik Mode."
   `(,"Magik"
-    [,"Transmit Method"   magik-transmit-method         :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+    [,"Transmit Method"   magik-transmit-method         :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f7, f2 f7, f2 m"]
-    [,"Transmit Region"   magik-transmit-region         :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+    [,"Transmit Region"   magik-transmit-region         :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f8, f2 f8, f2 r"]
-    [,"Transmit Buffer"   magik-transmit-buffer         :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+    [,"Transmit Buffer"   magik-transmit-buffer         :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f2 b"]
-    [,"Transmit Chunk"    magik-transmit-$-chunk        :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+    [,"Transmit Chunk"    magik-transmit-$-chunk        :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f2 $"]
-    [,"Transmit Thing"    magik-transmit-thing          :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+    [,"Transmit Thing"    magik-transmit-thing          :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f2 RET"]
     "---"
     [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   :active t :keys "f4 r"]
@@ -117,9 +116,9 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
     "---"
     [,"Add Debug Statement"         magik-add-debug-statement     :active t :keys "f4 s"]
     [,"Trace Statement"             magik-trace-curr-statement    :active t :keys "f2 t"]
-    [,"Symbol Complete"          magik-symbol-complete          :active (magik-utils-buffer-mode-list 'magik-shell-mode) :keys "f4 f4"]
+    [,"Symbol Complete"          magik-symbol-complete          :active (magik-utils-buffer-mode-list 'magik-session-mode) :keys "f4 f4"]
     [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
-								      (magik-utils-buffer-mode-list 'magik-shell-mode))
+								      (magik-utils-buffer-mode-list 'magik-session-mode))
      :keys "f2 x"]
     "---"
     [,"Heading"           magik-heading                 :active t :keys "f2 h"]
@@ -159,9 +158,7 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
       :style radio
       :selected (eq magik-transmit-method-eom-mode 'repeat)
       ])
-    [,"Customize"            magik-customize               t]
-    [,"Help: Magik Language Reference"     magik-language-help           t]
-    [,"Help"                 magik-help                    t]))
+    [,"Customize"            magik-customize               t]))
 
 (defvar magik-mode-abbrev-table nil
   "Abbrev table in use in Magik-mode buffers.")
@@ -724,17 +721,6 @@ Use auto-complete mode \"d\" symbol convention to represent.")
   "Auto-complete mode source definition for listing all Magik Globals.
 Use auto-complete mode \"g\" symbol convention to represent a global.")
 
-;;; Help
-(defun magik-help ()
-  "Display help on how to use the Magik Mode interface."
-  (interactive)
-  (sw-help-open sw-help-magik-id))
-
-(defun magik-language-help ()
-  "Display help about the Magik Language."
-  (interactive)
-  (sw-help-open sw-help-magik-language-id))
-
 (defun magik-customize ()
   "Open Customization buffer for Magik Mode."
   (interactive)
@@ -895,8 +881,8 @@ Optional argument ARG .."
 (defun magik-newline ()
   "Insert a newline and indent.  (To insert a newline and not indent, use C-j)."
   (interactive "*")
-  (if (eq major-mode 'magik-shell-mode)
-      (error "Your magik shell buffer has got into magik mode!  To recover, type `M-x magik-shell-mode'.  Please report this bug."))
+  (if (eq major-mode 'magik-session-mode)
+      (error "Your magik shell buffer has got into magik mode!  To recover, type `M-x magik-session-mode'.  Please report this bug."))
   (if abbrev-mode (save-excursion (expand-abbrev)))
   (if (save-excursion
 	(back-to-indentation)
@@ -1148,10 +1134,10 @@ Optional argument ARGS ..."
 Optional argument GIS ..."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
-					  'magik-shell-mode
+					  'magik-session-mode
 					  "Enter Magik process buffer:"
-					  magik-shell-buffer
-					  'magik-shell-buffer-alist-prefix-function))
+					  magik-session-buffer
+					  'magik-session-buffer-alist-prefix-function))
 	pt)
     (save-excursion
       (set-buffer gis)
@@ -1160,7 +1146,7 @@ Optional argument GIS ..."
       (cond ((equal (current-word) "True")
 	     nil) ;;Code loading successful.
 	    ((re-search-backward (concat "^\\*\\*\\*\\*.*" "on line" " \\([0-9]+\\)$")
-				 (save-excursion (re-search-backward magik-shell-prompt nil t)) t)
+				 (save-excursion (re-search-backward magik-session-prompt nil t)) t)
 	     (setq pt (point)))
 	    (t ;no "on line" errors found.
 	     nil)))
@@ -1345,10 +1331,10 @@ another file shall be written."
 If this command is repeated before the previous file has been processed by Magik,
 another file shall be written."
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-shell-mode
+					   'magik-session-mode
 					   "Enter Magik process buffer:"
-					   magik-shell-buffer
-					   'magik-shell-buffer-alist-prefix-function))
+					   magik-session-buffer
+					   'magik-session-buffer-alist-prefix-function))
 	 (process (barf-if-no-gis gis process))
 	 (orig-buf  (buffer-name))
 	 (orig-file (or (buffer-file-name) ""))
@@ -1751,10 +1737,10 @@ With a prefix arg, ask user for GIS buffer to use."
   (interactive "*")
   ;; the actual completion is done by the process filter: gis-filter-completion-action
   (setq buffer (magik-utils-get-buffer-mode buffer
-					    'magik-shell-mode
+					    'magik-session-mode
 					    "Enter Magik process buffer:"
-					    magik-shell-buffer
-					    'magik-shell-buffer-alist-prefix-function))
+					    magik-session-buffer
+					    'magik-session-buffer-alist-prefix-function))
   (barf-if-no-gis buffer)
 
   (if (equal (magik-utils-curr-word) "")
@@ -2218,7 +2204,6 @@ closing bracket into the new \"{...}\" notation."
 (progn
   ;; ------------------------ magik mode -------------------------
 
-  (define-key magik-mode-map [f1]    'magik-help)
   (define-key magik-mode-map "\r"    'magik-newline)
   (define-key magik-mode-map "\n"    'newline)
   (define-key magik-mode-map "\t"    'magik-indent-command)

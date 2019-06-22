@@ -26,8 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
-
 ;;also defined in sw-electric.el
 (defcustom magik-indent-level 8
   "*How much to indent each nested level"
@@ -178,8 +176,8 @@ like \"_endif\" or \"}\" or \"_then\"."
       0)
 
      ((equal (car (first  toks)) "def_slotted_exemplar")
-;      (goto-char (cdr (third toks))) ;third is first REAL token of def_slotted_exemplar command
-;      (current-column)
+					;      (goto-char (cdr (third toks))) ;third is first REAL token of def_slotted_exemplar command
+					;      (current-column)
       magik-indent-level)
 
      ((assoc (car (third toks)) magik-electric-templates-methods)
@@ -361,8 +359,8 @@ and corresponding begin keywords and left brackets are popped off the stack."
         (goto-char (cdr (second toks)))
       (while
           (and
-            (eq (forward-line) 0)
-            (null (setq toks (magik-tokenise-line-no-eol-nor-point-min)))))
+	   (eq (forward-line) 0)
+	   (null (setq toks (magik-tokenise-line-no-eol-nor-point-min)))))
       (if toks
           (goto-char (cdr (car toks)))))))
 
@@ -548,7 +546,7 @@ been initialised from the global variable, `magik-transitions'."
                           (while
                               (<= i end)
                             (aset vec i state)
-                            (incf i)))
+                            (cl-incf i)))
                         (setq str (substring str 3))))))
                 (setq lis (cddr lis)))
               (push (cons (car d) vec) magik-state-table)))))))

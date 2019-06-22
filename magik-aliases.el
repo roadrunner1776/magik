@@ -20,9 +20,8 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl)
   (defvar msb-menu-cond)
-
+  (require 'cl)
   (require 'magik-utils))
 
 (defgroup magik-aliases nil
@@ -67,6 +66,11 @@ containing the `aliases-program' if it is in a relative path to the file."
   :group 'magik-aliases
   :type  '(repeat string))
 
+(defcustom magik-aliases-layered-products-file "$SMALLWORLD_GIS/../smallworld_registry/LAYERED_PRODUCTS"
+  "*The default location of the LAYERED_PRODUCTS file."
+  :group 'magik
+  :type 'string)
+
 (defcustom magik-aliases-switch-to-buffer t
   "*User control for switching to the process buffer of a selected alias.
 If this is t then the buffer is displayed."
@@ -90,7 +94,6 @@ If any function returns t, then the buffer is displayed."
 (defvar magik-aliases-mode-map (make-sparse-keymap)
   "Keymap for GIS aliases files")
 
-(define-key magik-aliases-mode-map [f1]   'magik-aliases-help)
 (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
 
 (defvar magik-aliases-menu nil
@@ -103,8 +106,7 @@ If any function returns t, then the buffer is displayed."
     "----"
     (,"Definitions")
     "---"
-    [,"Customize"                     magik-aliases-customize   t]
-    [,"Help"                          magik-aliases-help        t]))
+    [,"Customize"                     magik-aliases-customize   t]))
 
 (defvar magik-aliases-mode-syntax-table nil
   "Syntax table in use in Aliases-mode buffers.")
@@ -137,11 +139,6 @@ If any function returns t, then the buffer is displayed."
 
 (defvar magik-aliases-process-environment nil
   "Stored `process-environment' for executing GIS command.")
-
-(defun magik-aliases-help ()
-  "Display help on how to use the Aliases Mode interface."
-  (interactive)
-  (sw-help-open sw-help-aliases-id))
 
 (defun magik-aliases-customize ()
   "Open Customization buffer for Aliases Mode."
@@ -284,20 +281,20 @@ With a prefix arg, ask user for current directory to use."
 	  (setq buf (concat buf " " alias)))
       (setq buf (generate-new-buffer (concat "*" buf "*")))
       (set-buffer buf)
-      (magik-shell-mode)
+      (magik-session-mode)
 
       (insert "Command: " program " ")
       (mapc (function (lambda (s) (insert s " "))) args)
       (setq default-directory dir
 	    args (append (list program) args)
-	    magik-shell-exec-path (copy-list (or exec-path-aliases exec-path))
-	    magik-shell-process-environment (copy-list (or process-environment-aliases process-environment))
-	    magik-shell-current-command (mapconcat 'identity args " "))
+	    magik-session-exec-path (cl-copy-list (or exec-path-aliases exec-path))
+	    magik-session-process-environment (cl-copy-list (or process-environment-aliases process-environment))
+	    magik-session-current-command (mapconcat 'identity args " "))
       (if (stringp version)
 	  (set 'magik-version-current version))
 
       (insert (format "\nCwd is: %s\n\n" default-directory))
-      (magik-shell-start-process args))
+      (magik-session-start-process args))
     (if (magik-aliases-switch-to-buffer alias)
 	(switch-to-buffer buf))))
 
@@ -319,7 +316,7 @@ With a prefix arg, ask user for current directory to use."
   "Expand FILE path including environment variables.
 Returns nil if FILE cannot be expanded."
   (condition-case nil
-      (expand-file-name (substitute-in-file-name file))
+      (expand-file-name (substitute-in-file-name (replace-regexp-in-string (regexp-quote "%SMALLWORLD_GIS%") "$SMALLWORLD_GIS" file nil 'literal)))
     (error nil)))
 
 (defun magik-aliases-layered-products-file (file)
@@ -390,7 +387,7 @@ Returns nil if FILE cannot be expanded."
 
     (when (getenv "SMALLWORLD_GIS")
       (dolist (lp (magik-aliases-layered-products-file
-		   (magik-aliases-expand-file "$SMALLWORLD_GIS/../smallworld_registry/LAYERED_PRODUCTS")))
+		   (magik-aliases-expand-file magik-aliases-layered-products-file)))
 	(push `[,(format "%s: %s" (car lp) (cdr lp))
 		(progn
 		  (find-file ,(concat (cdr lp) "/config/gis_aliases"))

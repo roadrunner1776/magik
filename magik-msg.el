@@ -20,13 +20,12 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl)
   (require 'easymenu)
   (require 'font-lock)
   (defvar msb-menu-cond)
 
   (require 'magik-utils)
-  (require 'magik-shell))
+  (require 'magik-session))
 
 (defgroup magik-msg nil
   "Customise Magik Messages group."
@@ -61,25 +60,22 @@
   "Menu for msg mode."
   `(,"Message"
     [,"Transmit Buffer"                  magik-msg-transmit-buffer
-					 :active (magik-utils-buffer-mode-list 'magik-shell-mode)
-					 :keys "f2 b"]
+     :active (magik-utils-buffer-mode-list 'magik-session-mode)
+     :keys "f2 b"]
     [,"Compile Message File"             magik-msg-compile-module-messages
-					 :active (magik-utils-buffer-mode-list 'magik-shell-mode)
-					 :keys "f2 c"]
+     :active (magik-utils-buffer-mode-list 'magik-session-mode)
+     :keys "f2 c"]
     [,"Next"                             magik-msg-forward-message
-					 :active t
-					 :keys "f2 down"]
+     :active t
+     :keys "f2 down"]
     [,"Previous"                         magik-msg-backward-message
-					 :active t
-					 :keys "f2 up"]
+     :active t
+     :keys "f2 up"]
     [,"Mark Message"                     magik-msg-mark-message
-					 :active t
-					 :keys "f2 m"]
+     :active t
+     :keys "f2 m"]
     "---"
-    [,"Customize"                        magik-msg-customize        t]
-    [,"Help"                             magik-msg-help             t]))
-
-(define-key magik-msg-mode-map [f1] 'magik-msg-help)
+    [,"Customize"                        magik-msg-customize        t]))
 
 (defvar magik-msg-mode-syntax-table nil
   "Syntax table in use in MSG-mode buffers.")
@@ -110,12 +106,6 @@
   "Default fontification of Magik Messages."
   :group 'msg
   :type 'sexp)
-
-;; Help
-(defun magik-msg-help ()
-  "Display help on how to use the Msg Mode interface."
-  (interactive)
-  (sw-help-open sw-help-msg-id))
 
 (defun magik-msg-customize ()
   "Open Customization buffer for Msg Mode."
@@ -186,10 +176,10 @@ You can customise msg-mode with the msg-mode-hook."
 The GIS process used is either that given by BUF or the variable `gis-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
-					  'magik-shell-mode
+					  'magik-session-mode
 					  "Enter Magik process buffer:"
-					  magik-shell-buffer
-					  'magik-shell-buffer-alist-prefix-function))
+					  magik-session-buffer
+					  'magik-session-buffer-alist-prefix-function))
 	(process (barf-if-no-gis gis))
 	(filename (buffer-file-name)))
     ;; Load messages
@@ -206,10 +196,10 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
 The GIS process used is either that given by BUF or the variable `gis-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
-					  'magik-shell-mode
+					  'magik-session-mode
 					  "Enter Magik process buffer:"
-					  magik-shell-buffer
-					  'magik-shell-buffer-alist-prefix-function))
+					  magik-session-buffer
+					  'magik-session-buffer-alist-prefix-function))
 	(process (barf-if-no-gis gis))
 	(directory (file-name-directory (buffer-file-name))))
     ;; Load messages

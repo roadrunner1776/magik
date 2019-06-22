@@ -20,10 +20,9 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl)
   (require 'magik-utils)
   (require 'magik-mode)
-  (require 'magik-shell)
+  (require 'magik-session)
   (require 'magik-cb))
 
 (require 'magik-menu)
@@ -69,7 +68,7 @@
   (global-set-key (kbd "<f2> e")      'electric-magik-mode)
   (global-set-key (kbd "<f2> k")      'sw-reload-dotemacs)
   (global-set-key (kbd "<f2> s")      'magik-version-selection)
-  (global-set-key (kbd "<f2> z")      'magik-shell)
+  (global-set-key (kbd "<f2> z")      'magik-session)
 
   ;; ------------------- F3 globals ----------------------
 

@@ -19,19 +19,18 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl)
-		   (require 'sort))
+(eval-when-compile
+  (require 'cl)
+  (require 'sort))
 
-(require 'cl)
-
-(defvar magik-utils-original-process-environment (copy-list process-environment)
+(defvar magik-utils-original-process-environment (cl-copy-list process-environment)
   "Store the original `process-environment' at startup.
 This is used by \\[gis-version-reset-emacs-environment] to reset an
 Emacs session back to the original startup settings.
 Note that any user defined Environment variables set via \\[setenv]
 will be lost.")
 
-(defvar magik-utils-original-exec-path (copy-list exec-path)
+(defvar magik-utils-original-exec-path (cl-copy-list exec-path)
   "Store the original `exec-path' at startup.
 This is used by \\[gis-version-reset-emacs-environment] to reset an
 Emacs session back to the original startup settings.")
@@ -39,7 +38,7 @@ Emacs session back to the original startup settings.")
 (defun barf-if-no-gis (&optional buffer process)
   "Return process object of GIS process.
 Signal an error if no gis is running."
-  (setq buffer  (or buffer magik-shell-buffer)
+  (setq buffer  (or buffer magik-session-buffer)
 	process (or process (get-buffer-process buffer)))
   (or process
       (error "There is no GIS process running in buffer '%s'" buffer)))
@@ -239,43 +238,43 @@ Used for determining a suitable BUFFER using the following interface:
 "
   (let* ((prefix-fn (or prefix-fn
 			#'(lambda (arg mode predicate)
-			   (nth (1- arg)
-				(reverse (magik-utils-buffer-mode-list-sorted mode predicate))))))
+			    (nth (1- arg)
+				 (reverse (magik-utils-buffer-mode-list-sorted mode predicate))))))
 	 (prompt (concat prompt " "))
 	 (visible-bufs (magik-utils-buffer-visible-list mode predicate))
 	 bufs
 	 (buffer (cond ((and (integerp current-prefix-arg)
-			      (setq buffer (funcall prefix-fn current-prefix-arg mode predicate)))
-			 buffer)
-			(current-prefix-arg
-			 (completing-read prompt
-					  (mapcar #'(lambda (b) (cons b b))
-						  (magik-utils-buffer-mode-list mode predicate))
-					  nil nil
-					  initial))
-			(buffer buffer)
-			((and
-			  (setq bufs
-				(delete nil
-					(mapcar (function (lambda (b) (if (cdr b) b))) visible-bufs)))
-			  ;;restrict list to those whose cdr is t.
-			  (setq buffer
-				(if (= (length bufs) 1)
-				    (caar bufs)
-				  (completing-read prompt visible-bufs 'cdr t)))
-			  (not (equal buffer "")))
-			 buffer)
-			((and
-			  visible-bufs
-			  (setq buffer
-				(if (= (length visible-bufs) 1)
-				    (caar visible-bufs)
-				  (completing-read prompt visible-bufs nil t)))
-			  (not (equal buffer "")))
-			 (select-frame-set-input-focus
-			  (window-frame (get-buffer-window buffer 'visible)))
-			 buffer)
-			(t default))))
+			     (setq buffer (funcall prefix-fn current-prefix-arg mode predicate)))
+			buffer)
+		       (current-prefix-arg
+			(completing-read prompt
+					 (mapcar #'(lambda (b) (cons b b))
+						 (magik-utils-buffer-mode-list mode predicate))
+					 nil nil
+					 initial))
+		       (buffer buffer)
+		       ((and
+			 (setq bufs
+			       (delete nil
+				       (mapcar (function (lambda (b) (if (cdr b) b))) visible-bufs)))
+			 ;;restrict list to those whose cdr is t.
+			 (setq buffer
+			       (if (= (length bufs) 1)
+				   (caar bufs)
+				 (completing-read prompt visible-bufs 'cdr t)))
+			 (not (equal buffer "")))
+			buffer)
+		       ((and
+			 visible-bufs
+			 (setq buffer
+			       (if (= (length visible-bufs) 1)
+				   (caar visible-bufs)
+				 (completing-read prompt visible-bufs nil t)))
+			 (not (equal buffer "")))
+			(select-frame-set-input-focus
+			 (window-frame (get-buffer-window buffer 'visible)))
+			buffer)
+		       (t default))))
     buffer))
 
 (defun magik-utils-delete-process-safely (process)

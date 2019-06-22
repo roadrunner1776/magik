@@ -1,4 +1,4 @@
-;;; magik-shell-filter.el --- deal with the output from the magik process.
+;;; magik-session-filter.el --- deal with the output from the magik process.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -35,17 +35,16 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl)
-		   (defvar comint-last-input-end) ;;avoid compiler warning
+(eval-when-compile (defvar comint-last-input-end) ;;avoid compiler warning
 		   (require 'comint))
 
 (require 'magik-mode)
-(require 'magik-shell)
+(require 'magik-session)
 
-(defvar magik-shell-filter-state "\C-a"
+(defvar magik-session-filter-state "\C-a"
   "Either \"\\C-a\", \"\\C-e\, \"\\C-f\" or \" \".")
 
-(defcustom magik-shell-filter-action-alist nil
+(defcustom magik-session-filter-action-alist nil
   "An alist that matches the different filter actions with the action character.
 The alist is a cons cell of the form (CHARACTER . FUNCTION).
 FUNCTION takes one argument, the string after the action character."
@@ -53,27 +52,27 @@ FUNCTION takes one argument, the string after the action character."
   :type '(repeat (cons (character :tag "Filter character")
 		       (function :tag "Action function"))))
 
-(defun magik-shell-filter-get-state (buf)
+(defun magik-session-filter-get-state (buf)
   "Displays the state of the GIS filter."
   (save-excursion
     (set-buffer buf)
-    magik-shell-filter-state))
+    magik-session-filter-state))
 
-(defun magik-shell-filter (proc str)
+(defun magik-session-filter (proc str)
   "Deal with strings coming back from Magik."
   (save-match-data
     (let*
 	((buf (process-buffer proc))
-	 (n (string-match (magik-shell-filter-get-state buf) str))
+	 (n (string-match (magik-session-filter-get-state buf) str))
 	 (filter-buf (concat " *filter*" (buffer-name buf))))
-      (cond ((equal (magik-shell-filter-get-state buf) "\C-e")
+      (cond ((equal (magik-session-filter-get-state buf) "\C-e")
 	     (save-excursion
 	       (set-buffer (get-buffer-create filter-buf))
 	       (insert (if n (substring str 0 n) str))
 	       (message "Filtering Magik output...(%s chars)" (number-to-string (point-max))))
 	     (if n
 		 (condition-case err
-		     (magik-shell-filter-action
+		     (magik-session-filter-action
 		      proc
 		      (save-excursion
 			(set-buffer (get-buffer-create filter-buf))
@@ -85,10 +84,10 @@ FUNCTION takes one argument, the string after the action character."
 		      (set-buffer buf)
 		      (setq n nil
 			    str ""
-			    magik-shell-filter-state "\C-a")
+			    magik-session-filter-state "\C-a")
 		      (message "Error: %s" (error-message-string err)))))))
-	    ((equal (magik-shell-filter-get-state buf) "\C-a")
-	     (magik-shell-filter-insert buf proc n str))
+	    ((equal (magik-session-filter-get-state buf) "\C-a")
+	     (magik-session-filter-insert buf proc n str))
 	    (t
 	     nil))
       ;; else if in " " or "\C-f" state then do nothing.
@@ -96,19 +95,19 @@ FUNCTION takes one argument, the string after the action character."
 	  (progn
 	    (save-excursion
 	      (set-buffer buf)
-	      (setq magik-shell-filter-state
-		    (cdr (assoc magik-shell-filter-state
+	      (setq magik-session-filter-state
+		    (cdr (assoc magik-session-filter-state
 				'(("\C-a" . "\C-e")
 				  ("\C-e" . " ")
 				  ("\C-f" . "\C-a")
 				  (" " . "\C-a"))))))
-	    (magik-shell-filter proc (substring str (1+ n))))))))
+	    (magik-session-filter proc (substring str (1+ n))))))))
 
-(defun magik-shell-filter-insert (buf proc n str)
+(defun magik-session-filter-insert (buf proc n str)
   "insert into BUF at the process-mark of PROC, N chars from STR.
 If N is nil insert the whole of STR.
 We insert before all markers except the comint-last-input-end and the last command
-from magik-shell-prev-cmds."
+from magik-session-prev-cmds."
   (save-excursion
     (set-buffer buf)
     (goto-char (process-mark proc))
@@ -124,8 +123,8 @@ from magik-shell-prev-cmds."
     ;; BAD!!! Also, we must make sure that any window start markers remain pinned to the
     ;; BAD!!! start of the line!
     (let*
-	((b (car (aref magik-shell-prev-cmds (max 0 (- magik-shell-no-of-cmds 2)))))
-	 (e (cdr (aref magik-shell-prev-cmds (max 0 (- magik-shell-no-of-cmds 2)))))
+	((b (car (aref magik-session-prev-cmds (max 0 (- magik-session-no-of-cmds 2)))))
+	 (e (cdr (aref magik-session-prev-cmds (max 0 (- magik-session-no-of-cmds 2)))))
 	 (b-pos (marker-position b))
 	 (e-pos (marker-position e))
 	 (comint-last-input-end-pos (marker-position comint-last-input-end))
@@ -147,20 +146,20 @@ from magik-shell-prev-cmds."
 	    (add-text-properties (match-beginning 0) (match-end 0)
 				 (list 'mouse-face 'highlight
 				       'help-echo "mouse-2: Goto error in file"
-				       'local-map magik-shell-mode-error-map)))))
+				       'local-map magik-session-mode-error-map)))))
 
       )))
 
-(defun magik-shell-filter-toggle-filter (&optional buffer)
+(defun magik-session-filter-toggle-filter (&optional buffer)
   "Toggle the filter on the GIS buffer.
 
 With a prefix arg, ask user for GIS buffer to use."
   (interactive)
   (setq buffer (magik-utils-get-buffer-mode buffer
-					    'magik-shell-mode
+					    'magik-session-mode
 					    "Enter Gis process buffer: "
-					    magik-shell-buffer
-					    'magik-shell-buffer-alist-prefix-function))
+					    magik-session-buffer
+					    'magik-session-buffer-alist-prefix-function))
   (barf-if-no-gis buffer)
 
   (let ((process (get-buffer-process buffer)))
@@ -172,12 +171,12 @@ With a prefix arg, ask user for GIS buffer to use."
 	(set-buffer (get-buffer-create (concat " *filter*" buffer)))
 	(erase-buffer)
 	(set-buffer buffer)
-	(setq magik-shell-filter-state "\C-a")
-	(set-process-filter process 'magik-shell-filter))
+	(setq magik-session-filter-state "\C-a")
+	(set-process-filter process 'magik-session-filter))
       (message "Set the filter in '%s'." buffer))))
 
-(defun magik-shell-filter-action (proc str)
-  "Deal with STR back from Magik according to `magik-shell-filter-action-alist'."
+(defun magik-session-filter-action (proc str)
+  "Deal with STR back from Magik according to `magik-session-filter-action-alist'."
   (let* ((s (substring str 0 1))
 	 (minibuffer-window (minibuffer-window))
 	 (minibuffer-active-p (and minibuffer-window
@@ -189,7 +188,7 @@ With a prefix arg, ask user for GIS buffer to use."
 	(set-buffer (process-buffer proc)))
 
     (setq str (substring str 1)
-	  fn (cdr (assoc s magik-shell-filter-action-alist)))
+	  fn (cdr (assoc s magik-session-filter-action-alist)))
     (if fn
 	(progn
 	  (funcall fn proc str)
@@ -197,15 +196,15 @@ With a prefix arg, ask user for GIS buffer to use."
       (and minibuffer-active-p (select-window minibuffer-window))
       (error "No filter defined for character %s" s))))
 
-(defun magik-shell-filter-register-action (string function &optional replace)
+(defun magik-session-filter-register-action (string function &optional replace)
   "Registers the GIS filter STRING with execution of FUNCTION.
 STRING is normally a single character.
 If STRING has already been registered then an error is raised unless
 REPLACE is t. If REPLACE is t then the FUNCTION will replace the old
 action's function setting."
-  (let ((action (assoc string magik-shell-filter-action-alist)))
+  (let ((action (assoc string magik-session-filter-action-alist)))
     (cond ((not action)
-	   (add-to-list 'magik-shell-filter-action-alist (cons string function)))
+	   (add-to-list 'magik-session-filter-action-alist (cons string function)))
 	  (replace
 	   (setcdr action function))
 	  (load-file-name ;avoid message when reloading library
@@ -213,10 +212,10 @@ action's function setting."
 	  (t
 	   (message "Filter action for '%s' is already set" string)))))
 
-;;; generic magik-shell-filter code ends here.
+;;; generic magik-session-filter code ends here.
 
 ;;; Set up filter action functions for the gis process
-(defun magik-shell-filter-action-completion (proc str)
+(defun magik-session-filter-action-completion (proc str)
   "Gis Filter Action interface for a magik symbol completion according to STR returned from Magik."
   (let ((ans (read str))
 	(curr-word-len (length (sw-curr-word))))
@@ -253,7 +252,7 @@ action's function setting."
 	  (message "Finding completions...Done."))))))
 
 
-(defun magik-shell-filter-action-deep-print (proc str)
+(defun magik-session-filter-action-deep-print (proc str)
   "Gis Filter Action interface for a deep print action according to the STR back from magik."
   (let ((buffer (concat "*deep print*" (buffer-name (process-buffer proc)))))
     (pop-to-buffer buffer) ;;Buffer should always exist since the only USer interface is via deep-print.
@@ -265,7 +264,7 @@ action's function setting."
       (erase-buffer))
     (insert str)))
 
-(defun magik-shell-filter-action-find-file (proc str)
+(defun magik-session-filter-action-find-file (proc str)
   "(Deprecated) Gis Filter Action interface for find-file.
 Find a file and goto a particular line number
 STR is of the form 42:/bla/bla/foo.magik or
@@ -279,7 +278,7 @@ particular line number."
       (or (zerop beg)
 	  (goto-line (string-to-number str))))))
 
-(defun magik-shell-filter-action-file-open (proc str)
+(defun magik-session-filter-action-file-open (proc str)
   "Gis Filter Action interface for opening files in Emacs.
 STR consists of newline separated KEY=VALUE pairs.
 Recognised KEYs are:
@@ -328,22 +327,22 @@ The behaviour is undefined if any search key and line or column are used."
       (if (setq val (assq 'line alist))   (goto-line (string-to-number (cdr val))))
       (if (setq val (assq 'column alist)) (move-to-column (string-to-number (cdr val)))))))
 
-(defun magik-shell-filter-action-cb-mf (proc socketname)
+(defun magik-session-filter-action-cb-mf (proc socketname)
   "Magik has started a method_finder and tells Emacs what the socketname is."
   (setq magik-cb--mf-socket-synchronised socketname))
 
-(defun magik-shell-filter-action-cb-goto-method (proc str)
+(defun magik-session-filter-action-cb-goto-method (proc str)
   "GIS Filter Action interface for cb-goto-method."
   (magik-cb-goto-method str nil))
 
-(defun magik-shell-filter-action-magik-shell-prompt-set (proc str)
-  "Gis Filter Action for setting `magik-shell-prompt' variable."
+(defun magik-session-filter-action-magik-session-prompt-set (proc str)
+  "Gis Filter Action for setting `magik-session-prompt' variable."
   (save-excursion
     (set-buffer (buffer-name (process-buffer proc)))
-    (setq magik-shell-prompt str)
-    (magik-shell-prompt-update-font-lock)))
+    (setq magik-session-prompt str)
+    (magik-session-prompt-update-font-lock)))
 
-(defun magik-shell-filter-action-eval-elisp (proc str)
+(defun magik-session-filter-action-eval-elisp (proc str)
   "Gis Filter Action that enables Magik to send Elisp code for Emacs to evaluate."
   (save-excursion
     (set-buffer (get-buffer-create
@@ -357,16 +356,16 @@ The behaviour is undefined if any search key and line or column are used."
        (message (error-message-string err))))
     (kill-buffer (current-buffer))))
 
-(magik-shell-filter-register-action "\n" 'magik-shell-filter-action-completion)
-(magik-shell-filter-register-action "p"  'magik-shell-filter-action-deep-print)
-(magik-shell-filter-register-action "f"  'magik-shell-filter-action-find-file)
+(magik-session-filter-register-action "\n" 'magik-session-filter-action-completion)
+(magik-session-filter-register-action "p"  'magik-session-filter-action-deep-print)
+(magik-session-filter-register-action "f"  'magik-session-filter-action-find-file)
 
-(magik-shell-filter-register-action "s"  'magik-shell-filter-action-cb-mf)
-(magik-shell-filter-register-action "j"  'magik-shell-filter-action-cb-goto-method)
+(magik-session-filter-register-action "s"  'magik-session-filter-action-cb-mf)
+(magik-session-filter-register-action "j"  'magik-session-filter-action-cb-goto-method)
 
-(magik-shell-filter-register-action "P"  'magik-shell-filter-action-magik-shell-prompt-set)
-(magik-shell-filter-register-action "E"  'magik-shell-filter-action-eval-elisp)
-(magik-shell-filter-register-action "F"  'magik-shell-filter-action-file-open)
+(magik-session-filter-register-action "P"  'magik-session-filter-action-magik-session-prompt-set)
+(magik-session-filter-register-action "E"  'magik-session-filter-action-eval-elisp)
+(magik-session-filter-register-action "F"  'magik-session-filter-action-file-open)
 
-(provide 'magik-shell-filter)
-;;; magik-shell-filter.el ends here
+(provide 'magik-session-filter)
+;;; magik-session-filter.el ends here

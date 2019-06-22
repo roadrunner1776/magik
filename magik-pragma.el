@@ -19,8 +19,6 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
-
 (defgroup magik-pragma nil
   "Magik Pragma features."
   :group 'magik)
@@ -42,7 +40,7 @@
 (defun magik-electric-pragma-tab (pragma-brackets)
   "Hop from one pragma field to the next.
 This command handles multiline _pragma statements."
-       ;; try to work out which field we're in.
+  ;; try to work out which field we're in.
   (let ((start-bracket (car pragma-brackets))
 	(end-bracket (cdr pragma-brackets)))
     (save-match-data
@@ -90,7 +88,7 @@ Note that this command does handle a multiline _pragma statement."
 	     (cons start-bracket end-bracket))))))
 
 (defun magik-pragma-do-if-match (list &optional default-elem reverse)
-"Given an list of elems (NAME MATCH FUNCTION [OTHER...]) execute each match until it returns t.
+  "Given an list of elems (NAME MATCH FUNCTION [OTHER...]) execute each match until it returns t.
 If MATCH returns t eval the corresponding FUNCTION with the first arg being the
 elem of the matching element and the second arg being the next elem in the list.
 The optional arguments OTHER may be used by FUNCTION to modify its behaviour.
@@ -107,47 +105,47 @@ The extra bit this provides is that the called function knows what the next elem
 Also being able to make up a data structure means that it is easy to add new things to test for.
 
 Returns nil if no change or the list (CURRENT-ELEM NEXT-ELEM) elements."
-(if reverse
-    (setq list (reverse list)))
-(let* ((len          (1- (length list)))
-       (first-elem   (elt list 0))
-       (current-elem nil)
-       (next-elem    first-elem)
-       (n -1)
-       (fn nil))
-  (while (and (<= n len)
-	      (progn
-		(setq n (1+ n)
-		      current-elem (elt list n)
-		      next-elem (if (eq n len) first-elem (elt list (1+ n)))
-		      fn (caddr current-elem))
-		(not (eval (cadr current-elem))))))
-  (cond ((and (symbolp fn) (fboundp fn))
-	 (funcall fn current-elem next-elem reverse)
-	 (list current-elem next-elem))
-	(fn
-	 ;fn is not a function so we evaluate it. The form can
-	 ;can access current-elem, next-elem and reverse since we are still inside the let. I think...
+  (if reverse
+      (setq list (reverse list)))
+  (let* ((len          (1- (length list)))
+	 (first-elem   (elt list 0))
+	 (current-elem nil)
+	 (next-elem    first-elem)
+	 (n -1)
+	 (fn nil))
+    (while (and (<= n len)
+		(progn
+		  (setq n (1+ n)
+			current-elem (elt list n)
+			next-elem (if (eq n len) first-elem (elt list (1+ n)))
+			fn (caddr current-elem))
+		  (not (eval (cadr current-elem))))))
+    (cond ((and (symbolp fn) (fboundp fn))
+	   (funcall fn current-elem next-elem reverse)
+	   (list current-elem next-elem))
+	  (fn
+					;fn is not a function so we evaluate it. The form can
+					;can access current-elem, next-elem and reverse since we are still inside the let. I think...
 	   (eval fn)
 	   (list current-elem next-elem))
-	((and default-elem
-	      (eval (cadr default-elem)))
-	  (funcall (caddr default-elem) default-elem first-elem reverse)
-	  (list default-elem first-elem))
-	(t nil))))
+	  ((and default-elem
+		(eval (cadr default-elem)))
+	   (funcall (caddr default-elem) default-elem first-elem reverse)
+	   (list default-elem first-elem))
+	  (t nil))))
 
 (defun magik-pragma-if-match-replace-with-next (current next reverse)
-"Removes the current match region and inserts the car of the NEXT element.
+  "Removes the current match region and inserts the car of the NEXT element.
 The optional fourth item of CURRENT specifies a subexpression of the match.
 It says to replace just that subexpression instead of the whole match.
 The element follows that described in pragma-do-if-match."
-(save-excursion
-  (let ((match-num (or (elt current 3) 0))
-	(key (car next)))
-    (delete-region (match-beginning match-num) (match-end match-num))
-    (insert (if (symbolp key)
-		(symbol-name key)
-	      key)))))
+  (save-excursion
+    (let ((match-num (or (elt current 3) 0))
+	  (key (car next)))
+      (delete-region (match-beginning match-num) (match-end match-num))
+      (insert (if (symbolp key)
+		  (symbol-name key)
+		key)))))
 
 
 ;;;;;;;;;;;;;;;;;;;; Pragma deprecated magik code ;;;;;;;;;;;;;;;;;;;
@@ -155,26 +153,26 @@ The element follows that described in pragma-do-if-match."
 ;;remove/insert a comment template.
 
 (defvar magik-pragma-deprecated-template-start
-"## -------Deprecated------
+  "## -------Deprecated------
 "
-"Start of deprecated method templates.
+  "Start of deprecated method templates.
 This is used for searching for the start of a template.")
 
 (defvar magik-pragma-deprecated-template-end
-"## -----------------------
+  "## -----------------------
 "
-"End of deprecated method templates.
+  "End of deprecated method templates.
 This is used for searching for the end of a template.")
 
 (defvar magik-pragma-deprecated-template
   (concat magik-pragma-deprecated-template-start
-"## Reason     : <why>
+	  "## Reason     : <why>
 ## Use instead: <other method>
 ## Action     : <action to be taken - use / for options>
 ## Deprecated : <timestamp>
 "
-magik-pragma-deprecated-template-end)
-"Template for inserting into comment header for deprecated methods.")
+	  magik-pragma-deprecated-template-end)
+  "Template for inserting into comment header for deprecated methods.")
 
 (defvar magik-pragma-deprecated-template-re nil
   "Regexp that matches any indented Template for deprecated methods.")
@@ -193,92 +191,92 @@ magik-pragma-deprecated-template-end)
      (looking-at " *Remove at next release. *")       magik-pragma-if-match-replace-with-next)
     ("Restricted at next release."
      (looking-at " *Restricted at next release. *")   magik-pragma-if-match-replace-with-next))
-"The list used to control behaviour for the Action field in the magik deprecated template.
+  "The list used to control behaviour for the Action field in the magik deprecated template.
 The format follows that described in pragma-do-if-match.")
 
 (defun magik-pragma-deprecated-action-toggle (direction)
   "toggle the current deprecated action option"
-   (goto-char (match-end 0))
-   (magik-pragma-do-if-match magik-pragma-deprecated-action-list
-		       '(default  (looking-at "<.*>") magik-pragma-if-match-replace-with-next)
-		       (eq direction 'backward)))
+  (goto-char (match-end 0))
+  (magik-pragma-do-if-match magik-pragma-deprecated-action-list
+			    '(default  (looking-at "<.*>") magik-pragma-if-match-replace-with-next)
+			    (eq direction 'backward)))
 
 (defun magik-pragma-goto-magik-deprecated-template ()
-"Goto the point at which the template should be placed."
-;;limit is set so that the searching only looks at the next non-blank line.
-(let ((limit (save-excursion (skip-chars-forward " \n") (end-of-line) (point))))
-  (cond ((looking-at "\\s-*##")
-	 (forward-line 0)
-	 t)
-	((re-search-forward "_method" limit t)
-	 (forward-line 1)
-	 t)
-	((re-search-forward "(" limit t)
-	 ;;This is intended to catch lines with define_shared_constant, define_shared_variable,
-	 ;; define_slot_access, def_mixin, def_indexed_mixin, new_slotted_exemplar, new_indexed_exemplar
-	 ;; i.e. anything which has a ( following it and which could include a ## comment
-	 ;; between the ( and the matching ).
-	 (backward-char) ; to place point in front of '(' ready for forward-sexp call
-	 ;;if following search fails then the default is to insert immediately before this line
-	 (re-search-forward "\\s-*##" (save-excursion (forward-sexp) (point)) t)
-	 (forward-line 0)
-	 t)
-	(t
-	 ;;By default insert immediately after the pragma line
-	 (forward-line 0)
-	 t))))
+  "Goto the point at which the template should be placed."
+  ;;limit is set so that the searching only looks at the next non-blank line.
+  (let ((limit (save-excursion (skip-chars-forward " \n") (end-of-line) (point))))
+    (cond ((looking-at "\\s-*##")
+	   (forward-line 0)
+	   t)
+	  ((re-search-forward "_method" limit t)
+	   (forward-line 1)
+	   t)
+	  ((re-search-forward "(" limit t)
+	   ;;This is intended to catch lines with define_shared_constant, define_shared_variable,
+	   ;; define_slot_access, def_mixin, def_indexed_mixin, new_slotted_exemplar, new_indexed_exemplar
+	   ;; i.e. anything which has a ( following it and which could include a ## comment
+	   ;; between the ( and the matching ).
+	   (backward-char) ; to place point in front of '(' ready for forward-sexp call
+	   ;;if following search fails then the default is to insert immediately before this line
+	   (re-search-forward "\\s-*##" (save-excursion (forward-sexp) (point)) t)
+	   (forward-line 0)
+	   t)
+	  (t
+	   ;;By default insert immediately after the pragma line
+	   (forward-line 0)
+	   t))))
 
 (defun magik-pragma-insert-deprecated-template ()
-"Inserts the template for deprecated methods."
-(save-excursion
-  (save-match-data
-    (search-forward ")") ; find end of _pragma statement
-    (delete-horizontal-space)
-    (if (eq (point) (point-max)) ;protect against being at the end of the buffer
-	(insert "\n")
-      (forward-line 1))
-    ;;Now search for a suitable place to insert the template
-    (and (magik-pragma-goto-magik-deprecated-template)
-	 (not (looking-at (concat "\\s-*" magik-pragma-deprecated-template-start)))
-	 (let ((start (point))
-	       (column (current-indentation))
-	       (template (copy-sequence magik-pragma-deprecated-template)))
-	   (string-match "<timestamp>" template)
-	   (setq template (replace-match (format-time-string "%d %B %Y") t t template))
-	   ;;Insert the template setting read-only property on the start and end text fields
-	   (insert template)
-	   (indent-region start (point) column)
-	   (message "Use toggle keys, \\\\ and /, on 'Action' line to choose action."))))))
+  "Inserts the template for deprecated methods."
+  (save-excursion
+    (save-match-data
+      (search-forward ")") ; find end of _pragma statement
+      (delete-horizontal-space)
+      (if (eq (point) (point-max)) ;protect against being at the end of the buffer
+	  (insert "\n")
+	(forward-line 1))
+      ;;Now search for a suitable place to insert the template
+      (and (magik-pragma-goto-magik-deprecated-template)
+	   (not (looking-at (concat "\\s-*" magik-pragma-deprecated-template-start)))
+	   (let ((start (point))
+		 (column (current-indentation))
+		 (template (copy-sequence magik-pragma-deprecated-template)))
+	     (string-match "<timestamp>" template)
+	     (setq template (replace-match (format-time-string "%d %B %Y") t t template))
+	     ;;Insert the template setting read-only property on the start and end text fields
+	     (insert template)
+	     (indent-region start (point) column)
+	     (message "Use toggle keys, \\\\ and /, on 'Action' line to choose action."))))))
 
 (defun magik-pragma-remove-magik-deprecated-template ()
-"Removes the template for deprecated methods.
+  "Removes the template for deprecated methods.
 If the text to be removed has been modifed then the user is asked whether they
 wish to remove it otherwise the template is removed silently."
-(save-excursion
-  (search-forward ")") ; find end of _pragma statement
-  (forward-line 1)
-  (if (magik-pragma-goto-magik-deprecated-template)
-      (let ((start nil)
-	    (end nil))
-	(if (looking-at magik-pragma-deprecated-template-re)
-	    ;;No changes made just remove whole template
-	    (delete-region (match-beginning 0) (match-end 0))
-	  (and (looking-at (concat "\\s-*" magik-pragma-deprecated-template-start))
-	       (setq start (match-beginning 0)))
-	  (setq end (re-search-forward (concat "\\s-*" magik-pragma-deprecated-template-end) nil t))
-	  (and start
-	       end
-	       (y-or-n-p "Remove modifed deprecated comments? ")
-	       (delete-region start end)))))))
+  (save-excursion
+    (search-forward ")") ; find end of _pragma statement
+    (forward-line 1)
+    (if (magik-pragma-goto-magik-deprecated-template)
+	(let ((start nil)
+	      (end nil))
+	  (if (looking-at magik-pragma-deprecated-template-re)
+	      ;;No changes made just remove whole template
+	      (delete-region (match-beginning 0) (match-end 0))
+	    (and (looking-at (concat "\\s-*" magik-pragma-deprecated-template-start))
+		 (setq start (match-beginning 0)))
+	    (setq end (re-search-forward (concat "\\s-*" magik-pragma-deprecated-template-end) nil t))
+	    (and start
+		 end
+		 (y-or-n-p "Remove modifed deprecated comments? ")
+		 (delete-region start end)))))))
 
 ;;;;;;;;;;;;;;;;;;;; Pragma toggle options ;;;;;;;;;;;;;;;;;;;
 
 (defvar magik-pragma-electric-toggle-list
-      '(
-	(classify-level (looking-at "c?lassify_level") magik-pragma-if-match-insert-classify_level)
-	(usage          (looking-at "u?sage")          magik-pragma-if-match-insert-usage)
-	(topic          (looking-at "t?opic")          magik-pragma-if-match-do-the-electric-pragma-topics))
-"The list used to control behaviour for the various fields in _pragma.
+  '(
+    (classify-level (looking-at "c?lassify_level") magik-pragma-if-match-insert-classify_level)
+    (usage          (looking-at "u?sage")          magik-pragma-if-match-insert-usage)
+    (topic          (looking-at "t?opic")          magik-pragma-if-match-do-the-electric-pragma-topics))
+  "The list used to control behaviour for the various fields in _pragma.
 The format follows that described in pragma-do-if-match.")
 
 (defvar magik-pragma-classify_level-list
@@ -287,7 +285,7 @@ The format follows that described in pragma-do-if-match.")
     (restricted (looking-at " *restricted *") magik-pragma-if-match-replace-with-next)
     (deprecated (looking-at " *deprecated *") magik-pragma-if-match-replace-with-next)
     (debug      (looking-at " *debug *")      magik-pragma-if-match-replace-with-next))
-"The list used to control behaviour for the classify_level field in _pragma.
+  "The list used to control behaviour for the classify_level field in _pragma.
 The format follows that described in pragma-do-if-match.")
 
 (defvar magik-pragma-usage-list
@@ -307,7 +305,7 @@ The format follows that described in pragma-do-if-match.")
      (looking-at " *{ *not_international *, *redefinable *} *")    magik-pragma-if-match-replace-with-next)
     ("{not_international, redefinable, subclassable}"
      (looking-at "{not_international, redefinable, subclassable}") magik-pragma-if-match-replace-with-next))
-"The list used to control behaviour for the usage field in _pragma.
+  "The list used to control behaviour for the usage field in _pragma.
 The format follows that described in pragma-do-if-match.")
 
 (defun magik-pragma-electric-toggle-option (arg direction)
@@ -344,7 +342,7 @@ which case we toggle through the various pragma options."
 	     (self-insert-command arg))))))
 
 (defun magik-pragma-electric-toggle (direction)
-"Toggle the values for the different fields used in the pragma line.
+  "Toggle the values for the different fields used in the pragma line.
 
 DIRECTION indicates whether the values should change 'forward or 'backward
 relative the current setting and available values."
@@ -359,33 +357,33 @@ relative the current setting and available values."
   (magik-pragma-do-if-match magik-pragma-electric-toggle-list nil (eq direction 'backward)))
 
 (defun magik-pragma-if-match-insert-classify_level (current next reverse)
-"Insert the classify_level according to the current setting.
+  "Insert the classify_level according to the current setting.
 Also adds a template in the comment section when the classify_level is set to deprecated.
 When the classify_level is changed from deprecrated then the template is removed.
 However, if data has been changed in the fields of the template then the user is asked
 if they wish to remove the contents of the depreacted template."
-;;Ensure point stays immediately after = by searching for = and doing the replace inside save-excursion
-(search-forward "=")
-(save-excursion
-  (let ((res (magik-pragma-do-if-match magik-pragma-classify_level-list
-				 '(default (looking-at "\\([^,]*\\),") magik-pragma-if-match-replace-with-next 1)
-				 reverse)))
-    (cond ((eq (caadr res) 'deprecated)
-	   ;;next element is deprecated i.e. user has just selected deprecated
-	   (magik-pragma-insert-deprecated-template))
-	  ((eq (caar res) 'deprecated)
-	   ;;current element is deprecated i.e. user has just deselected deprecated
-	   (magik-pragma-remove-magik-deprecated-template))
-	  (t nil)))))
+  ;;Ensure point stays immediately after = by searching for = and doing the replace inside save-excursion
+  (search-forward "=")
+  (save-excursion
+    (let ((res (magik-pragma-do-if-match magik-pragma-classify_level-list
+					 '(default (looking-at "\\([^,]*\\),") magik-pragma-if-match-replace-with-next 1)
+					 reverse)))
+      (cond ((eq (caadr res) 'deprecated)
+	     ;;next element is deprecated i.e. user has just selected deprecated
+	     (magik-pragma-insert-deprecated-template))
+	    ((eq (caar res) 'deprecated)
+	     ;;current element is deprecated i.e. user has just deselected deprecated
+	     (magik-pragma-remove-magik-deprecated-template))
+	    (t nil)))))
 
 (defun magik-pragma-if-match-insert-usage (current next reverse)
-"Insert the usage according to the current setting."
-;;Ensure point stays immediately after = by searching for = and doing the replace inside save-excursion
-(search-forward "=")
-(save-excursion
-  (magik-pragma-do-if-match magik-pragma-usage-list
-		      '(default (looking-at "{.*}") magik-pragma-if-match-replace-with-next)
-		      reverse)))
+  "Insert the usage according to the current setting."
+  ;;Ensure point stays immediately after = by searching for = and doing the replace inside save-excursion
+  (search-forward "=")
+  (save-excursion
+    (magik-pragma-do-if-match magik-pragma-usage-list
+			      '(default (looking-at "{.*}") magik-pragma-if-match-replace-with-next)
+			      reverse)))
 
 ;;;;;;;;;;;;;;;;;;;; Topic Select Mode ;;;;;;;;;;;;;;;;;;;
 
@@ -400,7 +398,7 @@ if they wish to remove the contents of the depreacted template."
 (define-abbrev-table 'topic-select-mode-abbrev-table ())
 
 (defvar magik-pragma-window-configuration nil
-"Window configuration to return to after topic selection mode.")
+  "Window configuration to return to after topic selection mode.")
 
 (defun magik-pragma-if-match-do-the-electric-pragma-topics (current next reverse)
   "Select pragma topics from a menu."
@@ -425,7 +423,7 @@ if they wish to remove the contents of the depreacted template."
           (current-window-configuration))
     (pop-to-buffer "*topic-selection*")
     (erase-buffer)
-    (topic-select-mode)
+    (magik-pragma-topic-select-mode)
     (insert "T O P I C   S E L E C T I O N
 
 y or m - mark a line           n or u - unmark a line
@@ -464,7 +462,7 @@ q      - quit
   (kill-all-local-variables)
   (setq major-mode 'topic-select-mode)
   (setq mode-name "Topic Select")
-  (use-local-map topic-select-mode-map)
+  (use-local-map magik-pragma-topic-select-mode-map)
   (set-syntax-table magik-pragma-topic-select-mode-syntax-table)
   (setq local-abbrev-table topic-select-mode-abbrev-table)
   (run-hooks 'topic-select-mode-hook))
@@ -472,7 +470,7 @@ q      - quit
 (defun magik-pragma-topic-select-mark ()
   "Mark a line to indicate that the process should be run"
   (interactive "*")
-  (topic-replace-char ">"))
+  (magik-pragma-topic-replace-char ">"))
 
 (defun magik-pragma-topic-replace-char (ch)
   "Add the one character string to the beginning of the
@@ -489,7 +487,7 @@ Beep if not looking at \"[ >] (\""
 (defun magik-pragma-topic-select-unmark ()
   "Remove the mark from the current line"
   (interactive "*")
-  (topic-replace-char " "))
+  (magik-pragma-topic-replace-char " "))
 
 (defun magik-pragma-topic-select-quit ()
   "quit from topic selection by restoring the window configuration"

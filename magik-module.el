@@ -19,11 +19,11 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl)
-		   (require 'easymenu)
+(eval-when-compile (require 'easymenu)
+		   (require 'cl)
 		   (require 'font-lock)
 		   (require 'magik-utils)
-		   (require 'magik-shell))
+		   (require 'magik-session))
 
 (defgroup magik-module nil
   "Customise Magik module.def files group."
@@ -46,10 +46,10 @@
   :type  'boolean)
 
 (defvar magik-module-mode-map (make-sparse-keymap)
-  "Keymap for Magik module.def files")
+  "Keymap for Magik module.def files.")
 
 (defvar magik-module-f2-map (make-sparse-keymap)
-  "Keymap for the F2 function key in Magik module.def buffers")
+  "Keymap for the F2 function key in Magik module.def buffers.")
 
 (fset 'magik-module-f2-map   magik-module-f2-map)
 
@@ -63,64 +63,61 @@
 (define-key magik-module-f2-map   "R"     'magik-module-toggle-remove-module)
 
 (defvar magik-module-menu nil
-  "Keymap for the Magik module.def buffer menu bar")
+  "Keymap for the Magik module.def buffer menu bar.")
 
 (easy-menu-define magik-module-menu magik-module-mode-map
   "Menu for Module mode."
   `(,"Module"
     [,"Load"
      magik-module-transmit-buffer
-     :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+     :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f2 b"]
     [,"Reload definition"
      magik-module-reload-module-definition
-     :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+     :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f2 d"]
     [,"Compile messages"
      magik-module-compile-messages
-     :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+     :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f2 c"]
     [,"Remove"
      magik-module-remove-module
-     :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+     :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f2 R"]
     (,"Set Options..."
      [,"Set :save_magikc? to _false"
       (magik-module-toggle-save-magikc -1)
-      :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+      :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected (null module-option-save-magikc)
       :keys "f2 s, M-- M-1 f2 s"]
      [,"Set :save_magikc? to _true"
       (magik-module-toggle-save-magikc 1)
-      :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+      :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected module-option-save-magikc
       :keys "f2 s, M-1 f2 s"]
      "---"
      [,"Set :force_reload? to _false"
       (magik-module-toggle-force-reload -1)
-      :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+      :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected (null module-option-force-reload)
       :keys "f2 r, M-- M-1 f2 r"]
      [,"Set :force_reload? to :prerequisites"
       (magik-module-toggle-force-reload 'prerequisites)
-      :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+      :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected (eq module-option-force-reload 'prerequisites)
       :keys "C-u f2 r"]
      [,"Set :force_reload? to _true"
       (magik-module-toggle-force-reload 1)
-      :active (magik-utils-buffer-mode-list 'magik-shell-mode)
+      :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected (eq module-option-force-reload t)
       :keys "f2 r, M-1 f2 r"])
     "---"
-    [,"Customize"                     magik-module-customize   t]
-    [,"Help"                          magik-module-help        t]))
-
-(define-key magik-module-mode-map [f1] 'magik-module-help)
+    [,"Customize"                     magik-module-customize   t]))
 
 (defvar magik-module-mode-syntax-table nil
   "Syntax table in use in Module Mode buffers.")
@@ -148,11 +145,6 @@
   "Default fontification of module.def files."
   :group 'module
   :type 'sexp)
-
-(defun magik-module-help ()
-  "Display help on how to use the Module Mode interface."
-  (interactive)
-  (sw-help-open sw-help-module-id))
 
 (defun magik-module-customize ()
   "Open Customization buffer for Module Mode."
@@ -222,10 +214,10 @@ option is set."
   "Reload the module definition in the GIS process."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-shell-mode
+					   'magik-session-mode
 					   "Enter Gis process buffer:"
-					   magik-shell-buffer
-					   'magik-shell-buffer-alist-prefix-function))
+					   magik-session-buffer
+					   'magik-session-buffer-alist-prefix-function))
 	 (module (intern (concat "|" (magik-module-name) "|")))
 	 (process (barf-if-no-gis gis)))
     (display-buffer gis t)
@@ -240,10 +232,10 @@ option is set."
   "Compile all the Module's messages in the GIS process."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-shell-mode
+					   'magik-session-mode
 					   "Enter Gis process buffer:"
-					   magik-shell-buffer
-					   'magik-shell-buffer-alist-prefix-function))
+					   magik-session-buffer
+					   'magik-session-buffer-alist-prefix-function))
 	 (module (intern (concat "|" (magik-module-name) "|")))
 	 (process (barf-if-no-gis gis)))
     (display-buffer gis t)
@@ -267,10 +259,10 @@ If module definition is not known to the Magik GIS it is loaded as
 a standalone module."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-shell-mode
+					   'magik-session-mode
 					   "Enter Gis process buffer:"
-					   magik-shell-buffer
-					   'magik-shell-buffer-alist-prefix-function))
+					   magik-session-buffer
+					   'magik-session-buffer-alist-prefix-function))
 	 (module (intern (concat "|" (magik-module-name) "|")))
 	 (process (barf-if-no-gis gis)))
     (display-buffer gis t)
@@ -304,10 +296,10 @@ a standalone module."
   "Send current buffer to GIS."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-shell-mode
+					   'magik-session-mode
 					   "Enter Gis process buffer:"
-					   magik-shell-buffer
-					   'magik-shell-buffer-alist-prefix-function))
+					   magik-session-buffer
+					   'magik-session-buffer-alist-prefix-function))
 	 (process (barf-if-no-gis gis))
 	 (filename (buffer-file-name)))
     (display-buffer gis t)

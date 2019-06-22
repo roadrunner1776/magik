@@ -82,13 +82,10 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
 ;;Variables
 
 (defvar magik-template-dir nil
-"*Location of Magik template files.")
+  "*Location of Magik template files.")
 
 (defvar magik-template-alist nil
   "Alist of types of template files.
@@ -100,7 +97,7 @@ magik-template-file-type-alist to make the user
 selection pick up the new template file.")
 
 (defvar magik-template-file-type nil
-"Type of Magik file being editted.
+  "Type of Magik file being editted.
 This variable is buffer local and is used to identify the type of magik file it is,
 i.e. which Template file it came from.
 
@@ -116,7 +113,7 @@ the user presses [return] when asked to select a template.
 If you want to change the order and hence the default used.")
 
 (defvar magik-template-file-type-default 'default
-"The default Magik Template file type to use.
+  "The default Magik Template file type to use.
 
 This must equal a key in magik-template-alist and be a value of
 a key in magik-template-alist.")
@@ -165,8 +162,8 @@ If nil     then OPTIONS are prepended to the LABEL entry of magik-template-file-
 	 (choice-list (and (not replace-p)         ;;i.e set to nil if replace.
 			   (cddr alist-entry))))
     (mapc #'(lambda (x) (add-to-list 'choice-list
-				    (cons (elt x 1) (elt x 0))
-				    append-p))
+				     (cons (elt x 1) (elt x 0))
+				     append-p))
 	  (if append-p
 	      options
 	    ;;preserve user supplied order if prepending.
@@ -177,27 +174,27 @@ If nil     then OPTIONS are prepended to the LABEL entry of magik-template-file-
 ;;Hooks
 
 (defvar magik-template-initialise-hook nil
-"Hook for initialising a template file.")
+  "Hook for initialising a template file.")
 
 (defvar magik-template-file-type-hook nil
-"List of functions used to determine magik-template-file-type.
+  "List of functions used to determine magik-template-file-type.
 Each function is run in turn until one function returns the non-nil value
 to use for magik-patch-file-type.")
 
 ;;Functions
 
 (defun magik-template-file (type &optional dir)
-"Returns the path to the template of type TYPE. "
-(let ((file (cdr (assoc type magik-template-alist)))
-      (template-dir (or dir magik-template-dir)))
-  (and file template-dir (concat (file-name-as-directory template-dir) file))))
+  "Returns the path to the template of type TYPE. "
+  (let ((file (cdr (assoc type magik-template-alist)))
+	(template-dir (or dir magik-template-dir)))
+    (and file template-dir (concat (file-name-as-directory template-dir) file))))
 
 (defun magik-template-file-type ()
-"Return the file type according to the contents of the buffer."
-(save-excursion
-  (save-match-data
-    (goto-char (point-min))
-    (run-hook-with-args-until-success 'magik-template-file-type-hook (buffer-name)))))
+  "Return the file type according to the contents of the buffer."
+  (save-excursion
+    (save-match-data
+      (goto-char (point-min))
+      (run-hook-with-args-until-success 'magik-template-file-type-hook (buffer-name)))))
 
 (defun magik-template-initialise (type)
   "Inserts template text.
@@ -205,9 +202,9 @@ Only the text in the template starting from a line matching ^# will be inserted.
   (if type   ;; to strip out the preamble from the template.
       (progn
 	(goto-char (point-min))
-      (or (re-search-forward "^#" nil t)
-	  (error "The template file, %s, doesn't seem to have column-1 hash, #, character" (magik-template-file type)))
-      (delete-region (point-min) (1- (point)))))
+	(or (re-search-forward "^#" nil t)
+	    (error "The template file, %s, doesn't seem to have column-1 hash, #, character" (magik-template-file type)))
+	(delete-region (point-min) (1- (point)))))
   (goto-char (point-max))
   (run-hooks 'magik-template-initialise-hook))
 

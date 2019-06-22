@@ -80,16 +80,14 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl)
   (defvar msb-menu-cond)
   (defvar ac-triggered)
   (defvar ac-prefix)
   (defvar ac-limit)
 
   (require 'magik-mode)
-  (require 'magik-shell))
+  (require 'magik-session))
 
-(require 'cl)
 (require 'magik-utils)
 
 (defgroup magik-cb nil
@@ -477,7 +475,7 @@ Not used yet.")
     (if (one-window-p t)
 	(split-window-vertically)
       (other-window 1))
-    (magik-shell buf)))
+    (magik-session buf)))
 
 (defun magik-cb-gis-shell ()
   "Start a command shell with the same environment as the current CB process."
@@ -485,7 +483,7 @@ Not used yet.")
   (let ((gis (magik-cb-gis-buffer)))
     (save-excursion
       (set-buffer gis)
-      (magik-shell-shell))))
+      (magik-session-shell))))
 
 (defun magik-cb-customize ()
   "Open Customization buffer for Class Browser Mode."
@@ -509,12 +507,12 @@ Do a no-op if already in the cb."
   (let (magik-cb-file running-p buffer gis-proc visible-bufs bufs)
     (cond ((and (integerp current-prefix-arg) (> current-prefix-arg 0))
 	   (setq gis (magik-utils-get-buffer-mode gis
-						  'magik-shell-mode
+						  'magik-session-mode
 						  "Enter Magik process buffer: "
 						  (cond ((eq major-mode 'magik-cb-mode) (magik-cb-gis-buffer))
-							((eq major-mode 'magik-shell-mode) (buffer-name))
-							(t magik-shell-buffer))
-						  'magik-shell-buffer-alist-prefix-function))
+							((eq major-mode 'magik-session-mode) (buffer-name))
+							(t magik-session-buffer))
+						  'magik-session-buffer-alist-prefix-function))
 	   (unless (get-buffer-process gis)
 	     (pop-to-buffer gis)
 	     (error "There is no process running in this buffer"))
@@ -539,14 +537,14 @@ Do a no-op if already in the cb."
 		 gis    (magik-cb-gis-buffer buffer)))
 	  ((eq major-mode 'magik-cb-mode)
 	   (setq gis (magik-cb-gis-buffer)))
-	  ((eq major-mode 'magik-shell-mode)
+	  ((eq major-mode 'magik-session-mode)
 	   (setq gis (buffer-name)))
-	  ((and ;List of *visible* cb-mode *and* magik-shell-mode buffers.
+	  ((and ;List of *visible* cb-mode *and* magik-session-mode buffers.
 	    (setq bufs
 		  (delete nil
 			  (mapcar (function (lambda (b) (if (cdr b) b)))
 				  (setq visible-bufs
-					(magik-utils-buffer-visible-list '(magik-cb-mode magik-shell-mode))))))
+					(magik-utils-buffer-visible-list '(magik-cb-mode magik-session-mode))))))
 	    ;;restrict list to those whose cdr is t.
 	    (setq buffer
 		  (if (= (length bufs) 1)
@@ -585,11 +583,11 @@ Do a no-op if already in the cb."
 	  ((setq buffer (magik-utils-get-buffer-mode nil
 						     'magik-cb-mode
 						     "Enter Class Browser buffer: "
-						     (let ((magik-cb (concat "*cb*" magik-shell-buffer)))
+						     (let ((magik-cb (concat "*cb*" magik-session-buffer)))
 						       (if (get-buffer magik-cb) magik-cb))))
 	   t)
-	  ((and magik-shell-buffer (get-buffer magik-shell-buffer) (get-buffer-process magik-shell-buffer))
-	   (setq gis magik-shell-buffer))
+	  ((and magik-session-buffer (get-buffer magik-session-buffer) (get-buffer-process magik-session-buffer))
+	   (setq gis magik-session-buffer))
 	  (t
 	   (setq magik-cb-file (magik-cb-set-filename)
 		 buffer (generate-new-buffer-name
@@ -726,7 +724,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
     (cond ((zerop arg) (set buf nil))
 	  ((> arg 0)
 	   ;; Look for GIS buffers
-	   (setq buf (cdr (assq arg (symbol-value 'magik-shell-buffer-alist))))
+	   (setq buf (cdr (assq arg (symbol-value 'magik-session-buffer-alist))))
 	   (unless (and buf
 			(save-excursion
 			  (set-buffer buf)
@@ -744,7 +742,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
 
 (defun magik-cb-update-sw-menu ()
   "Update CB submenu in SW menu bar."
-  (let ((magik-cb-gis-alist (sort (copy-alist (symbol-value 'magik-shell-buffer-alist))
+  (let ((magik-cb-gis-alist (sort (copy-alist (symbol-value 'magik-session-buffer-alist))
 				  #'(lambda (a b) (< (car a) (car b))))); 1, 2 etc.
 	(magik-cb-alist     (sort (copy-alist magik-cb-buffer-alist); -1, -2, etc.
 				  #'(lambda (a b) (> (car a) (car b)))))
@@ -841,13 +839,13 @@ It also detects the method_finder version and configures the following buffer lo
   (setq buffer (get-buffer-create buffer)) ; get a real buffer object.
   (if (get-buffer-process buffer)
       (get-buffer-process buffer) ;returns running process
-    (let* ((process-environment (copy-list (save-excursion
-					     (and gis (get-buffer gis) (set-buffer gis))
-					     (or (symbol-value 'magik-shell-process-environment)
-						 process-environment))))
-	   (exec-path (copy-list (save-excursion
-				   (and gis (get-buffer gis) (set-buffer gis))
-				   (or (symbol-value 'magik-shell-exec-path) exec-path))))
+    (let* ((process-environment (cl-copy-list (save-excursion
+						(and gis (get-buffer gis) (set-buffer gis))
+						(or (symbol-value 'magik-session-process-environment)
+						    process-environment))))
+	   (exec-path (cl-copy-list (save-excursion
+				      (and gis (get-buffer gis) (set-buffer gis))
+				      (or (symbol-value 'magik-session-exec-path) exec-path))))
 	   (gis-proc (and gis (get-buffer-process gis)))
 	   magik-cb-process)
 
@@ -924,7 +922,7 @@ It also detects the method_finder version and configures the following buffer lo
   (message "")
 
   ;; Update cb-buffer-alist using negative numbers if loading from a file,
-  ;; positive numbers are used by magik-shell-buffer-alist for loading from GIS
+  ;; positive numbers are used by magik-session-buffer-alist for loading from GIS
   (if (and magik-cb-filename
 	   (not (rassoc (buffer-name) magik-cb-buffer-alist)))
       (let ((n -1))
@@ -1315,8 +1313,8 @@ separated by spaces."
 	     (this-char (string-to-char topic)))
 	  (if (magik-cb-is-a-topic topic)
 	      (progn
-		(incf n-rows)
-		(or (eq last-char this-char) (incf n-rows))
+		(cl-incf n-rows)
+		(or (eq last-char this-char) (cl-incf n-rows))
 		(setq last-char this-char)
 		(setq max-len (max max-len (length topic)))))))
 
@@ -1335,7 +1333,7 @@ separated by spaces."
 	      (let ((buffer-read-only nil))
 		(if (not (eq last-char this-char))
 		    (progn
-		      (incf curr-row)
+		      (cl-incf curr-row)
 		      (if (eobp) (insert ?\n) (forward-line))))
 		(if (> curr-row col-length)
 		    (progn
@@ -1346,7 +1344,7 @@ separated by spaces."
 		(end-of-line)
 		(indent-to-column curr-col)
 		(insert "  " topic " ")
-		(incf curr-row)
+		(cl-incf curr-row)
 		(if (eobp) (insert ?\n) (forward-line))))))
       (setq ans (buffer-string))
       (kill-buffer (current-buffer)))
@@ -2203,13 +2201,6 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
     (setq magik-cb-temp-method-name (magik-cb-curr-method-name))
     (magik-cb nil magik-cb-temp-method-name "")))
 
-;; H E L P
-;; _______
-(defun magik-cb-help ()
-  "Display help on how to use the Class Browser interface."
-  (interactive)
-  (sw-help-open sw-help-cb-id))
-
 ;; U T I L S
 ;; _________
 
@@ -2693,7 +2684,6 @@ AC-PREFIX is of the form \"CLASS\".\"METHOD_NAME_PREFIX\"
   (loop for i from ?  to ?~ do
 	(define-key magik-cb-mode-map (char-to-string i) 'magik-cb-insert-command))
 
-  (define-key magik-cb-mode-map [f1]        'magik-cb-help)
   (define-key magik-cb-mode-map [delete]    'magik-cb-delete-char)
   (define-key magik-cb-mode-map [backspace] 'magik-cb-backward-delete-char)
   (define-key magik-cb-mode-map "\C-k"      'magik-cb-kill-line)

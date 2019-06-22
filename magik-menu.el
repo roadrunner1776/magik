@@ -22,8 +22,8 @@
 (require 'magik-aliases)
 (require 'magik-version)
 (require 'magik-mode)
-(require 'magik-shell)
-(require 'magik-shell-filter)
+(require 'magik-session)
+(require 'magik-session-filter)
 (require 'magik-cb)
 
 (require 'easymenu)
@@ -35,10 +35,10 @@
     [,"Select Environment"            magik-version-selection
      :active t
      :keys "f2 s"]
-    [,"Run/Goto session"              magik-shell
+    [,"Run/Goto session"              magik-session
      :active t
      :keys "f2 z"]
-    [,"Start new session"             magik-shell-new-buffer
+    [,"Start new session"             magik-session-new-buffer
      :active t
      :keys "C-u f2 z"]
     (,"Magik processes")
