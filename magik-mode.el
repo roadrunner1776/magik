@@ -2231,5 +2231,8 @@ closing bracket into the new \"{...}\" notation."
   ;;  (define-key magik-f4-map "w"    'magik-compare-methods)
   )
 
+(eval-after-load 'flycheck
+  '(require 'magik-lint))
+
 (provide 'magik-mode)
 ;;; magik-mode.el ends here

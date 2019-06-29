@@ -65,3 +65,13 @@ Major mode for editing Magik product.def files.
 ### magik-msg
 
 Major mode for editing Magik Message files.
+
+### magik-lint
+
+[Magik-lint](https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint) support.
+
+To enable automatic linting in `magik-mode` buffers, the following conditions have to be met:
+* Package [flycheck](https://flycheck.org) needs to be installed and loaded.
+* `magik-lint-VERSION.jar` ([download](https://github.com/StevenLooman/sonar-magik/releases)) has to be installed in `~/.emacs.d/magik-lint/` (location can be customized with the variable `magik-lint-jar-file`.
+* `java` has to be in `exec-path` (environment variable `PATH`). Or the environment variable `JAVA_HOME` has to be set (`$JAVA_HOME/bin` will automatically added to `exec-path` in that case).	
+* `flycheck-mode` has to be enabled for `magik-mode` buffers. Or use `global-flycheck-mode` to enable it for all buffers.
