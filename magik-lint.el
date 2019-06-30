@@ -21,7 +21,7 @@
 
 (require 'flycheck)
 
-(defcustom magik-lint-jar-file (expand-file-name (concat user-emacs-directory "magik-lint/magik-lint-0.1.0.jar"))
+(defcustom magik-lint-jar-file (expand-file-name (concat user-emacs-directory "magik-lint/magik-lint-0.1.1.jar"))
   "Location of the magik-lint jar file."
   :group 'magik
   :type  '(choice (file)
@@ -35,6 +35,7 @@
   "A Magik syntax checker and validator using the magik-lint utility."
   :command ("java"
 	    "-jar" (eval (expand-file-name magik-lint-jar-file))
+	    "--untabify" (eval (number-to-string (or tab-width 8)))
 	    "--msg-template" "\"${path}:${line}:${column}: (${category}) ${msg}\""
 	    source)
   :error-patterns
