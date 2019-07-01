@@ -20,23 +20,27 @@ The alternative, and recommended, way of installing [magik-mode](https://github.
 
 Global keys are set by calling `(magik-global-bindings)` after the packages has been loaded.
 
-<kbd>F2</kbd><kbd>s</kbd>: Open Magik version selection
+| Key | Description |
+| :---: | --- |
+|<kbd>F2</kbd><kbd>s</kbd> | Open Magik version selection |
 
 ### magik-version
 
 Major mode for managing multiple Magik environments.
 
-<kbd>Return</kbd> Select the current selected line as the current active environment.
-
-<kbd>a</kbd> Open gis_aliases file of selected version. Will prompt for layered product to use if selected version has more than one aliases file available.
-
-<kbd>+</kbd> Add a new entry to the currently open file.
+| Key | Description |
+| :---: | --- |
+| <kbd>Return</kbd> | Select the current selected line as the current active environment. |
+| <kbd>a</kbd> | Open gis_aliases file of selected version. Will prompt for layered product to use if selected version has more than one aliases file available. |
+| <kbd>+</kbd> | Add a new entry to the currently open file. |
 
 ### magik-aliases
 
 Major mode for editing Magik aliases files.
 
-<kbd>Shift</kbd>-</kbd>Return</kbd> Run a Magik session for the selected alias.
+| Key | Description |
+| :---: | --- |
+| <kbd>Shift</kbd>-<kbd>Return</kbd> | Run a Magik session for the selected alias. |
 
 ### magik-session
 
@@ -72,6 +76,6 @@ Major mode for editing Magik Message files.
 
 To enable automatic linting in `magik-mode` buffers, the following conditions have to be met:
 * Package [flycheck](https://flycheck.org) needs to be installed and loaded.
-* `magik-lint-VERSION.jar` ([download](https://github.com/StevenLooman/sonar-magik/releases)) has to be installed in `~/.emacs.d/magik-lint/` (location can be customized with the variable `magik-lint-jar-file`.
-* `java` has to be in `exec-path` (environment variable `PATH`). Or the environment variable `JAVA_HOME` has to be set (`$JAVA_HOME/bin` will automatically added to `exec-path` in that case).	
+* `magik-lint-VERSION.jar` ([download](https://github.com/StevenLooman/sonar-magik/releases)) has to be installed in `~/.emacs.d/magik-lint/` (location can be customized with the variable `magik-lint-jar-file`).
+* The `java` executable path should be in `exec-path`, or the variable `flycheck-magik-lint-java-executable` has to be set. `flycheck-magik-lint-java-executable` will automatically be set when the environment variable `JAVA_HOME` is set.
 * `flycheck-mode` has to be enabled for `magik-mode` buffers. Or use `global-flycheck-mode` to enable it for all buffers.

@@ -27,12 +27,10 @@
   :type  '(choice (file)
 		  (const nil)))
 
-(unless (and (eq system-type 'windows-nt)
-	     (flycheck-default-executable-find "java"))
-  (add-to-list 'exec-path (expand-file-name (substitute-in-file-name "$JAVA_HOME/bin/")) 'append))
+(flycheck-define-checker magik-lint-java
+  "A Magik syntax checker and validator using the magik-lint utility.
 
-(flycheck-define-checker magik-magiklint
-  "A Magik syntax checker and validator using the magik-lint utility."
+See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
   :command ("java"
 	    "-jar" (eval (expand-file-name magik-lint-jar-file))
 	    "--untabify" (eval (number-to-string (or tab-width 8)))
@@ -43,7 +41,11 @@
    (warning line-start (file-name) ":" line ":" column ": (Minor) " (message) line-end))
   :modes (magik-mode))
 
-(add-to-list 'flycheck-checkers 'magik-magiklint 'append)
+(unless (and (eq system-type 'windows-nt)
+	     (flycheck-default-executable-find "java"))
+  (setq flycheck-magik-lint-java-executable (executable-find (substitute-in-file-name "$JAVA_HOME/bin/java"))))
+
+(add-to-list 'flycheck-checkers 'magik-lint-java 'append)
 
 (provide 'magik-lint)
 ;;; magik-lint.el ends here
