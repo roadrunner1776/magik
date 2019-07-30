@@ -33,8 +33,8 @@
 See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
   :command ("java"
 	    "-jar" (eval (expand-file-name magik-lint-jar-file))
-	    "--untabify" (eval (number-to-string (or tab-width 8)))
 	    "--msg-template" "\"${path}:${line}:${column}: (${category}) ${msg}\""
+	    "--column-offset" "+1"
 	    source)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": (Major) " (message) line-end)
