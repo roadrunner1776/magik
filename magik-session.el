@@ -340,7 +340,7 @@ string for next time.")
 		  (repeat string)))
 (put 'magik-session-command-history 'permanent-local t)
 
-(defcustom magik-session-kill-process-function 'sw-delete-process-safely
+(defcustom magik-session-kill-process-function 'magik-utils-delete-process-safely
   "*The function used to terminate a Magik PROCESS in the GIS buffer.
 
 `kill-process'   terminates the process but the process may tidy itself up
