@@ -101,7 +101,7 @@
 
 (defgroup magik-cb-faces nil
   "Fontification colours for Class Browser."
-  :group 'cb)
+  :group 'magik-cb)
 
 (defface magik-cb-font-lock-optional-face
   '((((type tty) (class color)) (:foreground "yellow" :weight light))
@@ -115,12 +115,12 @@
   "Font-lock Face to use when displaying _optional variables.
 
 Based upon `font-lock-variable-name-face'"
-  :group 'cb-faces)
+  :group 'magik-cb-faces)
 
 (defface magik-cb-cursor-face
   '((t (:inverse-video t)))
   "Face to use for the Mode line cursor."
-  :group 'cb-faces)
+  :group 'magik-cb-faces)
 
 ;; Originally just italic, but due to GDI object leak, made bold too - see magik.el for more details.
 (defface magik-cb-font-lock-gather-face
@@ -135,36 +135,36 @@ Based upon `font-lock-variable-name-face'"
   "Font-lock Face to use when displaying _gather variables.
 
 Based upon `font-lock-variable-name-face'"
-  :group 'cb-faces)
+  :group 'magik-cb-faces)
 
 (defcustom magik-cb-mode-hook '()
   "*Hook for customising CB mode."
-  :group 'cb
+  :group 'magik-cb
   :type 'hook)
 
 (defcustom magik-cb-font-lock-class-face 'font-lock-type-face
   "*Font-lock Face to use when displaying the class."
-  :group 'cb
+  :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb-font-lock-method-face 'font-lock-function-name-face
   "*Font-lock Face to use when displaying the method name."
-  :group 'cb
+  :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb-font-lock-optional-face 'magik-cb-font-lock-optional-face
   "*Font-lock Face to use when displaying the _optional variables."
-  :group 'cb
+  :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb-font-lock-gather-face 'magik-cb-font-lock-gather-face
   "*Font-lock Face to use when displaying the _gather variable."
-  :group 'cb
+  :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb-cursor-face 'magik-cb-cursor-face
   "*Face to use for the Mode line cursor."
-  :group 'cb
+  :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb-font-lock-keywords
@@ -187,7 +187,7 @@ Based upon `font-lock-variable-name-face'"
     ("^\\s-+.*$" . font-lock-variable-name-face)
     )
   "*Font lock setting for Class Browser fontification."
-  :group 'cb
+  :group 'magik-cb
   :type  'sexp)
 
 ;; User configuration options
@@ -205,14 +205,14 @@ browser. Thus, you now have two windows one displaying your magik file
 the other displaying the source file containing the method.
 
 You can now use Ediff to compare the buffers!"
-  :group 'cb
+  :group 'magik-cb
   :type  'boolean)
 
 (defcustom magik-cb-generalise-file-name-alist nil
   "*An Alist used to modify paths returned by method finder.
 Each element is a cons cell (REGEXP . PATH), where REGEXP is matched against
 the file name and PATH is the string that replaces a match of REGEXP."
-  :group 'cb
+  :group 'magik-cb
   :type  '(alist :key-type regexp :value-type string))
 
 (defcustom magik-cb-coding-system (if (and (boundp 'coding-system-alist)
@@ -220,19 +220,19 @@ the file name and PATH is the string that replaces a match of REGEXP."
 				      'utf-8
 				    'iso-8859-1)
   "*Coding system to use for reading the temp file output from the CB process."
-  :group 'cb
+  :group 'magik-cb
   :type  'coding-system)
 
 (defcustom magik-cb-mode-line-cursor " "
   "*String to use as the cursor in the mode-line.
 `cb-cursor-face' is also used to modify the display of the character
 Can be set using \\[cb-set-mode-line-cursor]."
-  :group 'cb
+  :group 'magik-cb
   :type  'string)
 
 (defcustom magik-cb-debug nil
   "Set to t to enable debugging output from the C."
-  :group 'cb
+  :group 'magik-cb
   :type  'boolean)
 
 					;In case used in a version of Emacs prior to 20
@@ -310,7 +310,7 @@ This will stop the \"Loading documentation...\" message from hanging around.")
 (defvar magik-cb-menu nil
   "Keymap for the CB menu bar")
 
-(easy-menu-define cb-menu magik-cb-mode-map
+(easy-menu-define magik-cb-menu magik-cb-mode-map
   "Menu for CB mode."
   `(,"CB"
     [,"Jump to Source"                 magik-cb-jump-to-source        :active t :keys "f3 j, mouse-2"]
@@ -332,35 +332,35 @@ This will stop the \"Loading documentation...\" message from hanging around.")
     [,"Hide"           magik-cb-quit                  :active t :keys "space, f3 h"]
     "---"
     [,"Override Flags"
-     cb-toggle-override-flags
+     magik-cb-toggle-override-flags
      :active t
      :style toggle
      :selected (magik-cb-topic-on-p "override-flags")
      :keys "f3 F, f3 o"]
     [,"Override Topics"
-     cb-toggle-override-topics
+     magik-cb-toggle-override-topics
      :active t
      :style toggle
      :selected (magik-cb-topic-on-p "override-topics")
      :keys "f3 T"]
     [,"Override 200 Limit"
-     cb-toggle-override-200-limit
+     magik-cb-toggle-override-200-limit
      :active t
      :style toggle
      :selected (magik-cb-topic-on-p "override-200-limit")
      :keys "f3 2"]
     "---"
-    [,"Hop"                            cb-tab                   t]
-    [,"Clear"                          cb-clear                 t]
-    [,"Clear Method and Class"         cb-and-clear             :active t :keys "f3 /"]
+    [,"Hop"                            magik-cb-tab                   t]
+    [,"Clear"                          magik-cb-clear                 t]
+    [,"Clear Method and Class"         magik-cb-and-clear             :active t :keys "f3 /"]
     "---"
-    [,"Magik Process"                  cb-gis                   :active (get-buffer (magik-cb-gis-buffer)) :keys "f3 g"]
-    [,"Magik External Shell Process"   cb-gis-shell             :active (get-buffer
+    [,"Magik Process"                  magik-cb-gis                   :active (get-buffer (magik-cb-gis-buffer)) :keys "f3 g"]
+    [,"Magik External Shell Process"   magik-cb-gis-shell             :active (get-buffer
 									 (concat "*shell*" (magik-cb-gis-buffer)))
      :keys "f3 $"]
     "---"
-    [,"Customize"                      cb-customize             t]
-    [,"Help"                           cb-help                  t]))
+    [,"Customize"                      magik-cb-customize             t]
+    [,"Help"                           magik-cb-help                  t]))
 
 (defvar magik-cb--mf-socket-synchronised nil
   "Internal variable for controlling Class Browser processes started from GIS processes.
@@ -430,22 +430,22 @@ Not used yet.")
 
 (defcustom magik-cb2-font-lock-on-face 'font-lock-function-name-face
   "*Font-lock Face to use when displaying the variable."
-  :group 'cb
+  :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb2-font-lock-off-face 'font-lock-variable-name-face
   "*Font-lock Face to use when displaying the variable."
-  :group 'cb
+  :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb2-font-lock-thermometer-on-face 'font-lock-type-face
   "*Font-lock Face to use when displaying a thermometer variable that is on."
-  :group 'cb
+  :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb2-font-lock-thermometer-off-face 'font-lock-constant-face
   "*Font-lock Face to use when displaying a thermometer variable that is off."
-  :group 'cb
+  :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb2-font-lock-keywords
@@ -457,12 +457,12 @@ Not used yet.")
     ("^    .*$" . font-lock-doc-face)
     )
   "*Font lock setting for Class Browser fontification."
-  :group 'cb
+  :group 'magik-cb
   :type  'sexp)
 
 (defcustom magik-cb2-mode-hook '()
   "*Hook for customising CB toggle mode (CB2)."
-  :group 'cb
+  :group 'magik-cb
   :type 'hook)
 
 ;;; Functions
@@ -634,7 +634,7 @@ Do a no-op if already in the cb."
   "Major mode for running the Smallworld Class Browser.
    Full help is available on the CB pull-down menu or by typing
 
-  M-x cb-help
+  M-x magik-cb-help
 
 Useful configuration variables are:
 
@@ -778,7 +778,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
 
 (defun magik-cb-gis-get-mf-socketname (gis-process)
   "Returns from a GIS process its method_finder socketname interface."
-  ;; The gis-filter will set cb--mf-socket-synchronised, which we trap here.
+  ;; The gis-filter will set magik-cb--mf-socket-synchronised, which we trap here.
   (setq magik-cb--mf-socket-synchronised nil)
   (let ((buffer (buffer-name (process-buffer gis-process)))
 	(i 1)
@@ -827,14 +827,14 @@ it starts a mf_connector process to communicate with the method_finder
 in the GIS.
 If FILTER is given then it is set on the process.
 It also detects the method_finder version and configures the following buffer local variables:
-  `cb-quote-file-name'
-  `cb-mf-extended-flags'
-  `cb-filter-str'
-  `cb-cursor-pos'
-  `cb-n-methods-str'
-  `cb-topic-pos'
-  `cb-topics'
-  `cb-process'
+  `magik-cb-quote-file-name'
+  `magik-cb-mf-extended-flags'
+  `magik-cb-filter-str'
+  `magik-cb-cursor-pos'
+  `magik-cb-n-methods-str'
+  `magik-cb-topic-pos'
+  `magik-cb-topics'
+  `magik-cb-process'
 "
   (setq buffer (get-buffer-create buffer)) ; get a real buffer object.
   (if (get-buffer-process buffer)
@@ -898,9 +898,9 @@ It also detects the method_finder version and configures the following buffer lo
 		      magik-cb-pending-message t
 		      magik-cb-filename cb-file
 		      magik-cb-process magik-cb-process)))
-	    ;; Note that cb-start-process uses cb-filter when the process starts.
+	    ;; Note that magik-cb-start-process uses magik-cb-filter when the process starts.
 	    ;; This is so that it can handle the topic information that the method finder
-	    ;; process sends back. At the moment cb-ac-filter (the only other filter in use)
+	    ;; process sends back. At the moment magik-cb-ac-filter (the only other filter in use)
 	    ;; does not include that code. A future rework may tidy this up.
 	    (if filter
 		(set-process-filter magik-cb-process filter))))
@@ -921,7 +921,7 @@ It also detects the method_finder version and configures the following buffer lo
   (magik-cb-print-curr-methods)
   (message "")
 
-  ;; Update cb-buffer-alist using negative numbers if loading from a file,
+  ;; Update magik-cb-buffer-alist using negative numbers if loading from a file,
   ;; positive numbers are used by magik-session-buffer-alist for loading from GIS
   (if (and magik-cb-filename
 	   (not (rassoc (buffer-name) magik-cb-buffer-alist)))
@@ -1015,7 +1015,7 @@ It also detects the method_finder version and configures the following buffer lo
   "Deal with a C-e or a C-u char coming back from the C by loading
 from \"/tmp\" into the main cb buffer.  Be careful to maintain the
 position in the listing.  Also extract the number-of-methods from
-the last line of the file, and put it in the global `cb-n-methods-str'.
+the last line of the file, and put it in the global `magik-cb-n-methods-str'.
 "
   (let ((buf (process-buffer p))
 	(buffer-read-only nil)
@@ -1299,7 +1299,7 @@ separated by spaces."
        col-length
        (curr-col 0)
        (curr-row 0)
-					;sort the topics alphabetically. sort has side-effects, so the alist, cb-topics, is copied first
+					;sort the topics alphabetically. sort has side-effects, so the alist, magik-cb-topics, is copied first
        (magik-cb-sorted-topics (sort (copy-alist (magik-cb-topics)) #'(lambda (x y) (string< (car x) (car y)))))
        (last-char (string-to-char (caar magik-cb-sorted-topics))))
 
@@ -1372,23 +1372,23 @@ separated by spaces."
 ;; T O P I C   A N D   F L A G   U T I L S
 ;; _______________________________________
 ;;
-;; cb-topic-elt (str)
+;; magik-cb-topic-elt (str)
 ;;
-;; cb-is-a-topic (str)
-;; cb-topic-on-p (str)
-;; cb-all-topics-on-p ()         DOESN'T APPLY TO FLAGS.
+;; magik-cb-is-a-topic (str)
+;; magik-cb-topic-on-p (str)
+;; magik-cb-all-topics-on-p ()         DOESN'T APPLY TO FLAGS.
 ;;
-;; cb-set-topic (str new-val)
-;; cb-send-topic (str)
-;; cb-display-topic (str)     PROVIDED "*cb2*" EXISTS AND IS IN TOPIC MODE.
+;; magik-cb-set-topic (str new-val)
+;; magik-cb-send-topic (str)
+;; magik-cb-display-topic (str)     PROVIDED "*cb2*" EXISTS AND IS IN TOPIC MODE.
 ;;
-;; cb-toggle (str)        SET, SEND and DISPLAY.
+;; magik-cb-toggle (str)        SET, SEND and DISPLAY.
 ;;
-;; cb-set-all-topics (new-val)   DOESN'T APPLY TO FLAGS.
-;; cb-send-all-topics ()
-;; cb-display-all-topics ()
+;; magik-cb-set-all-topics (new-val)   DOESN'T APPLY TO FLAGS.
+;; magik-cb-send-all-topics ()
+;; magik-cb-display-all-topics ()
 ;;
-;; cb-curr-topic ()
+;; magik-cb-curr-topic ()
 
 (defun magik-cb-topic-elt (str)
   "Return an element from the topic and flag list."
@@ -1396,7 +1396,7 @@ separated by spaces."
 
 (defun magik-cb-is-a-topic (str)
   "Return t if str is a topic.  We can tell something is a topic
-rather than a flag because it doesn't appear in cb-initial-topics."
+rather than a flag because it doesn't appear in magik-cb-initial-topics."
   (not (assoc str magik-cb-initial-topics)))
 
 (defun magik-cb-topic-on-p (str)
@@ -1460,7 +1460,7 @@ Provided the \"*cb2*\" buffer exists and is in topic mode."
   "Deal with the set of flags that act like a thermometer.
 This is a set of flags which are only on if the previous ones are on.
 
-Specifically, make sure all topics in `cb-thermometer-group' up to
+Specifically, make sure all topics in `magik-cb-thermometer-group' up to
 and including STR are on and all remaining ones are off.  Also send the
 the STR to the method_finder."
   (let ((found-the-topic nil))
@@ -1548,7 +1548,7 @@ be careful to preserve the position in \"*cb2*\"."
 	(match-string 1)))))
 
 (defun magik-cb-set-mode-line-cursor (cursor)
-  "Set properties on the `cb-mode-line-cursor'."
+  "Set properties on the `magik-cb-mode-line-cursor'."
   (interactive "cCharacter to use for CB cursor: ")
   (setq magik-cb-mode-line-cursor (if (stringp cursor) cursor (char-to-string cursor)))
   (add-text-properties 0
@@ -1561,7 +1561,7 @@ be careful to preserve the position in \"*cb2*\"."
 ;; _____
 
 (defun magik-cb2-mode ()
-  "Make sure \"*cb2*\" exists and is in cb-mode and has the right keymap and modeline."
+  "Make sure \"*cb2*\" exists and is in magik-cb-mode and has the right keymap and modeline."
   (interactive)
   (kill-all-local-variables)
   (make-local-variable 'magik-cb2-mode)
@@ -2201,6 +2201,7 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
     (setq magik-cb-temp-method-name (magik-cb-curr-method-name))
     (magik-cb nil magik-cb-temp-method-name "")))
 
+
 ;; U T I L S
 ;; _________
 
@@ -2282,7 +2283,7 @@ compression or lazy re-draw or something."
 ;; through here, so that we can do diagnostics like this:
 ;;
 ;; (defun magik-cb-send-string (&rest strings)
-;;   (process-send-string cb-process (apply 'concat strings))
+;;   (process-send-string magik-cb-process (apply 'concat strings))
 ;;   (save-excursion
 ;;     (set-buffer (get-buffer-create "cb_diag"))
 ;;     (goto-char (point-max))
@@ -2384,7 +2385,7 @@ Turn slash characters around.
 Expand either $foo or %foo% variables
 Introduce or remove drive names.
 
-See the variable `cb-generalise-file-name-alist' to provide more customisation."
+See the variable `magik-cb-generalise-file-name-alist' to provide more customisation."
   (save-match-data
     (setq f (substitute-in-file-name f))
     (if magik-cb-generalise-file-name-alist
@@ -2439,7 +2440,7 @@ See the variable `cb-generalise-file-name-alist' to provide more customisation."
 
 (defun magik-cb-ac-start-process ()
   "Start a Class Browser process for auto-complete-mode.
-Stores process object in `cb-ac-process'."
+Stores process object in `magik-cb-ac-process'."
 
 					; TODO get-gis-buffer
   (setq magik-cb-ac-process (magik-cb-get-process-create "*cb-ac*" 'magik-cb-ac-filter "*gis*" nil)))
