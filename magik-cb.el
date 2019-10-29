@@ -450,10 +450,10 @@ Not used yet.")
 
 (defcustom magik-cb2-font-lock-keywords
   '(
-    ("[+] \\(\\sw+\\)" 1 cb2-font-lock-on-face)
-    ("[-] \\(\\sw+\\)" 1 cb2-font-lock-off-face)
-    ("[*] \\(\\sw+\\)" 1 cb2-font-lock-thermometer-on-face)
-    ("[.] \\(\\sw+\\)" 1 cb2-font-lock-thermometer-off-face)
+    ("[+] \\(\\sw+\\)" 1 magik-cb2-font-lock-on-face)
+    ("[-] \\(\\sw+\\)" 1 magik-cb2-font-lock-off-face)
+    ("[*] \\(\\sw+\\)" 1 magik-cb2-font-lock-thermometer-on-face)
+    ("[.] \\(\\sw+\\)" 1 magik-cb2-font-lock-thermometer-off-face)
     ("^    .*$" . font-lock-doc-face)
     )
   "*Font lock setting for Class Browser fontification."
