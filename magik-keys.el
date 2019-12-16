@@ -79,8 +79,7 @@
   (global-set-key (kbd "<f3> j")     'magik-cb-jump-to-source)
   (global-set-key (kbd "<f3> m")     'magik-cb-paste-method)
   (global-set-key (kbd "<f3> /")     'magik-cb-and-clear)
-  (global-set-key (kbd "<f3> ?")     'magik-cb-help)
-  (global-set-key (kbd "<f3> E")     'magik-cb-execute-method-finder))
+  (global-set-key (kbd "<f3> ?")     'magik-cb-help))
 
 (provide 'magik-keys)
 ;;; magik-keys.el ends here

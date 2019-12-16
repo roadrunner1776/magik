@@ -403,7 +403,7 @@ if they wish to remove the contents of the depreacted template."
 (defun magik-pragma-if-match-do-the-electric-pragma-topics (current next reverse)
   "Select pragma topics from a menu."
   (let* ((buffer-dir (if buffer-file-name (file-name-directory buffer-file-name) default-directory))
-	 (magik-pragma-files (if buffer-dir (sw-find-files-up buffer-dir "data/doc/pragma_topics")))
+	 (magik-pragma-files (if buffer-dir (magik-utils-find-files-up buffer-dir "data/doc/pragma_topics")))
 	 (product-pragma-file (if (getenv "SMALLWORLD_GIS") (expand-file-name (concat (getenv "SMALLWORLD_GIS") "/data/doc/pragma_topics"))))
 	 topics pos)
     (re-search-forward "= *")
@@ -434,7 +434,7 @@ q      - quit
 
 -----------------------------------------------
 ")
-    (mapcar 'insert-file-contents magik-pragma-files)
+    (mapc 'insert-file-contents magik-pragma-files)
     (and product-pragma-file
 	 (not (member product-pragma-file magik-pragma-files))
 	 (file-exists-p product-pragma-file)
@@ -520,7 +520,7 @@ Beep if not looking at \"[ >] (\""
   "Edit the topics file for the Smallworld Product \".../data/doc/pragma_topics\"."
   (interactive)
   (let* ((buffer-dir (if buffer-file-name (file-name-directory buffer-file-name) default-directory))
-	 (magik-pragma-file (if buffer-dir (sw-find-files-up buffer-dir "data/doc/pragma_topics" t))))
+	 (magik-pragma-file (if buffer-dir (magik-utils-find-files-up buffer-dir "data/doc/pragma_topics" t))))
     (cond (magik-pragma-file
 	   (find-file (car magik-pragma-file)))
 	  ((getenv "SMALLWORLD_GIS")

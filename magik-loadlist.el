@@ -52,10 +52,7 @@ Intial ^ and final $ is automatically added in `loadlist-ignore'."
     "---"
     [,"Transmit Buffer"                  magik-loadlist-transmit         :active t :keys "f2 b"]
     "---"
-    [,"Customize"                        magik-loadlist-customize        t]
-    [,"Help"                             magik-loadlist-help             t]))
-
-(define-key magik-loadlist-mode-map [f1] 'magik-loadlist-help)
+    [,"Customize"                        magik-loadlist-customize        t]))
 
 (defvar magik-loadlist-mode-syntax-table nil
   "Syntax table in use in loadlist mode buffers.")
@@ -69,11 +66,6 @@ Intial ^ and final $ is automatically added in `loadlist-ignore'."
   "Default fontification of load_list.txt files."
   :group 'magik-loadlist
   :type 'sexp)
-
-(defun magik-loadlist-help ()
-  "Display help on how to use the Loadlist Mode interface."
-  (interactive)
-  (sw-help-open sw-help-loadlist-id))
 
 (defun magik-loadlist-customize ()
   "Open Customization buffer for Loadlist Mode."
@@ -141,9 +133,9 @@ You can customise magik-loadlist-mode with the magik-loadlist-mode-hook."
 (defun magik-loadlist-ignore (file)
   "Return t if FILE matches any regexps from magik-loadlist-ignore-regexp-list.
 Regexp does not need to include ^ or $."
-  (loop for r in magik-loadlist-ignore-regexp-list
-	for match = (string-match (concat "^" r "$") file)
-	if match return t))
+  (cl-loop for r in magik-loadlist-ignore-regexp-list
+	   for match = (string-match (concat "^" r "$") file)
+	   if match return t))
 
 (defun magik-loadlist-directory-list (&optional dir)
   "Return contents of directory."
@@ -152,19 +144,19 @@ Regexp does not need to include ^ or $."
     (setq contents (delq (assoc ".." contents) contents)) ; Remove .. directory from list
     (setq contents (delq (assoc "."  contents) contents)) ; Remove .  directory from list
     (save-match-data
-      (loop for a in contents
-	    for f = (car a)
-	    if (magik-loadlist-ignore f)
-	    do (progn
-		 (princ (format "Ignored '%s'" f))
-		 (princ "\n"))
-	    else if (string-match "\\.magik$" f) ; a .magik file
-	    do (push (magik-loadlist-file-data
-		      (substring f 0 (- (length f) 6)))
-		     files)
-	    else if (cadr a) ; a subdirectory
-	    do (push (magik-loadlist-file-data (concat f "/")) files)
-	    end)
+      (cl-loop for a in contents
+	       for f = (car a)
+	       if (magik-loadlist-ignore f)
+	       do (progn
+		    (princ (format "Ignored '%s'" f))
+		    (princ "\n"))
+	       else if (string-match "\\.magik$" f) ; a .magik file
+	       do (push (magik-loadlist-file-data
+			 (substring f 0 (- (length f) 6)))
+			files)
+	       else if (cadr a) ; a subdirectory
+	       do (push (magik-loadlist-file-data (concat f "/")) files)
+	       end)
       files)))
 
 (defun magik-loadlist-refresh-contents (arg &optional dir)

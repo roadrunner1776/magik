@@ -175,12 +175,10 @@ like \"_endif\" or \"}\" or \"_then\"."
           (equal (car (car toks)) "_endmethod"))
       0)
 
-     ((equal (car (first  toks)) "def_slotted_exemplar")
-					;      (goto-char (cdr (third toks))) ;third is first REAL token of def_slotted_exemplar command
-					;      (current-column)
+     ((equal (car (cl-first  toks)) "def_slotted_exemplar")
       magik-indent-level)
 
-     ((assoc (car (third toks)) magik-electric-templates-methods)
+     ((assoc (car (cl-third toks)) magik-electric-templates-methods)
       magik-indent-level)
      ((and (equal last-str "\n")
            (equal penul-str "("))
@@ -191,7 +189,7 @@ like \"_endif\" or \"}\" or \"_then\"."
      ((and (equal last-str "\n")
            (equal penul-str "_then")
            (or (equal (caar toks) "_if") (equal (caar toks) "_elif")))
-      (goto-char (cdr (first toks)))
+      (goto-char (cdr (cl-first toks)))
       (+ (current-column) magik-indent-level))
 
      ;; Indent " _try _with ..."
@@ -202,13 +200,13 @@ like \"_endif\" or \"}\" or \"_then\"."
      ((and (equal last-str "\n")
            (equal (caadr toks) "_with")
            (equal (caar toks) "_try"))
-      (goto-char (cdr (first toks)))
+      (goto-char (cdr (cl-first toks)))
       (+ (current-column) magik-indent-level))
 
      ;; Indent " _when ..."
      ((and (equal last-str "\n")
            (equal (caar toks) "_when"))
-      (goto-char (cdr (first toks)))
+      (goto-char (cdr (cl-first toks)))
       (+ (current-column) magik-indent-level))
 
 
@@ -275,25 +273,25 @@ are treated as the lowest level-operators."
     ;; special fix for abstract, private, iterator methods etc.
     (if (member (caar toks) '("_method" "_procs"))
         (let
-            ((t2 (car (second toks)))
-             (t3 (car (third toks)))
-             (t4 (car (fourth toks))))
+            ((t2 (car (cl-second toks)))
+             (t3 (car (cl-third toks)))
+             (t4 (car (cl-fourth toks))))
           (cond
            ((and (equal t4 "_abstract") (equal t3 "_private") (equal t2 "_iter"))
-            (goto-char (cdr (fourth toks)))
-            (fourth toks))
+            (goto-char (cdr (cl-fourth toks)))
+            (cl-fourth toks))
            ((and (equal t3 "_private") (equal t2 "_iter"))
-            (goto-char (cdr (third toks)))
-            (third toks))
+            (goto-char (cdr (cl-third toks)))
+            (cl-third toks))
            ((and (equal t3 "_abstract") (equal t2 "_iter"))
-            (goto-char (cdr (third toks)))
-            (third toks))
+            (goto-char (cdr (cl-third toks)))
+            (cl-third toks))
            ((and (equal t3 "_abstract") (equal t2 "_private"))
-            (goto-char (cdr (third toks)))
-            (third toks))
+            (goto-char (cdr (cl-third toks)))
+            (cl-third toks))
            ((member t2 '("_abstract" "_private" "_iter"))
-            (goto-char (cdr (second toks)))
-            (second toks))
+            (goto-char (cdr (cl-second toks)))
+            (cl-second toks))
            (t
             (car toks))))
       (car toks))))
@@ -356,7 +354,7 @@ and corresponding begin keywords and left brackets are popped off the stack."
     (if (> (length toks) 1)
 
         ;; there is another token on this line, so goto there.
-        (goto-char (cdr (second toks)))
+        (goto-char (cdr (cl-second toks)))
       (while
           (and
 	   (eq (forward-line) 0)

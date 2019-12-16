@@ -20,7 +20,6 @@
 ;;; Code:
 
 (eval-when-compile (require 'easymenu)
-		   (require 'cl)
 		   (require 'font-lock)
 		   (require 'magik-utils)
 		   (require 'magik-session))

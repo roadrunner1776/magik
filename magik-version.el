@@ -38,11 +38,6 @@
   :group 'magik-version
   :type  'sexp)
 
-(defcustom magik-version-program "gis_version"
-  "*The program name for the gis_version environment program."
-  :group 'magik-version
-  :type  'file)
-
 (defcustom magik-version-file (concat user-emacs-directory "gis_version.txt")
   "*A file containing locations of GIS versions.
 This provides an alternative interface to a gis_version program."
@@ -54,11 +49,6 @@ This provides an alternative interface to a gis_version program."
   "*Regexp matching valid versions listed by `gis-version-program' or `gis-version-file'."
   :group 'magik-version
   :type  'regexp)
-
-(defcustom magik-version-program-error "gis_version: "
-  "*The error string that the gis version program returns when stream is invalid."
-  :group 'magik-version
-  :type  'string)
 
 (defcustom magik-version-invalid-string "(invalid)"
   "*The string marking an invalid gis version entry."
@@ -127,7 +117,6 @@ This provides an alternative interface to a gis_version program."
     [,"Quit"                      magik-version-quit        t]
     "---"
     [,"Add new installation"      magik-version-file-add    magik-version-file]
-    [,"Reset process environment" magik-version-reset-emacs-environment t]
     "---"
     [,"Customize"                 magik-version-customize   t]))
 
@@ -154,49 +143,11 @@ This provides an alternative interface to a gis_version program."
   (interactive)
   (customize-group 'magik-version))
 
-(defun magik-version (gis-version)
-  "Return the output from running the gis version script (as opposed to the alias).
-If it fails, return the symbol, 'failed."
-  (save-excursion
-    (set-buffer (generate-new-buffer "*gis-version temp buffer*"))
-    (if magik-version-file
-	(insert-file-contents magik-version-file)
-      (call-process magik-version-program nil t nil gis-version))
-    (goto-char (point-min))
-    (prog1
-	(if (search-forward magik-version-program-error nil t)
-	    'failed
-	  (buffer-string))
-      (kill-buffer (current-buffer)))))
-
-(defun magik-version-program-current ()
-  "Run `gis-version-program' and determine the current version.
-Return the current gis version that this Emacs inherited from its environment,
-or nil if there isn't one, or 'no-gis-version-script if there is no gis version command."
-  (save-excursion
-    (set-buffer (generate-new-buffer "*gis-version temp buffer*"))
-    (condition-case nil
-	(progn
-	  (call-process magik-version-program nil t nil)
-	  (goto-char (point-min))
-	  (prog1
-	      (if (search-forward "\n* " nil t)
-		  (buffer-substring
-		   (point)
-		   (progn (search-forward " ") (1- (point))))
-		nil)
-	    (kill-buffer (current-buffer))))
-      (error
-       (kill-buffer (current-buffer))
-       'no-gis-version-script))))
-
 (defun magik-version-run ()
   "Run GIS command in selected version."
   (interactive)
   (beginning-of-line)
-  (let ((process-environment (cl-copy-list process-environment))
-	(exec-path (cl-copy-list exec-path))
-	stream version buffer)
+  (let (stream version buffer)
     (setq stream (car (magik-version-select-internal))
 	  buffer  (concat "*gis " stream "*"))
     (magik-session buffer)
@@ -209,9 +160,7 @@ has more than one aliases file available."
   ;;Does not cope with 'partial stream versions' where the directory components list 2 (or more directories)
   (interactive)
   (beginning-of-line)
-  (let* ((process-environment (cl-copy-list process-environment))
-	 (exec-path (cl-copy-list exec-path))
-	 (version-list (magik-version-select-internal))
+  (let* ((version-list (magik-version-select-internal))
 	 lp-alist
 	 alias-file)
     (if (null (car version-list))
@@ -228,14 +177,7 @@ has more than one aliases file available."
 		   (setq alias-file (concat path "/config/gis_aliases"))))))
       (message alias-file)
       (if alias-file
-	  (progn
-	    (find-file alias-file)
-	    (setq magik-aliases-process-environment (cl-copy-list process-environment)
-		  magik-aliases-exec-path (cl-copy-list exec-path)
-		  magik-aliases-program-args (list "-p" (caddr version-list))
-		  magik-version-current (car version-list))
-	    ;;(set 'aliases-gis-version-current current-version)
-	    )))))
+	  (find-file alias-file)))))
 
 (defun magik-version-next ()
   "Move point to next valid version listed."
@@ -255,9 +197,8 @@ has more than one aliases file available."
 (defun magik-version-current ()
   "Return the current gis_version."
   (interactive)
-  (if magik-version-file
-      magik-version-current
-    (magik-version-program-current)))
+  (when magik-version-file
+    magik-version-current))
 
 ;;;###autoload
 (defun magik-version-mode ()
@@ -337,8 +278,7 @@ suitable for selection."
 					"config/PRODUCT_VERSION"))
 	  name version)
      (if (file-exists-p product-version-file)
-	 (save-excursion
-	   (set-buffer (get-buffer-create " *product_version*"))
+	 (with-current-buffer (get-buffer-create " *product_version*")
 	   (erase-buffer)
 	   (insert-file-contents product-version-file)
 	   (goto-char (point-min))
@@ -350,8 +290,7 @@ suitable for selection."
 
   (or magik-version-file
       (error "File interface is not being used"))
-  (save-excursion
-    (set-buffer (find-file-noselect magik-version-file))
+  (with-current-buffer (find-file-noselect magik-version-file)
     (goto-char (point-max))
     (let ((inhibit-read-only t))
       (insert (format magik-version-file-format name version root))
@@ -367,8 +306,7 @@ Will set `gis-version-file' to FILE."
   (find-file magik-version-file)
   (when (not (file-exists-p magik-version-file))
     (insert magik-version-file-header)
-    (let ((process-environment (cl-copy-list process-environment)))
-      (call-interactively 'magik-version-file-add))
+    (call-interactively 'magik-version-file-add)
     (save-buffer))
   nil)
 
@@ -380,8 +318,6 @@ Will set `gis-version-file' to FILE."
   (set-buffer (get-buffer-create "*gis version selection*"))
   (magik-version-mode)
 
-  (message "Starting %s selection..." magik-version-program)
-
   (setq buffer-read-only nil)
   (erase-buffer)
   (insert magik-version-help)
@@ -390,24 +326,22 @@ Will set `gis-version-file' to FILE."
 
   (save-excursion
     (save-match-data
-      (if (not magik-version-file)
-	  (call-process magik-version-program nil t nil)
-	(insert-file-contents magik-version-file)
-	(goto-char (point-min))
+      (insert-file-contents magik-version-file)
+      (goto-char (point-min))
 
-	(if (search-forward "-------" nil t) (forward-line 1)) ;skip a header
-	(while (re-search-forward magik-version-match nil t)
-	  (beginning-of-line)
-	  (forward-char 1)
-	  (backward-delete-char 1)
-	  (insert " ")
-	  (cond ((string-match magik-version-invalid-string (match-string-no-properties 3))
-		 nil)
-		((file-exists-p (match-string-no-properties 3))
-		 nil)
-		(t
-		 (goto-char (match-beginning 3))
-		 (insert magik-version-invalid-string " ")))))))
+      (if (search-forward "-------" nil t) (forward-line 1)) ;skip a header
+      (while (re-search-forward magik-version-match nil t)
+	(beginning-of-line)
+	(forward-char 1)
+	(backward-delete-char 1)
+	(insert " ")
+	(cond ((string-match magik-version-invalid-string (match-string-no-properties 3))
+	       nil)
+	      ((file-exists-p (match-string-no-properties 3))
+	       nil)
+	      (t
+	       (goto-char (match-beginning 3))
+	       (insert magik-version-invalid-string " "))))))
 
   (if (stringp magik-version-current)
       (save-excursion
@@ -422,7 +356,6 @@ Will set `gis-version-file' to FILE."
   (save-match-data
     (if (search-forward "-------" nil t) (setq magik-version-position (point)))) ;skip a header
 
-  (message "Starting %s selection... done" magik-version-program)
   (setq buffer-read-only t)
   (set-buffer-modified-p nil)
   (switch-to-buffer (current-buffer)))
@@ -448,10 +381,9 @@ Will set `gis-version-file' to FILE."
   (magik-version-select))
 
 (defun magik-version-select ()
-  "Store the gis product name in the global variable, `gis-version-current', so that
-`F2 z' will set the correct product's environment before starting the gis.
-Also now update the emacs `process-environment' correctly.
-The frame and icon title strings will be modified according to
+  "Store the gis product name in the global variable `gis-version-current'.
+So that `F2 z' will set the correct product's environment before starting
+the gis.  The frame and icon title strings will be modified according to
 `gis-version-frame-title-format' and `gis-version-icon-title-format'."
   (interactive)
   (let ((stream (car (magik-version-select-internal))))
@@ -481,37 +413,16 @@ Return (STREAM VERSION SMALLWORLD_GIS)."
       (error "No Environment on this line"))
     (if (not (and magik-version-current
 		  (string-equal stream magik-version-current)))
-	(progn
-	  (setq process-environment (cl-copy-list magik-utils-original-process-environment)
-		exec-path           (cl-copy-list magik-utils-original-exec-path))
-
-	  (magik-version-set-environment smallworld-gis
-					 stream
-					 version
-					 (if (and magik-version-program
-						  (not magik-version-file))
-					     magik-version-program))))
+	(magik-version-set-environment smallworld-gis
+				       stream
+				       version))
     (list stream version smallworld-gis)))
 
-(defun magik-version-set-environment (smallworld-gis stream version program)
+(defun magik-version-set-environment (smallworld-gis stream version)
   "Modify the process and exec-path environment given stream and smallworld-gis path."
   (setenv "SMALLWORLD_GIS" smallworld-gis)
   (setenv "SW_STREAM" stream)
-  (setenv "SW_VERSION" version)
-
-  (save-excursion
-    (set-buffer (get-buffer-create " *temp gis stream select*"))
-    (erase-buffer)
-    ;; Use cmdproxy explicitly and not shell-file-name since Cygwin
-    ;; may be being used and in this case 'set' sometimes reports shell values
-    ;; to be VAR='c:/path/to/file' i.e it inserts ''s.
-    (magik-version-call-process-windows "cmdproxy" nil t nil
-					"/c"
-					(concat "echo off && "
-						(expand-file-name "config/environment.bat"  smallworld-gis)
-						"&& set"))
-    (goto-char (point-min))
-    (magik-version-set-emacs-environment)))
+  (setenv "SW_VERSION" version))
 
 (defun magik-version-call-process-windows (&rest args)
   "Run Windows command and return the environment variables it sets up."
@@ -559,32 +470,6 @@ by the current Smallworld version."
 			   (append sw-list new-list)
 			   path-separator))
       (subst-char-in-string ?/ ?\\ new))))
-
-(defun magik-version-set-emacs-environment ()
-  "Update `process-environment' and `exec-path' variables."
-  (let* ((orig-shell (getenv "SHELL"))
-	 (orig-path  (getenv "PATH")))
-    (setq process-environment nil)
-    (while (not (eobp))
-      (if (looking-at ".*=")
-	  (push (buffer-substring (line-beginning-position) (line-end-position)) process-environment))
-      (forward-line 1))
-    (setenv "SHELL" orig-shell)
-    (setenv "PATH" (magik-version-prepend-sw-paths orig-path (getenv "PATH")))
-    (setq exec-path (append (parse-colon-path (getenv "PATH"))
-			    (parse-colon-path (getenv "EMACSPATH"))))))
-
-(defun magik-version-reset-emacs-environment ()
-  "Reset the Emacs environment back to how it was when Emacs started.
-This affects all Environment variables `process-environment'
-and the execution path `exec-path'."
-  (interactive)
-  (if (yes-or-no-p "Are you sure you want to reset the process environment? ")
-      (progn
-	(setq process-environment (cl-copy-list magik-utils-original-process-environment)
-	      exec-path           (cl-copy-list magik-utils-original-exec-path))
-	(setq-default magik-version-current nil)
-	(magik-version-selection))))
 
 (defun magik-version-header-string ()
   "Insert a string describing the gis_version status.

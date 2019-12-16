@@ -54,8 +54,7 @@ FUNCTION takes one argument, the string after the action character."
 
 (defun magik-session-filter-get-state (buf)
   "Displays the state of the GIS filter."
-  (save-excursion
-    (set-buffer buf)
+  (with-current-buffer buf
     magik-session-filter-state))
 
 (defun magik-session-filter (proc str)
@@ -66,35 +65,31 @@ FUNCTION takes one argument, the string after the action character."
 	 (n (string-match (magik-session-filter-get-state buf) str))
 	 (filter-buf (concat " *filter*" (buffer-name buf))))
       (cond ((equal (magik-session-filter-get-state buf) "\C-e")
-	     (save-excursion
-	       (set-buffer (get-buffer-create filter-buf))
+	     (with-current-buffer (get-buffer-create filter-buf)
 	       (insert (if n (substring str 0 n) str))
 	       (message "Filtering Magik output...(%s chars)" (number-to-string (point-max))))
 	     (if n
 		 (condition-case err
 		     (magik-session-filter-action
 		      proc
-		      (save-excursion
-			(set-buffer (get-buffer-create filter-buf))
+		      (with-current-buffer (get-buffer-create filter-buf)
 			(prog1
 			    (buffer-string)
 			  (erase-buffer))))
 		   (error
-		    (save-excursion
-		      (set-buffer buf)
+		    (with-current-buffer buf
 		      (setq n nil
 			    str ""
 			    magik-session-filter-state "\C-a")
 		      (message "Error: %s" (error-message-string err)))))))
 	    ((equal (magik-session-filter-get-state buf) "\C-a")
-	     (magik-session-filter-insert buf proc n str))
+	     (with-current-buffer buf (magik-session-filter-insert buf proc n str)))
 	    (t
 	     nil))
       ;; else if in " " or "\C-f" state then do nothing.
       (if n
 	  (progn
-	    (save-excursion
-	      (set-buffer buf)
+	    (with-current-buffer buf
 	      (setq magik-session-filter-state
 		    (cdr (assoc magik-session-filter-state
 				'(("\C-a" . "\C-e")
@@ -104,12 +99,10 @@ FUNCTION takes one argument, the string after the action character."
 	    (magik-session-filter proc (substring str (1+ n))))))))
 
 (defun magik-session-filter-insert (buf proc n str)
-  "insert into BUF at the process-mark of PROC, N chars from STR.
-If N is nil insert the whole of STR.
-We insert before all markers except the comint-last-input-end and the last command
-from magik-session-prev-cmds."
+  "Insert into BUF at the 'process-mark' of PROC, N chars from STR.
+If N is nil insert the whole of STR.  We insert before all markers except the
+ 'comint-last-input-end' and the last command from magik-session-prev-cmds."
   (save-excursion
-    (set-buffer buf)
     (goto-char (process-mark proc))
     ;; we make sure that the end-marker for the last command typed by the user
     ;; (if there is one, else just the null initial command)
@@ -146,9 +139,7 @@ from magik-session-prev-cmds."
 	    (add-text-properties (match-beginning 0) (match-end 0)
 				 (list 'mouse-face 'highlight
 				       'help-echo "mouse-2: Goto error in file"
-				       'local-map magik-session-mode-error-map)))))
-
-      )))
+				       'local-map magik-session-mode-error-map))))))))
 
 (defun magik-session-filter-toggle-filter (&optional buffer)
   "Toggle the filter on the GIS buffer.
@@ -167,8 +158,7 @@ With a prefix arg, ask user for GIS buffer to use."
 	(progn
 	  (set-process-filter process nil)
 	  (message "Cancelled the filter in '%s'." buffer))
-      (save-excursion
-	(set-buffer (get-buffer-create (concat " *filter*" buffer)))
+      (with-current-buffer (get-buffer-create (concat " *filter*" buffer))
 	(erase-buffer)
 	(set-buffer buffer)
 	(setq magik-session-filter-state "\C-a")
@@ -218,10 +208,10 @@ action's function setting."
 (defun magik-session-filter-action-completion (proc str)
   "Gis Filter Action interface for a magik symbol completion according to STR returned from Magik."
   (let ((ans (read str))
-	(curr-word-len (length (sw-curr-word))))
+	(curr-word-len (length (magik-utils-curr-word))))
     (cond
      ((eq (length ans) 0)
-      (message "Cannot find completion for %s." (sw-curr-word)))
+      (message "Cannot find completion for %s." (magik-utils-curr-word)))
      ((eq (length ans) 1)
       (if (eq (length (car ans)) curr-word-len)
 	  (message "Sole completion.")
@@ -241,7 +231,7 @@ action's function setting."
 	      (and (< i len)
 		   (< i (length (car strings)))
 		   (eq (aref (car strings) i) (aref longest-common-prefix i)))
-	    (incf i))
+	    (cl-incf i))
 	  (setq len i)
 	  (pop strings))
 	(if (> len curr-word-len)
@@ -337,17 +327,15 @@ The behaviour is undefined if any search key and line or column are used."
 
 (defun magik-session-filter-action-magik-session-prompt-set (proc str)
   "Gis Filter Action for setting `magik-session-prompt' variable."
-  (save-excursion
-    (set-buffer (buffer-name (process-buffer proc)))
+  (with-current-buffer (buffer-name (process-buffer proc))
     (setq magik-session-prompt str)
     (magik-session-prompt-update-font-lock)))
 
 (defun magik-session-filter-action-eval-elisp (proc str)
   "Gis Filter Action that enables Magik to send Elisp code for Emacs to evaluate."
-  (save-excursion
-    (set-buffer (get-buffer-create
-		 (generate-new-buffer-name ; Be ultra careful to avoid multiple sessions eval'ing Elisp code!!!
-		  (concat "*Magik Elisp eval*" (buffer-name (process-buffer proc))))))
+  (with-current-buffer (get-buffer-create
+			(generate-new-buffer-name ; Be ultra careful to avoid multiple sessions eval'ing Elisp code!!!
+			 (concat "*Magik Elisp eval*" (buffer-name (process-buffer proc)))))
     (erase-buffer)
     (insert str)
     (condition-case err

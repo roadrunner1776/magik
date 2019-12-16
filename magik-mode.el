@@ -121,7 +121,6 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
 								      (magik-utils-buffer-mode-list 'magik-session-mode))
      :keys "f2 x"]
     "---"
-    [,"Heading"           magik-heading                 :active t :keys "f2 h"]
     [,"Comment Region"           magik-comment-region          :active t :keys "f2 #"]
     [,"Uncomment Region"         magik-uncomment-region        :active t :keys "f2 ESC #"]
     [,"Fill Comment"              magik-fill-public-comment     :active t :keys "f2 q"]
@@ -734,7 +733,7 @@ Use auto-complete mode \"g\" symbol convention to represent a global.")
 	((toks (progn (insert ? )  ;; so that the token closes!
 		      (prog1
 			  (magik-tokenise-region-no-eol (line-beginning-position) (point))
-			(delete-backward-char 1))))
+			(delete-char -1))))
 	 (last-tok (car (last toks)))
 	 (last-tok-pos (cdr last-tok)))
       (backward-word 1)
@@ -796,7 +795,6 @@ Use auto-complete mode \"g\" symbol convention to represent a global.")
        (inhibit-point-motion-hooks t)
        (inhibit-modification-hooks t)
        deactivate-mark buffer-file-name buffer-file-truename
-       (parse-sexp-lookup-properties font-lock-syntactic-keywords)
        (old-syntax-table (syntax-table))
        (code-start (save-excursion (magik-goto-code))))
     (unwind-protect
@@ -829,8 +827,6 @@ Use auto-complete mode \"g\" symbol convention to represent a global.")
 		     (>= end code-start))
 	    ;; Now do the fontification.
 	    (font-lock-unfontify-region beg end)
-	    (when font-lock-syntactic-keywords
-	      (font-lock-fontify-syntactic-keywords-region beg end))
 	    (unless font-lock-keywords-only
 	      (font-lock-fontify-syntactically-region beg end loudly))
 	    (font-lock-fontify-keywords-region beg end loudly)))
@@ -1139,8 +1135,7 @@ Optional argument GIS ..."
 					  magik-session-buffer
 					  'magik-session-buffer-alist-prefix-function))
 	pt)
-    (save-excursion
-      (set-buffer gis)
+    (with-current-buffer gis
       (goto-char (point-max))
       (forward-line -1)
       (cond ((equal (current-word) "True")
@@ -1155,7 +1150,7 @@ Optional argument GIS ..."
 	(progn
 	  (pop-to-buffer gis)
 	  (goto-char pt)
-	  (gis-error-goto)))))
+	  (magik-gis-error-goto)))))
 
 (defun magik-perform-replace-no-set-mark (from to regexp-flag)
   "like `perform-replace' but without setting the mark and without
@@ -1345,7 +1340,7 @@ another file shall be written."
 	 (package (or package "\n")) ;need a newline to ensure fixed number of lines for gis-goto-error
 	 (coding-system buffer-file-coding-system))
 
-    (setq filename (loop
+    (setq filename (cl-loop
 		    with queue = 0
 		    with file  = nil
 		    do (setq file (concat filename "q" (number-to-string queue)))
@@ -1353,8 +1348,7 @@ another file shall be written."
 		    do (setq queue (1+ queue))
 		    else
 		    return file))
-    (save-excursion
-      (set-buffer (get-buffer-create " *transmit magik debug*"))
+    (with-current-buffer (get-buffer-create " *transmit magik debug*")
       (erase-buffer)
       (setq buffer-file-coding-system coding-system)
       (insert "write(\"**** Emacs: buffer=" orig-buf
@@ -1639,28 +1633,6 @@ If PT is given, goto that char position."
 	    str
 	    " +++\")\n")))
 
-
-
-(defun magik-heading ()
-  "Transforms a Magik comment line written conventionally into a standard heading format.
-The format is # (or ##) <tab> followed by each character uppercased and single spaced.
-   The body of the text is followed by a underline using # or ## as appropriate"
-  (interactive "*")
-  (save-excursion
-    (save-restriction
-      (narrow-to-region (line-beginning-position) (line-end-position))
-      (upcase-region (line-beginning-position) (line-end-position))
-      (beginning-of-line)
-      (forward-char 2)
-      (delete-horizontal-space)
-      (replace-regexp "\\(.\\)" " \\1")
-      (end-of-line)
-      (insert "\n" (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
-      (beginning-of-line)
-      (replace-regexp "[^#]" "_")
-      (forward-line -1)
-      (replace-regexp "^\\(##?\\)." "\\1\t"))))
-
 (defun magik-fill-public-comment ()
   "Fill a comment paragraph."
   (interactive "*")
@@ -1700,7 +1672,7 @@ The format is # (or ##) <tab> followed by each character uppercased and single s
   "Puts NLINES in first column of ARG lines at point."
   (interactive "p")
   (while (and (> nlines 0) (not (eobp)))
-    (decf nlines)
+    (cl-decf nlines)
     (beginning-of-line 1)
     (insert-char ?# 1)
     (forward-line 1)))
@@ -1709,7 +1681,7 @@ The format is # (or ##) <tab> followed by each character uppercased and single s
   "Deletes NLINES in first column of ARG lines at point."
   (interactive "*p")
   (while (and (> nlines 0) (not (eobp)))
-    (decf nlines)
+    (cl-decf nlines)
     (beginning-of-line 1)
     (if (char-equal (char-after (point)) ?# ) (delete-char 1))
     (forward-line 1)))
@@ -1806,8 +1778,7 @@ Optional argument BUFFER-B ..."
 Argument BUFFER ..."
   (interactive "BBuffer: ")
   (setq magik-work-buffer buffer)
-  (save-excursion
-    (set-buffer (get-buffer-create magik-work-buffer))
+  (with-current-buffer (get-buffer-create magik-work-buffer)
     (magik-mode)))
 
 (defun magik-copy-method-to-buffer (&optional buffer)
@@ -2006,13 +1977,13 @@ the list of all possible matches, without recourse to the class browser."
 	      ;; Re-use cache.
 	      magik-ac-class-method-source-cache
 	    ;; reset cache
-	    (setq magik-ac-class-method-source-cache (cb-ac-method-candidates)))))))
+	    (setq magik-ac-class-method-source-cache (magik-cb-ac-method-candidates)))))))
 
 (defun magik-ac-object-source-init ()
   "Initialisation function for obtaining all Magik Objects for use in auto-complete-mode."
-  (if (cb-ac-start-process)
+  (if (magik-cb-ac-start-process)
       (let ((ac-prefix "sw:object"))
-	(setq magik-ac-object-source-cache (cb-ac-class-candidates)))))
+	(setq magik-ac-object-source-cache (magik-cb-ac-class-candidates)))))
 
 (defun magik-ac-object-prefix ()
   "Detect if point is at a possible object, allowing for a package: prefix."
@@ -2035,12 +2006,12 @@ the list of all possible matches, without recourse to the class browser."
 (defun magik-ac-raise-condition-source-init ()
   "Initialisation function for obtaining all Magik Conditions for use in auto-complete-mode.
 Once initialised this variable is not refreshed."
-  (if (cb-ac-start-process)
+  (if (magik-cb-ac-start-process)
       (let ((ac-prefix "<condition>."))
 	(if magik-ac-raise-condition-source-cache
 	    ;; consider enabling refresh using auto-complete's 10 minute refresh idle timer?
 	    magik-ac-raise-condition-source-cache
-	  (setq magik-ac-raise-condition-source-cache (cb-ac-method-candidates))))))
+	  (setq magik-ac-raise-condition-source-cache (magik-cb-ac-method-candidates))))))
 
 (defun magik-ac-raise-condition-prefix ()
   "Detect if point is at a condition.raise."
@@ -2050,12 +2021,12 @@ Once initialised this variable is not refreshed."
 (defun magik-ac-global-source-init ()
   "Initialisation function for obtaining all Magik Conditions for use in auto-complete-mode.
 Once initialised this variable is not refreshed."
-  (if (cb-ac-start-process)
+  (if (magik-cb-ac-start-process)
       (let ((ac-prefix "<global>."))
 	(if magik-ac-global-source-cache
 	    ;; consider enabling refresh using auto-complete's 10 minute refresh idle timer?
 	    magik-ac-global-source-cache
-	  (setq magik-ac-global-source-cache (cb-ac-method-candidates))))))
+	  (setq magik-ac-global-source-cache (magik-cb-ac-method-candidates))))))
 
 (defun magik-ac-dynamic-prefix ()
   "Detect if point is at !..! dynamic point."
@@ -2069,13 +2040,14 @@ Once initialised this variable is not refreshed."
 (defun magik-ac-complete ()
   "Auto-complete command for Magik entities."
   (interactive)
-  (auto-complete '(
-		   magik-ac-class-method-source
-		   magik-ac-raise-condition-source
-		   magik-ac-dynamic-source
-		   magik-ac-object-source
-		   magik-ac-global-source
-		   )))
+  (let ((ac 'auto-complete))
+    (when (fboundp ac)
+      (funcall ac '(
+		    magik-ac-class-method-source
+		    magik-ac-raise-condition-source
+		    magik-ac-dynamic-source
+		    magik-ac-object-source
+		    magik-ac-global-source)))))
 
 ;;; Smallworld Compatibility functions
 (defalias 'magik-point-on-pragma-line-p 'pragma-line-p)
@@ -2100,7 +2072,7 @@ closing bracket into the new \"{...}\" notation."
     ()
   (define-abbrev-table 'magik-mode-abbrev-table ())
   (let ((abbrevs-changed nil))
-    (mapcar
+    (mapc
      #'(lambda (str)
 	 (define-abbrev magik-mode-abbrev-table
 	   str str 'magik-expand-abbrev))

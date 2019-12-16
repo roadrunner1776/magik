@@ -20,7 +20,6 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl)
   (require 'sort))
 
 (defvar magik-utils-original-process-environment (cl-copy-list process-environment)
@@ -185,24 +184,24 @@ If ERROR string is given then output as an error, %s will be replced with FILENA
 MODE may also be a list of modes.
 Optional PREDICATE is either a function or a variable which must not return nil."
   (save-excursion
-    (loop for b in (buffer-list)
-	  do (set-buffer b)
-	  if (get-buffer-window b 'visible)
-	  if (member major-mode (if (listp mode) mode (list mode)))
-	  if (magik-utils-buffer-mode-list-predicate-p predicate)
-	  collect (cons (buffer-name)
-			(windowp (get-buffer-window b nil))))))
+    (cl-loop for b in (buffer-list)
+	     do (set-buffer b)
+	     if (get-buffer-window b 'visible)
+	     if (member major-mode (if (listp mode) mode (list mode)))
+	     if (magik-utils-buffer-mode-list-predicate-p predicate)
+	     collect (cons (buffer-name)
+			   (windowp (get-buffer-window b nil))))))
 
 (defun magik-utils-buffer-mode-list (mode &optional predicate)
   "Return list of buffers with the given Major mode MODE.
 MODE may also be a list of modes.
 Optional PREDICATE is either a function or a variable which must not return nil."
   (save-excursion
-    (loop for b in (buffer-list)
-	  do (set-buffer b)
-	  if (member major-mode (if (listp mode) mode (list mode)))
-	  if (magik-utils-buffer-mode-list-predicate-p predicate)
-	  collect (buffer-name))))
+    (cl-loop for b in (buffer-list)
+	     do (set-buffer b)
+	     if (member major-mode (if (listp mode) mode (list mode)))
+	     if (magik-utils-buffer-mode-list-predicate-p predicate)
+	     collect (buffer-name))))
 
 (defun magik-utils-buffer-mode-list-sorted (mode &optional predicate sort-fn)
   "Return standardised sorted list of buffers with the given Major mode MODE.

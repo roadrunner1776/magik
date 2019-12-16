@@ -21,7 +21,6 @@
 
 (eval-when-compile
   (defvar msb-menu-cond)
-  (require 'cl)
   (require 'magik-utils))
 
 (defgroup magik-aliases nil
@@ -38,7 +37,7 @@
   "*List of common gis_aliases files.
 This list is expected to be setup by the Emacs maintainer,
 a user can setup their personal gis_aliases file list using
-`aliases-user-file-list'. Both these lists are concatenated to
+`aliases-user-file-list'.  Both these lists are concatenated to
 form the top section of the SW->Alias Files submenu."
   :group 'magik-aliases
   :type  '(repeat file))
@@ -57,7 +56,7 @@ form the top section of the SW->Alias Files submenu."
   "*Path to `aliases-program'.
 Setting this sets the default value.  When opening a gis_aliases file,
 the buffer local value of this variable will be set to the directory
-containing the `aliases-program' if it is in a relative path to the file."
+containing the `magik-aliases-program' if it is in a relative path to the file."
   :group 'magik-aliases
   :type  '(repeat directory))
 
@@ -228,7 +227,7 @@ when the buffer is displayed:
 (defun magik-aliases-program-set (&optional default)
   "Return the program to use to operate on a gis_aliases file."
   (let ((path magik-aliases-program-path)
-	finished program)
+	program)
     (while path
       (setq program (expand-file-name
 		     (concat (file-name-as-directory (car path)) default))
@@ -236,10 +235,16 @@ when the buffer is displayed:
       (if (file-executable-p program)
 	  (setq path nil)
 	(setq program nil)))
+    (unless program
+      (setq program (expand-file-name
+		     (concat (getenv "SMALLWORLD_GIS") "/config/"
+			     (file-name-as-directory (car magik-aliases-program-path)) magik-aliases-program)))
+      (unless (file-executable-p program)
+	(setq program nil)))
     (or program default)))
 
 (defun magik-aliases-run-program (&optional alias file dir)
-  "Run gis.exe on the aliases file.
+  "Run 'runalias` on the aliases file.
 
 With a prefix arg, ask user for current directory to use."
   (interactive (if (not (magik-aliases-at-alias-definition))
@@ -321,17 +326,16 @@ Returns nil if FILE cannot be expanded."
 
 (defun magik-aliases-layered-products-file (file)
   "Read contents of FILE with the format of LAYERED_PRODUCTS configuration file."
-  (if (file-exists-p file)
-      (save-excursion
-	(set-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*"))
-	(insert-file-contents file nil nil nil 'replace)
-
-	;; Always ensure that a default sw_core: set to SMALLWORLD_GIS is present
-	;; in case the value has been manually modified but we still wish to locate
-	;; a gis_aliases file next to the LAYERED_PRODUCTS file.
-	(goto-char (point-min))
-	(insert "sw_core:\n	path		= %SMALLWORLD_GIS%\n")
-	(magik-aliases-layered-products-alist))))
+  (when (file-exists-p file)
+    (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
+      (insert-file-contents file nil nil nil 'replace)
+      
+      ;; Always ensure that a default sw_core: set to SMALLWORLD_GIS is present
+      ;; in case the value has been manually modified but we still wish to locate
+      ;; a gis_aliases file next to the LAYERED_PRODUCTS file.
+      (goto-char (point-min))
+      (insert "sw_core:\n	path		= %SMALLWORLD_GIS%\n")
+      (magik-aliases-layered-products-alist))))
 
 (defun magik-aliases-layered-products-alist ()
   "Return alist of contents for LAYERED_PRODUCTS file."
@@ -397,10 +401,10 @@ Returns nil if FILE cannot be expanded."
 	      lp-files))
       (push "---" lp-files))
 
-    (loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)
-	  do (push (vector (buffer-file-name (get-buffer buf))
-			   (list 'switch-to-buffer buf)
-			   t) buffers))
+    (cl-loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)
+	     do (push (vector (buffer-file-name (get-buffer buf))
+			      (list 'switch-to-buffer buf)
+			      t) buffers))
     (or (eq (length buffers) 0) (push "---" buffers))
 
     (easy-menu-change (list "Tools" "Magik")
@@ -424,10 +428,6 @@ Returns nil if FILE cannot be expanded."
     (push '("aliases$" . magik-aliases-mode) auto-mode-alist))
 (or (assoc "aliases.txt$" auto-mode-alist)
     (push '("aliases.txt$" . magik-aliases-mode) auto-mode-alist))
-
-;;; speedbar configuration
-(eval-after-load 'speedbar
-  '(speedbar-add-supported-extension "aliases$"))
 
 ;;MSB configuration
 (defun magik-aliases-msb-configuration ()

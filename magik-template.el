@@ -228,21 +228,21 @@ a template type to use for normal magik files.
 	 (template-file nil))
     (if (eq major-mode 'magik-mode)
 	(progn
-	  (loop for type-data in magik-template-file-type-alist
-		for label         = (car type-data)
-		for prompt        = (concat (format "Magik %s type:" label) " ")
-		for test-function = (cadr type-data)
-		for option-list   = (cddr type-data)
-		until type
-		if (or (and (functionp test-function) (funcall test-function))
-		       (eq t test-function))
-		do (setq type (cdr (if (eq (length option-list) 1)
-				       (car option-list)
-				     (assoc (completing-read prompt
-							     option-list
-							     nil t nil nil
-							     (caar option-list))
-					    option-list)))))
+	  (cl-loop for type-data in magik-template-file-type-alist
+		   for label         = (car type-data)
+		   for prompt        = (concat (format "Magik %s type:" label) " ")
+		   for test-function = (cadr type-data)
+		   for option-list   = (cddr type-data)
+		   until type
+		   if (or (and (functionp test-function) (funcall test-function))
+			  (eq t test-function))
+		   do (setq type (cdr (if (eq (length option-list) 1)
+					  (car option-list)
+					(assoc (completing-read prompt
+								option-list
+								nil t nil nil
+								(caar option-list))
+					       option-list)))))
 	  (setq magik-template-file-type (or type magik-template-file-type-default))
 
 	  (setq-default magik-template-file-type nil) ; reset default value

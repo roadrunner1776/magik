@@ -88,11 +88,6 @@
   :group 'product
   :type 'sexp)
 
-(defun magik-product-help ()
-  "Display help on how to use the Product Mode interface."
-  (interactive)
-  (sw-help-open sw-help-product-id))
-
 (defun magik-product-customize ()
   "Open Customization buffer for Product Mode."
   (interactive)
