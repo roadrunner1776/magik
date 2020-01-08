@@ -55,7 +55,7 @@ form the top section of the SW->Alias Files submenu."
 
 (defcustom magik-aliases-program-path '("../bin/x86" "../../product/bin/x86")
   "*Path to `aliases-program'.
-Setting this sets the default value. When opening a gis_aliases file,
+Setting this sets the default value.  When opening a gis_aliases file,
 the buffer local value of this variable will be set to the directory
 containing the `aliases-program' if it is in a relative path to the file."
   :group 'magik-aliases
@@ -316,7 +316,7 @@ With a prefix arg, ask user for current directory to use."
   "Expand FILE path including environment variables.
 Returns nil if FILE cannot be expanded."
   (condition-case nil
-      (expand-file-name (substitute-in-file-name (replace-regexp-in-string (regexp-quote "%SMALLWORLD_GIS%") "$SMALLWORLD_GIS" file nil 'literal)))
+      (expand-file-name (substitute-in-file-name (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) file nil 'literal)))
     (error nil)))
 
 (defun magik-aliases-layered-products-file (file)
