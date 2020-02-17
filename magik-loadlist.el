@@ -230,14 +230,14 @@ With a prefix arg accept all changes without prompting."
 (defun magik-loadlist-transmit (&optional gis)
   "Load the loadlist.txt into the GIS process."
   (interactive)
-  (let* ((gis (magik-utils-get-buffer-mode gis
+  (let* ((dir  (file-name-directory buffer-file-name))
+	 (file (file-name-nondirectory buffer-file-name))
+	 (gis (magik-utils-get-buffer-mode gis
 					   'magik-session-mode
 					   "Enter Magik process buffer:"
 					   magik-session-buffer
 					   'magik-session-buffer-alist-prefix-function))
-	 (process (barf-if-no-gis gis))
-	 (dir  (file-name-directory buffer-file-name))
-	 (file (file-name-nondirectory buffer-file-name)))
+	 (process (barf-if-no-gis gis)))
     (message "%s loaded in buffer %s." file gis)
     (process-send-string
      process
