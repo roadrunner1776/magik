@@ -80,15 +80,13 @@
 ;;; Code:
 
 (eval-when-compile
-  (defvar msb-menu-cond)
-  (defvar ac-triggered)
-  (defvar ac-prefix)
-  (defvar ac-limit)
-
-  (require 'magik-mode)
-  (require 'magik-session))
-
+  (defvar msb-menu-cond))
+  
+(require 'magik-mode)
+(require 'magik-session)
 (require 'magik-utils)
+(require 'cl-lib)
+(require 'easymenu)
 
 (defgroup magik-cb nil
   "Running Magik Class Browser."
@@ -199,9 +197,9 @@ visible.
 
 The situation where it is useful to set this to t is as follows:
 you have two buffers, one with a magik file, the other with
-the class browser. If you jump to a file containing a method,
+the class browser.  If you jump to a file containing a method,
 the file containing the method will replace the window displaying the class
-browser. Thus, you now have two windows one displaying your magik file
+browser.  Thus, you now have two windows one displaying your magik file
 the other displaying the source file containing the method.
 
 You can now use Ediff to compare the buffers!"
@@ -243,7 +241,7 @@ Can be set using \\[cb-set-mode-line-cursor]."
   "Alist storing CB buffer filename and number used for prefix key switching.")
 
 (defvar magik-cb-process nil
-  "method finder process.")
+  "'method finder' process.")
 (put 'magik-cb-process 'permanent-local t)
 
 (defvar magik-cb-topics nil
@@ -798,14 +796,9 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
 	magik-cb--mf-socket-synchronised)))
 
 (defun magik-cb-start-process (buffer command &rest args)
-  "Start a Class Browser process in BUFFER and return process object.
-BUFFER may be nil, in which case only the process is started.
-Adds SW_ACP_PATH environment variable to PATH."
-  (let* ((acp-path (getenv "SW_ACP_PATH"))
-	 (exec-path
-	  (if acp-path
-	      (append (parse-colon-path acp-path) exec-path)
-	    exec-path))
+  "Start a COMMAND process in BUFFER and return process object.
+BUFFER may be nil, in which case only the process is started."
+  (let* ((exec-path (append (magik-aliases-layered-products-acp-path (magik-aliases-expand-file magik-aliases-layered-products-file)) exec-path))
 	 magik-cb-process)
     (setq magik-cb-process (apply 'start-process "cb" buffer command args))
     (set-process-filter        magik-cb-process 'magik-cb-filter)
@@ -1727,7 +1720,7 @@ some state for a clean exit."
 
 (defun magik-cb-delete-char (arg &optional killflag)
   "Do a delete-char in the mode-line and refresh the method display."
-  (interactive "p\nP") 
+  (interactive "p\nP")
   (with-current-buffer (magik-cb-buffer)
     (save-excursion
       (if (eq magik-cb-cursor-pos 'class-name)
@@ -1804,7 +1797,7 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
 	   "          "
 	   (magik-cb-modeline-flags)))
     (set-buffer-modified-p (buffer-modified-p))
-    
+
     ;;update CB2 if buffer exists.
     (let ((cb2 (magik-cb2-buffer))
 	  (mode-line (symbol-value 'mode-line-format)))
@@ -2313,13 +2306,8 @@ comments etc."
   (save-excursion (magik-cb-set-buffer-c) (buffer-string)))
 
 (defun magik-cb-method-finder-version ()
-  "Return as a string (e.g. \"2.0.0\") the version of the method_finder.
-Assumes method_finder is in SW_ACP_PATH."
-  (let* ((acp-path (getenv "SW_ACP_PATH"))
-	 (exec-path
-	  (if acp-path
-	      (append (parse-colon-path acp-path) exec-path)
-	    exec-path))
+  "Return as a string (e.g. \"2.0.0\") the version of the method_finder."
+  (let* ((exec-path (append (magik-aliases-layered-products-acp-path (magik-aliases-expand-file magik-aliases-layered-products-file)) exec-path))
 	 magik-cb-process)
     (with-current-buffer (get-buffer-create " *method finder version*")
       (erase-buffer)
@@ -2370,7 +2358,7 @@ See the variable `magik-cb-generalise-file-name-alist' to provide more customisa
 
 ;;MSB configuration
 (defun magik-cb-msb-configuration ()
-  "Adds CB buffers to msb menu, supposes that msb is already loaded."
+  "Add CB buffers to msb menu, supposes that msb is already loaded."
   (let* ((l (length msb-menu-cond))
 	 (last (nth (1- l) msb-menu-cond))
 	 (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last

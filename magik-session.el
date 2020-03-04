@@ -406,7 +406,7 @@ queried irrespective of default value of `magik-session-prompt'"
 	(version (and (boundp 'magik-session-version-current) (symbol-value 'magik-session-version-current))))
     (make-comint-in-buffer "magik-session-shell"
 			   buffer
-			   "cmd" nil "/k"
+			   (executable-find "cmd") nil "/k"
 			   (concat (getenv "SMALLWORLD_GIS") "\\config\\environment.bat"))
     (with-current-buffer buffer
       (if (stringp version) (set 'magik-session-version-current version)))
@@ -602,8 +602,6 @@ Entry to this mode calls the value of magik-session-mode-hook."
     (make-local-variable 'magik-session-drag-n-drop-mode-line-string)
     (make-local-variable 'magik-transmit-debug-mode-line-string)
     (make-local-variable 'ac-sources)
-
-					;(make-local-hook 'kill-buffer-hook) ;add-hook uses local option
 
     (use-local-map magik-session-mode-map)
     (easy-menu-add magik-session-menu)
@@ -1583,13 +1581,12 @@ where MODE is the name of the major mode with the '-mode' postfix."
 ;;;Package registration
 
 ;;Ensure Default magik-session-command are placed at head of magik-session-command-history
-(mapcar (function
-	 (lambda (c)
-	   (and c
-		(not (member c magik-session-command-history))
-		(push c magik-session-command-history))))
-	(list magik-session-command-default magik-session-command))
-
+(mapc (function
+       (lambda (c)
+	 (and c
+	      (not (member c magik-session-command-history))
+	      (push c magik-session-command-history))))
+      (list magik-session-command-default magik-session-command))
 
 ;;; package setup via setting of variable before load.
 (and magik-session-drag-n-drop-mode (magik-session-drag-n-drop-mode magik-session-drag-n-drop-mode))

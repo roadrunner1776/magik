@@ -329,15 +329,15 @@ Returns nil if FILE cannot be expanded."
   (when (file-exists-p file)
     (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
       (insert-file-contents file nil nil nil 'replace)
-      
+
       ;; Always ensure that a default sw_core: set to SMALLWORLD_GIS is present
       ;; in case the value has been manually modified but we still wish to locate
       ;; a gis_aliases file next to the LAYERED_PRODUCTS file.
       (goto-char (point-min))
       (insert "sw_core:\n	path		= %SMALLWORLD_GIS%\n")
-      (magik-aliases-layered-products-alist))))
+      (magik--aliases-layered-products-alist))))
 
-(defun magik-aliases-layered-products-alist ()
+(defun magik--aliases-layered-products-alist ()
   "Return alist of contents for LAYERED_PRODUCTS file."
   (save-excursion
     (save-match-data
@@ -358,6 +358,40 @@ Returns nil if FILE cannot be expanded."
 		    (let ((lp-dir (cons lp dir)))
 		      (or (member lp-dir alist) (push lp-dir alist))) ))))
 	alist))))
+
+(defun magik-aliases-layered-products-acp-path (file)
+  "Read contents of FILE with the format of LAYERED_PRODUCTS configuration file and return paths to append to 'exec-path'."
+  (when (file-exists-p file)
+    (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
+      (insert-file-contents file nil nil nil 'replace)
+
+      ;; Always ensure that a default sw_core: set to SMALLWORLD_GIS is present
+      ;; in case the value has been manually modified but we still wish to locate
+      ;; a gis_aliases file next to the LAYERED_PRODUCTS file.
+      (goto-char (point-min))
+      (insert "sw_core:\n	path		= %SMALLWORLD_GIS%\n")
+      (magik--aliases-layered-products-acp-list))))
+
+(defun magik--aliases-layered-products-acp-list ()
+  "Return list of ACP paths."
+  (save-excursion
+    (save-match-data
+      (let (paths pt lp dir)
+	(goto-char (point-min))
+	(while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
+	  (setq lp (match-string-no-properties 1))
+	  (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
+	      (progn
+		(setq pt (point))
+		(end-of-line)
+		(skip-syntax-backward "-")
+		(skip-chars-backward "/\\") ;avoid trailing directory character.
+		(setq dir
+		      (magik-aliases-expand-file
+		       (buffer-substring-no-properties pt (point))))
+		(if (file-directory-p (concat dir "/etc/x86"))
+		    (push (concat dir "/etc/x86") paths)))))
+	paths))))
 
 (defun magik-aliases-update-menu ()
   "Update the dynamic Aliases submenu."
