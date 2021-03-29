@@ -1207,13 +1207,15 @@ range [MIN, MAX)."
 
 (defun magik-session--prepare-for-edit-cmd ()
   "If we're in a previous command, replace any current command with
-this one."
+this one.
+Go to the end of the buffer otherwise."
   (let
       ((n (magik-session--get-curr-cmd-num)))
     (if n
 	(magik-session-copy-cmd n
 				(- (point)
-				   (car (aref magik-session-prev-cmds n)))))))
+				   (car (aref magik-session-prev-cmds n))))
+      (goto-char (point-max)))))
 
 (defun magik-session-send-command-at-point ()
   "Send the command at point, copying to the end of the buffer if necessary and
