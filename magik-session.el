@@ -1197,7 +1197,7 @@ range [MIN, MAX)."
   "Take a copy of a command before killing the line."
   (interactive "*P")
   (magik-session--prepare-for-edit-cmd)
-  (kill-line))
+  (kill-line arg))
 
 (defun magik-session-kill-region (beg end)
   "Ask if they really want to kill the region, before killing it."
