@@ -135,7 +135,7 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
       :keys "f2 e"
       :style toggle
       :selected magik-electric-mode]
-     [,"#DEBUG Statements"          toggle-magik-transmit-debug-p
+     [,"#DEBUG Statements"          magik-toggle-transmit-debug-p
       :active t
       :style toggle
       :selected magik-transmit-debug-p]
