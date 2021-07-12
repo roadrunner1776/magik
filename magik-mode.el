@@ -1334,7 +1334,9 @@ another file shall be written."
 	 (orig-buf  (buffer-name))
 	 (orig-file (or (buffer-file-name) ""))
 	 (position  (if start (number-to-string start) "1"))
-	 (filename (concat (concat (getenv "TEMP") "\\T")
+	 (filename (concat (if (eq system-type 'windows-nt)
+			       (concat (getenv "TEMP") "\\T")
+			     "/tmp/t")
 			   (user-login-name)
 			   (number-to-string (process-id process))))
 	 (package (or package "\n")) ;need a newline to ensure fixed number of lines for gis-goto-error
