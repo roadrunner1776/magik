@@ -50,6 +50,15 @@ Major mode for running Magik session as a direct sub-process.
 
 Major prog mode for editing Magik code.
 
+Support for outline-minor mode. Try e.g.:
+(add-hook 'magik-mode-hook
+	  (lambda ()
+	    (setq outline-regexp magik-mode-outline-string-regexp)))
+
+Support for imenu. Try e.g.:
+(add-hook 'magik-mode-hook 'imenu-add-menubar-index)
+
+
 ### magik-electric-mode
 
 Minor mode for electic Magik.
