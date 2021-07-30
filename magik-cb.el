@@ -2342,17 +2342,21 @@ See the variable `magik-cb-generalise-file-name-alist' to provide more customisa
 		   if (and (string-match (car i) f)
 			   (setq f (replace-match (cdr i) nil t f)))
 		   return f)))
-    (progn
-      (subst-char-in-string ?/ ?\\ f t)
-      (if (or (string-match "^[a-zA-Z]:" f)
-	      (string-match "^\\\\\\\\" f))
-	  f
-	(let* ((buffer (magik-cb-gis-buffer))
-	       (drive-name (if (get-buffer buffer)
-			       (with-current-buffer buffer
-				 (substring default-directory 0 2))
-			     (substring default-directory 0 2))))
-	  (concat drive-name f))))))
+    (if (eq system-type 'windows-nt)
+	(progn
+	  (subst-char-in-string ?/ ?\\ f t)
+	  (if (or (string-match "^[a-zA-Z]:" f)
+		  (string-match "^\\\\\\\\" f))
+	      f
+	    (let* ((buffer (magik-cb-gis-buffer))
+		   (drive-name (if (get-buffer buffer)
+				   (with-current-buffer buffer
+				     (substring default-directory 0 2))
+				 (substring default-directory 0 2))))
+	      (concat drive-name f))))
+      (if (string-match "^[a-zA-Z]:" f)
+	  (setq f (substring f 2)))
+      (subst-char-in-string ?\\ ?/ f t))))
 
 ;;Package configuration
 (magik-cb-set-mode-line-cursor magik-cb-mode-line-cursor)
