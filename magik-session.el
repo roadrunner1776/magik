@@ -225,28 +225,28 @@ this variable buffer-local by putting the following in your .emacs
   `(,"Magik Session"
     [,"Previous Command"                 magik-session-recall-prev-cmd           t]
     [,"Next Command"                     magik-session-recall-next-cmd           t]
-    [,"Previous Matching Command"        magik-session-recall-prev-matching-cmd  :active t :keys "f2 p"]
-    [,"Next Matching Command"            magik-session-recall-next-matching-cmd  :active t :keys "f2 n"]
+    [,"Previous Matching Command"        magik-session-recall-prev-matching-cmd  t]
+    [,"Next Matching Command"            magik-session-recall-next-matching-cmd  t]
     "----"
-    [,"Fold"                             magik-session-display-history   :active t :keys "f2 up, f2 C-p"]
-    [,"Unfold"                           magik-session-undisplay-history :active t :keys "f2 down, f2 C-n"]
+    [,"Fold"                             magik-session-display-history   :active t :keys "<f2> <up>,   <f2> C-p"]
+    [,"Unfold"                           magik-session-undisplay-history :active t :keys "<f2> <down>,   <f2> C-n"]
     "----"
-    [,"Electric Template"                magik-explicit-electric-space         :active t :keys "f2 SPC"]
-    [,"Symbol Complete"                  magik-symbol-complete                 :active t :keys "f4 f4"]
-    ;; [,"Deep Print"                       magik-deep-print                      :active t :keys "f2 x"]
+    [,"Electric Template"                magik-explicit-electric-space           t]
+    [,"Symbol Complete"                  magik-symbol-complete                   t]
+    ;; [,"Deep Print"                       magik-deep-print                      :active t :keys "<f2> x"]
     "----"
-    [,"Previous Traceback"               magik-session-traceback-up              :active t :keys "f4 up"]
-    [,"Next Traceback"                   magik-session-traceback-down            :active t :keys "f4 down"]
-    [,"Print Traceback"                  magik-session-traceback-print           :active t :keys "f4 P, f2 ="]
-    [,"Save Traceback"                   magik-session-traceback-save            :active t :keys "f4 S"]
+    [,"Previous Traceback"               magik-session-traceback-up              t]
+    [,"Next Traceback"                   magik-session-traceback-down            t]
+    [,"Print Traceback"                  magik-session-traceback-print   :active t :keys "<f4> P,   <f2> ="]
+    [,"Save Traceback"                   magik-session-traceback-save            t]
     "----"
-    [,"External Shell Process"           magik-session-shell                     :active t :keys "f4 $"]
-    [,"Kill Magik Process"               magik-session-kill-process              :active (and magik-session-process
+    [,"External Shell Process"           magik-session-shell                     t]
+    [,"Kill Magik Process"               magik-session-kill-process              (and magik-session-process
 										      (eq (process-status magik-session-process) 'run))]
     (,"Magik Session Command History")
     "---"
     (,"Toggle..."
-     [,"Magik Session Filter"             magik-session-filter-toggle-filter     :active t :keys "f2 f"
+     [,"Magik Session Filter"             magik-session-filter-toggle-filter     :active t
       :style toggle :selected (let ((b (get-buffer-process
 					(current-buffer))))
 				(and b (process-filter b)))]

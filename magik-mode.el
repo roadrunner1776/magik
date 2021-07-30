@@ -93,37 +93,34 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
 (easy-menu-define magik-menu magik-mode-map
   "Menu for Magik Mode."
   `(,"Magik"
-    [,"Transmit Method"   magik-transmit-method         :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f7, f2 f7, f2 m"]
-    [,"Transmit Region"   magik-transmit-region         :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f8, f2 f8, f2 r"]
-    [,"Transmit Buffer"   magik-transmit-buffer         :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 b"]
-    [,"Transmit Chunk"    magik-transmit-$-chunk        :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 $"]
-    [,"Transmit Thing"    magik-transmit-thing          :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 RET"]
+    [,"Transmit Method"   magik-transmit-method :active (magik-utils-buffer-mode-list 'magik-session-mode)
+     :keys "<f7>,   <f2> <f7>,   <f2> m"]
+    [,"Transmit Region"   magik-transmit-region :active (magik-utils-buffer-mode-list 'magik-session-mode)
+     :keys "<f8>,   <f2> <f8>,   <f2> r"]
+    [,"Transmit Buffer"   magik-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Transmit Chunk"    magik-transmit-$-chunk        (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Transmit Thing"    magik-transmit-thing          (magik-utils-buffer-mode-list 'magik-session-mode)]
     "---"
     [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   t] ; FIXME former f4 r
     [,"Copy Method to Work Buffer"  magik-copy-method-to-buffer   t] ; FIXME former f4 m
     [,"Set Work Buffer Name"        magik-set-work-buffer-name    t] ; FIXME former f4 n
     "---"
-    [,"Electric Template" magik-explicit-electric-space :active t :keys "f2 SPC"]
-    [,"Mark Method"       magik-mark-method             :active t :keys "C-M-h, f9"]
-    [,"Copy Method"       magik-copy-method             :active t :keys "f6"] ; FIXME former f4 c, f6
-    [,"Compare Method between Windows"   magik-compare-methods         :active t] ; FIXME former f4 w
-    [,"Compare Method using Ediff"     magik-ediff-methods           :active t] ; FIXME former f4 e
+    [,"Electric Template" magik-explicit-electric-space           t]
+    [,"Mark Method"       magik-mark-method               :active t :keys "C-M-h,   <f9>"]
+    [,"Copy Method"       magik-copy-method                       t] ; f6 and FIMXE former f4 c
+    [,"Compare Method between Windows" magik-compare-methods      t] ; FIXME former f4 w
+    [,"Compare Method using Ediff"     magik-ediff-methods        t] ; FIXME former f4 e
     "---"
-    [,"Add Debug Statement"         magik-add-debug-statement     :active t] ; FIXME former f4 s
-    [,"Trace Statement"             magik-trace-curr-statement    :active t :keys "f2 t"]
-    [,"Symbol Complete"          magik-symbol-complete          :active (magik-utils-buffer-mode-list 'magik-session-mode)] ; FIXME former f4 f4
+    [,"Add Debug Statement"         magik-add-debug-statement     t] ; FIXME former f4 s
+    [,"Trace Statement"             magik-trace-curr-statement    t]
+    [,"Symbol Complete"   magik-symbol-complete         (magik-utils-buffer-mode-list 'magik-session-mode)]  ; FIXME former f4 f4
     ;; [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
     ;; 									      (magik-utils-buffer-mode-list 'magik-session-mode))
-    ;;  :keys "f2 x"]
+    ;;  :keys "<f2> x"]
     "---"
-    [,"Comment Region"           magik-comment-region          :active t :keys "f2 #"]
-    [,"Uncomment Region"         magik-uncomment-region        :active t :keys "f2 ESC #"]
-    [,"Fill Comment"              magik-fill-public-comment     :active t :keys "f2 q"]
+    [,"Comment Region"           magik-comment-region          t]
+    [,"Uncomment Region"         magik-uncomment-region        t]
+    [,"Fill Comment"             magik-fill-public-comment     t]
     "---"
     (,"Toggle.."
      [,"Method Name Display"      magik-method-name-mode
@@ -132,7 +129,6 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
       :selected magik-method-name-mode]
      [,"Electric Magik Mode"  magik-electric-mode
       :active t
-      :keys "f2 e"
       :style toggle
       :selected magik-electric-mode]
      [,"#DEBUG Statements"          magik-toggle-transmit-debug-p

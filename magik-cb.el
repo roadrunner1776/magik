@@ -311,51 +311,46 @@ This will stop the \"Loading documentation...\" message from hanging around.")
 (easy-menu-define magik-cb-menu magik-cb-mode-map
   "Menu for CB mode."
   `(,"CB"
-    [,"Jump to Source"                 magik-cb-jump-to-source        :active t :keys "f3 j, mouse-2"]
-    [,"Family Tree"    magik-cb-family                :active t :keys "f3 f, mouse-2"]
-    [,"Fold"           magik-cb-fold                  :active (or (magik-cb-topic-on-p "show-topics")
-								  (magik-cb-topic-on-p "show-comments")
-								  (magik-cb-topic-on-p "show-args")
-								  (magik-cb-topic-on-p "show-classes"))
-     :keys "f3 up"]
-    [,"Unfold"         magik-cb-unfold                :active (or (not (magik-cb-topic-on-p "show-topics"))
-								  (not (magik-cb-topic-on-p "show-comments"))
-								  (not (magik-cb-topic-on-p "show-args"))
-								  (not (magik-cb-topic-on-p "show-classes")))
-     :keys "f3 down"]
+    [,"Jump to Source" magik-cb-jump-to-source        :active t :keys "<f3> j,   <mouse-2>"]
+    [,"Family Tree"    magik-cb-family                :active t :keys "<f3> f,   <mouse-2>"]
+    [,"Fold"           magik-cb-fold                  (or (magik-cb-topic-on-p "show-topics")
+							  (magik-cb-topic-on-p "show-comments")
+							  (magik-cb-topic-on-p "show-args")
+							  (magik-cb-topic-on-p "show-classes"))]
+    [,"Unfold"         magik-cb-unfold                (or (not (magik-cb-topic-on-p "show-topics"))
+							  (not (magik-cb-topic-on-p "show-comments"))
+							  (not (magik-cb-topic-on-p "show-args"))
+							  (not (magik-cb-topic-on-p "show-classes")))]
     "---"
-    [,"Set Options"        magik-cb-edit-topics-and-flags :active t :keys "f3 s, ;"]
-    [,"Turn All Topics On/Off"  magik-cb-toggle-all-topics     :active t :keys "f3 t"]
-    [,"Reset All Options"          magik-cb-reset                 :active t :keys "f3 r"]
-    [,"Hide"           magik-cb-quit                  :active t :keys "SPC, f3 h"]
+    [,"Set Options"             magik-cb-edit-topics-and-flags :active t :keys "<f3> s,   ;"]
+    [,"Turn All Topics On/Off"  magik-cb-toggle-all-topics     t]
+    [,"Reset All Options"       magik-cb-reset                 t]
+    [,"Hide"                    magik-cb-quit                  :active t :keys "SPC,   <f3> h"]
     "---"
     [,"Override Flags"
      magik-cb-toggle-override-flags
      :active t
      :style toggle
      :selected (magik-cb-topic-on-p "override-flags")
-     :keys "f3 F, f3 o"]
+     :keys "<f3> F,   <f3> o"]
     [,"Override Topics"
      magik-cb-toggle-override-topics
      :active t
      :style toggle
-     :selected (magik-cb-topic-on-p "override-topics")
-     :keys "f3 T"]
+     :selected (magik-cb-topic-on-p "override-topics")]
     [,"Override 200 Limit"
      magik-cb-toggle-override-200-limit
      :active t
      :style toggle
-     :selected (magik-cb-topic-on-p "override-200-limit")
-     :keys "f3 2"]
+     :selected (magik-cb-topic-on-p "override-200-limit")]
     "---"
     [,"Hop"                            magik-cb-tab                   t]
     [,"Clear"                          magik-cb-clear                 t]
-    [,"Clear Method and Class"         magik-cb-and-clear             :active t :keys "f3 /"]
+    [,"Clear Method and Class"         magik-cb-and-clear             t]
     "---"
-    [,"Magik Process"                  magik-cb-gis                   :active (get-buffer (magik-cb-gis-buffer)) :keys "f3 g"]
-    [,"Magik External Shell Process"   magik-cb-gis-shell             :active (get-buffer
-									       (concat "*shell*" (magik-cb-gis-buffer)))
-     :keys "f3 $"]
+    [,"Magik Process"                  magik-cb-gis                   (get-buffer (magik-cb-gis-buffer))]
+    [,"Magik External Shell Process"   magik-cb-gis-shell             (get-buffer
+								       (concat "*shell*" (magik-cb-gis-buffer)))]
     "---"
     [,"Customize"                      magik-cb-customize             t]
     ;; [,"Help"                           magik-cb-help                  t]

@@ -32,54 +32,34 @@
   `(,"Magik"
     (,"Alias Files")
     "---"
-    [,"Select Environment"            magik-version-selection
-     :active t
-     :keys "f2 s"]
-    [,"Run/Goto session"              magik-session
-     :active t
-     :keys "f2 z"]
-    [,"Start new session"             magik-session-new-buffer
-     :active t
-     :keys "C-u f2 z"]
+    [,"Select Environment" magik-version-selection          t]
+    [,"Run/Goto session"   magik-session                    t]
+    [,"Start new session"  magik-session-new-buffer :active t :keys "C-u <f2> z"]
     (,"Magik Session Processes")
     "---"
     (,"Class Browser")
     (,"Class Browser Processes")
     "---"
     (,"External Shell Processes")
-    [,"List Processes"    list-processes t]
+    [,"List Processes"    list-processes  t]
     "---"
-    [,"Customize" magik-customize
-     :active t] ;; :key-sequence nil
+    [,"Customize"         magik-customize t]
     (,"Help")))
 
 (defconst magik-menu-cb-menu
   `(,"Class Browser"
-    [,"Run/Goto Class Browser"       magik-cb
-     :active t
-     :keys "f3 f3"]
-    [,"Start New Class Browser"      magik-cb-new-buffer
-     :active t
-     :keys "C-u f3 f3"]
-    [,"Paste Method in CB"           magik-cb-paste-method
-     :active t
-     :keys "f3 m"]
-    [,"Paste Class in CB"            magik-cb-paste-class
-     :active t
-     :keys "f3 c"]
-    [,"Clear Method and Class in CB" magik-cb-and-clear
-     :active t
-     :keys "f3 /"]
+    [,"Run/Goto Class Browser"       magik-cb                      t]
+    [,"Start New Class Browser"      magik-cb-new-buffer   :active t :keys "C-u <f3> <f3>"]
+    [,"Paste Method in CB"           magik-cb-paste-method         t]
+    [,"Paste Class in CB"            magik-cb-paste-class          t]
+    [,"Clear Method and Class in CB" magik-cb-and-clear            t]
     "---"
-    [,"Jump to Source"               magik-cb-jump-to-source
-     :active t
-     :keys "f3 j"]
+    [,"Jump to Source"               magik-cb-jump-to-source t]
     "---"
-    [,"Customize"                    magik-cb-customize
-     :active t] ;; :key-sequence nil
+    [,"Customize"                    magik-cb-customize      t]
     ;; [,"Help"                         magik-cb-help
     ;;  :active t
-    ;;  :keys "f3 ?"]
+    ;;  :keys "<f3> ?"]
     ))
 
 ;;;###autoload
