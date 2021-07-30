@@ -50,11 +50,9 @@ Major mode for running Magik session as a direct sub-process.
 
 Major prog mode for editing Magik code.
 
-Support for outline-minor mode. Try e.g.:
-(outline-minor-mode)
+Support for outline-minor mode. Try: `(outline-minor-mode)`
 
-Support for imenu. Try e.g.:
-(add-hook 'magik-mode-hook 'imenu-add-menubar-index)
+Support for imenu. Try: `(add-hook 'magik-mode-hook 'imenu-add-menubar-index)`
 
 
 ### magik-electric-mode
@@ -93,3 +91,4 @@ If you plan to use this package with Smallworld-Versions 4.x or older, you shoul
 * Customize the variable `magik-session-auto-insert-dollar` to non nil
 * You might customize the variable `magik-aliases-layered-products-file` to "$SMALLWORLD_GIS/product/config/LAYERED_PRODUCTS". But if you want to use the EMACS for Smallworld 5.x as well, it's easier to create the directory `$SMALLWORLD_GIS/../smallworld_registry` and copy or soft-link the original LAYERED_PRODUCTS file into that directory - so you have the same structure as under Smallworld 5.x.
 * There is no support (yet) for the Smallworld dev-tools. So if you want to do things like <kbd>f4</kbd><kbd>d</kbd> to start debugging a method, you may still want to use the EMACS which has been delivered with the Smallworld 4.x (or older) software.
+* Some more things which are at least partly not supported by Smallworld 5.x are not supported (e.g. `deep-print`)
