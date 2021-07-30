@@ -59,7 +59,7 @@
 (define-key magik-module-f2-map   "d"     'magik-module-reload-module-definition)
 (define-key magik-module-f2-map   "s"     'magik-module-toggle-save-magikc)
 (define-key magik-module-f2-map   "r"     'magik-module-toggle-force-reload)
-(define-key magik-module-f2-map   "R"     'magik-module-toggle-remove-module)
+(define-key magik-module-f2-map   "R"     'magik-module-remove-module)
 
 (defvar magik-module-menu nil
   "Keymap for the Magik module.def buffer menu bar.")

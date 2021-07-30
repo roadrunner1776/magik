@@ -327,7 +327,7 @@ This will stop the \"Loading documentation...\" message from hanging around.")
     [,"Set Options"        magik-cb-edit-topics-and-flags :active t :keys "f3 s, ;"]
     [,"Turn All Topics On/Off"  magik-cb-toggle-all-topics     :active t :keys "f3 t"]
     [,"Reset All Options"          magik-cb-reset                 :active t :keys "f3 r"]
-    [,"Hide"           magik-cb-quit                  :active t :keys "space, f3 h"]
+    [,"Hide"           magik-cb-quit                  :active t :keys "SPC, f3 h"]
     "---"
     [,"Override Flags"
      magik-cb-toggle-override-flags
@@ -358,7 +358,8 @@ This will stop the \"Loading documentation...\" message from hanging around.")
      :keys "f3 $"]
     "---"
     [,"Customize"                      magik-cb-customize             t]
-    [,"Help"                           magik-cb-help                  t]))
+    ;; [,"Help"                           magik-cb-help                  t]
+    ))
 
 (defvar magik-cb--mf-socket-synchronised nil
   "Internal variable for controlling Class Browser processes started from GIS processes.
@@ -664,7 +665,7 @@ To view the help on these variables type C-h v [Return] [variable-name]"
 	buffer-undo-list t
 	font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w"))))
 
-  (add-hook 'menu-bar-update-hook 'magik-cb-update-sw-menu)
+  (add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu)
   (add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t) ;local hook
   (run-hooks 'magik-cb-mode-hook))
 
@@ -732,14 +733,14 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
 	     (error "No Class Browser is running"))))
     buf))
 
-(defun magik-cb-update-sw-menu ()
-  "Update CB submenu in SW menu bar."
+(defun magik-cb-update-tools-magik-cb-menu ()
+  "Update Class Browser Processes submenu in Tools -> Magik pulldown menu."
   (let ((magik-cb-gis-alist (sort (copy-alist (symbol-value 'magik-session-buffer-alist))
 				  #'(lambda (a b) (< (car a) (car b))))); 1, 2 etc.
 	(magik-cb-alist     (sort (copy-alist magik-cb-buffer-alist); -1, -2, etc.
 				  #'(lambda (a b) (> (car a) (car b)))))
 	cb-list)
-    ;; Order is such that CB of *gis* will be first see gis.el for more details.
+    ;; Order is such that CB of *gis* will be first see magik-session.el for more details.
     (dolist (c magik-cb-alist)
       (let ((i   (- (car c)))
 	    (buf (cdr c)))
