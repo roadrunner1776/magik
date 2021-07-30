@@ -286,8 +286,8 @@ suitable for selection."
 	   (setq version (current-word)
 		 name    version)))
      (list root
-	   (read-string "Enter name for this installation: " name)
-	   (read-string "Enter version number of this installation: " version))))
+	   (read-no-blanks-input "Enter name for this installation: " name)
+	   (read-no-blanks-input "Enter version number of this installation: " version))))
 
   (or magik-version-file
       (error "File interface is not being used"))
