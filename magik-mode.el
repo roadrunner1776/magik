@@ -104,22 +104,22 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
     [,"Transmit Thing"    magik-transmit-thing          :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f2 RET"]
     "---"
-    [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   :active t :keys "f4 r"]
-    [,"Copy Method to Work Buffer"  magik-copy-method-to-buffer   :active t :keys "f4 m"]
-    [,"Set Work Buffer Name"   magik-set-work-buffer-name    :active t :keys "f4 n"]
+    [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   t] ; FIXME former f4 r
+    [,"Copy Method to Work Buffer"  magik-copy-method-to-buffer   t] ; FIXME former f4 m
+    [,"Set Work Buffer Name"        magik-set-work-buffer-name    t] ; FIXME former f4 n
     "---"
     [,"Electric Template" magik-explicit-electric-space :active t :keys "f2 SPC"]
     [,"Mark Method"       magik-mark-method             :active t :keys "C-M-h, f9"]
-    [,"Copy Method"       magik-copy-method             :active t :keys "f4 c, f6"]
-    [,"Compare Method between Windows"   magik-compare-methods         :active t :keys "f4 w"]
-    [,"Compare Method using Ediff"     magik-ediff-methods           :active t :keys "f4 e"]
+    [,"Copy Method"       magik-copy-method             :active t :keys "f6"] ; FIXME former f4 c, f6
+    [,"Compare Method between Windows"   magik-compare-methods         :active t] ; FIXME former f4 w
+    [,"Compare Method using Ediff"     magik-ediff-methods           :active t] ; FIXME former f4 e
     "---"
-    [,"Add Debug Statement"         magik-add-debug-statement     :active t :keys "f4 s"]
+    [,"Add Debug Statement"         magik-add-debug-statement     :active t] ; FIXME former f4 s
     [,"Trace Statement"             magik-trace-curr-statement    :active t :keys "f2 t"]
-    [,"Symbol Complete"          magik-symbol-complete          :active (magik-utils-buffer-mode-list 'magik-session-mode) :keys "f4 f4"]
-    [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
-								      (magik-utils-buffer-mode-list 'magik-session-mode))
-     :keys "f2 x"]
+    [,"Symbol Complete"          magik-symbol-complete          :active (magik-utils-buffer-mode-list 'magik-session-mode)] ; FIXME former f4 f4
+    ;; [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
+    ;; 									      (magik-utils-buffer-mode-list 'magik-session-mode))
+    ;;  :keys "f2 x"]
     "---"
     [,"Comment Region"           magik-comment-region          :active t :keys "f2 #"]
     [,"Uncomment Region"         magik-uncomment-region        :active t :keys "f2 ESC #"]
