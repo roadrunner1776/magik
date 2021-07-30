@@ -388,9 +388,12 @@ Returns nil if FILE cannot be expanded."
 		(skip-chars-backward "/\\") ;avoid trailing directory character.
 		(setq dir
 		      (magik-aliases-expand-file
-		       (buffer-substring-no-properties pt (point))))
-		(if (file-directory-p (concat dir "/etc/x86"))
-		    (push (concat dir "/etc/x86") paths)))))
+ 		       (buffer-substring-no-properties pt (point)))
+		      etc-dir (concat dir (if (eq system-type 'windows-nt)
+					      "/etc/x86"
+					    "/etc/Linux.x86")))
+		(if (file-directory-p etc-dir)
+		    (push etc-dir paths)))))
 	paths))))
 
 (defun magik-aliases-update-menu ()

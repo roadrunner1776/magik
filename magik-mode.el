@@ -135,7 +135,7 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
       :keys "f2 e"
       :style toggle
       :selected magik-electric-mode]
-     [,"#DEBUG Statements"          toggle-magik-transmit-debug-p
+     [,"#DEBUG Statements"          magik-toggle-transmit-debug-p
       :active t
       :style toggle
       :selected magik-transmit-debug-p]
@@ -194,7 +194,7 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
     (,"Shared Constants"
      "^\\s-*\\(.+\\)\\.define_shared_constant([ \t\n]*:\\s-*\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 2)
     (,"Slot Access"
-     "^\\s-*\\(.+\\)\\.define_slot_access([ \t\n]*:\\s-*\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 2) ; define_slot_externally_* rarely used.
+     "^\\s-*\\(.+\\)\\.define_slot_\\(access\\|externally_readable\\|externally_writable\\)([ \t\n]*:\\s-*\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 3)
     (,"Pseduo Slots"
      "^\\s-*\\(.+\\)\\.define_pseudo_slot([ \t\n]*:\\s-*\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 2) ; define_slot_externally_* rarely used.
     (,"Mixins"
@@ -204,7 +204,7 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
     (,"Arrays"
      "^\\s-*_method\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\s-*?\\[" magik-imenu-method-name 1)
     (,"Exemplars"
-     "^\\s-*def_slotted_exemplar([ \t\n]*:\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 1) ;;def_indexed_exemplar very rarely used. def_enumeration not used.
+     "^\\s-*def_\\(slott\\|index\\)ed_exemplar([ \t\n]*:\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 2) ;; def_enumeration not used.
     (,"Globals"
      "^\\s-*_global\\(\n\\|\\s-\\)+\\(_constant\\(\n\\|\\s-\\)+\\)?\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 4)
     (,"Packages"
@@ -1334,7 +1334,9 @@ another file shall be written."
 	 (orig-buf  (buffer-name))
 	 (orig-file (or (buffer-file-name) ""))
 	 (position  (if start (number-to-string start) "1"))
-	 (filename (concat (concat (getenv "TEMP") "\\T")
+	 (filename (concat (if (eq system-type 'windows-nt)
+			       (concat (getenv "TEMP") "\\T")
+			     "/tmp/t")
 			   (user-login-name)
 			   (number-to-string (process-id process))))
 	 (package (or package "\n")) ;need a newline to ensure fixed number of lines for gis-goto-error
@@ -1456,8 +1458,8 @@ You can customise ‘magik-mode’ with the ‘magik-mode-hook’."
 	  (font-lock-fontify-buffer-function   . magik-font-lock-fontify-buffer)
 	  (font-lock-fontify-region-function   . magik-font-lock-fontify-region)
 	  (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))
-	outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_slotted_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
-
+	outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
+  
   (if magik-auto-abbrevs (abbrev-mode 1))
 
   (imenu-add-menubar-index)

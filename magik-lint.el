@@ -21,25 +21,31 @@
 
 (require 'flycheck)
 
-(defcustom magik-lint-jar-file (expand-file-name (concat user-emacs-directory "magik-lint/magik-lint-0.3.2.jar"))
+(defcustom magik-lint-jar-file (expand-file-name (concat user-emacs-directory "magik-lint/magik-lint-0.4.0.jar"))
   "Location of the magik-lint jar file."
   :group 'magik
   :type  '(choice (file)
-		  (const nil)))
+                  (const nil)))
 
 (flycheck-def-config-file-var flycheck-magik-lintrc magik-lint-java ".magiklint")
+
+(flycheck-def-args-var flycheck-magik-lint-args magik-lint-java)
+
+(flycheck-def-args-var flycheck-magik-lint-java-args magik-lint-java)
 
 (flycheck-define-checker magik-lint-java
   "A Magik syntax checker and validator using the magik-lint utility.
 
 See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
   :command ("java"
-	    "-jar" (eval (expand-file-name magik-lint-jar-file))
-	    (config-file "--rcfile" flycheck-magik-lintrc)
-	    "--max-infractions" (eval (number-to-string flycheck-checker-error-threshold))
-	    "--msg-template" "\"${path}:${line}:${column}: (${category}) ${msg}\""
-	    "--column-offset" "+1"
-	    source)
+            (eval flycheck-magik-lint-java-args)
+            "-jar" (eval (expand-file-name magik-lint-jar-file))
+            (eval flycheck-magik-lint-args)
+            (config-file "--rcfile" flycheck-magik-lintrc)
+            "--max-infractions" (eval (number-to-string flycheck-checker-error-threshold))
+            "--msg-template" "\"${path}:${line}:${column}: (${category}) ${msg}\""
+            "--column-offset" "+1"
+            source)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": (Critical) " (message) line-end)
    (error line-start (file-name) ":" line ":" column ": (Major) " (message) line-end)
@@ -47,7 +53,7 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
   :modes (magik-mode))
 
 (unless (and (eq system-type 'windows-nt)
-	     (flycheck-default-executable-find "java"))
+             (flycheck-default-executable-find "java"))
   (setq flycheck-magik-lint-java-executable (executable-find (substitute-in-file-name "$JAVA_HOME/bin/java"))))
 
 (add-to-list 'flycheck-checkers 'magik-lint-java 'append)
