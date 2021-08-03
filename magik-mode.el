@@ -2193,7 +2193,7 @@ closing bracket into the new \"{...}\" notation."
   ;;  (define-key magik-f4-map [f4]   'magik-symbol-complete)
   ;;  (define-key magik-f4-map "c"    'magik-copy-method)
   ;;  (define-key magik-f4-map "e"    'magik-ediff-methods)
-  ;;  (define-key magik-f4-map [f3]   'cb-magik-ediff-methods)
+  ;;  (define-key magik-f4-map [f3]   'magik-cb-magik-ediff-methods)
   ;;  (define-key magik-f4-map "m"    'magik-copy-method-to-buffer)
   ;;  (define-key magik-f4-map "n"    'magik-set-work-buffer-name)
   ;;  (define-key magik-f4-map "r"    'magik-copy-region-to-buffer)
