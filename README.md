@@ -110,3 +110,11 @@ Some keys bindings are changed with respect to a standard EMACS installation, at
 | <kbd>F2</kbd> | `2C-command`|globally changed to prefix key |
 | <kbd>F3</kbd> | `kmacro-start-macro-or-insert-counter` | globally changed to prefix key |
 | <kbd>F4</kbd> | `kmacro-end-or-call-macro` | used in magik-mode and magik-session-mode as prefix key |
+
+The reason for that is, that many Magik developpers are familiar with these bindings from former EMACS installations.
+
+For quick usage of the keyboard-macro functions you may e.g. bind the <kbd>Ctrl</kbd>-<kbd>F2</kbd> and <kbd>Ctrl</kbd>-<kbd>F4</kbd> combinations by putting the following lines into your  `.emacs` file:
+``` emacs-lisp
+(global-set-key [C-f3] 'kmacro-start-macro-or-insert-counter)
+(global-set-key [C-f4] 'kmacro-end-or-call-macro)
+```
