@@ -101,19 +101,19 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
     [,"Transmit Chunk"    magik-transmit-$-chunk        (magik-utils-buffer-mode-list 'magik-session-mode)]
     [,"Transmit Thing"    magik-transmit-thing          (magik-utils-buffer-mode-list 'magik-session-mode)]
     "---"
-    [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   t] ; FIXME former f4 r
-    [,"Copy Method to Work Buffer"  magik-copy-method-to-buffer   t] ; FIXME former f4 m
-    [,"Set Work Buffer Name"        magik-set-work-buffer-name    t] ; FIXME former f4 n
+    [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   t]
+    [,"Copy Method to Work Buffer"  magik-copy-method-to-buffer   t]
+    [,"Set Work Buffer Name"        magik-set-work-buffer-name    t]
     "---"
     [,"Electric Template" magik-explicit-electric-space           t]
     [,"Mark Method"       magik-mark-method               :active t :keys "C-M-h,   <f9>"]
-    [,"Copy Method"       magik-copy-method                       t] ; f6 and FIMXE former f4 c
-    [,"Compare Method between Windows" magik-compare-methods      t] ; FIXME former f4 w
-    [,"Compare Method using Ediff"     magik-ediff-methods        t] ; FIXME former f4 e
+    [,"Copy Method"       magik-copy-method               :active t :keys "<f4> c,   <f6>"]
+    [,"Compare Method between Windows" magik-compare-methods      t]
+    [,"Compare Method using Ediff"     magik-ediff-methods        t]
     "---"
-    [,"Add Debug Statement"         magik-add-debug-statement     t] ; FIXME former f4 s
+    [,"Add Debug Statement"         magik-add-debug-statement     t]
     [,"Trace Statement"             magik-trace-curr-statement    t]
-    [,"Symbol Complete"   magik-symbol-complete         (magik-utils-buffer-mode-list 'magik-session-mode)]  ; FIXME former f4 f4
+    [,"Symbol Complete"   magik-symbol-complete         (magik-utils-buffer-mode-list 'magik-session-mode)]
     ;; [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
     ;; 									      (magik-utils-buffer-mode-list 'magik-session-mode))
     ;;  :keys "<f2> x"]
@@ -2190,15 +2190,15 @@ closing bracket into the new \"{...}\" notation."
   (define-key magik-mode-map (kbd "<f2> <down>") 'magik-forward-method)
   (define-key magik-mode-map (kbd "<f2> $")      'magik-transmit-$-chunk)
 
-  ;;  (define-key magik-f4-map [f4]   'magik-symbol-complete)
-  ;;  (define-key magik-f4-map "c"    'magik-copy-method)
-  ;;  (define-key magik-f4-map "e"    'magik-ediff-methods)
-  ;;  (define-key magik-f4-map [f3]   'magik-cb-magik-ediff-methods)
-  ;;  (define-key magik-f4-map "m"    'magik-copy-method-to-buffer)
-  ;;  (define-key magik-f4-map "n"    'magik-set-work-buffer-name)
-  ;;  (define-key magik-f4-map "r"    'magik-copy-region-to-buffer)
-  ;;  (define-key magik-f4-map "s"    'magik-add-debug-statement)
-  ;;  (define-key magik-f4-map "w"    'magik-compare-methods)
+  (define-key magik-mode-map (kbd "<f4> <f4>")   'magik-symbol-complete)
+  (define-key magik-mode-map (kbd "<f4> c")      'magik-copy-method)
+  (define-key magik-mode-map (kbd "<f4> e")      'magik-ediff-methods)
+  (define-key magik-mode-map (kbd "<f4> <f3>")   'magik-cb-magik-ediff-methods)
+  (define-key magik-mode-map (kbd "<f4> m")      'magik-copy-method-to-buffer)
+  (define-key magik-mode-map (kbd "<f4> n")    	 'magik-set-work-buffer-name)
+  (define-key magik-mode-map (kbd "<f4> r")    	 'magik-copy-region-to-buffer)
+  (define-key magik-mode-map (kbd "<f4> s")    	 'magik-add-debug-statement)
+  (define-key magik-mode-map (kbd "<f4> w")    	 'magik-compare-methods)
   )
 
 (eval-after-load 'flycheck
