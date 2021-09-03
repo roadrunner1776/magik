@@ -53,7 +53,7 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
   :modes (magik-mode))
 
 (unless (and (eq system-type 'windows-nt)
-             (flycheck-default-executable-find "java"))
+             (funcall flycheck-executable-find "java"))
   (setq flycheck-magik-lint-java-executable (executable-find (substitute-in-file-name "$JAVA_HOME/bin/java"))))
 
 (add-to-list 'flycheck-checkers 'magik-lint-java 'append)
