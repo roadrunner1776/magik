@@ -459,7 +459,6 @@ is an operator."
              "%" char
              "@" at
              "\"" string
-             "'" string1
              "_" keyword
              ":" sym
              "|" var-bar
@@ -510,9 +509,6 @@ is an operator."
     (string "\"" string-finish
             t stay)
     (string-finish t neutral)
-    (string1 "'" string1-finish
-             t stay)
-    (string1-finish t neutral)
     (comment t stay))
   "A description of the lexical state transitions in Magik.  This gets
 compiled into a more efficient form by `init-magik-state-table()'.")
