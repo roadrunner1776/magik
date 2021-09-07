@@ -2112,8 +2112,7 @@ closing bracket into the new \"{...}\" notation."
   (modify-syntax-entry ?< "." magik-mode-syntax-table)
   (modify-syntax-entry ?> "." magik-mode-syntax-table)
   (modify-syntax-entry ?& "." magik-mode-syntax-table)
-  (modify-syntax-entry ?\" "\"" magik-mode-syntax-table)
-  (modify-syntax-entry ?\' "\"" magik-mode-syntax-table))
+  (modify-syntax-entry ?\" "\"" magik-mode-syntax-table))
 
 ;;; package setup via setting of variable before load.
 (and magik-method-name-mode
