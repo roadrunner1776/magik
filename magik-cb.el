@@ -2142,6 +2142,11 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
       (set-window-configuration current-wc)
       (error "Cannot find method, '%s', in class, '%s'" method (concat package ":" class)))))
 
+(defvar magik-cb-jump-history (list '("" ""))
+  "Alist of the history of methods which have been jumped to.")
+(defvar magik-cb-current-jump ""
+  "Current position in the magik-cb-jump-history alist.")
+
 (defun magik-cb-jump-to-source-from-cb ()
   "Jump to source for the method under the cursor in a CB buffer."
   (let ((regexp (concat "^\\(\\S-+\\)" magik-cb-in-keyword "\\(\\S-+\\)"))
@@ -2155,8 +2160,63 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
 		     (looking-at regexp)))
 		  (zerop (forward-line -1))))
       (if (looking-at regexp)
-	  (magik-cb-send-string (concat "pr_source_file " (match-string 1) " " (match-string 2) "\n"))
+	  (let ((jump-name (concat (match-string 1) "(" (match-string 2) ")"))
+		(jump-value (concat "pr_source_file " (match-string 1) " "  (match-string 2) "\n")))
+	    (setq magik-cb-jump-history (magik-cb-jump-history-remove jump-name))
+	    (add-to-list 'magik-cb-jump-history (list jump-name jump-value))
+	    (magik-cb-send-string jump-value)
+	    (setq magik-cb-current-jump jump-name))
 	(error "Can't find a line like: 'my_method  IN  my_class'")))))
+
+(defun magik-cb-jump-history-remove (jump-name)
+  "Removes the given JUMP-NAME from the magik-cb-jump-history list."
+  (remove (assoc jump-name magik-cb-jump-history) magik-cb-jump-history)
+  )
+
+(defun magik-cb-jump-previous ()
+  "Jumps to the method definition of the method jump before the method jump defined in magik-cb-current-jump."
+  (interactive)
+  (let (
+	(current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
+	(if (not (eq (length magik-cb-jump-history) current-pos))
+	    (progn (magik-cb-send-string (nth 1 (nth (+ current-pos 1) magik-cb-jump-history)))
+	  		  (setq magik-cb-current-jump (nth 0 (nth (+ current-pos 1) magik-cb-jump-history))))
+	    (message "already at the most historiant method jump!"))
+	)
+    )
+
+(defun magik-cb-jump-next ()
+  "Jumps to the method definition of the method jump after the method jump defined in magik-cb-current-jump."
+  (interactive)
+  (let (
+	(current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
+	(if (not (eq 0 current-pos))
+	   (progn (magik-cb-send-string (nth 1 (nth (- current-pos 1) magik-cb-jump-history)))
+		  (setq magik-cb-current-jump (nth 0 (nth (- current-pos 1) magik-cb-jump-history))))
+	    (message "already at the most recent method jump!"))
+	)
+    )
+
+(defun magik-cb-jump-select (arg)
+    "Jumps to the method definition of the selected method jump."
+  (interactive (list (completing-read "Jump to: " magik-cb-jump-history)))
+   (magik-cb-send-string (nth 1 (assoc arg magik-cb-jump-history)))
+  (setq magik-cb-current-jump arg)
+  )
+
+(defun magik-cb-ido-jump-select (arg)
+    "Ido version the magik-cb-jump-select function."
+  (interactive (list (ido-completing-read "Jump to: " magik-cb-jump-history)))
+   (magik-cb-send-string (nth 1 (assoc arg magik-cb-jump-history)))
+  (setq magik-cb-current-jump arg)
+  )
+
+(defun magik-cb-jump-clear-history ()
+    "Clears the magik-cb-jump-history and magik-cb-current-jump variables to their initial state."
+  (interactive)
+  (setq magik-cb-jump-history (list '("" "")))
+  (setq magik-cb-current-jump "")
+  )
 
 (defun magik-cb-jump-to-source ()
   "Jump to the source for the method under the cursor."
