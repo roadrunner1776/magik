@@ -43,7 +43,7 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
             (eval flycheck-magik-lint-args)
             (config-file "--rcfile" flycheck-magik-lintrc)
             "--max-infractions" (eval (number-to-string flycheck-checker-error-threshold))
-            "--msg-template" "\"${path}:${line}:${column}: (${category}) ${msg_id} ${msg}\""
+            "--msg-template" "\"${path}:${line}:${column}: (${category}) ${msg}\""
             "--column-offset" "+1"
             source)
   :error-patterns
