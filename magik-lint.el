@@ -21,7 +21,7 @@
 
 (require 'flycheck)
 
-(defcustom magik-lint-jar-file (expand-file-name (concat user-emacs-directory "magik-lint/magik-lint-0.5.0.jar"))
+(defcustom magik-lint-jar-file (expand-file-name (concat user-emacs-directory "magik-lint/magik-lint-0.5.1.jar"))
   "Location of the magik-lint jar file."
   :group 'magik
   :type  '(choice (file)
