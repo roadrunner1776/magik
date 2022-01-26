@@ -285,6 +285,7 @@ With a prefix arg, ask user for current directory to use."
       (if alias
 	  (setq buf (concat buf " " alias)))
       (setq buf (generate-new-buffer (concat "*" buf "*")))
+      (kill-buffer (current-buffer))
       (set-buffer buf)
       (magik-session-mode)
 
