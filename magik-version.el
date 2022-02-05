@@ -178,7 +178,9 @@ has more than one aliases file available."
       (message alias-file)
       (when alias-file
 	(kill-buffer (current-buffer))
-	(find-file alias-file)))))
+	(find-file alias-file)
+	(setq buffer-read-only t)
+	(set-buffer-modified-p nil)))))
 
 (defun magik-version-next ()
   "Move point to next valid version listed."
