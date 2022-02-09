@@ -173,11 +173,12 @@ has more than one aliases file available."
 	    (t
 	     (let* ((lp   (completing-read "Select a Layered Product with gis_aliases file: " lp-alist nil t))
 		    (path (cdr (assoc lp lp-alist))))
-	       (if path
-		   (setq alias-file (concat path "/config/gis_aliases"))))))
+	       (when path
+		 (setq alias-file (concat path "/config/gis_aliases"))))))
       (message alias-file)
-      (if alias-file
-	  (find-file alias-file)))))
+      (when alias-file
+	(magik-version-select)
+	(find-file alias-file)))))
 
 (defun magik-version-next ()
   "Move point to next valid version listed."
