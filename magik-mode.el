@@ -1685,6 +1685,7 @@ If PT is given, goto that char position."
   (while (and (> nlines 0) (not (eobp)))
     (cl-decf nlines)
     (beginning-of-line 1)
+    (skip-chars-forward "\t")
     (if (char-equal (char-after (point)) ?# ) (delete-char 1))
     (forward-line 1)))
 
