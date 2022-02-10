@@ -94,6 +94,7 @@ If any function returns t, then the buffer is displayed."
   "Keymap for GIS aliases files")
 
 (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
+(define-key magik-aliases-mode-map "q"                'magik-aliases-quit)
 
 (defvar magik-aliases-menu nil
   "Menu for Aliases mode.")
@@ -102,6 +103,7 @@ If any function returns t, then the buffer is displayed."
   "Menu for aliases mode."
   `(,"Aliases"
     [,"Run current definition"        magik-aliases-run-program t]
+    [,"Quit"                          magik-aliases-quit        t]
     "----"
     (,"Definitions")
     "---"
@@ -190,6 +192,11 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook."
       (progn
 	(setq major-mode 'fundamental-mode) ; prevent current buffer being listed.
 	(magik-aliases-update-sw-menu))))
+
+(defun magik-aliases-quit ()
+  "Quit, without selecting anything, aliases selection mode."
+  (interactive)
+  (kill-buffer (current-buffer)))
 
 (defun magik-aliases-list ()
   "Return list of alias definitions."
