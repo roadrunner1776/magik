@@ -177,7 +177,7 @@ has more than one aliases file available."
 		 (setq alias-file (concat path "/config/gis_aliases"))))))
       (message alias-file)
       (when alias-file
-  (magik-version-select)
+        (magik-version-select)
 	(kill-buffer (current-buffer))
 	(find-file alias-file)
 	(setq buffer-read-only t)
