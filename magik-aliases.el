@@ -206,7 +206,7 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook."
 	(goto-char (point-max))
 	(while (re-search-backward magik-aliases-definition-regexp nil t)
 	  (push (match-string-no-properties 1) list))))
-    list))
+    (reverse list)))
 
 (defun magik-aliases-switch-to-buffer (alias)
   "Return t, to switch to the buffer that the GIS.exe process is running in.
