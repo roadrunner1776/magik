@@ -2278,11 +2278,11 @@ closing bracket into the new \"{...}\" notation."
   (define-key magik-mode-map (kbd "<f2> <up>")   'magik-backward-method)
   (define-key magik-mode-map (kbd "<f2> <down>") 'magik-forward-method)
   (define-key magik-mode-map (kbd "<f2> $")      'magik-transmit-$-chunk)
+  (define-key magik-mode-map (kbd "<f2> d")      'magik-file-sw-method-docs)
+  (define-key magik-mode-map (kbd "<f2> m")      'magik-single-sw-method-docs)
 
   (define-key magik-mode-map (kbd "<f4> <f4>")   'magik-symbol-complete)
   (define-key magik-mode-map (kbd "<f4> c")      'magik-copy-method)
-  (define-key magik-mode-map (kbd "<f4> m")      'magik-single-sw-method-docs)
-  (define-key magik-mode-map (kbd "<f4> d")      'magik-file-sw-method-docs)
   (define-key magik-mode-map (kbd "<f4> e")      'magik-ediff-methods)
   (define-key magik-mode-map (kbd "<f4> <f3>")   'magik-cb-magik-ediff-methods)
   (define-key magik-mode-map (kbd "<f4> m")      'magik-copy-method-to-buffer)
