@@ -94,8 +94,8 @@ If any function returns t, then the buffer is displayed."
   "Keymap for GIS aliases files")
 
 (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
-(define-key magik-aliases-mode-map " "                'magik-aliases-next)
-(define-key magik-aliases-mode-map "q"                'magik-aliases-quit)
+(define-key magik-aliases-mode-map " "                'magik-aliases-n)
+(define-key magik-aliases-mode-map "q"                'magik-aliases-q)
 
 (defvar magik-aliases-menu nil
   "Menu for Aliases mode.")
@@ -195,6 +195,13 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook."
 	(setq major-mode 'fundamental-mode) ; prevent current buffer being listed.
 	(magik-aliases-update-sw-menu))))
 
+(defun magik-aliases-n ()
+  "If buffer is read-only goto next alias, else insert SPC."
+  (interactive)
+  (if buffer-read-only
+      (magik-aliases-next)
+    (magik-aliases-insert " ")))
+
 (defun magik-aliases-next ()
   "Move point to next valid alias listed."
   (interactive)
@@ -205,10 +212,21 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook."
       (when (re-search-forward magik-aliases-definition-regexp nil t)
 	(forward-line))))
 
+(defun magik-aliases-q ()
+  "If buffer is read-only goto next alias, else insert q."
+  (interactive)
+  (if buffer-read-only
+      (magik-aliases-quit)
+    (magik-aliases-insert "q")))
+
 (defun magik-aliases-quit ()
   "Quit, without selecting anything, aliases selection mode."
   (interactive)
   (kill-buffer (current-buffer)))
+
+(defun magik-aliases-insert (arg)
+  "Insert ARG at point."
+  (insert arg))
 
 (defun magik-aliases-list ()
   "Return list of alias definitions."
