@@ -117,12 +117,14 @@ This provides an alternative interface to a gis_version program."
     [,"Quit"                      magik-version-quit        t]
     "---"
     [,"Add new installation"      magik-version-file-add    magik-version-file]
+    [,"Open gis aliases file"     magik-version-file-open t]
     "---"
     [,"Customize"                 magik-version-customize   t]))
 
 (define-key magik-version-mode-map " "    'magik-version-next)
 (define-key magik-version-mode-map "a"    'magik-version-gis-aliases)
 (define-key magik-version-mode-map "+"    'magik-version-file-add)
+(define-key magik-version-mode-map "o"    'magik-version-file-open)
 (define-key magik-version-mode-map "q"    'magik-version-quit)
 (define-key magik-version-mode-map "r"    'magik-version-run)
 (define-key magik-version-mode-map "\r"   'magik-version-select)
@@ -301,6 +303,13 @@ suitable for selection."
       (save-buffer)))
   (if (eq major-mode 'magik-version-mode)
       (magik-version-selection)))
+
+(defun magik-version-file-open ()
+  "Open the magik-version-file to edit."
+  (interactive
+   (when (not (file-exists-p magik-version-file))
+     (call-interactively 'magik-version-file-create)))
+    (find-file magik-version-file))
 
 (defun magik-version-file-create ()
   "Create a gis version format file based upon the current environment.
