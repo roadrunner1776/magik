@@ -129,6 +129,7 @@ This provides an alternative interface to a gis_version program."
 (define-key magik-version-mode-map "r"    'magik-version-run)
 (define-key magik-version-mode-map "\r"   'magik-version-select)
 (define-key magik-version-mode-map [mouse-2] 'magik-version-mouse-select)
+(define-key magik-version-mode-map [remap read-only-mode] 'magik-version-disable-read-only-mode)
 
 (defvar magik-version-mode-syntax-table nil
   "Syntax table in use in DEF-mode buffers.")
@@ -385,6 +386,11 @@ Will set `gis-version-file' to FILE."
       (setq frame-title-format magik-version-frame-title-format))
   (if magik-version-icon-title-format
       (setq icon-title-format  magik-version-icon-title-format)))
+
+(defun magik-version-disable-read-only-mode ()
+  "Like `read-only-mode', but does nothing in magik-version-mode."
+  (interactive)
+  (message "%s" (substitute-command-keys "Can't switch this buffer to edit. Use \\\[magik-version-file-open] if you want to edit this file.")))
 
 (defun magik-version-mouse-select (click)
   "Choose product using mouse event."
