@@ -192,7 +192,8 @@ has more than one aliases file available."
   (save-match-data
     (while (and (not (eobp))
 		(or (looking-at (concat "^.*" magik-version-invalid-string))
-		    (not (looking-at magik-version-match))))
+		    (not (looking-at magik-version-match))
+		    (< (point) magik-version-position)))
       (forward-line 1))
     (if (not (eobp))
 	(beginning-of-line)
@@ -372,7 +373,8 @@ Will set `gis-version-file' to FILE."
 
   (setq buffer-read-only t)
   (set-buffer-modified-p nil)
-  (switch-to-buffer (current-buffer)))
+  (switch-to-buffer (current-buffer))
+  (magik-version-next))
 
 (defun magik-version-quit ()
   "Quit, without selecting anything, gis version selection mode."
