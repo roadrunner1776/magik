@@ -182,6 +182,7 @@ has more than one aliases file available."
       (when alias-file
 	(kill-buffer (current-buffer))
 	(find-file alias-file)
+	(magik-aliases-next)
 	(setq buffer-read-only t)
 	(set-buffer-modified-p nil)))))
 
