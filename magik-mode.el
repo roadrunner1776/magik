@@ -1917,7 +1917,7 @@ Argument ENDING-POINT ..."
     (cond
      ((eq major-mode 'magik-mode)
       (goto-char (point-min))
-      (while (search-forward-regexp (cdr (assoc "method" magik-regexp)) nil t)
+      (while (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
         (magik-parse-sw-method-docs (match-string 1)))))))
 
 (defun magik-single-sw-method-docs ()
@@ -1927,8 +1927,8 @@ Argument ENDING-POINT ..."
     (cond
      ((eq major-mode 'magik-mode)
       (forward-line)
-      (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t)
-      (search-forward-regexp (cdr (assoc "method" magik-regexp)) nil t)
+      (search-backward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
+      (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
       (unless (equal (match-string 1) nil)
 	(magik-parse-sw-method-docs (match-string 1)))))))
 
