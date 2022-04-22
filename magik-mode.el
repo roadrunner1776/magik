@@ -127,6 +127,8 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
     "---"
     [,"Check sw-method-docs for method"  magik-single-sw-method-docs :active t :keys "f2 m"]
     [,"Check sw-method-docs for file"  magik-file-sw-method-docs :active t :keys "f2 f"]
+    [,"Check pragma for method/def_slotted_exemplar"  magik-single-pragma :active t :keys "f2 p"]
+    [,"Check pragma for file"  magik-file-pragma :active t :keys "f2 F"]
     "---"
     (,"Toggle.."
      [,"Method Name Display"      magik-method-name-mode
@@ -382,6 +384,8 @@ Based upon `font-lock-warning-face'"
 
 (defconst magik-regexp
   '(("method" .
+     "^[_abstract\s|_private\s|_iter\s]*?_method")
+    ("method-with-arguments" .
      "^[_abstract\s|_private\s|_iter\s]*?_method.*(\\([\0-\377[:nonascii:]]*?\\))")
     ("assignment-method" .
      "^[_abstract\s|_private\s|_iter\s]*?_method.*<<\s?\\(.*\\)")
@@ -389,6 +393,10 @@ Based upon `font-lock-warning-face'"
      "^\\s-*_endmethod\\s-*\\(\n\\$\\s-*\\)?$")
     ("method-argument" .
      "_gather\\|_scatter\\|_optional")
+    ("pragma" .
+     "^_pragma(.*)")
+    ("def_slotted_exemplar" .
+     "^[sw:]?def_slotted_exemplar(.*")
     )
   "List of regexp strings which can be used for searching for a magik-specific string in a buffer.")
 
@@ -1847,6 +1855,63 @@ Argument END ..."
     (magik-mode))
   (display-buffer buffer))
 
+(defun magik-file-pragma ()
+  "Search file for missing pragmas."
+  (interactive)
+  (save-excursion
+    (cond
+     ((eq major-mode 'magik-mode)
+      (goto-char (point-min))
+      (while (search-forward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t)
+	(magik-parse-pragma))
+      (goto-char (point-min))
+      (while (search-forward-regexp (cdr (assoc "method" magik-regexp)) nil t)
+	(magik-parse-pragma))))))
+
+(defun magik-single-pragma ()
+  "Search last def_slotted_exemplar/method for missing pragma."
+  (interactive)
+  (save-excursion
+    (cond
+     ((eq major-mode 'magik-mode)
+      (forward-line)
+      (let ((starting-point (line-number-at-pos))
+	    (exemplar-point nil)
+	    (method-point nil))
+	(when (not (equal (search-backward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t) nil))
+	  (setq exemplar-point (line-number-at-pos)))
+	(goto-line starting-point)
+	(when (not (equal (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t) nil))
+	  (setq method-point (line-number-at-pos)))
+	(when (or (not (equal exemplar-point nil))
+		  (not (equal method-point nil)))
+	  (when (or (and (not (equal exemplar-point nil))
+			 (> exemplar-point (line-number-at-pos)))
+		    (equal method-point nil))
+	    (goto-line exemplar-point))
+	  (magik-parse-pragma)))))))
+
+(defun magik-parse-pragma ()
+  "Helper function for inserting pragma."
+  (let ((ending-point (line-number-at-pos))
+	(starting-point 0)
+	(search-result nil))
+    (save-excursion
+      (search-backward-regexp "^\\$" nil t)
+      (setq starting-point (line-number-at-pos))
+      (setq search-result (search-forward-regexp (cdr (assoc "pragma" magik-regexp)) nil t))
+      (when (or (and (not (equal search-result nil))
+		     (< ending-point (line-number-at-pos)))
+		(equal search-result nil))
+	(magik-write-pragma ending-point)
+	t))))
+
+(defun magik-write-pragma (ending-point)
+  "Writer function for inserting pragma.
+Argument ENDING-POINT ..."
+  (goto-line ending-point)
+  (magik-insert-pragma))
+
 (defun magik-file-sw-method-docs ()
   "Search file for missing parameters in the methods and complete the comments."
   (interactive)
@@ -1854,7 +1919,7 @@ Argument END ..."
     (cond
      ((eq major-mode 'magik-mode)
       (goto-char (point-min))
-      (while (search-forward-regexp (cdr (assoc "method" magik-regexp)) nil t)
+      (while (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
         (magik-parse-sw-method-docs (match-string 1)))
       (goto-char (point-min))
       (while (search-forward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
@@ -1867,8 +1932,8 @@ Argument END ..."
     (cond
      ((eq major-mode 'magik-mode)
       (forward-line)
-      (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t)
-      (search-forward-regexp (cdr (assoc "method" magik-regexp)) nil t)
+      (search-backward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
+      (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
       (if (not (equal (match-string 1) nil))
 	  (magik-parse-sw-method-docs (match-string 1))
 	(search-backward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
@@ -2289,6 +2354,8 @@ closing bracket into the new \"{...}\" notation."
   (define-key magik-mode-map (kbd "<f2> $")      'magik-transmit-$-chunk)
   (define-key magik-mode-map (kbd "<f2> f")      'magik-file-sw-method-docs)
   (define-key magik-mode-map (kbd "<f2> m")      'magik-single-sw-method-docs)
+  (define-key magik-mode-map (kbd "<f2> F")      'magik-file-pragma)
+  (define-key magik-mode-map (kbd "<f2> p")      'magik-single-pragma)
 
   (define-key magik-mode-map (kbd "<f4> <f4>")   'magik-symbol-complete)
   (define-key magik-mode-map (kbd "<f4> c")      'magik-copy-method)
