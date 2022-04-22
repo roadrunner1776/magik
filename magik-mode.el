@@ -387,6 +387,8 @@ Based upon `font-lock-warning-face'"
      "^[_abstract\s|_private\s|_iter\s]*?_method")
     ("method-with-arguments" .
      "^[_abstract\s|_private\s|_iter\s]*?_method.*(\\([\0-\377[:nonascii:]]*?\\))")
+    ("assignment-method" .
+     "^[_abstract\s|_private\s|_iter\s]*?_method.*<<\s?\\(.*\\)")
     ("endmethod" .
      "^\\s-*_endmethod\\s-*\\(\n\\$\\s-*\\)?$")
     ("method-argument" .
@@ -1918,6 +1920,9 @@ Argument ENDING-POINT ..."
      ((eq major-mode 'magik-mode)
       (goto-char (point-min))
       (while (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
+        (magik-parse-sw-method-docs (match-string 1)))
+      (goto-char (point-min))
+      (while (search-forward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
         (magik-parse-sw-method-docs (match-string 1)))))))
 
 (defun magik-single-sw-method-docs ()
@@ -1929,8 +1934,12 @@ Argument ENDING-POINT ..."
       (forward-line)
       (search-backward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
       (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
-      (unless (equal (match-string 1) nil)
-	(magik-parse-sw-method-docs (match-string 1)))))))
+      (if (not (equal (match-string 1) nil))
+	  (magik-parse-sw-method-docs (match-string 1))
+	(search-backward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
+	(search-forward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
+	(unless (equal (match-string 1) nil)
+	  (magik-parse-sw-method-docs (match-string 1))))))))
 
 (defun magik-parse-sw-method-docs (method-string)
   "Helper function for inserting sw-method-docs.

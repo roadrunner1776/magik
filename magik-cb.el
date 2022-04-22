@@ -2418,6 +2418,11 @@ See the variable `magik-cb-generalise-file-name-alist' to provide more customisa
 	  (setq f (substring f 2)))
       (subst-char-in-string ?\\ ?/ f t))))
 
+(defun magik-cb-disable-save ()
+  "Like `save-buffer', but does nothing in magik-cb."
+  (interactive)
+  (message "Can't save Magik Class Browser buffer."))
+
 ;;Package configuration
 (magik-cb-set-mode-line-cursor magik-cb-mode-line-cursor)
 
@@ -2482,7 +2487,9 @@ See the variable `magik-cb-generalise-file-name-alist' to provide more customisa
   (define-key magik-cb-mode-map (kbd "<f3> r")      'magik-cb-reset)
   (define-key magik-cb-mode-map (kbd "<f3> o")      'magik-cb-toggle-override-flags)
   (define-key magik-cb-mode-map (kbd "<f3> s")      'magik-cb-edit-topics-and-flags)
-  (define-key magik-cb-mode-map (kbd "<f3> t")      'magik-cb-toggle-all-topics))
+  (define-key magik-cb-mode-map (kbd "<f3> t")      'magik-cb-toggle-all-topics)
+
+  (define-key magik-cb-mode-map [remap save-buffer] 'magik-cb-disable-save))
 
 (provide 'magik-cb)
 ;;; magik-cb.el ends here
