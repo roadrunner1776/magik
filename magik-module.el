@@ -245,7 +245,7 @@ option is set."
        "_proc(module_name, version)
 	 _if (a_module << sw_module_manager.module(module_name, version, _true)) _isnt _unset
 	 _then
-	   sw_module_manager.compile_messages(a_module)
+	   a_module.compile_messages()
 	 _endif
        _endproc"
        module 'unset) ;include version number?
