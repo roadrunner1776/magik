@@ -172,7 +172,6 @@ With a prefix arg accept all changes without prompting."
 	updated
 	buf-i
 	newlist)
-    (with-output-to-temp-buffer "*loadlist changes*"
       (dolist (i (magik-loadlist-directory-list dir))
 	(cond ((setq buf-i (assoc (elt i 0) buflist))
 	       (let ((real-file    (elt i 1))
@@ -189,7 +188,6 @@ With a prefix arg accept all changes without prompting."
 		       (princ (format "Updated '%s' with '%s'"
 				      (or real-str (elt buf-i 0))
 				      replace-file))
-		       (princ "\n")
 		       (setq updated t)))
 		 (setcdr buf-i nil)))
 	      (t
@@ -202,8 +200,6 @@ With a prefix arg accept all changes without prompting."
 					(or (elt d 1) (elt d 0))) " ")))
 	    (when (or arg (y-or-n-p prompt))
 	      (kill-line 1)
-	      (princ prompt)
-	      (princ "\n")
 	      (setq updated t)))))
       (goto-char (point-max))
       (or (looking-at "$") (insert "\n"))
@@ -212,12 +208,10 @@ With a prefix arg accept all changes without prompting."
 				      n) " ")))
 	  (when (or arg (y-or-n-p prompt))
 	    (insert n "\n")
-	    (princ prompt)
-	    (princ "\n")
 	    (setq updated t))))
-      (unless updated
-	(princ "No changes required in buffer")
-	(princ "\n")))))
+    (if (not updated)
+	(message "No changes required in buffer")
+      (message "Finished updating buffer"))))
 
 (defun magik-loadlist-transmit (&optional gis)
   "Load the loadlist.txt into the GIS process."
