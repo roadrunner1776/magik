@@ -219,6 +219,7 @@ option is set."
 					   'magik-session-buffer-alist-prefix-function))
 	 (module (intern (concat "|" (magik-module-name) "|")))
 	 (process (barf-if-no-gis gis)))
+    (message "%s reloaded in buffer %s." (magik-module-name) gis)
     (display-buffer gis t)
     (process-send-string
      process
@@ -237,6 +238,7 @@ option is set."
 					   'magik-session-buffer-alist-prefix-function))
 	 (module (intern (concat "|" (magik-module-name) "|")))
 	 (process (barf-if-no-gis gis)))
+    (message "Compiled messages for %s in buffer %s." (magik-module-name) gis)
     (display-buffer gis t)
     (process-send-string
      process
@@ -301,6 +303,7 @@ a standalone module."
 					   'magik-session-buffer-alist-prefix-function))
 	 (process (barf-if-no-gis gis))
 	 (filename (buffer-file-name)))
+    (message "%s loaded in buffer %s." (magik-module-name) gis)
     (display-buffer gis t)
     (magik-module-transmit-load-module filename process)
     gis))
