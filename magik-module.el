@@ -57,7 +57,7 @@
 (define-key magik-module-f2-map   "b"     'magik-module-transmit-buffer)
 (define-key magik-module-f2-map   "c"     'magik-module-compile-messages)
 (define-key magik-module-f2-map   "d"     'magik-module-reload-module-definition)
-(define-key magik-module-f2-map   "s"     'magik-module-toggle-save-magikc)
+(define-key magik-module-f2-map   "m"     'magik-module-toggle-save-magikc)
 (define-key magik-module-f2-map   "r"     'magik-module-toggle-force-reload)
 (define-key magik-module-f2-map   "R"     'magik-module-remove-module)
 
@@ -89,13 +89,13 @@
       :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected (null module-option-save-magikc)
-      :keys "f2 s, M-- M-1 f2 s"]
+      :keys "f2 m, M-- M-1 f2 m"]
      [,"Set :save_magikc? to _true"
       (magik-module-toggle-save-magikc 1)
       :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected module-option-save-magikc
-      :keys "f2 s, M-1 f2 s"]
+      :keys "f2 m, M-1 f2 m"]
      "---"
      [,"Set :force_reload? to _false"
       (magik-module-toggle-force-reload -1)
