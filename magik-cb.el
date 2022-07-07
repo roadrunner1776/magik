@@ -1998,6 +1998,16 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
   (interactive)
   (magik-cb nil "" ""))
 
+(defun magik-cb-paste-method-and-class ()
+    "Set the CB method and class name to the word under the cursor, and enter the CB."
+  (interactive)
+  (save-excursion
+    (let ((class (magik-cb-curr-class-name))
+	  (method))
+      (forward-char)
+      (setq method (magik-cb-curr-method-name))
+      (magik-cb nil (concat "^" method "$") class))))
+
 (defun magik-cb-paste-method ()
   "Set the CB method name to the word under the cursor, and enter the CB."
   (interactive)
@@ -2006,17 +2016,7 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
 (defun magik-cb-paste-class ()
   "Set the CB class name to the word under the cursor, and enter the CB."
   (interactive)
-  (let ((class (magik-utils-find-tag-default)))
-    (if (null class)
-	(error "No current word to use as a class-name"))
-
-    (save-match-data
-      (if (string-match ":" class)
-	  (setq class (replace-match ":^" nil t class))
-	(setq class (concat "^" class))))
-    (setq class (concat class "$"))
-
-    (magik-cb nil nil class)))
+  (magik-cb nil nil (magik-cb-curr-class-name)))
 
 (defun magik-cb-tab ()
   "Move backwards and forwards between the method name and the class name."
@@ -2359,6 +2359,20 @@ comments etc."
 	  (skip-chars-forward " \t")
 	  (concat name (magik-method-name-postfix)))
       (error "No current word to use as a method name"))))
+
+(defun magik-cb-curr-class-name ()
+  "Return the class-name under point."
+  (let* ((class (string-trim-right (substring-no-properties (magik-utils-find-tag-default)) "[0-9]*:")))
+    (if (null class)
+	(error "No current word to use as a class-name"))
+
+    (save-match-data
+      (if (string-match ":" class)
+          (if (not (string-equal (substring-no-properties class 0 1) ":"))
+              (setq class (replace-match ":^" nil t class))
+            (setq class (replace-match "^" nil t class)))
+	(setq class (concat "^" class))))
+    (setq class (concat class "$"))))
 
 (defun magik-cb-method-str ()
   (save-excursion (magik-cb-set-buffer-m) (buffer-string)))
