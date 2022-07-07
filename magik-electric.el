@@ -284,7 +284,7 @@ the previous line starts with a `#' align with that."
 		(t nil)))
 	(if class (insert class "."))))
      ((eq line 'filename_as_symbol)
-      (let ((name (file-name-nondirectory (buffer-file-name))))
+      (let ((name (if (not (buffer-file-name)) "" (file-name-nondirectory (buffer-file-name)))))
 	(if (string-match "\\.magik$" name)
 	    (setq name (substring name 0 (- (length name) 6))))
 	(insert ":" name)))
