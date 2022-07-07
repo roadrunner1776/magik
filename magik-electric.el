@@ -82,7 +82,7 @@ usage={})") ("_iter _method " prev_class_name) "\t## " "\t## " -
      ("pragma" 17 0 (prev_pragma "_pragma(classify_level=, topic={}, usage={})"))
      ("def_slotted_exemplar" e 2 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
       ("def_slotted_exemplar(" filename_as_symbol ",\n\t## \n\t## \n\t## \n\t{\n\t},\n\t{})\n" dollar))
-     ("remex" -1 1 ("remex(" filename_as_symbol ")\n" dollar))
+     ("remex" e 2 ("remex(" filename_as_symbol ")\n" dollar))
      ("message_handler" e 0 ("message_handler.new(" filename_as_symbol ")\n" dollar))
 
      ("if" e 0 "_if " "_then" - "_endif")
