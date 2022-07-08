@@ -1,0 +1,26 @@
+_package sw
+$
+
+_method method_finder.get_method_info_extra(method_name, class_name)
+	_local method_info << property_list.new()
+	_for package_name, package_data _over sw:package.all_packages.fast_keys_and_elements()
+	_loop
+		_local exemplar << package_data.get_value(class_name.as_symbol())
+		_if exemplar.responds_to?(method_name.as_symbol())
+		_then
+			method_info[:method] << method_name
+			real_pkg_name << exemplar.exemplar_global.package.name
+			method_info[:class] << write_string(real_pkg_name, %:, class_name)
+			_leave
+		_endif
+	_endloop
+	_return method_info
+_endmethod
+$
+
+_method method_finder.emacs_jump_to_method_source(method_name, class_name)
+	_local method_info << _self.get_method_info_extra(method_name, class_name)
+	!terminal!.write("E",write_string("(magik-cb-send-string", %space, %", "pr_source_file ", method_info[:method], %space,
+					    method_info[:class], "\n", %", %)),"", %newline)
+_endmethod
+$
