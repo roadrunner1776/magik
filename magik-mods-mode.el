@@ -20,8 +20,8 @@
   "Face for apropos method lines"
   :group 'magik-mods-group )
 
-(defvar magik-mods-keywords '((".+\..+ \(.+\:[0-9]+\)" . 'magik-mods-traceback-face)
-			      ("\\(slot\\|iter\\|method\\|class\\) .+ in .+" . 'magik-mods-apropos-method-face))
+(defvar magik-mods-keywords '(("^.+\.[^0-9]+ \(.+\:[0-9]+\)" . 'magik-mods-traceback-face)
+			      ("^\\(slot\\|iter\\|method\\|class\\) .+ in .+" . 'magik-mods-apropos-method-face))
   "Keywords for magik-mods-minor-mode highlighting.")
 ;;(font-lock-add-keywords nil '(("\\(iter\\|method\\|class\\) .+ in .+" . 'magik-mods-apropos-method-face)))
 (defun magik-mods-session-newline (arg)
