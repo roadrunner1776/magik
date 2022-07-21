@@ -6,7 +6,7 @@ _method method_finder.get_method_info_extra(method_name, class_name)
 	_for package_name, package_data _over sw:package.all_packages.fast_keys_and_elements()
 	_loop
 		_local exemplar << package_data.get_value(class_name.as_symbol())
-		_if exemplar.responds_to?(method_name.as_symbol())
+		_if exemplar.responds_to?(method_name.as_symbol(), _true)
 		_then
 			method_info[:method] << method_name
 			real_pkg_name << exemplar.exemplar_global.package.name
