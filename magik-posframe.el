@@ -40,5 +40,38 @@
   ;; (apply fn args)
   )
 
-
-
+(defun magik-posframe-show-print-method ()
+  (interactive)
+  (magik-mods-set-cb-process-var)
+  (let (class_name
+	method_name
+	method_and_class
+	start_of_line
+	magik-proc)
+    (save-excursion
+      (beginning-of-line)
+      (setq start_of_line (point))
+      (end-of-line)
+      (setq method_and_class (split-string
+			      (buffer-substring-no-properties start_of_line (point))
+			      " in " t
+			      "\\(slot\\|iter method\\|method\\|class \\(constant\\|variable\\)\\| \\)"))
+      (setq class_name (cadr method_and_class))
+      (setq method_name (split-string (car method_and_class) "\\((\\|\\(\\^<<\\|<<\\)\\)" t " "))
+      (if (length> method_name 1)
+	  (if (string-match-p ")" (cadr method_name))
+	      (setq method_name (concat (car method_name) "()"))
+	    (setq method_name (concat (car method_name) "<<"))
+	    )
+	(setq method_name (car method_name))
+	)
+      )
+    (setq magik-proc (magik-transmit-string (concat "method_finder.posframe_popup(\"" method_name "\",\"" class_name "\")" "\n")
+					    (save-excursion 
+					      (beginning-of-line) 
+					      (magik-package-line)) 
+					    (lambda (f) (magik-function "load_file" f 'unset (or (buffer-file-name) 'unset))) 
+					    (lambda (f) (magik-function "system.unlink" f 'false 'true)) 
+					    ))
+    )
+  )

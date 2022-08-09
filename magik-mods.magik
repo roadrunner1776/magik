@@ -24,3 +24,22 @@ _method method_finder.emacs_jump_to_method_source(method_name, class_name)
 					    method_info[:class], "\n", %", %)),"", %newline)
 _endmethod
 $
+
+_method method.emacs_posframe
+	_local (result, line_nr) << _self.method_as_string(_false)
+	result << result.string.replace_all(%".write_string, write_string(%\,%"))
+	source << write_string(_self.source_file.replace_all(%\.write_string, write_string(%/)),
+			       "::", line_nr)
+	!terminal!.write("E",
+			 write_string("(magik-posframe-show ", %", result, %", %newline,
+				      %", source, %",
+				      %newline,
+				      ")"), "", %newline)
+_endmethod
+$
+
+_method method_finder.posframe_popup(method_name, class_name)
+	_local method_info << _self.get_method_info_extra(method_name, class_name)
+	_return write_string(method_info[:class], ".method(:|", method_info[:method], "|).emacs_posframe").sandboxed_evaluate()
+_endmethod
+$
