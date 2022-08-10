@@ -51,6 +51,14 @@
   (apply fn args)
   )
 
+(defun magik-posframe-goto-file (fn &rest args)
+  (interactive)
+  (let ((filename (split-string magik-posframe-source-file "::")))
+    (goto-line (string-to-number (cadr filename))
+	       (find-file (car filename)))
+    (magik-posframe-hide fn args))
+  )
+
 (defun magik-posframe-show-print-method ()
   (interactive)
   (magik-mods-set-cb-process-var)
