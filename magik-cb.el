@@ -2003,20 +2003,19 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
   (interactive)
   (magik-cb nil (concat "^" (magik-cb-curr-method-name) "$") nil))
 
-(defun magik-cb-paste-class ()
-  "Set the CB class name to the word under the cursor, and enter the CB."
-  (interactive)
-  (magik-cb nil nil (magik-cb-curr-class-name)))
-
 (defun magik-cb-paste-method-and-class ()
-    "Set the CB method and class name to the word under the cursor, and enter the CB."
+  "Set the CB method and class name to the word under the cursor, and enter the CB."
   (interactive)
   (save-excursion
-    (let ((class (magik-cb-curr-class-name))
-	  (method))
-      (forward-char)
-      (setq method (magik-cb-curr-method-name))
-      (magik-cb nil (concat "^" method "$") class))))
+    (let ((beg (progn (skip-syntax-backward "^ " (line-beginning-position))
+                      (point)))
+          (end (progn (skip-syntax-forward "^ " (line-end-position))
+                      (point)))
+	  (strings))
+      (setq strings (split-string (buffer-substring beg end) "\\."))
+      (if (eq (length strings) 2)
+          (magik-cb nil (concat "^" (nth 1 strings) "$") (nth 0 strings))
+	(error "No current word to use as a class-name and method")))))
 
 (defun magik-cb-tab ()
   "Move backwards and forwards between the method name and the class name."
