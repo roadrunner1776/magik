@@ -95,6 +95,7 @@ If any function returns t, then the buffer is displayed."
 
 (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
 (define-key magik-aliases-mode-map " "                'magik-aliases-n)
+(define-key magik-aliases-mode-map (kbd "<down>")     'magik-aliases-down)
 (define-key magik-aliases-mode-map "q"                'magik-aliases-q)
 
 (defvar magik-aliases-menu nil
@@ -201,6 +202,13 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook."
   (if buffer-read-only
       (magik-aliases-next)
     (magik-aliases-insert " ")))
+
+(defun magik-aliases-down ()
+  "If buffer is read-only goto next alias, else insert <down>."
+  (interactive)
+  (if buffer-read-only
+      (magik-aliases-next)
+    (forward-line)))
 
 (defun magik-aliases-next ()
   "Move point to next valid alias listed."
