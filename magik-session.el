@@ -956,14 +956,6 @@ Also update `magik-session-cmd-num'.  Also append the string to \" *history**gis
     (set-marker comint-last-input-end   end)
     (set-marker (process-mark (get-buffer-process (current-buffer))) end)
     (goto-char (point-max))
-    (save-excursion
-      (while
-	  (> (- end beg) 240)
-	(goto-char (+ beg 240))
-	(if (search-backward "\n" beg t)
-	    (process-send-region (get-buffer-process (current-buffer)) beg (1+ (point)))
-	  (error "Sending long lines will probably crash the gis buffer. Use load_file instead."))
-	(setq beg (1+ (point)))))
     (process-send-region (get-buffer-process (current-buffer)) beg end)))
 
 (defun magik-session--make-new-cmds-vec ()
