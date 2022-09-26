@@ -203,5 +203,9 @@ Using the `magik-cb-process' in the background."
    )
   )
 
+(progn
+  (define-key magik-session-mode-map (kbd "<f3> j m") 'magik-session-extras-cb-method-jump-method)
+  (define-key magik-session-mode-map (kbd "<f3> j t") 'magik-session-extras-cb-method-jump-traceback))
+
 (provide 'magik-session-extras)
 ;;; magik-session-extras.el ends here
