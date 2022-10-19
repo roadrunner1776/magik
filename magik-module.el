@@ -57,7 +57,7 @@
 (define-key magik-module-f2-map   "b"     'magik-module-transmit-buffer)
 (define-key magik-module-f2-map   "c"     'magik-module-compile-messages)
 (define-key magik-module-f2-map   "d"     'magik-module-reload-module-definition)
-(define-key magik-module-f2-map   "s"     'magik-module-toggle-save-magikc)
+(define-key magik-module-f2-map   "m"     'magik-module-toggle-save-magikc)
 (define-key magik-module-f2-map   "r"     'magik-module-toggle-force-reload)
 (define-key magik-module-f2-map   "R"     'magik-module-remove-module)
 
@@ -77,13 +77,13 @@
       :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected (null module-option-save-magikc)
-      :keys "M-- M-1 <f2> s,   <f2> s"]
+      :keys "M-- M-1 <f2> m,   <f2> m"]
      [,"Set :save_magikc? to _true"
       (magik-module-toggle-save-magikc 1)
       :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected module-option-save-magikc
-      :keys "M-1 <f2> s,   <f2> s"]
+      :keys "M-1 <f2> m,   <f2> m"]
      "---"
      [,"Set :force_reload? to _false"
       (magik-module-toggle-force-reload -1)
@@ -207,6 +207,7 @@ option is set."
 					   'magik-session-buffer-alist-prefix-function))
 	 (module (intern (concat "|" (magik-module-name) "|")))
 	 (process (barf-if-no-gis gis)))
+    (message "%s reloaded in buffer %s." (magik-module-name) gis)
     (display-buffer gis t)
     (process-send-string
      process
@@ -225,6 +226,7 @@ option is set."
 					   'magik-session-buffer-alist-prefix-function))
 	 (module (intern (concat "|" (magik-module-name) "|")))
 	 (process (barf-if-no-gis gis)))
+    (message "Compiled messages for %s in buffer %s." (magik-module-name) gis)
     (display-buffer gis t)
     (process-send-string
      process
@@ -233,7 +235,7 @@ option is set."
        "_proc(module_name, version)
 	 _if (a_module << sw_module_manager.module(module_name, version, _true)) _isnt _unset
 	 _then
-	   sw_module_manager.compile_messages(a_module)
+	   a_module.compile_messages()
 	 _endif
        _endproc"
        module 'unset) ;include version number?
@@ -289,6 +291,7 @@ a standalone module."
 					   'magik-session-buffer-alist-prefix-function))
 	 (process (barf-if-no-gis gis))
 	 (filename (buffer-file-name)))
+    (message "%s loaded in buffer %s." (magik-module-name) gis)
     (display-buffer gis t)
     (magik-module-transmit-load-module filename process)
     gis))

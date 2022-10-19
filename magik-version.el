@@ -117,16 +117,19 @@ This provides an alternative interface to a gis_version program."
     [,"Quit"                      magik-version-quit        t]
     "---"
     [,"Add new installation"      magik-version-file-add    magik-version-file]
+    [,"Open gis aliases file"     magik-version-file-open t]
     "---"
     [,"Customize"                 magik-version-customize   t]))
 
 (define-key magik-version-mode-map " "    'magik-version-next)
 (define-key magik-version-mode-map "a"    'magik-version-gis-aliases)
 (define-key magik-version-mode-map "+"    'magik-version-file-add)
+(define-key magik-version-mode-map "o"    'magik-version-file-open)
 (define-key magik-version-mode-map "q"    'magik-version-quit)
 (define-key magik-version-mode-map "r"    'magik-version-run)
 (define-key magik-version-mode-map "\r"   'magik-version-select)
 (define-key magik-version-mode-map [mouse-2] 'magik-version-mouse-select)
+(define-key magik-version-mode-map [remap read-only-mode] 'magik-version-disable-read-only-mode)
 
 (defvar magik-version-mode-syntax-table nil
   "Syntax table in use in DEF-mode buffers.")
@@ -176,8 +179,12 @@ has more than one aliases file available."
 	       (if path
 		   (setq alias-file (concat path "/config/gis_aliases"))))))
       (message alias-file)
-      (if alias-file
-	  (find-file alias-file)))))
+      (when alias-file
+	(kill-buffer (current-buffer))
+	(find-file alias-file)
+	(magik-aliases-next)
+	(setq buffer-read-only t)
+	(set-buffer-modified-p nil)))))
 
 (defun magik-version-next ()
   "Move point to next valid version listed."
@@ -186,7 +193,8 @@ has more than one aliases file available."
   (save-match-data
     (while (and (not (eobp))
 		(or (looking-at (concat "^.*" magik-version-invalid-string))
-		    (not (looking-at magik-version-match))))
+		    (not (looking-at magik-version-match))
+		    (< (point) magik-version-position)))
       (forward-line 1))
     (if (not (eobp))
 	(beginning-of-line)
@@ -286,8 +294,8 @@ suitable for selection."
 	   (setq version (current-word)
 		 name    version)))
      (list root
-	   (read-string "Enter name for this installation: " name)
-	   (read-string "Enter version number of this installation: " version))))
+	   (read-no-blanks-input "Enter name for this installation: " name)
+	   (read-no-blanks-input "Enter version number of this installation: " version))))
 
   (or magik-version-file
       (error "File interface is not being used"))
@@ -298,6 +306,13 @@ suitable for selection."
       (save-buffer)))
   (if (eq major-mode 'magik-version-mode)
       (magik-version-selection)))
+
+(defun magik-version-file-open ()
+  "Open the magik-version-file to edit."
+  (interactive
+   (when (not (file-exists-p magik-version-file))
+     (call-interactively 'magik-version-file-create)))
+    (find-file magik-version-file))
 
 (defun magik-version-file-create ()
   "Create a gis version format file based upon the current environment.
@@ -359,7 +374,8 @@ Will set `gis-version-file' to FILE."
 
   (setq buffer-read-only t)
   (set-buffer-modified-p nil)
-  (switch-to-buffer (current-buffer)))
+  (switch-to-buffer (current-buffer))
+  (magik-version-next))
 
 (defun magik-version-quit ()
   "Quit, without selecting anything, gis version selection mode."
@@ -373,6 +389,11 @@ Will set `gis-version-file' to FILE."
       (setq frame-title-format magik-version-frame-title-format))
   (if magik-version-icon-title-format
       (setq icon-title-format  magik-version-icon-title-format)))
+
+(defun magik-version-disable-read-only-mode ()
+  "Like `read-only-mode', but does nothing in magik-version-mode."
+  (interactive)
+  (message "%s" (substitute-command-keys "Can't switch this buffer to edit. Use \\\[magik-version-file-open] if you want to edit this file.")))
 
 (defun magik-version-mouse-select (click)
   "Choose product using mouse event."

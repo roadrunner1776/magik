@@ -1580,6 +1580,11 @@ where MODE is the name of the major mode with the '-mode' postfix."
 		    (eq major-mode 'magik-session-mode))))
 	(funcall fn gis (buffer-file-name)))))
 
+(defun magik-session-disable-save ()
+  "Like `save-buffer', but does nothing in magik-session-mode."
+  (interactive)
+  (message "Can't save Magik Session buffer."))
+
 ;;;Package registration
 
 ;;Ensure Default magik-session-command are placed at head of magik-session-command-history
@@ -1660,7 +1665,9 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (define-key magik-session-mode-map (kbd "<f4> s")      'magik-add-debug-statement)
   (define-key magik-session-mode-map (kbd "<f4> w")      'magik-set-work-buffer-name)
   (define-key magik-session-mode-map (kbd "<f4> P")      'magik-session-traceback-print)
-  (define-key magik-session-mode-map (kbd "<f4> S")      'magik-session-traceback-save))
+  (define-key magik-session-mode-map (kbd "<f4> S")      'magik-session-traceback-save)
+
+  (define-key magik-session-mode-map [remap save-buffer] 'magik-session-disable-save))
 
 (provide 'magik-session)
 ;;; magik-session.el ends here

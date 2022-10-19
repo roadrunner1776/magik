@@ -53,6 +53,10 @@
      (prev_class_name "define_slot_access(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
     ("define_pseudo_slot" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
      (prev_class_name "define_pseudo_slot(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
+    ("define_print_attributes" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+     (prev_class_name "define_print_attributes(:" "\n\t## \n\t## \n\t## \n\t)\n" dollar))
+    ("define_show_attributes" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+     (prev_class_name "define_show_attributes(:" "\n\t## \n\t## \n\t## \n\t)\n" dollar))
     ("def_mixin" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
      (prev_class_name "def_mixin(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
     ("def_property" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
@@ -62,7 +66,7 @@
     ("define_condition" -1 0
      ("condition.define_condition(:" ",\n\t:,\n\t{})\n" dollar))
     ("define_binary_operator_case" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
-     (prev_class_name "define_binary_operator_case(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar)))
+     ("define_binary_operator_case(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar)))
   " These 'method' templates automatically insert the class name at the front.")
 (defvar magik-electric-templates
   (append
@@ -78,6 +82,8 @@ usage={})") ("_iter _method " prev_class_name) "\t## " "\t## " -
      ("pragma" 17 0 (prev_pragma "_pragma(classify_level=, topic={}, usage={})"))
      ("def_slotted_exemplar" e 2 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
       ("def_slotted_exemplar(" filename_as_symbol ",\n\t## \n\t## \n\t## \n\t{\n\t},\n\t{})\n" dollar))
+     ("remex" e 2 ("remex(" filename_as_symbol ")\n" dollar))
+     ("message_handler" e 0 ("message_handler.new(" filename_as_symbol ")\n" dollar))
 
      ("if" e 0 "_if " "_then" - "_endif")
      ("over" e 0 "_over " "_loop" - "_endloop")
@@ -278,7 +284,7 @@ the previous line starts with a `#' align with that."
 		(t nil)))
 	(if class (insert class "."))))
      ((eq line 'filename_as_symbol)
-      (let ((name (buffer-name)))
+      (let ((name (if (not (buffer-file-name)) "" (file-name-nondirectory (buffer-file-name)))))
 	(if (string-match "\\.magik$" name)
 	    (setq name (substring name 0 (- (length name) 6))))
 	(insert ":" name)))

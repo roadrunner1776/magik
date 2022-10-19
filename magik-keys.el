@@ -75,6 +75,7 @@
   (global-unset-key (kbd "<f3>"))
 
   (global-set-key (kbd "<f3> <f3>")  'magik-cb)
+  (global-set-key (kbd "<f3> b")     'magik-cb-paste-method-and-class)
   (global-set-key (kbd "<f3> c")     'magik-cb-paste-class)
   (global-set-key (kbd "<f3> j")     'magik-cb-jump-to-source)
   (global-set-key (kbd "<f3> m")     'magik-cb-paste-method)
