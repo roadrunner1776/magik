@@ -125,10 +125,10 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
     [,"Uncomment Region"         magik-uncomment-region        :active t :keys "f2 ESC #"]
     [,"Fill Comment"              magik-fill-public-comment     :active t :keys "f2 q"]
     "---"
-    [,"Check sw-method-docs for method"  magik-single-sw-method-docs :active t :keys "f2 m"]
-    [,"Check sw-method-docs for file"  magik-file-sw-method-docs :active t :keys "f2 f"]
+    [,"Check sw-method-docs for method"  magik-single-sw-method-docs :active t :keys "f2 d"]
+    [,"Check sw-method-docs for file"  magik-file-sw-method-docs :active t :keys "f2 D"]
     [,"Check pragma for method/def_slotted_exemplar"  magik-single-pragma :active t :keys "f2 p"]
-    [,"Check pragma for file"  magik-file-pragma :active t :keys "f2 F"]
+    [,"Check pragma for file"  magik-file-pragma :active t :keys "f2 P"]
     "---"
     (,"Toggle.."
      [,"Method Name Display"      magik-method-name-mode
@@ -2352,9 +2352,9 @@ closing bracket into the new \"{...}\" notation."
   (define-key magik-mode-map (kbd "<f2> <up>")   'magik-backward-method)
   (define-key magik-mode-map (kbd "<f2> <down>") 'magik-forward-method)
   (define-key magik-mode-map (kbd "<f2> $")      'magik-transmit-$-chunk)
-  (define-key magik-mode-map (kbd "<f2> f")      'magik-file-sw-method-docs)
-  (define-key magik-mode-map (kbd "<f2> m")      'magik-single-sw-method-docs)
-  (define-key magik-mode-map (kbd "<f2> F")      'magik-file-pragma)
+  (define-key magik-mode-map (kbd "<f2> D")      'magik-file-sw-method-docs)
+  (define-key magik-mode-map (kbd "<f2> d")      'magik-single-sw-method-docs)
+  (define-key magik-mode-map (kbd "<f2> P")      'magik-file-pragma)
   (define-key magik-mode-map (kbd "<f2> p")      'magik-single-pragma)
 
   (define-key magik-mode-map (kbd "<f4> <f4>")   'magik-symbol-complete)
