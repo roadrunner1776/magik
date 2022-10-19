@@ -41,7 +41,7 @@
     [,"Start new session"             magik-session-new-buffer
      :active t
      :keys "C-u f2 z"]
-    (,"Magik processes")
+    (,"Magik Session Processes")
     "---"
     (,"Class Browser")
     (,"Class Browser Processes")
@@ -77,9 +77,10 @@
     "---"
     [,"Customize"                    magik-cb-customize
      :active t] ;; :key-sequence nil
-    [,"Help"                         magik-cb-help
-     :active t
-     :keys "f3 ?"]))
+    ;; [,"Help"                         magik-cb-help
+    ;;  :active t
+    ;;  :keys "f3 ?"]
+    ))
 
 ;;;###autoload
 (defun magik-menu-set-menus ()
@@ -95,13 +96,13 @@
   ;; Due to a minor bug in easy-menu-change, have to set the "No Process" etc.
   ;; strings separately
   (easy-menu-change (list "Tools" "Magik")
-		    "Magik Processes"
+		    "Magik Session Processes"
 		    (list "No Processes"))
   (easy-menu-change (list "Tools" "Magik")
 		    "Class Browser Processes"
 		    (list "No Processes"))
   (easy-menu-change (list "Tools" "Magik")
-		    "Shell Processes"
+		    "External Shell Processes"
 		    (list "No Processes"))
 
   (easy-menu-change (list "Tools") "--" nil "Search Files (Grep)...")

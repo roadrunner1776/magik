@@ -81,7 +81,7 @@
 
 (eval-when-compile
   (defvar msb-menu-cond))
-  
+
 (require 'magik-mode)
 (require 'magik-session)
 (require 'magik-utils)
@@ -327,7 +327,7 @@ This will stop the \"Loading documentation...\" message from hanging around.")
     [,"Set Options"        magik-cb-edit-topics-and-flags :active t :keys "f3 s, ;"]
     [,"Turn All Topics On/Off"  magik-cb-toggle-all-topics     :active t :keys "f3 t"]
     [,"Reset All Options"          magik-cb-reset                 :active t :keys "f3 r"]
-    [,"Hide"           magik-cb-quit                  :active t :keys "space, f3 h"]
+    [,"Hide"           magik-cb-quit                  :active t :keys "SPC, f3 h"]
     "---"
     [,"Override Flags"
      magik-cb-toggle-override-flags
@@ -358,7 +358,8 @@ This will stop the \"Loading documentation...\" message from hanging around.")
      :keys "f3 $"]
     "---"
     [,"Customize"                      magik-cb-customize             t]
-    [,"Help"                           magik-cb-help                  t]))
+    ;; [,"Help"                           magik-cb-help                  t]
+    ))
 
 (defvar magik-cb--mf-socket-synchronised nil
   "Internal variable for controlling Class Browser processes started from GIS processes.
@@ -664,7 +665,7 @@ To view the help on these variables type C-h v [Return] [variable-name]"
 	buffer-undo-list t
 	font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w"))))
 
-  (add-hook 'menu-bar-update-hook 'magik-cb-update-sw-menu)
+  (add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu)
   (add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t) ;local hook
   (run-hooks 'magik-cb-mode-hook))
 
@@ -732,14 +733,14 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
 	     (error "No Class Browser is running"))))
     buf))
 
-(defun magik-cb-update-sw-menu ()
-  "Update CB submenu in SW menu bar."
+(defun magik-cb-update-tools-magik-cb-menu ()
+  "Update Class Browser Processes submenu in Tools -> Magik pulldown menu."
   (let ((magik-cb-gis-alist (sort (copy-alist (symbol-value 'magik-session-buffer-alist))
 				  #'(lambda (a b) (< (car a) (car b))))); 1, 2 etc.
 	(magik-cb-alist     (sort (copy-alist magik-cb-buffer-alist); -1, -2, etc.
 				  #'(lambda (a b) (> (car a) (car b)))))
 	cb-list)
-    ;; Order is such that CB of *gis* will be first see gis.el for more details.
+    ;; Order is such that CB of *gis* will be first see magik-session.el for more details.
     (dolist (c magik-cb-alist)
       (let ((i   (- (car c)))
 	    (buf (cdr c)))
@@ -2005,17 +2006,26 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
 (defun magik-cb-paste-class ()
   "Set the CB class name to the word under the cursor, and enter the CB."
   (interactive)
-  (let ((class (magik-utils-find-tag-default)))
-    (if (null class)
-	(error "No current word to use as a class-name"))
+  (magik-cb nil nil (magik-cb-curr-class-name)))
 
-    (save-match-data
-      (if (string-match ":" class)
-	  (setq class (replace-match ":^" nil t class))
-	(setq class (concat "^" class))))
-    (setq class (concat class "$"))
-
-    (magik-cb nil nil class)))
+(defun magik-cb-paste-method-and-class ()
+  "Set the CB method and class name to the word under the cursor, and enter the CB."
+  (interactive)
+  (save-excursion
+    (let ((beg (progn (skip-syntax-backward "^ " (line-beginning-position))
+                      (point)))
+          (end (progn (skip-syntax-forward "^ " (line-end-position))
+                      (point)))
+	  (class))
+      (if (eq (length (split-string (buffer-substring beg end) "\\.")) 2)
+	  (progn
+	    (goto-char beg)
+	    (setq class (magik-cb-curr-class-name))
+	    (while (not (looking-at "\\."))
+	      (forward-char 1))
+	    (forward-char 1)
+	    (magik-cb nil (concat "^" (magik-cb-curr-method-name) "$") class))
+	(error "No current word to use as a class-name and method")))))
 
 (defun magik-cb-tab ()
   "Move backwards and forwards between the method name and the class name."
@@ -2141,6 +2151,11 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
       (set-window-configuration current-wc)
       (error "Cannot find method, '%s', in class, '%s'" method (concat package ":" class)))))
 
+(defvar magik-cb-jump-history (list '("" ""))
+  "Alist of the history of methods which have been jumped to.")
+(defvar magik-cb-current-jump ""
+  "Current position in the magik-cb-jump-history alist.")
+
 (defun magik-cb-jump-to-source-from-cb ()
   "Jump to source for the method under the cursor in a CB buffer."
   (let ((regexp (concat "^\\(\\S-+\\)" magik-cb-in-keyword "\\(\\S-+\\)"))
@@ -2154,8 +2169,63 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
 		     (looking-at regexp)))
 		  (zerop (forward-line -1))))
       (if (looking-at regexp)
-	  (magik-cb-send-string (concat "pr_source_file " (match-string 1) " " (match-string 2) "\n"))
+	  (let ((jump-name (concat (match-string 1) "(" (match-string 2) ")"))
+		(jump-value (concat "pr_source_file " (match-string 1) " "  (match-string 2) "\n")))
+	    (setq magik-cb-jump-history (magik-cb-jump-history-remove jump-name))
+	    (add-to-list 'magik-cb-jump-history (list jump-name jump-value))
+	    (magik-cb-send-string jump-value)
+	    (setq magik-cb-current-jump jump-name))
 	(error "Can't find a line like: 'my_method  IN  my_class'")))))
+
+(defun magik-cb-jump-history-remove (jump-name)
+  "Removes the given JUMP-NAME from the magik-cb-jump-history list."
+  (remove (assoc jump-name magik-cb-jump-history) magik-cb-jump-history)
+  )
+
+(defun magik-cb-jump-previous ()
+  "Jumps to the method definition of the method jump before the method jump defined in magik-cb-current-jump."
+  (interactive)
+  (let (
+	(current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
+	(if (not (eq (length magik-cb-jump-history) current-pos))
+	    (progn (magik-cb-send-string (nth 1 (nth (+ current-pos 1) magik-cb-jump-history)))
+	  		  (setq magik-cb-current-jump (nth 0 (nth (+ current-pos 1) magik-cb-jump-history))))
+	    (message "already at the most historiant method jump!"))
+	)
+    )
+
+(defun magik-cb-jump-next ()
+  "Jumps to the method definition of the method jump after the method jump defined in magik-cb-current-jump."
+  (interactive)
+  (let (
+	(current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
+	(if (not (eq 0 current-pos))
+	   (progn (magik-cb-send-string (nth 1 (nth (- current-pos 1) magik-cb-jump-history)))
+		  (setq magik-cb-current-jump (nth 0 (nth (- current-pos 1) magik-cb-jump-history))))
+	    (message "already at the most recent method jump!"))
+	)
+    )
+
+(defun magik-cb-jump-select (arg)
+    "Jumps to the method definition of the selected method jump."
+  (interactive (list (completing-read "Jump to: " magik-cb-jump-history)))
+   (magik-cb-send-string (nth 1 (assoc arg magik-cb-jump-history)))
+  (setq magik-cb-current-jump arg)
+  )
+
+(defun magik-cb-ido-jump-select (arg)
+    "Ido version the magik-cb-jump-select function."
+  (interactive (list (ido-completing-read "Jump to: " magik-cb-jump-history)))
+   (magik-cb-send-string (nth 1 (assoc arg magik-cb-jump-history)))
+  (setq magik-cb-current-jump arg)
+  )
+
+(defun magik-cb-jump-clear-history ()
+    "Clears the magik-cb-jump-history and magik-cb-current-jump variables to their initial state."
+  (interactive)
+  (setq magik-cb-jump-history (list '("" "")))
+  (setq magik-cb-current-jump "")
+  )
 
 (defun magik-cb-jump-to-source ()
   "Jump to the source for the method under the cursor."
@@ -2299,6 +2369,18 @@ comments etc."
 	  (concat name (magik-method-name-postfix)))
       (error "No current word to use as a method name"))))
 
+(defun magik-cb-curr-class-name ()
+  "Return the class-name under point."
+  (save-excursion
+    (let ((class (magik-utils-find-tag-default)))
+      (if (null class)
+	  (error "No current word to use as a class-name"))
+      (save-match-data
+	(if (string-match ":" class)
+	    (setq class (replace-match ":^" nil t class))
+	  (setq class (concat "^" class))))
+      (setq class (concat class "$")))))
+
 (defun magik-cb-method-str ()
   (save-excursion (magik-cb-set-buffer-m) (buffer-string)))
 
@@ -2341,17 +2423,26 @@ See the variable `magik-cb-generalise-file-name-alist' to provide more customisa
 		   if (and (string-match (car i) f)
 			   (setq f (replace-match (cdr i) nil t f)))
 		   return f)))
-    (progn
-      (subst-char-in-string ?/ ?\\ f t)
-      (if (or (string-match "^[a-zA-Z]:" f)
-	      (string-match "^\\\\\\\\" f))
-	  f
-	(let* ((buffer (magik-cb-gis-buffer))
-	       (drive-name (if (get-buffer buffer)
-			       (with-current-buffer buffer
-				 (substring default-directory 0 2))
-			     (substring default-directory 0 2))))
-	  (concat drive-name f))))))
+    (if (eq system-type 'windows-nt)
+	(progn
+	  (subst-char-in-string ?/ ?\\ f t)
+	  (if (or (string-match "^[a-zA-Z]:" f)
+		  (string-match "^\\\\\\\\" f))
+	      f
+	    (let* ((buffer (magik-cb-gis-buffer))
+		   (drive-name (if (get-buffer buffer)
+				   (with-current-buffer buffer
+				     (substring default-directory 0 2))
+				 (substring default-directory 0 2))))
+	      (concat drive-name f))))
+      (if (string-match "^[a-zA-Z]:" f)
+	  (setq f (substring f 2)))
+      (subst-char-in-string ?\\ ?/ f t))))
+
+(defun magik-cb-disable-save ()
+  "Like `save-buffer', but does nothing in magik-cb."
+  (interactive)
+  (message "Can't save Magik Class Browser buffer."))
 
 ;;Package configuration
 (magik-cb-set-mode-line-cursor magik-cb-mode-line-cursor)
@@ -2417,7 +2508,9 @@ See the variable `magik-cb-generalise-file-name-alist' to provide more customisa
   (define-key magik-cb-mode-map (kbd "<f3> r")      'magik-cb-reset)
   (define-key magik-cb-mode-map (kbd "<f3> o")      'magik-cb-toggle-override-flags)
   (define-key magik-cb-mode-map (kbd "<f3> s")      'magik-cb-edit-topics-and-flags)
-  (define-key magik-cb-mode-map (kbd "<f3> t")      'magik-cb-toggle-all-topics))
+  (define-key magik-cb-mode-map (kbd "<f3> t")      'magik-cb-toggle-all-topics)
+
+  (define-key magik-cb-mode-map [remap save-buffer] 'magik-cb-disable-save))
 
 (provide 'magik-cb)
 ;;; magik-cb.el ends here

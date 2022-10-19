@@ -94,7 +94,7 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
   "Menu for Magik Mode."
   `(,"Magik"
     [,"Transmit Method"   magik-transmit-method         :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f7, f2 f7, f2 m"]
+     :keys "f7, f2 f7"]
     [,"Transmit Region"   magik-transmit-region         :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f8, f2 f8, f2 r"]
     [,"Transmit Buffer"   magik-transmit-buffer         :active (magik-utils-buffer-mode-list 'magik-session-mode)
@@ -106,24 +106,29 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
     "---"
     [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   :active t :keys "f4 r"]
     [,"Copy Method to Work Buffer"  magik-copy-method-to-buffer   :active t :keys "f4 m"]
-    [,"Set Work Buffer Name"   magik-set-work-buffer-name    :active t :keys "f4 n"]
+    [,"Set Work Buffer Name"        magik-set-work-buffer-name    :active t :keys "f4 n"]
     "---"
-    [,"Electric Template" magik-explicit-electric-space :active t :keys "f2 SPC"]
-    [,"Mark Method"       magik-mark-method             :active t :keys "C-M-h, f9"]
-    [,"Copy Method"       magik-copy-method             :active t :keys "f4 c, f6"]
-    [,"Compare Method between Windows"   magik-compare-methods         :active t :keys "f4 w"]
-    [,"Compare Method using Ediff"     magik-ediff-methods           :active t :keys "f4 e"]
+    [,"Electric Template" magik-explicit-electric-space        :active t :keys "f2 SPC"]
+    [,"Mark Method"       magik-mark-method                    :active t :keys "C-M-h, f9"]
+    [,"Copy Method"       magik-copy-method                    :active t :keys "f4 c, f6"]
+    [,"Compare Method between Windows"   magik-compare-methods :active t :keys "f4 w"]
+    [,"Compare Method using Ediff"     magik-ediff-methods     :active t :keys "f4 e"]
     "---"
     [,"Add Debug Statement"         magik-add-debug-statement     :active t :keys "f4 s"]
     [,"Trace Statement"             magik-trace-curr-statement    :active t :keys "f2 t"]
-    [,"Symbol Complete"          magik-symbol-complete          :active (magik-utils-buffer-mode-list 'magik-session-mode) :keys "f4 f4"]
-    [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
-								      (magik-utils-buffer-mode-list 'magik-session-mode))
-     :keys "f2 x"]
+    [,"Symbol Complete"  magik-symbol-complete :active (magik-utils-buffer-mode-list 'magik-session-mode) :keys "f4 f4"]
+    ;; [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
+    ;; 									      (magik-utils-buffer-mode-list 'magik-session-mode))
+    ;;  :keys "f2 x"]
     "---"
     [,"Comment Region"           magik-comment-region          :active t :keys "f2 #"]
     [,"Uncomment Region"         magik-uncomment-region        :active t :keys "f2 ESC #"]
     [,"Fill Comment"              magik-fill-public-comment     :active t :keys "f2 q"]
+    "---"
+    [,"Check sw-method-docs for method"  magik-single-sw-method-docs :active t :keys "f2 m"]
+    [,"Check sw-method-docs for file"  magik-file-sw-method-docs :active t :keys "f2 f"]
+    [,"Check pragma for method/def_slotted_exemplar"  magik-single-pragma :active t :keys "f2 p"]
+    [,"Check pragma for file"  magik-file-pragma :active t :keys "f2 F"]
     "---"
     (,"Toggle.."
      [,"Method Name Display"      magik-method-name-mode
@@ -376,6 +381,24 @@ Based upon `font-lock-warning-face'"
 
 Based upon `font-lock-warning-face'"
   :group 'magik-faces)
+
+(defconst magik-regexp
+  '(("method" .
+     "^[_abstract\s|_private\s|_iter\s]*?_method")
+    ("method-with-arguments" .
+     "^[_abstract\s|_private\s|_iter\s]*?_method.*(\\([\0-\377[:nonascii:]]*?\\))")
+    ("assignment-method" .
+     "^[_abstract\s|_private\s|_iter\s]*?_method.*<<\s?\\(.*\\)")
+    ("endmethod" .
+     "^\\s-*_endmethod\\s-*\\(\n\\$\\s-*\\)?$")
+    ("method-argument" .
+     "_gather\\|_scatter\\|_optional")
+    ("pragma" .
+     "^_pragma(.*)")
+    ("def_slotted_exemplar" .
+     "^[sw:]?def_slotted_exemplar(.*")
+    )
+  "List of regexp strings which can be used for searching for a magik-specific string in a buffer.")
 
 (defvar magik-keyword-constants
   '("false" "true" "maybe" "unset" "constant")
@@ -1063,7 +1086,7 @@ Optional argument NOERROR ..."
 Optional argument NOERROR ..."
   (interactive)
   (save-match-data
-    (when (re-search-forward "^\\s-*_endmethod\\s-*\\(\n\\$\\s-*\\)?$" nil noerror)
+    (when (re-search-forward (cdr (assoc "endmethod" magik-regexp)) nil noerror)
       (forward-line 1)
       t)))
 
@@ -1394,7 +1417,7 @@ Argument FILENAME ..."
   "Major mode for editing Magik code.
 
 Indents with the TAB or RET keys, inserts underscores, and sends Magik
-to a running gis with `F2 b', `F2 m', `F2 r', or `F2 RET'.
+to a running gis with `F2 b', `F2 r', or `F2 RET'.
 Creates programming templates like
   _if
   _then
@@ -1685,6 +1708,7 @@ If PT is given, goto that char position."
   (while (and (> nlines 0) (not (eobp)))
     (cl-decf nlines)
     (beginning-of-line 1)
+    (skip-chars-forward "\t")
     (if (char-equal (char-after (point)) ?# ) (delete-char 1))
     (forward-line 1)))
 
@@ -1830,6 +1854,141 @@ Argument END ..."
     (set-buffer-modified-p nil)
     (magik-mode))
   (display-buffer buffer))
+
+(defun magik-file-pragma ()
+  "Search file for missing pragmas."
+  (interactive)
+  (save-excursion
+    (cond
+     ((eq major-mode 'magik-mode)
+      (goto-char (point-min))
+      (while (search-forward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t)
+	(magik-parse-pragma))
+      (goto-char (point-min))
+      (while (search-forward-regexp (cdr (assoc "method" magik-regexp)) nil t)
+	(magik-parse-pragma))))))
+
+(defun magik-single-pragma ()
+  "Search last def_slotted_exemplar/method for missing pragma."
+  (interactive)
+  (save-excursion
+    (cond
+     ((eq major-mode 'magik-mode)
+      (forward-line)
+      (let ((starting-point (line-number-at-pos))
+	    (exemplar-point nil)
+	    (method-point nil))
+	(when (not (equal (search-backward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t) nil))
+	  (setq exemplar-point (line-number-at-pos)))
+	(goto-line starting-point)
+	(when (not (equal (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t) nil))
+	  (setq method-point (line-number-at-pos)))
+	(when (or (not (equal exemplar-point nil))
+		  (not (equal method-point nil)))
+	  (when (or (and (not (equal exemplar-point nil))
+			 (> exemplar-point (line-number-at-pos)))
+		    (equal method-point nil))
+	    (goto-line exemplar-point))
+	  (magik-parse-pragma)))))))
+
+(defun magik-parse-pragma ()
+  "Helper function for inserting pragma."
+  (let ((ending-point (line-number-at-pos))
+	(starting-point 0)
+	(search-result nil))
+    (save-excursion
+      (search-backward-regexp "^\\$" nil t)
+      (setq starting-point (line-number-at-pos))
+      (setq search-result (search-forward-regexp (cdr (assoc "pragma" magik-regexp)) nil t))
+      (when (or (and (not (equal search-result nil))
+		     (< ending-point (line-number-at-pos)))
+		(equal search-result nil))
+	(magik-write-pragma ending-point)
+	t))))
+
+(defun magik-write-pragma (ending-point)
+  "Writer function for inserting pragma.
+Argument ENDING-POINT ..."
+  (goto-line ending-point)
+  (magik-insert-pragma))
+
+(defun magik-file-sw-method-docs ()
+  "Search file for missing parameters in the methods and complete the comments."
+  (interactive)
+  (save-excursion
+    (cond
+     ((eq major-mode 'magik-mode)
+      (goto-char (point-min))
+      (while (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
+        (magik-parse-sw-method-docs (match-string 1)))
+      (goto-char (point-min))
+      (while (search-forward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
+        (magik-parse-sw-method-docs (match-string 1)))))))
+
+(defun magik-single-sw-method-docs ()
+  "Search last method for missing parameters and complete the comments."
+  (interactive)
+  (save-excursion
+    (cond
+     ((eq major-mode 'magik-mode)
+      (forward-line)
+      (search-backward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
+      (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
+      (if (not (equal (match-string 1) nil))
+	  (magik-parse-sw-method-docs (match-string 1))
+	(search-backward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
+	(search-forward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
+	(unless (equal (match-string 1) nil)
+	  (magik-parse-sw-method-docs (match-string 1))))))))
+
+(defun magik-parse-sw-method-docs (method-string)
+  "Helper function for inserting sw-method-docs.
+Argument METHOD-STRING ..."
+  (let ((parameters (mapcar (lambda (x) (string-trim (replace-regexp-in-string (cdr (assoc "method-argument" magik-regexp)) "" x))) (split-string method-string "(\\|)\\|,")))
+	(parameters-in-comments '())
+	(missing-parameters '())
+	(comments nil)
+	(comments-found 0)
+	(starting-point (+ 1 (line-number-at-pos))))
+    (while (not (looking-at (cdr (assoc "endmethod" magik-regexp))))
+      (if (and (not (looking-at "^\t##$")) (looking-at "^\t##"))
+	  (progn
+	    (setq comments-found (+ 1 comments-found))
+	    (setq comments (split-string (string-trim (replace-regexp-in-string "## " "" (buffer-substring-no-properties (point) (line-end-position)))) " "))
+	    (dolist (comment comments)
+	      (when (and (equal (string-match-p "[[:upper:]]" comment) 0) (equal (upcase comment) comment))
+		(push comment parameters-in-comments))))
+	(when (looking-at "^\t##$")
+	    (setq comments-found (+ 1 comments-found))))
+      (forward-line))
+    (setq starting-point (+ comments-found starting-point))
+    (setq parameters-in-comments (delq nil (delete-dups parameters-in-comments)))
+    (setq missing-parameters (delq nil (delete-dups missing-parameters)))
+
+    (dolist (parameter parameters)
+      (when (and (not (equal parameter "")) (not (member (upcase parameter) parameters-in-comments)))
+	  (push parameter missing-parameters)))
+    (setq missing-parameters (reverse missing-parameters))
+
+    (magik-write-sw-method-docs missing-parameters starting-point comments-found)))
+
+(defun magik-write-sw-method-docs (missing-parameters starting-point comments-found)
+  "Writer function for inserting sw-method-docs.
+Argument MISSING-PARAMETERS ...
+Argument STARTING-POINT ...
+Argument COMMENTS-FOUND ..."
+  (if (or (equal comments-found 0) (equal comments-found 1))
+      (progn
+	(goto-line starting-point)
+	(when (equal comments-found 0)
+	  (insert "\t##\n"))
+	(dolist (parameter missing-parameters)
+	  (insert (concat "\t## " (upcase parameter) "\n")))
+	(insert "\t##\n"))
+    (progn
+      (goto-line (- starting-point 1))
+      (dolist (parameter missing-parameters)
+	(insert (concat "\t## " (upcase parameter) "\n"))))))
 
 ;;; Imenu configuration functions
 (defun magik-imenu-method-name (index)
@@ -2193,16 +2352,20 @@ closing bracket into the new \"{...}\" notation."
   (define-key magik-mode-map (kbd "<f2> <up>")   'magik-backward-method)
   (define-key magik-mode-map (kbd "<f2> <down>") 'magik-forward-method)
   (define-key magik-mode-map (kbd "<f2> $")      'magik-transmit-$-chunk)
+  (define-key magik-mode-map (kbd "<f2> f")      'magik-file-sw-method-docs)
+  (define-key magik-mode-map (kbd "<f2> m")      'magik-single-sw-method-docs)
+  (define-key magik-mode-map (kbd "<f2> F")      'magik-file-pragma)
+  (define-key magik-mode-map (kbd "<f2> p")      'magik-single-pragma)
 
-  ;;  (define-key magik-f4-map [f4]   'magik-symbol-complete)
-  ;;  (define-key magik-f4-map "c"    'magik-copy-method)
-  ;;  (define-key magik-f4-map "e"    'magik-ediff-methods)
-  ;;  (define-key magik-f4-map [f3]   'cb-magik-ediff-methods)
-  ;;  (define-key magik-f4-map "m"    'magik-copy-method-to-buffer)
-  ;;  (define-key magik-f4-map "n"    'magik-set-work-buffer-name)
-  ;;  (define-key magik-f4-map "r"    'magik-copy-region-to-buffer)
-  ;;  (define-key magik-f4-map "s"    'magik-add-debug-statement)
-  ;;  (define-key magik-f4-map "w"    'magik-compare-methods)
+  (define-key magik-mode-map (kbd "<f4> <f4>")   'magik-symbol-complete)
+  (define-key magik-mode-map (kbd "<f4> c")      'magik-copy-method)
+  (define-key magik-mode-map (kbd "<f4> e")      'magik-ediff-methods)
+  (define-key magik-mode-map (kbd "<f4> <f3>")   'magik-cb-magik-ediff-methods)
+  (define-key magik-mode-map (kbd "<f4> m")      'magik-copy-method-to-buffer)
+  (define-key magik-mode-map (kbd "<f4> n")    	 'magik-set-work-buffer-name)
+  (define-key magik-mode-map (kbd "<f4> r")    	 'magik-copy-region-to-buffer)
+  (define-key magik-mode-map (kbd "<f4> s")    	 'magik-add-debug-statement)
+  (define-key magik-mode-map (kbd "<f4> w")    	 'magik-compare-methods)
   )
 
 (eval-after-load 'flycheck

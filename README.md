@@ -1,5 +1,11 @@
 # magik-mode: Emacs major mode for Smallworld Magik files
 
+## Content
+1. [Installation](#installation)
+2. [Features](#features)
+3. [Usage with Smallworld 4.x or older](#usage4x)
+4. [Side Effects](#sideeffects)
+
 ## Installation
 
 These packages are available on [MELPA](https://melpa.org/). 
@@ -23,6 +29,8 @@ Global keys are set by calling `(magik-global-bindings)` after the packages has 
 | Key | Description |
 | :---: | --- |
 |<kbd>F2</kbd><kbd>s</kbd> | Open Magik version selection |
+
+
 
 ### magik-version
 
@@ -50,11 +58,9 @@ Major mode for running Magik session as a direct sub-process.
 
 Major prog mode for editing Magik code.
 
-Support for outline-minor mode. Try e.g.:
-(outline-minor-mode)
+Support for outline-minor mode. Try: `(outline-minor-mode)`
 
-Support for imenu. Try e.g.:
-(add-hook 'magik-mode-hook 'imenu-add-menubar-index)
+Support for imenu. Try: `(add-hook 'magik-mode-hook 'imenu-add-menubar-index)`
 
 
 ### magik-electric-mode
@@ -87,9 +93,28 @@ To enable automatic linting in `magik-mode` buffers, the following conditions ha
 * The `java` executable path should be in `exec-path`, or the variable `flycheck-magik-lint-java-executable` has to be set. `flycheck-magik-lint-java-executable` will automatically be set when the environment variable `JAVA_HOME` is set.
 * `flycheck-mode` has to be enabled for `magik-mode` buffers. Or use `global-flycheck-mode` to enable it for all buffers.
 
-## Usage with Smallworld 4.x or older
+## <a name="usage4x"></a>Usage with Smallworld 4.x or older
 
 If you plan to use this package with Smallworld-Versions 4.x or older, you should consider the following points:
 * Customize the variable `magik-session-auto-insert-dollar` to non nil
 * You might customize the variable `magik-aliases-layered-products-file` to "$SMALLWORLD_GIS/product/config/LAYERED_PRODUCTS". But if you want to use the EMACS for Smallworld 5.x as well, it's easier to create the directory `$SMALLWORLD_GIS/../smallworld_registry` and copy or soft-link the original LAYERED_PRODUCTS file into that directory - so you have the same structure as under Smallworld 5.x.
 * There is no support (yet) for the Smallworld dev-tools. So if you want to do things like <kbd>f4</kbd><kbd>d</kbd> to start debugging a method, you may still want to use the EMACS which has been delivered with the Smallworld 4.x (or older) software.
+* Some more things which are at least partly not supported by Smallworld 5.x are not supported (e.g. `deep-print`)
+
+## <a name="sideeffects"></a>Side Effects
+
+Some keys bindings are changed with respect to a standard EMACS installation, at least when using `(magik-global-bindings)`:
+
+| Key | Function in standard EMACS | Change in Magik Mode package |
+| :---: | --- | --- |
+| <kbd>F2</kbd> | `2C-command`|globally changed to prefix key |
+| <kbd>F3</kbd> | `kmacro-start-macro-or-insert-counter` | globally changed to prefix key |
+| <kbd>F4</kbd> | `kmacro-end-or-call-macro` | used in magik-mode and magik-session-mode as prefix key |
+
+The reason for that is, that many Magik developpers are familiar with these bindings from former EMACS installations.
+
+For quick usage of the keyboard-macro functions you may e.g. bind the <kbd>Ctrl</kbd>-<kbd>F2</kbd> and <kbd>Ctrl</kbd>-<kbd>F4</kbd> combinations by putting the following lines into your  `.emacs` file:
+``` emacs-lisp
+(global-set-key [C-f3] 'kmacro-start-macro-or-insert-counter)
+(global-set-key [C-f4] 'kmacro-end-or-call-macro)
+```

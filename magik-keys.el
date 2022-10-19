@@ -53,20 +53,20 @@
   (global-set-key (kbd "<f2> #")      'magik-comment-region)
   (global-set-key (kbd "<f2> ESC #")    'magik-uncomment-region)
   (global-set-key (kbd "<f2> b")      'magik-transmit-buffer)
-  (global-set-key (kbd "<f2> h")      'magik-heading)
+  ;; (global-set-key (kbd "<f2> h")      'magik-heading)
   (global-set-key (kbd "<f2> m")      'magik-transmit-method)
   (global-set-key (kbd "<f2> r")      'magik-transmit-region)
-  (global-set-key (kbd "<f2> q")      'fill-magik-public-comment)
+  (global-set-key (kbd "<f2> q")      'magik-fill-public-comment)
   (global-set-key (kbd "<f2> t")      'magik-trace-curr-statement)
 
-  (global-set-key (kbd "<f2> SPC")    'explicit-electric-magik-space)
-  (global-set-key (kbd "<f2> x")      'deep-print)
+  (global-set-key (kbd "<f2> SPC")    'magik-explicit-electric-space)
+  ;; (global-set-key (kbd "<f2> x")      'deep-print)
 
-  (global-set-key (kbd "<f2> <f1>")   'sw-help-keys)
-  (global-set-key (kbd "<f2> [")      'toggle-debug)
+  ;; (global-set-key (kbd "<f2> <f1>")   'sw-help-keys)
+  ;; (global-set-key (kbd "<f2> [")      'toggle-debug)
   (global-set-key (kbd "<f2> TAB")    'hippie-expand)
-  (global-set-key (kbd "<f2> e")      'electric-magik-mode)
-  (global-set-key (kbd "<f2> k")      'sw-reload-dotemacs)
+  (global-set-key (kbd "<f2> e")      'magik-electric-mode)
+  ;; (global-set-key (kbd "<f2> k")      'sw-reload-dotemacs)
   (global-set-key (kbd "<f2> s")      'magik-version-selection)
   (global-set-key (kbd "<f2> z")      'magik-session)
 
@@ -75,11 +75,13 @@
   (global-unset-key (kbd "<f3>"))
 
   (global-set-key (kbd "<f3> <f3>")  'magik-cb)
+  (global-set-key (kbd "<f3> b")     'magik-cb-paste-method-and-class)
   (global-set-key (kbd "<f3> c")     'magik-cb-paste-class)
   (global-set-key (kbd "<f3> j")     'magik-cb-jump-to-source)
   (global-set-key (kbd "<f3> m")     'magik-cb-paste-method)
   (global-set-key (kbd "<f3> /")     'magik-cb-and-clear)
-  (global-set-key (kbd "<f3> ?")     'magik-cb-help))
+  ;; (global-set-key (kbd "<f3> ?")     'magik-cb-help)
+  )
 
 (provide 'magik-keys)
 ;;; magik-keys.el ends here

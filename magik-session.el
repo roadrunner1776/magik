@@ -111,23 +111,23 @@ setting of the Magik Prompt by calling `magik-session-prompt-get'."
 (setq magik-session-prompt "Magik\\(\\|SF\\)> ")
 
 (defcustom magik-session-command-history-max-length 90
-  "*The maximum length of the displayed `magik-session-command' in the SW -> GIS Command History submenu.
+  "*The maximum length of the displayed `magik-session-command' in the Magik Session -> Magik Session Command History submenu.
 `magik-session-command' is a string of the form \"[DIRECTORY] COMMAND ARGS\"."
   :group 'magik
   :type  'integer)
 
 (defcustom magik-session-command-history-max-length-dir (floor (/ magik-session-command-history-max-length 2))
-  "*The maximum length of the displayed directory path in the SW -> GIS Command History submenu."
+  "*The maximum length of the displayed directory path in the Magik Session -> Magik Session Command History submenu."
   :group 'magik
   :type  'integer)
 
 (defcustom magik-session-recall-cmd-move-to-end nil
   "*If t, move the cursor point to the end of the recalled command.
-This behaviour is available for \\[recall-prev-gis-cmd] and \\[recall-next-gis-cmd] only.
+This behaviour is available for \\[magik-session-recall-prev-cmd] and \\[magik-session-recall-next-cmd] only.
 The default is nil, which preserves the original behaviour to leave
 the cursor point in the same position.
 
-The similar commands, \\[recall-prev-matching-gis-cmd] and \\[recall-next-matching-gis-cmd]
+The similar commands, \\[magik-session-recall-prev-matching-cmd] and \\[magik-session-recall-next-matching-cmd]
 that use command string matching are not affected by this setting."
   :group 'magik
   :type 'boolean)
@@ -228,12 +228,12 @@ this variable buffer-local by putting the following in your .emacs
     [,"Previous Matching Command"        magik-session-recall-prev-matching-cmd  :active t :keys "f2 p"]
     [,"Next Matching Command"            magik-session-recall-next-matching-cmd  :active t :keys "f2 n"]
     "----"
-    [,"Fold"                             magik-session-display-history           :active t :keys "f2 up"]
-    [,"Unfold"                           magik-session-undisplay-history         :active t :keys "f2 down"]
+    [,"Fold"                             magik-session-display-history   :active t :keys "f2 up, f2 C-p"]
+    [,"Unfold"                           magik-session-undisplay-history :active t :keys "f2 down, f2 C-n"]
     "----"
-    [,"Electric Template"                magik-electric-explicit-space         :active t :keys "f2 SPC"]
+    [,"Electric Template"                magik-explicit-electric-space         :active t :keys "f2 SPC"]
     [,"Symbol Complete"                  magik-symbol-complete                 :active t :keys "f4 f4"]
-    [,"Deep Print"                       magik-deep-print                      :active t :keys "f2 x"]
+    ;; [,"Deep Print"                       magik-deep-print                      :active t :keys "f2 x"]
     "----"
     [,"Previous Traceback"               magik-session-traceback-up              :active t :keys "f4 up"]
     [,"Next Traceback"                   magik-session-traceback-down            :active t :keys "f4 down"]
@@ -242,11 +242,11 @@ this variable buffer-local by putting the following in your .emacs
     "----"
     [,"External Shell Process"           magik-session-shell                     :active t :keys "f4 $"]
     [,"Kill Magik Process"               magik-session-kill-process              :active (and magik-session-process
-											      (eq (process-status magik-session-process) 'run))]
-    (,"Magik Command History")
+										      (eq (process-status magik-session-process) 'run))]
+    (,"Magik Session Command History")
     "---"
     (,"Toggle..."
-     [,"Magik Session Filter"             magik-session-toggle-filter              :active t :keys "f2 f"
+     [,"Magik Session Filter"             magik-session-filter-toggle-filter     :active t :keys "f2 f"
       :style toggle :selected (let ((b (get-buffer-process
 					(current-buffer))))
 				(and b (process-filter b)))]
@@ -356,7 +356,7 @@ string for next time.")
   :type  'function)
 
 (defun magik-session-customize ()
-  "Open Customization buffer for Gis Mode."
+  "Open Customization buffer for Magik Session Mode."
   (interactive)
   (customize-group 'gis))
 
@@ -492,8 +492,8 @@ and return a list of all the components of the command."
 			    "..."))))
 	(concat label (substring command (+ command-len (length label)))))))
 
-(defun magik-session-update-sw-menu ()
-  "Update GIS process submenu in SW menu bar."
+(defun magik-session-update-tools-magik-gis-menu ()
+  "Update Magik Session processes submenu in Tools -> Magik pulldown menu."
   (let* ((magik-session-alist (sort (copy-alist magik-session-buffer-alist)
 				    #'(lambda (a b) (< (car a) (car b)))))
 	 magik-session-list)
@@ -513,8 +513,8 @@ and return a list of all the components of the command."
 		      "Magik Session Processes"
 		      (or magik-session-list (list "No Processes")))))
 
-(defun magik-session-update-gis-menu ()
-  "Update the GIS menu bar."
+(defun magik-session-update-magik-session-menu ()
+  "Update the Magik Session Command history in the Magik Session pulldown menu"
   (if (eq major-mode 'magik-session-mode)
       (let (command-list)
 	(save-match-data
@@ -552,8 +552,8 @@ and return a list of all the components of the command."
 			  "Magik Session Command History"
 			  (or command-list (list "No History"))))))
 
-(defun magik-session-update-sw-shell-menu ()
-  "Update GIS shell submenu in SW menu bar."
+(defun magik-session-update-tools-magik-shell-menu ()
+  "Update External Shell Processes submenu in Tools -> Magik pulldown menu."
   (let ((shell-bufs (magik-utils-buffer-mode-list 'shell-mode
 						  (function (lambda () (getenv "SMALLWORLD_GIS")))))
 	shell-list)
@@ -674,9 +674,9 @@ Entry to this mode calls the value of magik-session-mode-hook."
     (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
       (erase-buffer))
 
-    (add-hook 'menu-bar-update-hook 'magik-session-update-gis-menu)
-    (add-hook 'menu-bar-update-hook 'magik-session-update-sw-menu)
-    (add-hook 'menu-bar-update-hook 'magik-session-update-sw-shell-menu)
+    (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu)
+    (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu)
+    (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu)
     (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t) ;local hook
     (run-hooks 'magik-session-mode-hook)))
 
@@ -1282,18 +1282,20 @@ An internal function that deals with 4 cases."
 	  ))))
 
 (defun magik-session-recall-prev-cmd ()
-  "Recall the earlier gis commands
-Cursor point is placed at end of command.
-Compare with \\[recall-prev-matching-gis-cmd] placing cursor
-immediately at the start of a command"
+  "Recall the earlier magik session commands 
+
+The variable \\[magik-session-recall-cmd-move-to-end\\] decides
+whether cursor point is placed at end of command.  Compare with
+\\[magik-session-recall-prev-matching-cmd]"
   (interactive "*")
   (magik-session-recall "" -1 magik-session-recall-cmd-move-to-end))
 
 (defun magik-session-recall-next-cmd ()
-  "Recall the later gis commands
-Cursor point is placed at end of command.
-Compare with \\[recall-next-matching-gis-cmd] placing cursor
-immediately at the start of a command"
+  "Recall the later magik session commands
+
+The variable \\[magik-session-recall-cmd-move-to-end\\] decides
+whether cursor point is placed at end of command.  Compare with
+\\[magik-session-recall-next-matching-cmd]"
   (interactive "*")
   (magik-session-recall "" 1 magik-session-recall-cmd-move-to-end))
 
@@ -1554,7 +1556,7 @@ the buffer to the printer.  Query first."
   (force-mode-line-update))
 
 (defun magik-session-drag-n-drop-load ()
-  "Load a drag and dropped file into the Gis session.
+  "Load a drag and dropped file into the Magik Session.
 If the previous buffer was a GIS session buffer and the previous event was
 a drag & drop event then we load the dropped file into the GIS session.
 
@@ -1577,6 +1579,11 @@ where MODE is the name of the major mode with the '-mode' postfix."
 	       (and magik-session-drag-n-drop-mode
 		    (eq major-mode 'magik-session-mode))))
 	(funcall fn gis (buffer-file-name)))))
+
+(defun magik-session-disable-save ()
+  "Like `save-buffer', but does nothing in magik-session-mode."
+  (interactive)
+  (message "Can't save Magik Session buffer."))
 
 ;;;Package registration
 
@@ -1635,16 +1642,16 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (define-key magik-session-mode-map "\C-w"      'magik-session-kill-region)
   (define-key magik-session-mode-map [f8]        'magik-session-send-command-at-point)
   (define-key magik-session-mode-map "\C-c\C-c"  'magik-session-kill-process)
-  (define-key magik-session-mode-map "\C-c\C-\\" 'query-quit-shell-subjob)
-  (define-key magik-session-mode-map "\C-c\C-z"  'query-stop-shell-subjob)
-  (define-key magik-session-mode-map "\C-c\C-d"  'query-shell-send-eof)
+  (define-key magik-session-mode-map "\C-c\C-\\" 'magik-session-query-quit-shell-subjob)
+  (define-key magik-session-mode-map "\C-c\C-z"  'magik-session-query-stop-shell-subjob)
+  (define-key magik-session-mode-map "\C-c\C-d"  'magik-session-query-shell-send-eof)
 
-  (define-key magik-session-mode-map (kbd "<f2> <up>")   'display-gis-history)
-  (define-key magik-session-mode-map (kbd "<f2> \C-p")   'display-gis-history)
-  (define-key magik-session-mode-map (kbd "<f2> <down>") 'undisplay-gis-history)
-  (define-key magik-session-mode-map (kbd "<f2> \C-n")   'undisplay-gis-history)
+  (define-key magik-session-mode-map (kbd "<f2> <up>")   'magik-session-display-history)
+  (define-key magik-session-mode-map (kbd "<f2> \C-p")   'magik-session-display-history)
+  (define-key magik-session-mode-map (kbd "<f2> <down>") 'magik-session-undisplay-history)
+  (define-key magik-session-mode-map (kbd "<f2> \C-n")   'magik-session-undisplay-history)
   (define-key magik-session-mode-map (kbd "<f2> =")      'magik-session-traceback-print)
-  (define-key magik-session-mode-map (kbd "<f2> f")      'toggle-gis-filter)
+  (define-key magik-session-mode-map (kbd "<f2> f")      'magik-session-filter-toggle-filter)
   (define-key magik-session-mode-map (kbd "<f2> p")      'magik-session-recall-prev-matching-cmd)
   (define-key magik-session-mode-map (kbd "<f2> n")      'magik-session-recall-next-matching-cmd)
 
@@ -1656,9 +1663,11 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (define-key magik-session-mode-map (kbd "<f4> m")      'magik-copy-method-to-buffer)
   (define-key magik-session-mode-map (kbd "<f4> r")      'magik-copy-region-to-buffer)
   (define-key magik-session-mode-map (kbd "<f4> s")      'magik-add-debug-statement)
-  (define-key magik-session-mode-map (kbd "<f4> w")      'magik-set-work-buffer)
+  (define-key magik-session-mode-map (kbd "<f4> w")      'magik-set-work-buffer-name)
   (define-key magik-session-mode-map (kbd "<f4> P")      'magik-session-traceback-print)
-  (define-key magik-session-mode-map (kbd "<f4> S")      'magik-session-traceback-save))
+  (define-key magik-session-mode-map (kbd "<f4> S")      'magik-session-traceback-save)
+
+  (define-key magik-session-mode-map [remap save-buffer] 'magik-session-disable-save))
 
 (provide 'magik-session)
 ;;; magik-session.el ends here
