@@ -2003,6 +2003,11 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
   (interactive)
   (magik-cb nil (concat "^" (magik-cb-curr-method-name) "$") nil))
 
+(defun magik-cb-paste-class ()
+  "Set the CB class name to the word under the cursor, and enter the CB."
+  (interactive)
+  (magik-cb nil nil (magik-cb-curr-class-name)))
+
 (defun magik-cb-paste-method-and-class ()
   "Set the CB method and class name to the word under the cursor, and enter the CB."
   (interactive)
