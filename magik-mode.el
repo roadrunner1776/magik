@@ -42,11 +42,6 @@
   :group 'smallworld
   :group 'languages)
 
-(defcustom magik-mode-hook nil
-  "*Hook to run after Magik mode is set."
-  :group 'magik
-  :type  'hook)
-
 (defcustom magik-transmit-debug-p nil
   "*If t, \"#DEBUG\" patterns get stripped out of things being transmitted to magik."
   :group 'magik
@@ -84,8 +79,72 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
   :group 'magik
   :type  'integer)
 
-(defvar magik-mode-map (make-sparse-keymap)
-  "Keymap for Magik files.")
+;;;###autoload
+(define-derived-mode magik-mode prog-mode "Magik"
+  "Major mode for editing Magik code.
+
+Indents with the TAB or RET keys, inserts underscores, and sends Magik
+to a running gis with `F2 b', `F2 r', or `F2 RET'.
+Creates programming templates like
+  _if
+  _then
+
+  _endif
+with `F2 SPC' and trace statements with `F2 t'.
+Fills private (#) or public (##) comments with `F2 q'.
+
+You can customise ‘magik-mode’ with the ‘magik-mode-hook’."
+
+  (make-local-variable 'paragraph-start)
+  (make-local-variable 'paragraph-separate)
+  (make-local-variable 'indent-line-function)
+  (make-local-variable 'require-final-newline)
+  (make-local-variable 'comment-start)
+  (make-local-variable 'comment-end)
+  (make-local-variable 'comment-column)
+  (make-local-variable 'comment-start-skip)
+  (make-local-variable 'comment-multi-line)
+  (make-local-variable 'parse-sexp-ignore-comments)
+  (make-local-variable 'imenu-generic-expression)
+  (make-local-variable 'imenu-syntax-alist)
+  (make-local-variable 'font-lock-defaults)
+  (make-local-variable 'outline-regexp)
+  (make-local-variable 'magik-method-name)
+  (make-local-variable 'magik-transmit-debug-mode-line-string)
+  (make-local-variable 'ac-sources)
+
+  (setq magik-template-file-type (magik-template-file-type)
+	paragraph-start (concat "^$\\|" page-delimiter)
+	paragraph-separate paragraph-start
+	indent-line-function 'magik-indent-line
+	require-final-newline t
+	comment-start "#"
+	comment-end ""
+	comment-column 8
+	comment-start-skip "#+ *"
+	comment-multi-line nil
+	parse-sexp-ignore-comments nil
+	magik-transmit-debug-mode-line-string " #DEBUG"
+	imenu-create-index-function 'magik-imenu-create-index-function
+	imenu-syntax-alist '((?_ . "w"))
+	font-lock-defaults
+	'((magik-font-lock-keywords
+	   magik-font-lock-keywords-1
+	   magik-font-lock-keywords-2
+	   magik-font-lock-keywords-3
+	   magik-font-lock-keywords-4
+	   magik-font-lock-keywords-5)
+	  nil t
+	  ((?_ . "w"))
+	  magik-goto-code
+	  (font-lock-fontify-buffer-function   . magik-font-lock-fontify-buffer)
+	  (font-lock-fontify-region-function   . magik-font-lock-fontify-region)
+	  (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))
+	outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
+  
+  (when magik-auto-abbrevs (abbrev-mode 1))
+
+  (imenu-add-menubar-index))
 
 (defvar magik-menu nil
   "Keymap for the Magik buffer menu bar.")
@@ -163,12 +222,6 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
       :selected (eq magik-transmit-method-eom-mode 'repeat)
       ])
     [,"Customize"            magik-customize               t]))
-
-(defvar magik-mode-abbrev-table nil
-  "Abbrev table in use in Magik-mode buffers.")
-
-(defvar magik-mode-syntax-table nil
-  "Syntax table in use in Magik-mode buffers.")
 
 (defvar magik-imenu-expression
   `(
@@ -1412,83 +1465,6 @@ Argument FILENAME ..."
       (magik-function "load_file" filename)
       "$\n"))))
 
-;;;###autoload
-(define-derived-mode magik-mode prog-mode "Magik"
-  "Major mode for editing Magik code.
-
-Indents with the TAB or RET keys, inserts underscores, and sends Magik
-to a running gis with `F2 b', `F2 r', or `F2 RET'.
-Creates programming templates like
-  _if
-  _then
-
-  _endif
-with `F2 SPC' and trace statements with `F2 t'.
-Fills private (#) or public (##) comments with `F2 q'.
-
-You can customise ‘magik-mode’ with the ‘magik-mode-hook’."
-
-  (kill-all-local-variables)
-  (make-local-variable 'paragraph-start)
-  (make-local-variable 'paragraph-separate)
-  (make-local-variable 'indent-line-function)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'comment-start)
-  (make-local-variable 'comment-end)
-  (make-local-variable 'comment-column)
-  (make-local-variable 'comment-start-skip)
-  (make-local-variable 'comment-multi-line)
-  (make-local-variable 'parse-sexp-ignore-comments)
-  (make-local-variable 'imenu-generic-expression)
-  (make-local-variable 'imenu-syntax-alist)
-  (make-local-variable 'font-lock-defaults)
-  (make-local-variable 'outline-regexp)
-  (make-local-variable 'magik-method-name)
-  (make-local-variable 'magik-transmit-debug-mode-line-string)
-  (make-local-variable 'ac-sources)
-
-  (use-local-map magik-mode-map)
-  (easy-menu-add magik-menu)
-  (set-syntax-table magik-mode-syntax-table)
-
-  (setq major-mode 'magik-mode
-	mode-name "Magik"
-	magik-template-file-type (magik-template-file-type)
-	local-abbrev-table magik-mode-abbrev-table
-	paragraph-start (concat "^$\\|" page-delimiter)
-	paragraph-separate paragraph-start
-	indent-line-function 'magik-indent-line
-	require-final-newline t
-	comment-start "#"
-	comment-end ""
-	comment-column 8
-	comment-start-skip "#+ *"
-	comment-multi-line nil
-	parse-sexp-ignore-comments nil
-	magik-transmit-debug-mode-line-string " #DEBUG"
-	imenu-create-index-function 'magik-imenu-create-index-function
-	imenu-syntax-alist '((?_ . "w"))
-	font-lock-defaults
-	'((magik-font-lock-keywords
-	   magik-font-lock-keywords-1
-	   magik-font-lock-keywords-2
-	   magik-font-lock-keywords-3
-	   magik-font-lock-keywords-4
-	   magik-font-lock-keywords-5)
-	  nil t
-	  ((?_ . "w"))
-	  magik-goto-code
-	  (font-lock-fontify-buffer-function   . magik-font-lock-fontify-buffer)
-	  (font-lock-fontify-region-function   . magik-font-lock-fontify-region)
-	  (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))
-	outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
-  
-  (if magik-auto-abbrevs (abbrev-mode 1))
-
-  (imenu-add-menubar-index)
-
-  (run-hooks 'magik-mode-hook))
-
 (defun magik-method-name-mode (&optional arg)
   "Toggle display of current method in mode line.
 Toggles the value of variable `magik-method-name-mode'.
@@ -1959,7 +1935,7 @@ Argument METHOD-STRING ..."
 	      (when (and (equal (string-match-p "[[:upper:]]" comment) 0) (equal (upcase comment) comment))
 		(push comment parameters-in-comments))))
 	(when (looking-at "^\t##$")
-	    (setq comments-found (+ 1 comments-found))))
+	  (setq comments-found (+ 1 comments-found))))
       (forward-line))
     (setq starting-point (+ comments-found starting-point))
     (setq parameters-in-comments (delq nil (delete-dups parameters-in-comments)))
@@ -1967,7 +1943,7 @@ Argument METHOD-STRING ..."
 
     (dolist (parameter parameters)
       (when (and (not (equal parameter "")) (not (member (upcase parameter) parameters-in-comments)))
-	  (push parameter missing-parameters)))
+	(push parameter missing-parameters)))
     (setq missing-parameters (reverse missing-parameters))
 
     (magik-write-sw-method-docs missing-parameters starting-point comments-found)))
@@ -2229,49 +2205,43 @@ closing bracket into the new \"{...}\" notation."
 (put 'magik-translate-old-vec-notation 'disabled t)
 
 ;;; Package initialisation
-(if magik-mode-abbrev-table
-    ()
-  (define-abbrev-table 'magik-mode-abbrev-table ())
-  (let ((abbrevs-changed nil))
-    (mapc
-     #'(lambda (str)
-	 (define-abbrev magik-mode-abbrev-table
-	   str str 'magik-expand-abbrev))
+(let ((abbrevs-changed nil))
+  (mapc
+   #'(lambda (str)
+       (define-abbrev magik-mode-abbrev-table
+	 str str 'magik-expand-abbrev))
 
-     (append magik-keyword-constants magik-keyword-operators
-	     magik-keyword-class magik-keyword-statements
-	     magik-keyword-methods magik-keyword-procedures
-	     magik-keyword-loop magik-keyword-arguments
-	     magik-keyword-variable nil))))
+   (append magik-keyword-constants magik-keyword-operators
+	   magik-keyword-class magik-keyword-statements
+	   magik-keyword-methods magik-keyword-procedures
+	   magik-keyword-loop magik-keyword-arguments
+	   magik-keyword-variable nil)))
 
-(if magik-mode-syntax-table
-    ()
-  (setq magik-mode-syntax-table (make-syntax-table))
-  (if magik-under-as-char
-      (modify-syntax-entry ?_ "w" magik-mode-syntax-table))
-  (modify-syntax-entry ?\\ "." magik-mode-syntax-table) ;; \ is not an escape character in magik mode.
-  (modify-syntax-entry ?? "w" magik-mode-syntax-table)
-  (modify-syntax-entry ?! "w" magik-mode-syntax-table)
-  ;; char intro
-  (modify-syntax-entry ?% "/" magik-mode-syntax-table)
-  ;; multi quote
-  (modify-syntax-entry ?| "$" magik-mode-syntax-table)
-  ;; colon is now part of a word due to the introduction of packages.
-  ;;       Consequently symbols now include the initial :
-  (modify-syntax-entry ?: "w" magik-mode-syntax-table) ;cf \ = "/" in TeX mode.
-  ;; comments
-  (modify-syntax-entry ?# "<" magik-mode-syntax-table)
-  (modify-syntax-entry ?\n ">" magik-mode-syntax-table)
-  (modify-syntax-entry ?+ "." magik-mode-syntax-table)
-  (modify-syntax-entry ?- "." magik-mode-syntax-table)
-  (modify-syntax-entry ?* "." magik-mode-syntax-table)
-  (modify-syntax-entry ?/ "." magik-mode-syntax-table)
-  (modify-syntax-entry ?= "." magik-mode-syntax-table)
-  (modify-syntax-entry ?$ "." magik-mode-syntax-table)
-  (modify-syntax-entry ?< "." magik-mode-syntax-table)
-  (modify-syntax-entry ?> "." magik-mode-syntax-table)
-  (modify-syntax-entry ?& "." magik-mode-syntax-table)
-  (modify-syntax-entry ?\" "\"" magik-mode-syntax-table))
+(if magik-under-as-char
+    (modify-syntax-entry ?_ "w" magik-mode-syntax-table))
+(modify-syntax-entry ?\\ "." magik-mode-syntax-table) ;; \ is not an escape character in magik mode.
+(modify-syntax-entry ?? "w" magik-mode-syntax-table)
+(modify-syntax-entry ?! "w" magik-mode-syntax-table)
+;; char intro
+(modify-syntax-entry ?% "/" magik-mode-syntax-table)
+;; multi quote
+(modify-syntax-entry ?| "$" magik-mode-syntax-table)
+;; colon is now part of a word due to the introduction of packages.
+;;       Consequently symbols now include the initial :
+(modify-syntax-entry ?: "w" magik-mode-syntax-table) ;cf \ = "/" in TeX mode.
+;; comments
+(modify-syntax-entry ?# "<" magik-mode-syntax-table)
+(modify-syntax-entry ?\n ">" magik-mode-syntax-table)
+(modify-syntax-entry ?+ "." magik-mode-syntax-table)
+(modify-syntax-entry ?- "." magik-mode-syntax-table)
+(modify-syntax-entry ?* "." magik-mode-syntax-table)
+(modify-syntax-entry ?/ "." magik-mode-syntax-table)
+(modify-syntax-entry ?= "." magik-mode-syntax-table)
+(modify-syntax-entry ?$ "." magik-mode-syntax-table)
+(modify-syntax-entry ?< "." magik-mode-syntax-table)
+(modify-syntax-entry ?> "." magik-mode-syntax-table)
+(modify-syntax-entry ?& "." magik-mode-syntax-table)
+(modify-syntax-entry ?\" "\"" magik-mode-syntax-table)
 
 ;;; package setup via setting of variable before load.
 (and magik-method-name-mode
@@ -2365,8 +2335,7 @@ closing bracket into the new \"{...}\" notation."
   (define-key magik-mode-map (kbd "<f4> n")    	 'magik-set-work-buffer-name)
   (define-key magik-mode-map (kbd "<f4> r")    	 'magik-copy-region-to-buffer)
   (define-key magik-mode-map (kbd "<f4> s")    	 'magik-add-debug-statement)
-  (define-key magik-mode-map (kbd "<f4> w")    	 'magik-compare-methods)
-  )
+  (define-key magik-mode-map (kbd "<f4> w")    	 'magik-compare-methods))
 
 (eval-after-load 'flycheck
   '(require 'magik-lint))
