@@ -84,7 +84,7 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
   "Major mode for editing Magik code.
 
 Indents with the TAB or RET keys, inserts underscores, and sends Magik
-to a running gis with `F2 b', `F2 r', or `F2 RET'.
+to a running gis with `F2 b', `F2 m', `F2 r', or `F2 RET'.
 Creates programming templates like
   _if
   _then
@@ -153,7 +153,7 @@ You can customise ‘magik-mode’ with the ‘magik-mode-hook’."
   "Menu for Magik Mode."
   `(,"Magik"
     [,"Transmit Method"   magik-transmit-method         :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f7, f2 f7"]
+     :keys "f7, f2 f7, f2 m"]
     [,"Transmit Region"   magik-transmit-region         :active (magik-utils-buffer-mode-list 'magik-session-mode)
      :keys "f8, f2 f8, f2 r"]
     [,"Transmit Buffer"   magik-transmit-buffer         :active (magik-utils-buffer-mode-list 'magik-session-mode)
