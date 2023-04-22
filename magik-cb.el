@@ -748,7 +748,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
 	    (setq cb-list
 		  (append cb-list
 			  (list (vector buf
-					(list 'switch-to-buffer buf)
+					(list 'display-buffer buf)
 					':active t
 					':keys (format "M-- M-%d f3 f3" i))))))))
     (setq cb-list (append cb-list (list "---")))
@@ -759,7 +759,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
 	    (setq cb-list
 		  (append cb-list
 			  (list (vector buf
-					(list 'switch-to-buffer buf)
+					(list 'display-buffer buf)
 					':active t
 					':keys (format "M-%d f3 f3" i))))))))
 
@@ -927,7 +927,7 @@ It also detects the method_finder version and configures the following buffer lo
       (select-window (get-buffer-window buffer))
     (setq magik-cb-was-one-window (one-window-p t)
 	  magik-cb-was-started-from-top-half (zerop (cl-second (window-edges (selected-window)))))
-    (switch-to-buffer-other-window buffer)))
+    (display-buffer buffer)))
 
 (defun magik-cb-set-filename ()
   "Read a filename off the user and return it."
@@ -1591,7 +1591,7 @@ some state for a clean exit."
 	;; same sort of start up as for "*cb*", and just note that the user
 	;; got into "*cb2*" without going via "*cb*".
 	(setq magik-cb-was-one-window (one-window-p t))
-	(switch-to-buffer-other-window cb2))
+	(display-buffer cb2))
 
        ((not (one-window-p t))
 	;; if there's 3 windows maybe we should try and zap the least wanted
@@ -1608,10 +1608,10 @@ some state for a clean exit."
        (magik-cb-was-started-from-top-half
 	;; make "*cb2*" appear in the top half.
 	(split-window-vertically)
-	(switch-to-buffer cb2))
+	(display-buffer cb2))
 
        (t
-	(switch-to-buffer-other-window cb2))))
+	(display-buffer cb2))))
     t))
 					;)
 
@@ -1987,7 +1987,7 @@ modelines of \"*cb*\" and \"*cb2*\" and put in a (') character."
      ((and (>= x (+ 25 22 9 8 3 len1 len2))
 	   (buffer-live-p (get-buffer (magik-cb-gis-buffer)))
 	   (get-buffer-process (get-buffer (magik-cb-gis-buffer))))
-      (switch-to-buffer-other-window (magik-cb-gis-buffer)))))
+      (display-buffer (magik-cb-gis-buffer)))))
   (magik-cb-redraw-modeline))
 
 ;; U S E R   I N T E R F A C E
