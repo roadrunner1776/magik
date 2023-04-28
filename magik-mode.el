@@ -84,7 +84,7 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
   "Major mode for editing Magik code.
 
 Indents with the TAB or RET keys, inserts underscores, and sends Magik
-to a running gis with `F2 b', `F2 r', or `F2 RET'.
+to a running gis with `F2 b', `F2 m', `F2 r', or `F2 RET'.
 Creates programming templates like
   _if
   _then
