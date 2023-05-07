@@ -53,14 +53,10 @@
 (easy-menu-define magik-product-menu magik-product-mode-map
   "Menu for Product mode."
   `(,"Product"
-    [,"Add product"                      magik-product-transmit-buffer
-     :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 b"]
-    [,"Reinitialise product"             magik-product-reinitialise
-     :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 r"]
+    [,"Add product"          magik-product-transmit-buffer (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Reinitialise product" magik-product-reinitialise    (magik-utils-buffer-mode-list 'magik-session-mode)]
     "---"
-    [,"Customize"                        magik-product-customize   t]))
+    [,"Customize"            magik-product-customize       t]))
 
 (defvar magik-product-mode-syntax-table nil
   "Syntax table in use in Product Mode buffers.")
