@@ -5,6 +5,7 @@
 2. [Features](#features)
 3. [Usage with Smallworld 4.x or older](#usage4x)
 4. [Side Effects](#sideeffects)
+5. [Familiar with SW 4.x EMACS? Some Tipps for you!](#legacyantinews)
 
 ## Installation
 
@@ -118,3 +119,15 @@ For quick usage of the keyboard-macro functions you may e.g. bind the <kbd>Ctrl<
 (global-set-key [C-f3] 'kmacro-start-macro-or-insert-counter)
 (global-set-key [C-f4] 'kmacro-end-or-call-macro)
 ```
+
+## <a name="legacyantinews"></a>Familiar with SW 4.x EMACS? Some Tipps for you!
+
+If you've been using the EMACS delivered by GE with Smallworld version 4.3 and earlier, you might want to customize some variables with default values changed with respect to the former "GE"-EMACS:
+
+| actual<br/>variable | actual<br>default | former<br/>variable | former<br/>default | Remarks |
+| :---: | --- | --- | --- | --- |
+| magik-electric-mode | t | electric-magik-mode | nil | If set (non nil), typing the <kbd>Space</kbd> after a keyworld like `for` or `if` inserts the matching control structure.<br/>If not set (nil), you have to type <kbd>F2></kbd><kbd>Space</kbd> to achive the same behaviour. |
+| mouse-drag-copy-region | nil | dto. | t | Paste a mouse selection (even to other programs).<br/>(Default has been changed in standard EMACS) |
+| show-paren-mode | nil | dto | t | if point is on opening or after closeing bracket, show the matching one.<br/>(GE's EMACS had done this customization) |
+
+Eventually you'll find some more customazations in of the former GE's EMACS' installation in emacs/site-lisp/smallworld/sw_defaults.el, but you'll have to check, whether these will work the the EMACS installation you are using now.

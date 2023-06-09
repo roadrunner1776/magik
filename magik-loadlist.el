@@ -48,9 +48,9 @@ Intial ^ and final $ is automatically added in `loadlist-ignore'."
 (easy-menu-define magik-loadlist-menu magik-loadlist-mode-map
   "Menu for loadlist mode."
   `(,"Loadlist"
-    [,"Refresh Buffer from Directory"    magik-loadlist-refresh-contents :active t]
+    [,"Refresh Buffer from Directory"    magik-loadlist-refresh-contents t]
     "---"
-    [,"Transmit Buffer"                  magik-loadlist-transmit         :active t :keys "f2 b"]
+    [,"Transmit Buffer"                  magik-loadlist-transmit         t]
     "---"
     [,"Customize"                        magik-loadlist-customize        t]))
 

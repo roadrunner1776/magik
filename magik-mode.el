@@ -84,7 +84,7 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
   "Major mode for editing Magik code.
 
 Indents with the TAB or RET keys, inserts underscores, and sends Magik
-to a running gis with `F2 b', `F2 r', or `F2 RET'.
+to a running gis with `F2 b', `F2 m', `F2 r', or `F2 RET'.
 Creates programming templates like
   _if
   _then
@@ -152,42 +152,39 @@ You can customise ‘magik-mode’ with the ‘magik-mode-hook’."
 (easy-menu-define magik-menu magik-mode-map
   "Menu for Magik Mode."
   `(,"Magik"
-    [,"Transmit Method"   magik-transmit-method         :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f7, f2 f7"]
-    [,"Transmit Region"   magik-transmit-region         :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f8, f2 f8, f2 r"]
-    [,"Transmit Buffer"   magik-transmit-buffer         :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 b"]
-    [,"Transmit Chunk"    magik-transmit-$-chunk        :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 $"]
-    [,"Transmit Thing"    magik-transmit-thing          :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 RET"]
+    [,"Transmit Method"   magik-transmit-method :active (magik-utils-buffer-mode-list 'magik-session-mode)
+     :keys "<f7>,   <f2> <f7>,   <f2> m"]
+    [,"Transmit Region"   magik-transmit-region :active (magik-utils-buffer-mode-list 'magik-session-mode)
+     :keys "<f8>,   <f2> <f8>,   <f2> r"]
+    [,"Transmit Buffer"   magik-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Transmit Chunk"    magik-transmit-$-chunk        (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Transmit Thing"    magik-transmit-thing          (magik-utils-buffer-mode-list 'magik-session-mode)]
     "---"
-    [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   :active t :keys "f4 r"]
-    [,"Copy Method to Work Buffer"  magik-copy-method-to-buffer   :active t :keys "f4 m"]
-    [,"Set Work Buffer Name"        magik-set-work-buffer-name    :active t :keys "f4 n"]
+    [,"Copy Region to Work Buffer"  magik-copy-region-to-buffer   t]
+    [,"Copy Method to Work Buffer"  magik-copy-method-to-buffer   t]
+    [,"Set Work Buffer Name"        magik-set-work-buffer-name    t]
     "---"
-    [,"Electric Template" magik-explicit-electric-space        :active t :keys "f2 SPC"]
-    [,"Mark Method"       magik-mark-method                    :active t :keys "C-M-h, f9"]
-    [,"Copy Method"       magik-copy-method                    :active t :keys "f4 c, f6"]
-    [,"Compare Method between Windows"   magik-compare-methods :active t :keys "f4 w"]
-    [,"Compare Method using Ediff"     magik-ediff-methods     :active t :keys "f4 e"]
+    [,"Electric Template" magik-explicit-electric-space           t]
+    [,"Mark Method"       magik-mark-method               :active t :keys "C-M-h,   <f9>"]
+    [,"Copy Method"       magik-copy-method               :active t :keys "<f4> c,   <f6>"]
+    [,"Compare Method between Windows" magik-compare-methods      t]
+    [,"Compare Method using Ediff"     magik-ediff-methods        t]
     "---"
-    [,"Add Debug Statement"         magik-add-debug-statement     :active t :keys "f4 s"]
-    [,"Trace Statement"             magik-trace-curr-statement    :active t :keys "f2 t"]
-    [,"Symbol Complete"  magik-symbol-complete :active (magik-utils-buffer-mode-list 'magik-session-mode) :keys "f4 f4"]
+    [,"Add Debug Statement"         magik-add-debug-statement     t]
+    [,"Trace Statement"             magik-trace-curr-statement    t]
+    [,"Symbol Complete"   magik-symbol-complete         (magik-utils-buffer-mode-list 'magik-session-mode)]
     ;; [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
     ;; 									      (magik-utils-buffer-mode-list 'magik-session-mode))
-    ;;  :keys "f2 x"]
+    ;;  :keys "<f2> x"]
     "---"
-    [,"Comment Region"           magik-comment-region          :active t :keys "f2 #"]
-    [,"Uncomment Region"         magik-uncomment-region        :active t :keys "f2 ESC #"]
-    [,"Fill Comment"              magik-fill-public-comment     :active t :keys "f2 q"]
+    [,"Comment Region"           magik-comment-region          t]
+    [,"Uncomment Region"         magik-uncomment-region        t]
+    [,"Fill Comment"             magik-fill-public-comment     t]
     "---"
-    [,"Check sw-method-docs for method"  magik-single-sw-method-docs :active t :keys "f2 d"]
-    [,"Check sw-method-docs for file"  magik-file-sw-method-docs :active t :keys "f2 D"]
-    [,"Check pragma for method/def_slotted_exemplar"  magik-single-pragma :active t :keys "f2 p"]
-    [,"Check pragma for file"  magik-file-pragma :active t :keys "f2 P"]
+    [,"Check sw-method-docs for method"      magik-single-sw-method-docs t]
+    [,"Check sw-method-docs for file"        magik-file-sw-method-docs   t]
+    [,"Check pragma for method/def_slotted_exemplar" magik-single-pragma t]
+    [,"Check pragma for file"                        magik-file-pragma   t]
     "---"
     (,"Toggle.."
      [,"Method Name Display"      magik-method-name-mode
@@ -196,7 +193,6 @@ You can customise ‘magik-mode’ with the ‘magik-mode-hook’."
       :selected magik-method-name-mode]
      [,"Electric Magik Mode"  magik-electric-mode
       :active t
-      :keys "f2 e"
       :style toggle
       :selected magik-electric-mode]
      [,"#DEBUG Statements"          magik-toggle-transmit-debug-p

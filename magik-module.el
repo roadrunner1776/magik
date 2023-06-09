@@ -67,54 +67,42 @@
 (easy-menu-define magik-module-menu magik-module-mode-map
   "Menu for Module mode."
   `(,"Module"
-    [,"Load"
-     magik-module-transmit-buffer
-     :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 b"]
-    [,"Reload definition"
-     magik-module-reload-module-definition
-     :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 d"]
-    [,"Compile messages"
-     magik-module-compile-messages
-     :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 c"]
-    [,"Remove"
-     magik-module-remove-module
-     :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 R"]
+    [,"Load"               magik-module-transmit-buffer          (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Reload definition"  magik-module-reload-module-definition (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Compile messages"   magik-module-compile-messages         (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Remove"             magik-module-remove-module            (magik-utils-buffer-mode-list 'magik-session-mode)]
     (,"Set Options..."
      [,"Set :save_magikc? to _false"
       (magik-module-toggle-save-magikc -1)
       :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected (null module-option-save-magikc)
-      :keys "f2 m, M-- M-1 f2 m"]
+      :keys "M-- M-1 <f2> m,   <f2> m"]
      [,"Set :save_magikc? to _true"
       (magik-module-toggle-save-magikc 1)
       :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected module-option-save-magikc
-      :keys "f2 m, M-1 f2 m"]
+      :keys "M-1 <f2> m,   <f2> m"]
      "---"
      [,"Set :force_reload? to _false"
       (magik-module-toggle-force-reload -1)
       :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected (null module-option-force-reload)
-      :keys "f2 r, M-- M-1 f2 r"]
+      :keys "M-- M-1 <f2> r,   <f2> r"]
      [,"Set :force_reload? to :prerequisites"
       (magik-module-toggle-force-reload 'prerequisites)
       :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected (eq module-option-force-reload 'prerequisites)
-      :keys "C-u f2 r"]
+      :keys "C-u <f2> r"]
      [,"Set :force_reload? to _true"
       (magik-module-toggle-force-reload 1)
       :active (magik-utils-buffer-mode-list 'magik-session-mode)
       :style radio
       :selected (eq module-option-force-reload t)
-      :keys "f2 r, M-1 f2 r"])
+      :keys "M-1 <f2> r,   <f2> r"])
     "---"
     [,"Customize"                     magik-module-customize   t]))
 

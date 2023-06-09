@@ -59,23 +59,13 @@
 (easy-menu-define magik-msg-menu magik-msg-mode-map
   "Menu for msg mode."
   `(,"Message"
-    [,"Transmit Buffer"                  magik-msg-transmit-buffer
-     :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 b"]
-    [,"Compile Message File"             magik-msg-compile-module-messages
-     :active (magik-utils-buffer-mode-list 'magik-session-mode)
-     :keys "f2 c"]
-    [,"Next"                             magik-msg-forward-message
-     :active t
-     :keys "f2 down"]
-    [,"Previous"                         magik-msg-backward-message
-     :active t
-     :keys "f2 up"]
-    [,"Mark Message"                     magik-msg-mark-message
-     :active t
-     :keys "f2 m"]
+    [,"Transmit Buffer"      magik-msg-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Compile Message File" magik-msg-compile-module-messages (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Next"                 magik-msg-forward-message         t]
+    [,"Previous"             magik-msg-backward-message        t]
+    [,"Mark Message"         magik-msg-mark-message            t]
     "---"
-    [,"Customize"                        magik-msg-customize        t]))
+    [,"Customize"            magik-msg-customize               t]))
 
 (defvar magik-msg-mode-syntax-table nil
   "Syntax table in use in MSG-mode buffers.")
