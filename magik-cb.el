@@ -603,22 +603,24 @@ Do a no-op if already in the cb."
 	  (t
 	   (setq gis-proc nil)))
     (pop-to-buffer buffer)
-    (magik-cb-mode)
+    (with-current-buffer buffer
+      (magik-cb-mode)
 
-    (if (not running-p)
-	(progn
-	  (setq magik-cb-process (magik-cb-get-process-create buffer 'magik-cb-filter gis magik-cb-file))
-	  (magik-cb-interactive-buffer)
-	  (sleep-for 0.1)))
+      (if (not running-p)
+	  (progn
+	    (setq magik-cb-process (magik-cb-get-process-create buffer 'magik-cb-filter gis magik-cb-file))
+	    (magik-cb-interactive-buffer)
+	    (sleep-for 0.1)))
 
-    (if (not magik-cb-process)
-	(error "The Class Browser, '%s', is not running" (current-buffer)))
+      (if (not magik-cb-process)
+	  (error "The Class Browser, '%s', is not running" (current-buffer)))
 
-    (if (magik-cb-set-method-and-class method class)
-	(magik-cb-send-modeline-and-pr)
-      (magik-cb-redraw-modeline))
+      (if (magik-cb-set-method-and-class method class)
+	  (magik-cb-send-modeline-and-pr)
+	(magik-cb-redraw-modeline))
 
-    (magik-cb-set-windows)))
+      (magik-cb-set-windows))
+    ))
 
 (defun magik-cb-new-buffer ()
   "Start a new Class Browser session."
