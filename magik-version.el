@@ -374,7 +374,7 @@ Will set `gis-version-file' to FILE."
 
   (setq buffer-read-only t)
   (set-buffer-modified-p nil)
-  (switch-to-buffer (current-buffer))
+  (display-buffer (current-buffer))
   (magik-version-next))
 
 (defun magik-version-quit ()

@@ -347,7 +347,7 @@ With a prefix arg, ask user for current directory to use."
       (insert (format "\nCwd is: %s\n\n" default-directory))
       (magik-session-start-process args))
     (if (magik-aliases-switch-to-buffer alias)
-	(switch-to-buffer buf))))
+	(display-buffer buf))))
 
 (defun magik-aliases-at-alias-definition ()
   "Return definition, if point is in an alias definition."
@@ -486,7 +486,7 @@ Returns nil if FILE cannot be expanded."
 
     (cl-loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)
 	     do (push (vector (buffer-file-name (get-buffer buf))
-			      (list 'switch-to-buffer buf)
+			      (list 'display-buffer buf)
 			      t) buffers))
     (or (eq (length buffers) 0) (push "---" buffers))
 

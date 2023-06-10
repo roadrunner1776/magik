@@ -410,7 +410,7 @@ queried irrespective of default value of `magik-session-prompt'"
 			   (concat (getenv "SMALLWORLD_GIS") "\\config\\environment.bat"))
     (with-current-buffer buffer
       (if (stringp version) (set 'magik-session-version-current version)))
-    (switch-to-buffer-other-window buffer)))
+    (display-buffer buffer)))
 
 (defun magik-session-parse-gis-command (command)
   "Parse the magik-session-command string taking care of any quoting
@@ -504,7 +504,7 @@ and return a list of all the components of the command."
 	    (setq magik-session-list
 		  (append magik-session-list
 			  (list (vector buf
-					(list 'switch-to-buffer buf)
+					(list 'display-buffer buf)
 					':active t
 					':keys (format "M-%d f2 z" i))))))))
     ;;GIS buffers ordered according to when they were started.
@@ -558,7 +558,7 @@ and return a list of all the components of the command."
 						  (function (lambda () (getenv "SMALLWORLD_GIS")))))
 	shell-list)
     (cl-loop for buf in shell-bufs
-	     do (push (vector buf (list 'switch-to-buffer buf) t) shell-list))
+	     do (push (vector buf (list 'display-buffer buf) t) shell-list))
     (easy-menu-change (list "Tools" "Magik")
 		      "External Shell Processes"
 		      (or shell-list (list "No Processes")))))
