@@ -21,7 +21,7 @@
 
 (require 'flycheck)
 
-(defcustom magik-lint-jar-file (expand-file-name (concat user-emacs-directory "magik-lint/magik-lint-0.5.1.jar"))
+(defcustom magik-lint-jar-file (expand-file-name (concat user-emacs-directory "magik-lint/magik-lint-0.7.1.jar"))
   "Location of the magik-lint jar file."
   :group 'magik
   :type  '(choice (file)
@@ -43,7 +43,7 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
             (eval flycheck-magik-lint-args)
             (config-file "--rcfile" flycheck-magik-lintrc)
             "--max-infractions" (eval (number-to-string flycheck-checker-error-threshold))
-            "--msg-template" "\"${path}:${line}:${column}: (${category}) ${msg}\""
+            "--msg-template" "\"${path}:${line}:${column}: (${category}) ${msg} (${symbol})\""
             "--column-offset" "+1"
             source)
   :error-patterns
