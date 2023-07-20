@@ -21,6 +21,7 @@
 
 (eval-when-compile
   (require 'sort))
+(require 'cl-lib)
 
 (defvar magik-utils-original-process-environment (cl-copy-list process-environment)
   "Store the original `process-environment' at startup.

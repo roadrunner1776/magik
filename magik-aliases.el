@@ -526,8 +526,8 @@ Returns nil if FILE cannot be expanded."
 		     "Aliases Files (%d)")
 		    last))))
 
-(eval-after-load 'msb
-  '(magik-aliases-msb-configuration))
+(with-eval-after-load 'msb
+  (magik-aliases-msb-configuration))
 
 (provide 'magik-aliases)
 ;;; magik-aliases.el ends here

@@ -240,10 +240,9 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
     (push '("\\.hmsg$" . magik-msg-mode) auto-mode-alist))
 
 ;; speedbar configuration
-(eval-after-load 'speedbar
-  '(progn
-     (speedbar-add-supported-extension ".msg")
-     (speedbar-add-supported-extension ".hmsg")))
+(with-eval-after-load 'speedbar
+  (speedbar-add-supported-extension ".msg")
+  (speedbar-add-supported-extension ".hmsg"))
 
 ;;MSB configuration
 (defun magik-msg-msb-configuration ()
@@ -259,8 +258,8 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
 		     "Msg Files (%d)")
 		    last))))
 
-(eval-after-load 'msb
-  '(magik-msg-msb-configuration))
+(with-eval-after-load 'msb
+  (magik-msg-msb-configuration))
 
 (provide 'magik-msg)
 ;;; magik-msg.el ends here
