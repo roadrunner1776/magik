@@ -604,8 +604,7 @@ Entry to this mode calls the value of magik-session-mode-hook."
     (make-local-variable 'ac-sources)
 
     (use-local-map magik-session-mode-map)
-    (easy-menu-add magik-session-menu)
-    (set-syntax-table magik-mode-syntax-table)
+    (set-syntax-table magik-base-mode-syntax-table)
 
     (if (null tmp-no-of-gis-cmds)
 	(progn
@@ -622,7 +621,7 @@ Entry to this mode calls the value of magik-session-mode-hook."
     (setq major-mode 'magik-session-mode
 	  mode-name "Magik Session"
 	  selective-display t
-	  local-abbrev-table magik-mode-abbrev-table
+	  local-abbrev-table magik-base-mode-abbrev-table
 	  comint-last-input-start (make-marker)
 	  comint-last-input-end   (make-marker)
 	  magik-session-command-history (or magik-session-command-history (default-value 'magik-session-command-history))
@@ -1609,11 +1608,11 @@ where MODE is the name of the major mode with the '-mode' postfix."
 		     "GIS (%d)")
 		    last))))
 
-(eval-after-load 'msb
-  '(magik-session-msb-configuration))
+(with-eval-after-load 'msb
+  (magik-session-msb-configuration))
 
-(eval-after-load 'auto-complete
-  '(add-to-list 'ac-modes 'magik-session-mode))
+(with-eval-after-load 'auto-complete
+  (add-to-list 'ac-modes 'magik-session-mode))
 
 (progn
   ;; ---------------------- magik session mode -------------------------

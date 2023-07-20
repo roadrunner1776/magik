@@ -85,7 +85,6 @@
 (require 'magik-mode)
 (require 'magik-session)
 (require 'magik-utils)
-(require 'cl-lib)
 (require 'easymenu)
 
 (defgroup magik-cb nil
@@ -655,7 +654,7 @@ To view the help on these variables type C-h v [Return] [variable-name]"
 
   (use-local-map magik-cb-mode-map)
   (easy-menu-add magik-cb-menu)
-  (set-syntax-table magik-mode-syntax-table)
+  (set-syntax-table magik-base-mode-syntax-table)
 
   (setq major-mode 'magik-cb-mode
 	buffer-read-only t
@@ -1551,7 +1550,7 @@ be careful to preserve the position in \"*cb2*\"."
 	font-lock-defaults '(magik-cb2-font-lock-keywords nil t ((?_ . "w"))))
 
   (use-local-map magik-cb-mode-map)
-  (set-syntax-table (copy-syntax-table magik-mode-syntax-table))
+  (set-syntax-table (copy-syntax-table magik-base-mode-syntax-table))
   (modify-syntax-entry ?\" "w")
   (modify-syntax-entry ?- "w")
 
@@ -2458,11 +2457,11 @@ See the variable `magik-cb-generalise-file-name-alist' to provide more customisa
 		     "CB (%d)")
 		    last))))
 
-(eval-after-load 'msb
-  '(magik-cb-msb-configuration))
+(with-eval-after-load 'msb
+  (magik-cb-msb-configuration))
 
-(eval-after-load 'autocomplete
-  '(require 'magik-cb-ac))
+(with-eval-after-load 'autocomplete
+  (require 'magik-cb-ac))
 
 (progn
   ;; ----------------------- cb mode ------------------------

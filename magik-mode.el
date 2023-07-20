@@ -1,6 +1,7 @@
 ;;; magik-mode.el --- mode for editing Magik + some utils.
 
 ;; Package-Version: 0.0.1
+;; Package-Requires: ((emacs "24.4"))
 ;; URL: http://github.com/roadrunner1776/magik
 ;; Keywords: languages
 
@@ -24,7 +25,6 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'imenu)
   (require 'font-lock)
   (defvar msb-menu-cond)
   (defvar ac-sources)
@@ -79,77 +79,61 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
   :group 'magik
   :type  'integer)
 
-;;;###autoload
-(define-derived-mode magik-mode prog-mode "Magik"
-  "Major mode for editing Magik code.
+(define-derived-mode magik-base-mode prog-mode "Magik"
+  "Generic major mode for editing Magik files.
 
-Indents with the TAB or RET keys, inserts underscores, and sends Magik
-to a running gis with `F2 b', `F2 m', `F2 r', or `F2 RET'.
-Creates programming templates like
-  _if
-  _then
+This is a generic major mode intended to be inherited by
+concrete implementations."
+  :interactive nil
+  :group 'magik
 
-  _endif
-with `F2 SPC' and trace statements with `F2 t'.
-Fills private (#) or public (##) comments with `F2 q'.
+  (setq-local magik-template-file-type (magik-template-file-type)
+	      paragraph-start (concat "^$\\|" page-delimiter)
+	      paragraph-separate paragraph-start
+	      indent-line-function 'magik-indent-line
+	      require-final-newline mode-require-final-newline
+	      comment-start "#"
+	      comment-end ""
+	      comment-column 8
+	      comment-start-skip "#+ *"
+	      comment-multi-line nil
+	      parse-sexp-ignore-comments nil
+	      magik-transmit-debug-mode-line-string " #DEBUG"
+	      imenu-generic-expression imenu-generic-expression
+	      imenu-create-index-function 'magik-imenu-create-index-function
+	      imenu-syntax-alist '((?_ . "w"))
+	      ac-sources ac-sources
 
-You can customise ‘magik-mode’ with the ‘magik-mode-hook’."
+	      outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
 
-  (make-local-variable 'paragraph-start)
-  (make-local-variable 'paragraph-separate)
-  (make-local-variable 'indent-line-function)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'comment-start)
-  (make-local-variable 'comment-end)
-  (make-local-variable 'comment-column)
-  (make-local-variable 'comment-start-skip)
-  (make-local-variable 'comment-multi-line)
-  (make-local-variable 'parse-sexp-ignore-comments)
-  (make-local-variable 'imenu-generic-expression)
-  (make-local-variable 'imenu-syntax-alist)
-  (make-local-variable 'font-lock-defaults)
-  (make-local-variable 'outline-regexp)
-  (make-local-variable 'magik-method-name)
-  (make-local-variable 'magik-transmit-debug-mode-line-string)
-  (make-local-variable 'ac-sources)
-
-  (setq magik-template-file-type (magik-template-file-type)
-	paragraph-start (concat "^$\\|" page-delimiter)
-	paragraph-separate paragraph-start
-	indent-line-function 'magik-indent-line
-	require-final-newline t
-	comment-start "#"
-	comment-end ""
-	comment-column 8
-	comment-start-skip "#+ *"
-	comment-multi-line nil
-	parse-sexp-ignore-comments nil
-	magik-transmit-debug-mode-line-string " #DEBUG"
-	imenu-create-index-function 'magik-imenu-create-index-function
-	imenu-syntax-alist '((?_ . "w"))
-	font-lock-defaults
-	'((magik-font-lock-keywords
-	   magik-font-lock-keywords-1
-	   magik-font-lock-keywords-2
-	   magik-font-lock-keywords-3
-	   magik-font-lock-keywords-4
-	   magik-font-lock-keywords-5)
-	  nil t
-	  ((?_ . "w"))
-	  magik-goto-code
-	  (font-lock-fontify-buffer-function   . magik-font-lock-fontify-buffer)
-	  (font-lock-fontify-region-function   . magik-font-lock-fontify-region)
-	  (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))
-	outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
-  
   (when magik-auto-abbrevs (abbrev-mode 1))
 
   (imenu-add-menubar-index))
 
+;;;###autoload
+(define-derived-mode magik-mode magik-base-mode "Magik"
+  "Major mode for editing Magik code."
+  :group 'magik
+  :abbrev-table nil
+  :syntax-table nil
+
+  (setq-local font-lock-defaults '((magik-font-lock-keywords
+				    magik-font-lock-keywords-1
+				    magik-font-lock-keywords-2
+				    magik-font-lock-keywords-3
+				    magik-font-lock-keywords-4
+				    magik-font-lock-keywords-5)
+				   nil t
+				   ((?_ . "w"))
+				   magik-goto-code
+				   (font-lock-fontify-buffer-function   . magik-font-lock-fontify-buffer)
+				   (font-lock-fontify-region-function   . magik-font-lock-fontify-region)
+				   (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))))
+
 (defvar magik-menu nil
   "Keymap for the Magik buffer menu bar.")
 
-(easy-menu-define magik-menu magik-mode-map
+(easy-menu-define magik-menu magik-base-mode-map
   "Menu for Magik Mode."
   `(,"Magik"
     [,"Transmit Method"   magik-transmit-method :active (magik-utils-buffer-mode-list 'magik-session-mode)
@@ -173,9 +157,6 @@ You can customise ‘magik-mode’ with the ‘magik-mode-hook’."
     [,"Add Debug Statement"         magik-add-debug-statement     t]
     [,"Trace Statement"             magik-trace-curr-statement    t]
     [,"Symbol Complete"   magik-symbol-complete         (magik-utils-buffer-mode-list 'magik-session-mode)]
-    ;; [,"Deep Print"        deep-print                     :active (and (fboundp 'deep-print)
-    ;; 									      (magik-utils-buffer-mode-list 'magik-session-mode))
-    ;;  :keys "<f2> x"]
     "---"
     [,"Comment Region"           magik-comment-region          t]
     [,"Uncomment Region"         magik-uncomment-region        t]
@@ -277,155 +258,113 @@ You can customise ‘magik-mode’ with the ‘magik-mode-hook’."
   "Fontification colours for Magik."
   :group 'magik)
 
-(defface magik-font-lock-keyword-operators-face
-  '((((type tty) (class color)) (:foreground "cyan" :weight bold))
-    (((class grayscale) (background light)) (:foreground "LightGray" :bold t))
-    (((class grayscale) (background dark)) (:foreground "DimGray" :bold t))
-    (((class color) (background light)) (:foreground "Sky Blue"))
-    (((class color) (background dark)) (:foreground "Sky Blue"))
-    (t (:bold t)))
+(defface magik-class-face
+  '((t (:inherit font-lock-type-face)))
+  "Font-lock Face to use when displaying exemplars.
+
+Based upon `font-lock-type-face'"
+  :group 'magik-faces)
+
+(defface magik-doc-face
+  '((t (:inherit font-lock-doc-face)))
+  "Font-lock Face to use when displaying documentation.
+
+Based upon `font-lock-doc-face'"
+  :group 'magik-faces)
+
+(defface magik-keyword-operators-face
+  '((t (:inherit font-lock-keyword-face)))
   "Font-lock Face to use when displaying Magik operator keywords.
 
 Based upon `font-lock-keyword-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-keyword-statements-face
-  '((((type tty) (class color)) (:foreground "cyan" :weight bold))
-    (((class grayscale) (background light)) (:foreground "LightGray" :bold t))
-    (((class grayscale) (background dark)) (:foreground "DimGray" :bold t))
-    (((class color) (background light)) (:foreground "Steel Blue"))
-    (((class color) (background dark)) (:foreground "Steel Blue"))
-    (t (:bold t)))
+(defface magik-keyword-statements-face
+  '((t (:inherit font-lock-keyword-face)))
   "Font-lock Face to use when displaying Magik statement keywords.
 
 Based upon `font-lock-keyword-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-keyword-loop-face
-  '((((type tty) (class color)) (:foreground "cyan" :weight bold))
-    (((class grayscale) (background light)) (:foreground "LightGray" :bold t))
-    (((class grayscale) (background dark)) (:foreground "DimGray" :bold t))
-    (((class color) (background light)) (:foreground "Dark Sea Green"))
-    (((class color) (background dark)) (:foreground "Dark Sea Green"))
-    (t (:bold t)))
-  "Font-lock Face to use when displaying Magik loop keywords.
+(defface magik-keyword-loop-face
+  '((t (:inherit font-lock-keyword-face)))
+  "Font-lock Face to use when displaying Magik statement keywords.
 
 Based upon `font-lock-keyword-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-keyword-arguments-face
-  '((((type tty) (class color)) (:foreground "cyan" :weight bold))
-    (((class grayscale) (background light)) (:foreground "LightGray" :bold t))
-    (((class grayscale) (background dark)) (:foreground "DimGray" :bold t))
-    (((class color) (background light)) (:foreground "Green"))
-    (((class color) (background dark)) (:foreground "Green"))
-    (t (:bold t)))
+(defface magik-keyword-arguments-face
+  '((t (:inherit font-lock-keyword-face)))
   "Font-lock Face to use when displaying Magik argument keywords.
 
 Based upon `font-lock-keyword-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-keyword-variable-face
-  '((((type tty) (class color)) (:foreground "cyan" :weight bold))
-    (((class grayscale) (background light)) (:foreground "LightGray" :bold t))
-    (((class grayscale) (background dark)) (:foreground "DimGray" :bold t))
-    (((class color) (background light)) (:foreground "Yellow Green"))
-    (((class color) (background dark)) (:foreground "Green Yellow"))
-    (t (:bold t)))
+(defface magik-keyword-variable-face
+  '((t (:inherit font-lock-variable-name-face)))
   "Font-lock Face to use when displaying Magik variable keywords.
 
-Based upon `font-lock-keyword-face'"
+Based upon `font-lock-variable-name-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-keyword-obsolete-face
-  '((((type tty) (class color)) (:underline t :foreground "red"))
-    (((class color) (background light)) (:underline t :foreground "Red" :bold t))
-    (((class color) (background dark)) (:underline t :foreground "Pink" :bold t))
-    (t (:inverse-video t :bold t)))
+(defface magik-keyword-obsolete-face
+  '((t (:inherit font-lock-warning-face)))
   "Font-lock Face to use when displaying obsolete Magik keywords.
 
 Based upon `font-lock-warning-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-boolean-face
-  '((((type tty) (class color)) (:foreground "yellow" :weight light))
-    (((class grayscale) (background light))
-     (:foreground "Gray90" :bold t :italic t))
-    (((class grayscale) (background dark))
-     (:foreground "DimGray" :bold t :italic t))
-    (((class color) (background light)) (:foreground "DarkGoldenrod"))
-    (((class color) (background dark)) (:foreground "LightGoldenrod"))
-    (t (:bold t :italic t)))
+(defface magik-boolean-face
+  '((t (:inherit font-lock-variable-name-face)))
   "Font-lock Face to use when displaying boolean and kleenean references.
 
 Based upon `font-lock-variable-name-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-pragma-face
-  '((((type tty) (class color)) (:bold t :foreground "blue" :weight light))
-    (((class grayscale) (background light)) (:foreground "LightGray" :bold t))
-    (((class grayscale) (background dark)) (:foreground "DimGray" :bold t))
-    (((class color) (background light)) (:bold t :foreground "Orchid"))
-    (((class color) (background dark)) (:bold t :foreground "LightSteelBlue"))
-    (t (:bold t)))
+(defface magik-method-face
+  '((t (:inherit font-lock-function-name-face)))
+  "Font-lock Face to use when displaying method names and method and procedure keywords.
+
+Based upon `font-lock-function-name-face'"
+  :group 'magik-faces)
+
+(defface magik-pragma-face
+  '((t (:inherit font-lock-builtin-face)))
   "Font-lock Face to use when displaying pragma directives.
 
 Based upon `font-lock-builtin-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-procedure-face
-  '((((type tty) (class color)) (:foreground "blue" :weight bold))
-    (((class color) (background light)) (:italic t :foreground "Blue"        :bold t)) ;originally just italic
-    (((class color) (background dark)) (:italic t :foreground "LightSkyBlue" :bold t))
-    (t (:inverse-video t :bold t)))
+(defface magik-procedure-face
+  '((t (:inherit font-lock-function-name-face)))
   "Font-lock Face to use when displaying procedure calls.
 
 Based upon `font-lock-function-name-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-slot-face
-  '((((type tty) (class color)) (:foreground "yellow" :weight light))
-    (((class grayscale) (background light))
-     (:foreground "Gray90" :bold t :italic t))
-    (((class grayscale) (background dark))
-     (:foreground "DimGray" :bold t :italic t))
-    (((class color) (background light)) (:italic t :foreground "DarkGoldenrod" :bold t)) ;originally just italic
-    (((class color) (background dark)) (:italic t :foreground "LightGoldenrod" :bold t))
-    (t (:bold t :italic t)))
+(defface magik-slot-face
+  '((t (:inherit font-lock-variable-name-face)))
   "Font-lock Face to use when displaying slots.
 
 Based upon `font-lock-variable-name-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-symbol-face
-  '((((type tty) (class color)) (:foreground "magenta"))
-    (((class grayscale) (background light))
-     (:foreground "LightGray" :bold t :underline t))
-    (((class grayscale) (background dark))
-     (:foreground "Gray50" :bold t :underline t))
-    (((class color) (background light)) (:foreground "CadetBlue"))
-    (((class color) (background dark)) (:foreground "Aquamarine"))
-    (t (:bold t :underline t)))
+(defface magik-symbol-face
+  '((t (:inherit font-lock-constant-face)))
   "Font-lock Face to use when displaying symbols.
 
 Based upon `font-lock-constant-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-warning-face
-  '((((type tty) (class color)) (:inverse-video t :foreground "red"))
-    (((class color) (background light)) (:inverse-video t :foreground "Red" :bold t))
-    (((class color) (background dark)) (:inverse-video t :foreground "Pink" :bold t))
-    (t (:inverse-video t :bold t)))
+(defface magik-warning-face
+  '((t (:inherit font-lock-warning-face)))
   "Font-lock Face to use when displaying warning statements.
 
 Based upon `font-lock-warning-face'"
   :group 'magik-faces)
 
-(defface magik-font-lock-write-face
-  '((((type tty) (class color)) (:foreground "red"))
-    (((class color) (background light)) (:italic t :foreground "Red" :bold t))
-    (((class color) (background dark)) (:italic t :foreground "Pink" :bold t))
-    (t (:inverse-video t :bold t)))
+(defface magik-write-face
+  '((t (:inherit font-lock-warning-face)))
   "Font-lock Face to use when displaying write() statements.
 
 Based upon `font-lock-warning-face'"
@@ -496,91 +435,11 @@ because it does not have an _ preceding like all the other Magik keywords.")
   "List of obsolete/unimplemented keywords to highlight for font-lock.")
 
 (defvar magik-other-keywords '(">>" "def_indexed_exemplar" "def_slotted_exemplar")
-  "List of other Magik 'keywords'.")
+  "List of other Magik `keywords'.")
 
 (defvar magik-warnings
   '("TODO" "DEBUG" "FIXME" "sys!slot" "sys!perform" "sys!perform_iter")
   "List of Magik Warnings.")
-
-(defcustom magik-font-lock-class-face 'font-lock-type-face
-  "*Font-lock Face to use when displaying exemplars."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-method-face 'font-lock-function-name-face
-  "*Font-lock Face to use when displaying method names and method and procedure keywords."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-keyword-operators-face 'magik-font-lock-keyword-operators-face
-  "*Font-lock Face to use when displaying Magik operator keywords."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-keyword-statements-face 'magik-font-lock-keyword-statements-face
-  "*Font-lock Face to use when displaying Magik statement keywords."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-keyword-loop-face 'magik-font-lock-keyword-loop-face
-  "*Font-lock Face to use when displaying Magik loop keywords."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-keyword-arguments-face 'magik-font-lock-keyword-arguments-face
-  "*Font-lock Face to use when displaying Magik argument keywords."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-keyword-variable-face 'magik-font-lock-keyword-variable-face
-  "*Font-lock Face to use when displaying Magik variable keywords."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-keyword-obsolete-face 'magik-font-lock-keyword-obsolete-face
-  "*Font-lock Face to use when displaying obsolete Magik keywords."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-boolean-face 'magik-font-lock-boolean-face
-  "*Font-lock Face to use when displaying boolean and kleenean references."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-dynamic-face 'font-lock-variable-name-face
-  "*Font-lock Face to use when displaying dynamic variables."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-pragma-face 'magik-font-lock-pragma-face
-  "*Font-lock Face to use when displaying pragma directives."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-procedure-face 'magik-font-lock-procedure-face
-  "*Font-lock Face to use when displaying procedure calls."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-slot-face 'magik-font-lock-slot-face
-  "*Font-lock Face to use when displaying slots."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-symbol-face 'magik-font-lock-symbol-face
-  "*Font-lock Face to use when displaying symbols."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-warning-face 'magik-font-lock-warning-face
-  "*Font-lock Face to use when displaying warning statements."
-  :group 'magik
-  :type 'face)
-
-(defcustom magik-font-lock-write-face 'magik-font-lock-write-face
-  "*Font-lock Face to use when displaying write() statements."
-  :group 'magik
-  :type 'face)
 
 (defcustom magik-font-lock-keywords-1
   (list
@@ -608,16 +467,16 @@ constants which use the `font-lock-constant-face' face."
 (defcustom magik-font-lock-keywords-2
   (list
    '("\\b_method\\s-*\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\.\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)"
-     (1 magik-font-lock-class-face)
-     (3 magik-font-lock-method-face))
-   '("\\<!\\sw+\\!\\>" .  magik-font-lock-dynamic-face)
-   '("\\<:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . magik-font-lock-symbol-face)
-   '("\\<\\(write\\|print\\|debug_print\\)\\s-*(" 1 magik-font-lock-write-face)
+     (1 ''magik-class-face)
+     (3 ''magik-method-face))
+   '("\\<!\\sw+\\!\\>" .  ''magik-dynamic-face)
+   '("\\<:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . ''magik-symbol-face)
+   '("\\<\\(write\\|print\\|debug_print\\)\\s-*(" 1 ''magik-write-face)
    (list (concat "\\<\\("
 		 (mapconcat 'identity magik-warnings "\\|")
 		 "\\)")
-	 0 'magik-font-lock-warning-face t)
-   '("^\\s-*##.*$" 0 font-lock-doc-face t)
+	 0 ''magik-warning-face t)
+   '("^\\s-*##.*$" 0 ''magik-doc-face t)
    )
   "Font lock setting for 2nd level of Magik fontification.
 Fontifies certain Magik language features like symbols, dynamics but does
@@ -636,32 +495,32 @@ See `magik-font-lock-keywords-1' and `magik-font-lock-keywords-2'."
   (append
    magik-font-lock-keywords-2
    (list
-    (cons (concat "\\<no_way\\|_" (regexp-opt magik-keyword-constants t) "\\>") 'font-lock-constant-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-constants  t) "\\>") 'font-lock-constant-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-operators  t) "\\>") 'magik-font-lock-keyword-operators-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-class      t) "\\>") 'magik-font-lock-class-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-methods    t) "\\>") 'magik-font-lock-method-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-procedures t) "\\>") 'magik-font-lock-procedure-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-statements t) "\\>") 'magik-font-lock-keyword-statements-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-loop       t) "\\>") 'magik-font-lock-keyword-loop-face)    ;; warnings
-    (list (concat "\\<\\(" (mapconcat 'identity magik-warnings "\\|") "\\)\\>") 1 'magik-font-lock-warning-face t)
+    (cons (concat "\\<no_way\\|_" (regexp-opt magik-keyword-constants t) "\\>") ''font-lock-constant-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-constants  t) "\\>") ''font-lock-constant-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-operators  t) "\\>") ''magik-keyword-operators-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-class      t) "\\>") ''magik-class-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-methods    t) "\\>") ''magik-method-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-procedures t) "\\>") ''magik-procedure-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-statements t) "\\>") ''magik-keyword-statements-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-loop       t) "\\>") ''magik-keyword-loop-face)    ;; warnings
+    (list (concat "\\<\\(" (mapconcat 'identity magik-warnings "\\|") "\\)\\>") 1 ''magik-warning-face t)
 
-    (cons (concat "\\<_" (regexp-opt magik-keyword-arguments  t) "\\>") 'magik-font-lock-keyword-arguments-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-variable   t) "\\>") 'magik-font-lock-keyword-variable-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-obsolete   t) "\\>") 'magik-font-lock-keyword-obsolete-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-arguments  t) "\\>") ''magik-keyword-arguments-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-variable   t) "\\>") ''magik-keyword-variable-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-obsolete   t) "\\>") ''magik-keyword-obsolete-face)
     ;; other "keywords"
-    (cons (concat "\\<\\(" (mapconcat 'identity magik-other-keywords "\\|") "\\)\\>") 'font-lock-keyword-face)
-    '("^_pragma\\s-*\\(([^)]*)\\)" 1 magik-font-lock-pragma-face)
+    (cons (concat "\\<\\(" (mapconcat 'identity magik-other-keywords "\\|") "\\)\\>") ''font-lock-keyword-face)
+    '("^_pragma\\s-*\\(([^)]*)\\)" 1 ''magik-pragma-face)
     ;; methods
-    '("\\(\\sw\\|\\s$\\)\\.\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\(\\s-*(\\)" 2 magik-font-lock-method-face)
+    '("\\(\\sw\\|\\s$\\)\\.\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\(\\s-*(\\)" 2 ''magik-method-face)
     ;; procedures
-    '("\\<\\(\\sw+\\)\\(\\s-*(\\)" 1 magik-font-lock-procedure-face)
-    '("^\\(def_slotted_exemplar\\|def_indexed_exemplar\\)\\>" 0 magik-font-lock-class-face t)
-    '("^\\(\\sw+\\)\\.define_\\(shared_constant\\|shared_variable\\|slot_access\\)\\>" 1 magik-font-lock-class-face)
-    '("\\Sw\\(\\.\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\>" 1 magik-font-lock-slot-face)
-    '("\\<\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\?\\>" 0 magik-font-lock-boolean-face t)
-    '("_for\\s-+\\(\\sw+\\)" 1 font-lock-variable-name-face) ;_for loop variable
-    '("@\\s-*\\sw+" 0 font-lock-constant-face t)
+    '("\\<\\(\\sw+\\)\\(\\s-*(\\)" 1 ''magik-procedure-face)
+    '("^\\(def_slotted_exemplar\\|def_indexed_exemplar\\)\\>" 0 ''magik-class-face t)
+    '("^\\(\\sw+\\)\\.define_\\(shared_constant\\|shared_variable\\|slot_access\\)\\>" 1 ''magik-class-face)
+    '("\\Sw\\(\\.\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\>" 1 ''magik-slot-face)
+    '("\\<\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\?\\>" 0 ''magik-boolean-face t)
+    '("_for\\s-+\\(\\sw+\\)" 1 ''font-lock-variable-name-face) ;_for loop variable
+    '("@\\s-*\\sw+" 0 ''font-lock-constant-face t)
     ))
   "Font lock setting for 4th level of Magik fontification.
 As 1st level but also fontifies all Magik keywords according their
@@ -725,11 +584,11 @@ code is loaded."
   :type '(choice (const :tag "On" 1)
 		 (const :tag "Off" -1)))
 
-(defvar magik-method-name ""
+(defvar-local magik-method-name ""
   "Variable storing method name at which point it in.
 Used by \\[magik-method-name-mode].")
 
-(defvar magik-transmit-debug-mode-line-string nil
+(defvar-local magik-transmit-debug-mode-line-string nil
   "Mode-line string to use when transmitting of #DEBUG statements is enabled.")
 
 (defvar magik-method-name-set-text-function 'magik-method-name-set-text-properties
@@ -947,7 +806,7 @@ Optional argument ARG .."
 
 ;; bound to CR in magik mode.
 (defun magik-newline ()
-  "Insert a newline and indent.  (To insert a newline and not indent, use C-j)."
+  "Insert a newline and indent.  (To insert a newline and not indent, use \\[electric-newline-and-maybe-indent])."
   (interactive "*")
   (if (eq major-mode 'magik-session-mode)
       (error "Your magik shell buffer has got into magik mode!  To recover, type `M-x magik-session-mode'.  Please report this bug."))
@@ -1549,7 +1408,7 @@ If PT is given, goto that char position."
 
 (defun magik-current-method-name ()
   "Return current method and exemplar names as a list (METHOD EXEMPLAR PACKAGE)."
-  (let ((this-syntax-table (copy-syntax-table magik-mode-syntax-table))
+  (let ((this-syntax-table (copy-syntax-table magik-base-mode-syntax-table))
 	(package (magik-current-package-name))
 	(exemplar "")
 	(name "")
@@ -1612,7 +1471,7 @@ If PT is given, goto that char position."
 		   mode-line-buffer-identification 'magik-method-name)
 	   (error
 	    (setq magik-method-name "")))
-	 (set-syntax-table magik-mode-syntax-table))))
+	 (set-syntax-table magik-base-mode-syntax-table))))
 
 (defun magik-trace-curr-statement ()
   "Add a trace statement for the current statement."
@@ -1892,10 +1751,10 @@ Argument ENDING-POINT ..."
      ((eq major-mode 'magik-mode)
       (goto-char (point-min))
       (while (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
-        (magik-parse-sw-method-docs (match-string 1)))
+	(magik-parse-sw-method-docs (match-string 1)))
       (goto-char (point-min))
       (while (search-forward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
-        (magik-parse-sw-method-docs (match-string 1)))))))
+	(magik-parse-sw-method-docs (match-string 1)))))))
 
 (defun magik-single-sw-method-docs ()
   "Search last method for missing parameters and complete the comments."
@@ -2018,7 +1877,6 @@ provide extra control over the name that appears in the index."
 	      (caar slist)))
       (setq slist (cdr slist)))
     (goto-char (point-max))
-    (imenu-progress-message prev-pos 0 t)
     (unwind-protect			; for syntax table
 	(save-match-data
 	  (set-syntax-table table)
@@ -2034,7 +1892,6 @@ provide extra control over the name that appears in the index."
 	       ;; Go backwards for convenience of adding items in order.
 	       (goto-char (point-max))
 	       (while (re-search-backward regexp nil t)
-		 (imenu-progress-message prev-pos nil t)
 		 ;; Add this sort of submenu only when we've found an
 		 ;; item for it, avoiding empty, duff menus.
 		 (unless (assoc menu-title index-alist)
@@ -2058,7 +1915,6 @@ provide extra control over the name that appears in the index."
 			     (cons item (cdr menu))))))))
 	   magik-imenu-expression)
 	  (set-syntax-table old-table)))
-    (imenu-progress-message prev-pos 100 t)
     ;; Sort each submenu by position.
     ;; This is in case one submenu gets items from two different regexps.
     (let ((tail index-alist))
@@ -2204,7 +2060,7 @@ closing bracket into the new \"{...}\" notation."
 (let ((abbrevs-changed nil))
   (mapc
    #'(lambda (str)
-       (define-abbrev magik-mode-abbrev-table
+       (define-abbrev magik-base-mode-abbrev-table
 	 str str 'magik-expand-abbrev))
 
    (append magik-keyword-constants magik-keyword-operators
@@ -2214,30 +2070,30 @@ closing bracket into the new \"{...}\" notation."
 	   magik-keyword-variable nil)))
 
 (if magik-under-as-char
-    (modify-syntax-entry ?_ "w" magik-mode-syntax-table))
-(modify-syntax-entry ?\\ "." magik-mode-syntax-table) ;; \ is not an escape character in magik mode.
-(modify-syntax-entry ?? "w" magik-mode-syntax-table)
-(modify-syntax-entry ?! "w" magik-mode-syntax-table)
+    (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
+(modify-syntax-entry ?\\ "." magik-base-mode-syntax-table) ;; \ is not an escape character in magik mode.
+(modify-syntax-entry ?? "w" magik-base-mode-syntax-table)
+(modify-syntax-entry ?! "w" magik-base-mode-syntax-table)
 ;; char intro
-(modify-syntax-entry ?% "/" magik-mode-syntax-table)
+(modify-syntax-entry ?% "/" magik-base-mode-syntax-table)
 ;; multi quote
-(modify-syntax-entry ?| "$" magik-mode-syntax-table)
+(modify-syntax-entry ?| "$" magik-base-mode-syntax-table)
 ;; colon is now part of a word due to the introduction of packages.
 ;;       Consequently symbols now include the initial :
-(modify-syntax-entry ?: "w" magik-mode-syntax-table) ;cf \ = "/" in TeX mode.
+(modify-syntax-entry ?: "w" magik-base-mode-syntax-table) ;cf \ = "/" in TeX mode.
 ;; comments
-(modify-syntax-entry ?# "<" magik-mode-syntax-table)
-(modify-syntax-entry ?\n ">" magik-mode-syntax-table)
-(modify-syntax-entry ?+ "." magik-mode-syntax-table)
-(modify-syntax-entry ?- "." magik-mode-syntax-table)
-(modify-syntax-entry ?* "." magik-mode-syntax-table)
-(modify-syntax-entry ?/ "." magik-mode-syntax-table)
-(modify-syntax-entry ?= "." magik-mode-syntax-table)
-(modify-syntax-entry ?$ "." magik-mode-syntax-table)
-(modify-syntax-entry ?< "." magik-mode-syntax-table)
-(modify-syntax-entry ?> "." magik-mode-syntax-table)
-(modify-syntax-entry ?& "." magik-mode-syntax-table)
-(modify-syntax-entry ?\" "\"" magik-mode-syntax-table)
+(modify-syntax-entry ?# "<" magik-base-mode-syntax-table)
+(modify-syntax-entry ?\n ">" magik-base-mode-syntax-table)
+(modify-syntax-entry ?+ "." magik-base-mode-syntax-table)
+(modify-syntax-entry ?- "." magik-base-mode-syntax-table)
+(modify-syntax-entry ?* "." magik-base-mode-syntax-table)
+(modify-syntax-entry ?/ "." magik-base-mode-syntax-table)
+(modify-syntax-entry ?= "." magik-base-mode-syntax-table)
+(modify-syntax-entry ?$ "." magik-base-mode-syntax-table)
+(modify-syntax-entry ?< "." magik-base-mode-syntax-table)
+(modify-syntax-entry ?> "." magik-base-mode-syntax-table)
+(modify-syntax-entry ?& "." magik-base-mode-syntax-table)
+(modify-syntax-entry ?\" "\"" magik-base-mode-syntax-table)
 
 ;;; package setup via setting of variable before load.
 (and magik-method-name-mode
@@ -2268,8 +2124,8 @@ closing bracket into the new \"{...}\" notation."
     (push '(magik-transmit-debug-p magik-transmit-debug-mode-line-string) minor-mode-alist))
 
 ;;; speedbar configuration
-(eval-after-load 'speedbar
-  '(speedbar-add-supported-extension ".magik"))
+(with-eval-after-load 'speedbar
+  (speedbar-add-supported-extension ".magik"))
 
 ;;MSB configuration
 (defun magik-msb-configuration ()
@@ -2285,8 +2141,8 @@ closing bracket into the new \"{...}\" notation."
 		     "Magik Files (%d)")
 		    last))))
 
-(eval-after-load 'msb
-  '(magik-msb-configuration))
+(with-eval-after-load 'msb
+  (magik-msb-configuration))
 
 ;;Auto-complete configuration
 (defun magik-ac-configuration ()
@@ -2297,44 +2153,47 @@ closing bracket into the new \"{...}\" notation."
   (ac-define-prefix 'magik-method 'magik-ac-method-prefix)
   (setq ac-modes (append (list 'magik-mode) ac-modes)))
 
-(eval-after-load 'auto-complete
-  '(magik-ac-configuration))
+(with-eval-after-load 'auto-complete
+  (magik-ac-configuration))
 
 (progn
   ;; ------------------------ magik mode -------------------------
 
-  (define-key magik-mode-map "\r"    'magik-newline)
-  (define-key magik-mode-map "\n"    'newline)
-  (define-key magik-mode-map "\t"    'magik-indent-command)
-  (define-key magik-mode-map " "     'magik-electric-space)
-  (define-key magik-mode-map "#"     'magik-electric-hash)
-  (define-key magik-mode-map "/"     'magik-electric-pragma-slash)
-  (define-key magik-mode-map "\\"    'magik-electric-pragma-backslash)
+  (define-key magik-base-mode-map "\r" 'magik-newline)
+  (define-key magik-base-mode-map "\n" 'newline)
+  (define-key magik-base-mode-map "\t" 'magik-indent-command)
+  (define-key magik-base-mode-map " " 'magik-electric-space)
+  (define-key magik-base-mode-map "#" 'magik-electric-hash)
+  (define-key magik-base-mode-map "/" 'magik-electric-pragma-slash)
+  (define-key magik-base-mode-map "\\" 'magik-electric-pragma-backslash)
 
-  (define-key magik-mode-map "\C-\M-h"   'magik-mark-method) ;standard key mapping
-  (define-key magik-mode-map [M-up]      'magik-backward-method)
-  (define-key magik-mode-map [M-down]    'magik-forward-method)
+  (define-key magik-base-mode-map "\C-\M-h" 'magik-mark-method) ;standard key mapping
+  (define-key magik-base-mode-map [M-up] 'magik-backward-method)
+  (define-key magik-base-mode-map [M-down] 'magik-forward-method)
 
-  (define-key magik-mode-map (kbd "<f2> <up>")   'magik-backward-method)
-  (define-key magik-mode-map (kbd "<f2> <down>") 'magik-forward-method)
-  (define-key magik-mode-map (kbd "<f2> $")      'magik-transmit-$-chunk)
-  (define-key magik-mode-map (kbd "<f2> D")      'magik-file-sw-method-docs)
-  (define-key magik-mode-map (kbd "<f2> d")      'magik-single-sw-method-docs)
-  (define-key magik-mode-map (kbd "<f2> P")      'magik-file-pragma)
-  (define-key magik-mode-map (kbd "<f2> p")      'magik-single-pragma)
+  (define-key magik-base-mode-map (kbd "<f2> <up>") 'magik-backward-method)
+  (define-key magik-base-mode-map (kbd "<f2> <down>") 'magik-forward-method)
+  (define-key magik-base-mode-map (kbd "<f2> $") 'magik-transmit-$-chunk)
+  (define-key magik-base-mode-map (kbd "<f2> D") 'magik-file-sw-method-docs)
+  (define-key magik-base-mode-map (kbd "<f2> d") 'magik-single-sw-method-docs)
+  (define-key magik-base-mode-map (kbd "<f2> P") 'magik-file-pragma)
+  (define-key magik-base-mode-map (kbd "<f2> p") 'magik-single-pragma)
 
-  (define-key magik-mode-map (kbd "<f4> <f4>")   'magik-symbol-complete)
-  (define-key magik-mode-map (kbd "<f4> c")      'magik-copy-method)
-  (define-key magik-mode-map (kbd "<f4> e")      'magik-ediff-methods)
-  (define-key magik-mode-map (kbd "<f4> <f3>")   'magik-cb-magik-ediff-methods)
-  (define-key magik-mode-map (kbd "<f4> m")      'magik-copy-method-to-buffer)
-  (define-key magik-mode-map (kbd "<f4> n")    	 'magik-set-work-buffer-name)
-  (define-key magik-mode-map (kbd "<f4> r")    	 'magik-copy-region-to-buffer)
-  (define-key magik-mode-map (kbd "<f4> s")    	 'magik-add-debug-statement)
-  (define-key magik-mode-map (kbd "<f4> w")    	 'magik-compare-methods))
+  (define-key magik-base-mode-map (kbd "<f4> <f4>") 'magik-symbol-complete)
+  (define-key magik-base-mode-map (kbd "<f4> c") 'magik-copy-method)
+  (define-key magik-base-mode-map (kbd "<f4> e") 'magik-ediff-methods)
+  (define-key magik-base-mode-map (kbd "<f4> <f3>") 'magik-cb-magik-ediff-methods)
+  (define-key magik-base-mode-map (kbd "<f4> m") 'magik-copy-method-to-buffer)
+  (define-key magik-base-mode-map (kbd "<f4> n") 'magik-set-work-buffer-name)
+  (define-key magik-base-mode-map (kbd "<f4> r") 'magik-copy-region-to-buffer)
+  (define-key magik-base-mode-map (kbd "<f4> s") 'magik-add-debug-statement)
+  (define-key magik-base-mode-map (kbd "<f4> w") 'magik-compare-methods))
 
-(eval-after-load 'flycheck
-  '(require 'magik-lint))
+(with-eval-after-load 'flycheck
+  (require 'magik-lint))
+
+(with-eval-after-load 'treesit
+  (require 'magik-treesit))
 
 (provide 'magik-mode)
 ;;; magik-mode.el ends here
