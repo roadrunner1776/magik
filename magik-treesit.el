@@ -65,11 +65,12 @@
 
    :language 'magik
    :feature 'keyword
-   `([(false) (true) (maybe) (unset)] @font-lock-constant-face ;;FIXME "_constant"
+   `([(false) (true) (maybe) (unset)] @font-lock-constant-face
+     ["_constant"] @font-lock-constant-face
 
      ["_and" "_andif" "_div" "_is" "_isnt" "_cf" "_mod" "_not" "_or" "_orif" "_xor" "_xorif"] @magik-keyword-operators-face
 
-     [(self) (super)] @font-lock-type-face ;;FIXME "_clone"
+     [(self) (super) (clone)] @font-lock-type-face
 
      ["_abstract" "_private"  "_method" "_endmethod"] @magik-method-face ;;FIXME "_primitive"
 
@@ -83,7 +84,7 @@
 
       ["_iter" "_continue" "_for" "_loop" "_endloop" "_loopbody" "_over" "_leave"] @magik-keyword-loop-face ;;FIXME: "_finally"  "_while"
 
-      ["_gather" "_scatter" "_optional" "_return" ">>"] @magik-keywords-arguments-face ;;FIXME "_allresults"
+      ["_gather" "_scatter" "_allresults" "_optional" "_return" ">>"] @magik-keyword-arguments-face
 
       ["_dynamic" "_global" "_import" "_local" ] @magik-keyword-variable-face))) ;;FIXME "_class" "_recursive"
 
