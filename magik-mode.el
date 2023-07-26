@@ -272,6 +272,13 @@ Based upon `font-lock-type-face'"
 Based upon `font-lock-doc-face'"
   :group 'magik-faces)
 
+(defface magik-dynamic-face
+  '((t (:inherit font-lock-variable-name-face)))
+  "Font-lock Face to use when displaying dynamic variables.
+
+Based upon `font-lock-variable-name-face'"
+  :group 'magik-faces)
+
 (defface magik-keyword-operators-face
   '((t (:inherit font-lock-keyword-face)))
   "Font-lock Face to use when displaying Magik operator keywords.
