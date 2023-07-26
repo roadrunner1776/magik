@@ -260,114 +260,87 @@ concrete implementations."
 
 (defface magik-class-face
   '((t (:inherit font-lock-type-face)))
-  "Font-lock Face to use when displaying exemplars.
-
-Based upon `font-lock-type-face'"
+  "Font-lock Face to use when displaying exemplars."
   :group 'magik-faces)
 
 (defface magik-doc-face
   '((t (:inherit font-lock-doc-face)))
-  "Font-lock Face to use when displaying documentation.
-
-Based upon `font-lock-doc-face'"
+  "Font-lock Face to use when displaying documentation."
   :group 'magik-faces)
 
 (defface magik-keyword-operators-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik operator keywords.
-
-Based upon `font-lock-keyword-face'"
+  "Font-lock Face to use when displaying Magik operator keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-statements-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik statement keywords.
-
-Based upon `font-lock-keyword-face'"
+  "Font-lock Face to use when displaying Magik statement keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-loop-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik statement keywords.
-
-Based upon `font-lock-keyword-face'"
+  "Font-lock Face to use when displaying Magik statement keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-arguments-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik argument keywords.
+  "Font-lock Face to use when displaying Magik argument keywords."
+  :group 'magik-faces)
 
-Based upon `font-lock-keyword-face'"
+(defface magik-dynamic-face
+  '((t (:inherit font-lock-variable-name-face)))
+  "Face to use when displaying dynamic variables."
   :group 'magik-faces)
 
 (defface magik-keyword-variable-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying Magik variable keywords.
-
-Based upon `font-lock-variable-name-face'"
+  "Font-lock Face to use when displaying Magik variable keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-obsolete-face
   '((t (:inherit font-lock-warning-face)))
-  "Font-lock Face to use when displaying obsolete Magik keywords.
-
-Based upon `font-lock-warning-face'"
+  "Font-lock Face to use when displaying obsolete Magik keywords."
   :group 'magik-faces)
 
 (defface magik-boolean-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying boolean and kleenean references.
-
-Based upon `font-lock-variable-name-face'"
+  "Font-lock Face to use when displaying boolean and kleenean references."
   :group 'magik-faces)
 
 (defface magik-method-face
   '((t (:inherit font-lock-function-name-face)))
-  "Font-lock Face to use when displaying method names and method and procedure keywords.
-
-Based upon `font-lock-function-name-face'"
+  "Font-lock Face to use when displaying method names and method and procedure keywords."
   :group 'magik-faces)
 
 (defface magik-pragma-face
   '((t (:inherit font-lock-builtin-face)))
-  "Font-lock Face to use when displaying pragma directives.
-
-Based upon `font-lock-builtin-face'"
+  "Font-lock Face to use when displaying pragma directives."
   :group 'magik-faces)
 
 (defface magik-procedure-face
   '((t (:inherit font-lock-function-name-face)))
-  "Font-lock Face to use when displaying procedure calls.
-
-Based upon `font-lock-function-name-face'"
+  "Font-lock Face to use when displaying procedure calls."
   :group 'magik-faces)
 
 (defface magik-slot-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying slots.
-
-Based upon `font-lock-variable-name-face'"
+  "Font-lock Face to use when displaying slots."
   :group 'magik-faces)
 
 (defface magik-symbol-face
   '((t (:inherit font-lock-constant-face)))
-  "Font-lock Face to use when displaying symbols.
-
-Based upon `font-lock-constant-face'"
+  "Font-lock Face to use when displaying symbols."
   :group 'magik-faces)
 
 (defface magik-warning-face
   '((t (:inherit font-lock-warning-face)))
-  "Font-lock Face to use when displaying warning statements.
-
-Based upon `font-lock-warning-face'"
+  "Font-lock Face to use when displaying warning statements."
   :group 'magik-faces)
 
 (defface magik-write-face
   '((t (:inherit font-lock-warning-face)))
-  "Font-lock Face to use when displaying write() statements.
-
-Based upon `font-lock-warning-face'"
+  "Font-lock Face to use when displaying write() statements."
   :group 'magik-faces)
 
 (defconst magik-regexp
@@ -467,16 +440,16 @@ constants which use the `font-lock-constant-face' face."
 (defcustom magik-font-lock-keywords-2
   (list
    '("\\b_method\\s-*\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\.\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)"
-     (1 ''magik-class-face)
-     (3 ''magik-method-face))
-   '("\\<!\\sw+\\!\\>" .  ''magik-dynamic-face)
-   '("\\<:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . ''magik-symbol-face)
-   '("\\<\\(write\\|print\\|debug_print\\)\\s-*(" 1 ''magik-write-face)
+     (1 'magik-class-face)
+     (3 'magik-method-face))
+   '("\\<!\\sw+\\!\\>" .  'magik-dynamic-face)
+   '("\\<:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . 'magik-symbol-face)
+   '("\\<\\(write\\|print\\|debug_print\\)\\s-*(" 1 'magik-write-face)
    (list (concat "\\<\\("
 		 (mapconcat 'identity magik-warnings "\\|")
 		 "\\)")
-	 0 ''magik-warning-face t)
-   '("^\\s-*##.*$" 0 ''magik-doc-face t)
+	 0 'magik-warning-face t)
+   '("^\\s-*##.*$" 0 'magik-doc-face t)
    )
   "Font lock setting for 2nd level of Magik fontification.
 Fontifies certain Magik language features like symbols, dynamics but does
@@ -509,18 +482,18 @@ See `magik-font-lock-keywords-1' and `magik-font-lock-keywords-2'."
     (cons (concat "\\<_" (regexp-opt magik-keyword-variable   t) "\\>") ''magik-keyword-variable-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-obsolete   t) "\\>") ''magik-keyword-obsolete-face)
     ;; other "keywords"
-    (cons (concat "\\<\\(" (mapconcat 'identity magik-other-keywords "\\|") "\\)\\>") ''font-lock-keyword-face)
-    '("^_pragma\\s-*\\(([^)]*)\\)" 1 ''magik-pragma-face)
+    (cons (concat "\\<\\(" (mapconcat 'identity magik-other-keywords "\\|") "\\)\\>") 'font-lock-keyword-face)
+    '("^_pragma\\s-*\\(([^)]*)\\)" 1 'magik-pragma-face)
     ;; methods
-    '("\\(\\sw\\|\\s$\\)\\.\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\(\\s-*(\\)" 2 ''magik-method-face)
+    '("\\(\\sw\\|\\s$\\)\\.\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\(\\s-*(\\)" 2 'magik-method-face)
     ;; procedures
-    '("\\<\\(\\sw+\\)\\(\\s-*(\\)" 1 ''magik-procedure-face)
-    '("^\\(def_slotted_exemplar\\|def_indexed_exemplar\\)\\>" 0 ''magik-class-face t)
-    '("^\\(\\sw+\\)\\.define_\\(shared_constant\\|shared_variable\\|slot_access\\)\\>" 1 ''magik-class-face)
-    '("\\Sw\\(\\.\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\>" 1 ''magik-slot-face)
-    '("\\<\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\?\\>" 0 ''magik-boolean-face t)
-    '("_for\\s-+\\(\\sw+\\)" 1 ''font-lock-variable-name-face) ;_for loop variable
-    '("@\\s-*\\sw+" 0 ''font-lock-constant-face t)
+    '("\\<\\(\\sw+\\)\\(\\s-*(\\)" 1 'magik-procedure-face)
+    '("^\\(def_slotted_exemplar\\|def_indexed_exemplar\\)\\>" 0 'magik-class-face t)
+    '("^\\(\\sw+\\)\\.define_\\(shared_constant\\|shared_variable\\|slot_access\\)\\>" 1 'magik-class-face)
+    '("\\Sw\\(\\.\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\>" 1 'magik-slot-face)
+    '("\\<\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\?\\>" 0 'magik-boolean-face t)
+    '("_for\\s-+\\(\\sw+\\)" 1 'font-lock-variable-name-face) ;_for loop variable
+    '("@\\s-*\\sw+" 0 'font-lock-constant-face t)
     ))
   "Font lock setting for 4th level of Magik fontification.
 As 1st level but also fontifies all Magik keywords according their
