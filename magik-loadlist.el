@@ -30,7 +30,7 @@
   :group 'magik-loadlist
   :type  'hook)
 
-(defcustom magik-loadlist-ignore-regexp-list '("\\..*")
+(defcustom magik-loadlist-ignore-regexp-list '("\\..*" "resources")
   "List of Regexps used to miss certain files from load_list.txt files.
 Intial ^ and final $ is automatically added in `loadlist-ignore'."
   :group 'magik-loadlist
