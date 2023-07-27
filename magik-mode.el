@@ -448,7 +448,7 @@ constants which use the `font-lock-constant-face' face."
    (list (concat "\\<\\("
 		 (mapconcat 'identity magik-warnings "\\|")
 		 "\\)")
-	 0 'magik-warning-face t)
+	 0 ''magik-warning-face t)
    '("^\\s-*##.*$" 0 'magik-doc-face t)
    )
   "Font lock setting for 2nd level of Magik fontification.
