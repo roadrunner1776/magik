@@ -716,7 +716,7 @@ Use auto-complete mode \"g\" symbol convention to represent a global.")
       (if (and (eq (point) last-tok-pos)
 	       (/= (preceding-char) ?.))
 	  (insert ?_))
-      (if (and (eq major-mode 'magik-mode)
+      (if (and (derived-mode-p 'magik-base-mode)
 	       (looking-at "_else\\|_elif\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
 	  (magik-indent-command)))))
 
@@ -1503,7 +1503,7 @@ If PT is given, goto that char position."
 
 (defun magik-method-name-set ()
   "Set the name of the current Magik method in `magik-method-name'."
-  (cond ((not (eq major-mode 'magik-mode))
+  (cond ((not (derived-mode-p 'magik-base-mode))
 	 nil)
 	((not magik-method-name-mode)
 	 (setq mode-line-buffer-identification
@@ -1736,7 +1736,7 @@ Argument END ..."
   (interactive)
   (save-excursion
     (cond
-     ((eq major-mode 'magik-mode)
+     ((derived-mode-p 'magik-base-mode)
       (goto-char (point-min))
       (while (search-forward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t)
 	(magik-parse-pragma))
@@ -1749,7 +1749,7 @@ Argument END ..."
   (interactive)
   (save-excursion
     (cond
-     ((eq major-mode 'magik-mode)
+     ((derived-mode-p 'magik-base-mode)
       (forward-line)
       (let ((starting-point (line-number-at-pos))
 	    (exemplar-point nil)
@@ -1793,7 +1793,7 @@ Argument ENDING-POINT ..."
   (interactive)
   (save-excursion
     (cond
-     ((eq major-mode 'magik-mode)
+     ((derived-mode-p 'magik-base-mode)
       (goto-char (point-min))
       (while (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
 	(magik-parse-sw-method-docs (match-string 1)))
@@ -1806,7 +1806,7 @@ Argument ENDING-POINT ..."
   (interactive)
   (save-excursion
     (cond
-     ((eq major-mode 'magik-mode)
+     ((derived-mode-p 'magik-base-mode)
       (forward-line)
       (search-backward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
       (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
@@ -2180,7 +2180,7 @@ closing bracket into the new \"{...}\" notation."
 	 (handle (1- (nth 1 last))))
     (setcdr precdr (list
 		    (list
-		     '(eq major-mode 'magik-mode)
+		     '(derived-mode-p 'magik-base-mode)
 		     handle
 		     "Magik Files (%d)")
 		    last))))
