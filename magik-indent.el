@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(require 'compat)
+
 ;;also defined in sw-electric.el
 (defcustom magik-indent-level 8
   "*How much to indent each nested level"

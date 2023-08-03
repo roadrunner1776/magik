@@ -19,6 +19,8 @@
 
 ;;; Code:
 
+(require 'compat)
+
 (defgroup magik-pragma nil
   "Magik Pragma features."
   :group 'magik)

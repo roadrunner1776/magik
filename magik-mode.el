@@ -1,7 +1,7 @@
 ;;; magik-mode.el --- mode for editing Magik + some utils.
 
 ;; Package-Version: 0.0.1
-;; Package-Requires: ((emacs "24.4"))
+;; Package-Requires: ((emacs "24.4") (compat "28.1"))
 ;; URL: http://github.com/roadrunner1776/magik
 ;; Keywords: languages
 
@@ -34,6 +34,7 @@
   (require 'magik-electric)
   (require 'magik-pragma))
 
+(require 'compat)
 (require 'imenu)
 (require 'magik-template)
 
