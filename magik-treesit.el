@@ -106,6 +106,7 @@
 					       (error)))
   (treesit-major-mode-setup))
 
+;;;###autoload
 (with-eval-after-load 'treesit-auto
   (add-to-list 'treesit-auto-recipe-list
 		(make-treesit-auto-recipe

@@ -2166,8 +2166,5 @@ closing bracket into the new \"{...}\" notation."
 (with-eval-after-load 'flycheck
   (require 'magik-lint))
 
-(with-eval-after-load 'treesit
-  (require 'magik-treesit))
-
 (provide 'magik-mode)
 ;;; magik-mode.el ends here
