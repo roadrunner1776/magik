@@ -32,7 +32,8 @@
 (defcustom magik-indent-level 8
   "*How much to indent each nested level"
   :group 'magik
-  :type  'integer)
+  :safe 'integerp
+  :type 'integer)
 
 (defvar magik-electric-templates-methods) ;keep compiler happy
 (defvar magik-stack)        ; a dynamic var.

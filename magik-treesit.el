@@ -46,7 +46,8 @@
      (call
       message: (identifier) @magik-method-face)
      (slot_accessor) @magik-slot-face
-     (iterator (identifier) @font-lock-variable-name-face)
+     (try (identifier) @font-lock-variable-name-face)
+     (label) @font-lock-variable-name-face
      [(variable) (dynamic_variable) (global_variable)] @font-lock-variable-name-face)
 
    :language 'magik
@@ -72,21 +73,65 @@
 
      [(self) (super) (clone)] @font-lock-type-face
 
-     ["_abstract" "_private"  "_method" "_endmethod"] @magik-method-face ;;FIXME "_primitive"
+     ["_abstract" "_private"  "_method" "_endmethod" "_primitive"] @magik-method-face
 
      ["_proc" "_endproc"] @magik-procedure-face
 
      ["_block" "_endblock" "_catch" "_throw" "_endcatch"
       "_if" "_then" "_elif" "_else" "_endif"
-      "_protect" "_locking" "_protection" "_endprotect" ;;FIXME "_lock" "_endlock"
-      "_try" "_endtry" "_when" "_handling" "_with"  ;;FIXME  "_using"
-       "_package" "_default"] @magik-keyword-statements-face ;;FIXME "_pragma" "_thisthread"
+      "_protect" "_locking" "_protection" "_endprotect" "_lock" "_endlock"
+      "_try" "_endtry" "_when" "_handling" "_with"
+      "_package" "_default" (thisthread)] @magik-keyword-statements-face
 
-      ["_iter" "_continue" "_for" "_loop" "_endloop" "_loopbody" "_over" "_leave"] @magik-keyword-loop-face ;;FIXME: "_finally"  "_while"
+     ["_iter" "_continue" "_for" "_loop" "_endloop" "_loopbody" "_over" "_leave" "_finally" "_while"] @magik-keyword-loop-face
 
-      ["_gather" "_scatter" "_allresults" "_optional" "_return" ">>"] @magik-keyword-arguments-face
+     ["_gather" "_scatter" "_allresults" "_optional" "_return" ">>"] @magik-keyword-arguments-face
 
-      ["_dynamic" "_global" "_import" "_local" ] @magik-keyword-variable-face))) ;;FIXME "_class" "_recursive"
+     ["_dynamic" "_global" "_import" "_local" "_class"] @magik-keyword-variable-face)))
+
+(defvar magik-ts-mode--indent-rules
+  `((magik
+     ((node-is "}") parent 0)
+     ((node-is ")") parent 0)
+     ((node-is "_protection") parent 0)
+     ((node-is "_then") parent 0)
+     ((node-is "_endblock") parent 0)
+     ((node-is "_endif") parent 0)
+     ((node-is "_loop") parent 0)
+     ((node-is "_endloop") parent 0)
+     ((node-is "_endmethod") parent 0)
+     ((node-is "_endprotect") parent 0)
+     ((node-is "_endlock") parent 0)
+     ((node-is "_endproc") parent 0)
+     ((node-is "method") parent 0)
+     ((node-is "elif") parent 0)
+     ((node-is "else") parent 0)
+
+     ((parent-is "block") parent magik-indent-level)
+     ((parent-is "if") parent magik-indent-level)
+     ((parent-is "elif") parent magik-indent-level)
+     ((parent-is "else") parent magik-indent-level)
+     ((parent-is "iterator") parent magik-indent-level)
+     ((parent-is "loop") parent magik-indent-level)
+     ((parent-is "finally") parent magik-indent-level)
+     ((parent-is "while") parent magik-indent-level)
+     ((parent-is "method") parent magik-indent-level)
+     ((parent-is "protect") parent magik-indent-level)
+     ((parent-is "lock") parent magik-indent-level)
+     ((parent-is "proc") parent magik-indent-level)
+     ((parent-is "vector") parent magik-indent-level)
+
+     ((parent-is "assignment") parent magik-indent-level)
+     ((parent-is "logical_operator") parent magik-indent-level)
+     ((parent-is "relational_operator") parent magik-indent-level)
+     ((parent-is "arithmetic_operator") parent magik-indent-level)
+     ((parent-is "unary_operator") parent magik-indent-level)
+
+     ((parent-is "documentation") first-sibling 0)
+     ((parent-is "call") (nth-sibling 4) 0)
+     ((parent-is "invoke") (nth-sibling 2) 0)
+     (no-node parent-bol 0)
+     (catch-all prev-sibling 0))))
 
 ;;;###autoload
 (define-derived-mode magik-ts-mode magik-base-mode "Magik"
@@ -98,7 +143,9 @@
   ;; Tree-sitter setup.
   (treesit-parser-create 'magik)
 
-  (setq-local treesit-font-lock-settings magik--treesit-settings
+  (setq-local treesit--indent-verbose t
+	      treesit-simple-indent-rules magik-ts-mode--indent-rules
+	      treesit-font-lock-settings magik--treesit-settings
 	      treesit-font-lock-feature-list '((comment pragma)
 					       (type constant keyword string)
 					       ()
@@ -109,13 +156,14 @@
 ;;;###autoload
 (with-eval-after-load 'treesit-auto
   (add-to-list 'treesit-auto-recipe-list
-		(make-treesit-auto-recipe
-		 :lang 'magik
-		 :ts-mode 'magik-ts-mode
-		 :remap 'magik-mode
-		 :url "https://github.com/krn-robin/tree-sitter-magik"
-		 :revision "main"
-		 :source-dir "src")))
+	       (make-treesit-auto-recipe
+		:lang 'magik
+		:ts-mode 'magik-ts-mode
+		:remap 'magik-mode
+		:ext "\\.magik\\'"
+		:url "https://github.com/krn-robin/tree-sitter-magik"
+		:revision "main"
+		:source-dir "src")))
 
 (provide 'magik-treesit)
 ;;; magik-treesit.el ends here

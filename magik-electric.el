@@ -1,4 +1,4 @@
-;;; magik-electric.el ---
+;;; magik-electric.el ---                            -*- lexical-binding: t; -*-
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@
      ("condition.define_condition(:" ",\n\t:,\n\t{})\n" dollar))
     ("define_binary_operator_case" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
      ("define_binary_operator_case(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar)))
-  " These 'method' templates automatically insert the class name at the front.")
+  " These `method' templates automatically insert the class name at the front.")
 (defvar magik-electric-templates
   (append
    '(("iter" e 1 (prev_pragma "_pragma(classify_level=, topic={},
@@ -225,7 +225,7 @@ the previous line starts with a `#' align with that."
        (y (cadr template))
        (col (- (current-column) len))
        (p (point)))
-    (backward-delete-char len)
+    (delete-char (- len))
     (if (save-excursion (re-search-forward "[^ \t]" (line-end-position) t))
 	(progn
 	  (insert ?\n)
@@ -236,7 +236,7 @@ the previous line starts with a `#' align with that."
       (magik-electric-insert-template-line name (car template) col)
       (insert "\n")
       (pop template))
-    (backward-delete-char 1)
+    (delete-char -1)
     (goto-char p)
     (forward-line y)
     (cond ((not (numberp x))

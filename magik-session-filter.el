@@ -1,4 +1,4 @@
-;;; magik-session-filter.el --- deal with the output from the magik process.
+;;; magik-session-filter.el --- deal with the output from the magik process.  
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ FUNCTION takes one argument, the string after the action character."
 	    (magik-session-filter proc (substring str (1+ n))))))))
 
 (defun magik-session-filter-insert (buf proc n str)
-  "Insert into BUF at the 'process-mark' of PROC, N chars from STR.
+  "Insert into BUF at the `process-mark' of PROC, N chars from STR.
 If N is nil insert the whole of STR.  We insert before all markers except the
  'comint-last-input-end' and the last command from magik-session-prev-cmds."
   (save-excursion
