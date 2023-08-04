@@ -88,24 +88,24 @@ concrete implementations."
   :interactive nil
   :group 'magik
 
-  (setq-local magik-template-file-type (magik-template-file-type)
-	      paragraph-start (concat "^$\\|" page-delimiter)
-	      paragraph-separate paragraph-start
-	      indent-line-function 'magik-indent-line
-	      require-final-newline mode-require-final-newline
-	      comment-start "#"
-	      comment-end ""
-	      comment-column 8
-	      comment-start-skip "#+ *"
-	      comment-multi-line nil
-	      parse-sexp-ignore-comments nil
-	      magik-transmit-debug-mode-line-string " #DEBUG"
-	      imenu-generic-expression imenu-generic-expression
-	      imenu-create-index-function 'magik-imenu-create-index-function
-	      imenu-syntax-alist '((?_ . "w"))
-	      ac-sources ac-sources
+  (compat-call setq-local magik-template-file-type (magik-template-file-type)
+	       paragraph-start (concat "^$\\|" page-delimiter)
+	       paragraph-separate paragraph-start
+	       indent-line-function 'magik-indent-line
+	       require-final-newline mode-require-final-newline
+	       comment-start "#"
+	       comment-end ""
+	       comment-column 8
+	       comment-start-skip "#+ *"
+	       comment-multi-line nil
+	       parse-sexp-ignore-comments nil
+	       magik-transmit-debug-mode-line-string " #DEBUG"
+	       imenu-generic-expression imenu-generic-expression
+	       imenu-create-index-function 'magik-imenu-create-index-function
+	       imenu-syntax-alist '((?_ . "w"))
+	       ac-sources ac-sources
 
-	      outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
+	       outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
 
   (when magik-auto-abbrevs (abbrev-mode 1))
 
