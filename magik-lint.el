@@ -50,11 +50,12 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
   ((error line-start (file-name) ":" line ":" column ": (Critical) " (message) line-end)
    (error line-start (file-name) ":" line ":" column ": (Major) " (message) line-end)
    (warning line-start (file-name) ":" line ":" column ": (Minor) " (message) line-end))
-  :modes (magik-mode))
+  :modes (magik-mode magik-ts-mode))
 
 (unless (and (eq system-type 'windows-nt)
              (funcall flycheck-executable-find "java"))
-  (setq flycheck-magik-lint-java-executable (executable-find (substitute-in-file-name "$JAVA_HOME/bin/java"))))
+  (setq flycheck-magik-lint-java-executable (or (executable-find (expand-file-name "bin/java" (getenv "JAVA_HOME")))
+                                                (executable-find "java"))))
 
 (add-to-list 'flycheck-checkers 'magik-lint-java 'append)
 
