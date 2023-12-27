@@ -91,7 +91,6 @@ concrete implementations."
   (compat-call setq-local magik-template-file-type (magik-template-file-type)
 	       paragraph-start (concat "^$\\|" page-delimiter)
 	       paragraph-separate paragraph-start
-	       indent-line-function 'magik-indent-line
 	       require-final-newline mode-require-final-newline
 	       comment-start "#"
 	       comment-end ""
@@ -129,7 +128,8 @@ concrete implementations."
 				   magik-goto-code
 				   (font-lock-fontify-buffer-function   . magik-font-lock-fontify-buffer)
 				   (font-lock-fontify-region-function   . magik-font-lock-fontify-region)
-				   (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))))
+				   (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))
+	      indent-line-function 'magik-indent-line))
 
 (defvar magik-menu nil
   "Keymap for the Magik buffer menu bar.")
@@ -2133,9 +2133,9 @@ closing bracket into the new \"{...}\" notation."
 (progn
   ;; ------------------------ magik mode -------------------------
 
-  (define-key magik-base-mode-map "\r" 'magik-newline)
-  (define-key magik-base-mode-map "\n" 'newline)
-  (define-key magik-base-mode-map "\t" 'magik-indent-command)
+  (define-key magik-mode-map "\r" 'magik-newline)
+  (define-key magik-mode-map "\n" 'newline)
+  (define-key magik-mode-map "\t" 'magik-indent-command)
   (define-key magik-base-mode-map " " 'magik-electric-space)
   (define-key magik-base-mode-map "#" 'magik-electric-hash)
   (define-key magik-base-mode-map "/" 'magik-electric-pragma-slash)

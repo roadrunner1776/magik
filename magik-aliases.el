@@ -1,4 +1,4 @@
-;;; magik-aliases.el --- mode for editing GIS aliases files.
+;;; magik-aliases.el --- mode for editing GIS aliases files.   -*- lexical-binding: t; -*-
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -164,7 +164,6 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook."
   (make-local-variable 'magik-aliases-process-environment)
 
   (use-local-map magik-aliases-mode-map)
-  (easy-menu-add magik-aliases-menu)
   (set-syntax-table magik-aliases-mode-syntax-table)
 
   (setq major-mode 'magik-aliases-mode
@@ -289,7 +288,7 @@ when the buffer is displayed:
     (or program default)))
 
 (defun magik-aliases-run-program (&optional alias file dir)
-  "Run 'runalias` on the aliases file.
+  "Run `runalias' on the aliases file.
 
 With a prefix arg, ask user for current directory to use."
   (interactive (if (not (magik-aliases-at-alias-definition))
@@ -406,7 +405,10 @@ Returns nil if FILE cannot be expanded."
 	alist))))
 
 (defun magik-aliases-layered-products-acp-path (file)
-  "Read contents of FILE with the format of LAYERED_PRODUCTS configuration file and return paths to append to 'exec-path'."
+  "Read LAYERED_PRODUCTS configuration file.
+
+  Read contents of FILE with the format of LAYERED_PRODUCTS configuration file
+  and return paths to append to `exec-path'."
   (when (file-exists-p file)
     (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
       (insert-file-contents file nil nil nil 'replace)
@@ -422,10 +424,9 @@ Returns nil if FILE cannot be expanded."
   "Return list of ACP paths."
   (save-excursion
     (save-match-data
-      (let (paths pt lp dir)
+      (let (paths pt dir etc-dir)
 	(goto-char (point-min))
 	(while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
-	  (setq lp (match-string-no-properties 1))
 	  (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
 	      (progn
 		(setq pt (point))
@@ -457,7 +458,7 @@ Returns nil if FILE cannot be expanded."
 			  (or entries (list "No Aliases found"))))))
 
 (defun magik-aliases-update-sw-menu ()
-  "Update 'Alias Files' submenu in SW menu bar."
+  "Update `Alias Files' submenu in SW menu bar."
   (interactive)
   (let (default-files
 	 lp-files
