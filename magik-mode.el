@@ -2091,8 +2091,8 @@ closing bracket into the new \"{...}\" notation."
 ;;; Package registration
 
 ;;;###autoload
-(or (assoc "\\.magik$" auto-mode-alist)
-    (push '("\\.magik$" . magik-mode) auto-mode-alist))
+(or (assoc "\\.magik\\'" auto-mode-alist)
+    (push '("\\.magik\\'" . magik-mode) auto-mode-alist))
 
 (or (assq 'magik-transmit-debug-p minor-mode-alist)
     (push '(magik-transmit-debug-p magik-transmit-debug-mode-line-string) minor-mode-alist))

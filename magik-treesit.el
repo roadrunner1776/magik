@@ -154,16 +154,13 @@
   (treesit-major-mode-setup))
 
 ;;;###autoload
-(with-eval-after-load 'treesit-auto
-  (add-to-list 'treesit-auto-recipe-list
-	       (make-treesit-auto-recipe
-		:lang 'magik
-		:ts-mode 'magik-ts-mode
-		:remap 'magik-mode
-		:ext "\\.magik\\'"
-		:url "https://github.com/krn-robin/tree-sitter-magik"
-		:revision "main"
-		:source-dir "src")))
+(when (and (or (featurep 'treesit)
+	       (require 'treesit nil 'noerror))
+	   (fboundp 'treesit-ready-p))
+  (add-to-list 'treesit-language-source-alist '(magik "https://github.com/krn-robin/tree-sitter-magik"))
+  (when (treesit-ready-p 'magik)
+    (add-to-list 'major-mode-remap-alist '(magik-mode . magik-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.magik\\'" . magik-ts-mode))))
 
 (provide 'magik-treesit)
 ;;; magik-treesit.el ends here
