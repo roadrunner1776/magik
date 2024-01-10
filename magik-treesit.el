@@ -119,7 +119,6 @@
      ((parent-is "protect") parent magik-indent-level)
      ((parent-is "lock") parent magik-indent-level)
      ((parent-is "proc") parent magik-indent-level)
-     ((parent-is "vector") parent magik-indent-level)
 
      ((parent-is "assignment") parent magik-indent-level)
      ((parent-is "logical_operator") parent magik-indent-level)
@@ -128,8 +127,11 @@
      ((parent-is "unary_operator") parent magik-indent-level)
 
      ((parent-is "documentation") first-sibling 0)
-     ((parent-is "call") (nth-sibling 4) 0)
      ((parent-is "invoke") (nth-sibling 2) 0)
+
+     ((parent-is "call") parent-bol magik-indent-level)
+     ((parent-is "vector") parent-bol magik-indent-level)
+
      (no-node parent-bol 0)
      (catch-all prev-sibling 0))))
 
