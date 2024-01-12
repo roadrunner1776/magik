@@ -134,12 +134,12 @@
      ((parent-is "try") parent magik-indent-level)
      ((parent-is "catch") parent magik-indent-level)
      ((parent-is "handling") parent magik-indent-level)
-
      ((parent-is "assignment") parent magik-indent-level)
-     ((parent-is "logical_operator") parent magik-indent-level)
-     ((parent-is "relational_operator") parent magik-indent-level)
-     ((parent-is "arithmetic_operator") parent magik-indent-level)
-     ((parent-is "unary_operator") parent magik-indent-level)
+
+     ((parent-is "logical_operator") parent 0)
+     ((parent-is "relational_operator") parent 0)
+     ((parent-is "arithmetic_operator") parent 0)
+     ((parent-is "unary_operator") parent 0)
 
      ((parent-is "documentation") first-sibling 0)
      ((parent-is "invoke") (nth-sibling 2) 0)
