@@ -104,6 +104,7 @@
      ((node-is "_endlock") parent 0)
      ((node-is "_endproc") parent 0)
      ((node-is "_endtry") parent 0)
+     ((node-is "_endcatch") parent 0)
      ((node-is "method") parent 0)
      ((node-is "elif") parent 0)
      ((node-is "else") parent 0)
@@ -122,6 +123,8 @@
      ((parent-is "lock") parent magik-indent-level)
      ((parent-is "proc") parent magik-indent-level)
      ((parent-is "try") parent magik-indent-level)
+     ((parent-is "catch") parent magik-indent-level)
+     ((parent-is "handling") parent magik-indent-level)
 
      ((parent-is "assignment") parent magik-indent-level)
      ((parent-is "logical_operator") parent magik-indent-level)
