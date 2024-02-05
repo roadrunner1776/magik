@@ -43,6 +43,9 @@
    '((method
       exemplarname: (identifier) @font-lock-type-face
       name: (identifier) @magik-method-face)
+     (method
+      exemplarname: (identifier) @magik-class-face
+      (argument) @magik-argument-face)
      (call
       message: (identifier) @magik-method-face)
      (slot_accessor) @magik-slot-face
