@@ -267,9 +267,38 @@ concrete implementations."
   "Fontification colours for Magik."
   :group 'magik)
 
+;; font-lock-variable-use-face was introduced in Emacs 29.1.
+(unless (member `font-lock-variable-use-face (face-list))
+  (put 'font-lock-variable-use 'face-alias 'font-lock-variable-name-face))
+
+(defface magik-argument-face
+  '((t (:inherit font-lock-variable-use-face)))
+  "Font-lock Face to use when displaying arguments for methods."
+  :group 'magik-faces)
+
+(defface magik-boolean-face
+  '((t (:inherit font-lock-variable-name-face)))
+  "Font-lock Face to use when displaying boolean and kleenean references."
+  :group 'magik-faces)
+
+(defface magik-character-face
+  '((t (:inherit font-lock-constant-face)))
+  "Font-lock Face to use when displaying characters."
+  :group 'magik-faces)
+
 (defface magik-class-face
   '((t (:inherit font-lock-type-face)))
   "Font-lock Face to use when displaying exemplars."
+  :group 'magik-faces)
+
+(defface magik-comment-face
+  '((t (:inherit font-lock-comment-face)))
+  "Font-lock Face to use when displaying comments."
+  :group 'magik-faces)
+
+(defface magik-constant-face
+  '((t (:inherit font-lock-constant-face)))
+  "Font-lock Face to use when displaying constants."
   :group 'magik-faces)
 
 (defface magik-doc-face
@@ -289,7 +318,7 @@ concrete implementations."
 
 (defface magik-keyword-loop-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik statement keywords."
+  "Font-lock Face to use when displaying Magik loop keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-arguments-face
@@ -299,7 +328,17 @@ concrete implementations."
 
 (defface magik-dynamic-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Face to use when displaying dynamic variables."
+  "Font-lock Face to use when displaying dynamic variables."
+  :group 'magik-faces)
+
+(defface magik-global-face
+  '((t (:inherit font-lock-variable-name-face)))
+  "Font-lock Face to use when displaying global variables."
+  :group 'magik-faces)
+
+(defface magik-global-reference-face
+  '((t (:inherit font-lock-constant-face)))
+  "Font-lock Face to use when displaying global references."
   :group 'magik-faces)
 
 (defface magik-keyword-variable-face
@@ -312,14 +351,23 @@ concrete implementations."
   "Font-lock Face to use when displaying obsolete Magik keywords."
   :group 'magik-faces)
 
-(defface magik-boolean-face
-  '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying boolean and kleenean references."
-  :group 'magik-faces)
-
 (defface magik-method-face
   '((t (:inherit font-lock-function-name-face)))
   "Font-lock Face to use when displaying method names and method and procedure keywords."
+  :group 'magik-faces)
+
+(defface magik-label-face
+  '((t (:inherit font-lock-variable-name-face)))
+  "Font-lock Face to use when displaying labels for loops."
+  :group 'magik-faces)
+
+;; font-lock-number-face was introduced in Emacs 29.1 as new face without any inheritance.
+(unless (member `font-lock-number-face (face-list))
+  (put 'font-lock-number-face 'face-alias 'font-lock-constant-face))
+
+(defface magik-number-face
+  '((t (:inherit font-lock-number-face)))
+  "Font-lock Face to use when displaying numbers."
   :group 'magik-faces)
 
 (defface magik-pragma-face
@@ -340,6 +388,16 @@ concrete implementations."
 (defface magik-symbol-face
   '((t (:inherit font-lock-constant-face)))
   "Font-lock Face to use when displaying symbols."
+  :group 'magik-faces)
+
+(defface magik-string-face
+  '((t (:inherit font-lock-string-face)))
+  "Font-lock Face to use when displaying strings."
+  :group 'magik-faces)
+
+(defface magik-variable-face
+  '((t (:inherit font-lock-variable-name-face)))
+  "Font-lock Face to use when displaying variables."
   :group 'magik-faces)
 
 (defface magik-warning-face
@@ -370,8 +428,12 @@ concrete implementations."
     )
   "List of regexp strings which can be used for searching for a magik-specific string in a buffer.")
 
+(defvar magik-keyword-kleenean
+  '("false" "true" "maybe")
+  "List of keywords relating to kleenean values to highlight for font-lock.")
+
 (defvar magik-keyword-constants
-  '("false" "true" "maybe" "unset" "constant")
+  '("unset" "constant")
   "List of keywords relating to constant values to highlight for font-lock.
 The \"no_way\" constant is treated as a special case in this Magik mode
 because it does not have an _ preceding like all the other Magik keywords.")
@@ -401,7 +463,7 @@ because it does not have an _ preceding like all the other Magik keywords.")
   "List of keywords relating to statements to highlight for font-lock.")
 
 (defvar magik-keyword-loop
-  '("iter" "continue" "finally" "for" "loop" "endloop" "loopbody" "over" "leave" "while")
+  '("iter" "continue" "for" "loop" "endloop" "loopbody" "over" "leave" "finally" "while")
   "List of keywords relating to loops to highlight for font-lock.")
 
 (defvar magik-keyword-arguments
@@ -409,7 +471,7 @@ because it does not have an _ preceding like all the other Magik keywords.")
   "List of keywords relating to arguments to highlight for font-lock.")
 
 (defvar magik-keyword-variable
-  '("class" "dynamic" "global" "import" "local" "recursive")
+  '("dynamic" "global" "import" "local" "class" "recursive")
   "List of keywords relating to variables to highlight for font-lock.")
 
 (defvar magik-keyword-obsolete
@@ -425,7 +487,7 @@ because it does not have an _ preceding like all the other Magik keywords.")
 
 (defcustom magik-font-lock-keywords-1
   (list
-   (cons (concat "\\<no_way\\|_" (regexp-opt magik-keyword-constants t) "\\>") 'font-lock-constant-face)
+   (cons (concat "\\<no_way\\|_" (regexp-opt magik-keyword-constants t) "\\>") 'magik-constant-face)
    (cons (concat "\\<_"
 		 (regexp-opt (append magik-keyword-operators
 				     magik-keyword-class
@@ -477,8 +539,9 @@ See `magik-font-lock-keywords-1' and `magik-font-lock-keywords-2'."
   (append
    magik-font-lock-keywords-2
    (list
-    (cons (concat "\\<no_way\\|_" (regexp-opt magik-keyword-constants t) "\\>") ''font-lock-constant-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-constants  t) "\\>") ''font-lock-constant-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-kleenean  t) "\\>") ''magik-boolean-face)
+    (cons (concat "\\<no_way\\|_" (regexp-opt magik-keyword-constants t) "\\>") ''magik-constant-face)
+    (cons (concat "\\<_" (regexp-opt magik-keyword-constants  t) "\\>") ''magik-constant-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-operators  t) "\\>") ''magik-keyword-operators-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-class      t) "\\>") ''magik-class-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-methods    t) "\\>") ''magik-method-face)
@@ -501,8 +564,8 @@ See `magik-font-lock-keywords-1' and `magik-font-lock-keywords-2'."
     '("^\\(\\sw+\\)\\.define_\\(shared_constant\\|shared_variable\\|slot_access\\)\\>" 1 'magik-class-face)
     '("\\Sw\\(\\.\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\>" 1 'magik-slot-face)
     '("\\<\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\?\\>" 0 'magik-boolean-face t)
-    '("_for\\s-+\\(\\sw+\\)" 1 'font-lock-variable-name-face) ;_for loop variable
-    '("@\\s-*\\sw+" 0 'font-lock-constant-face t)
+    '("_for\\s-+\\(\\sw+\\)" 1 'magik-variable-face) ;_for loop variable
+    '("@\\s-*\\sw+" 0 'magik-global-reference-face t)
     ))
   "Font lock setting for 4th level of Magik fontification.
 As 1st level but also fontifies all Magik keywords according their

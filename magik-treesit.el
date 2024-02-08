@@ -35,43 +35,52 @@
 
    :language 'magik
    :feature 'comment
-   '((comment) @font-lock-comment-face
+   '((comment) @magik-comment-face
      (documentation) @magik-doc-face)
 
    :language 'magik
    :feature 'type
    '((method
-      exemplarname: (identifier) @font-lock-type-face
+      exemplarname: (identifier) @magik-class-face
       name: (identifier) @magik-method-face)
+     (method
+      exemplarname: (identifier) @magik-class-face
+      (argument) @magik-argument-face)
      (call
       message: (identifier) @magik-method-face)
+     (iterator (identifier) @magik-variable-face)
+     (try
+      condition: (identifier) @magik-variable-face)
      (slot_accessor) @magik-slot-face
-     (try (identifier) @font-lock-variable-name-face)
-     (label) @font-lock-variable-name-face
-     [(variable) (dynamic_variable) (global_variable)] @font-lock-variable-name-face)
+     (label) @magik-label-face
+     (variable) @magik-variable-face
+     (global_variable) @magik-global-face
+     (dynamic_variable) @magik-dynamic-face
+     (global_reference) @magik-global-reference-face)
 
    :language 'magik
    :feature 'error
-   '((ERROR) @font-lock-warning-face)
+   '((ERROR) @magik-warning-face)
 
    :language 'magik
    :override t
    :feature 'string
-   '((string_literal) @font-lock-string-face)
+   '((string_literal) @magik-string-face)
 
    :language 'magik
    :feature 'constant
-   '([(number) (character_literal)] @font-lock-constant-face
-     [(symbol)] @magik-symbol-face)
+   '((number) @magik-number-face
+     (character_literal) @magik-character-face
+     (symbol) @magik-symbol-face)
 
    :language 'magik
    :feature 'keyword
-   `([(false) (true) (maybe) (unset)] @font-lock-constant-face
-     ["_constant"] @font-lock-constant-face
+   `([(false) (true) (maybe)] @magik-boolean-face
+     [(unset) "_constant"] @magik-constant-face
 
      ["_and" "_andif" "_div" "_is" "_isnt" "_cf" "_mod" "_not" "_or" "_orif" "_xor" "_xorif"] @magik-keyword-operators-face
 
-     [(self) (super) (clone)] @font-lock-type-face
+     [(self) (super) (clone)] @magik-class-face
 
      ["_abstract" "_private"  "_method" "_endmethod" "_primitive"] @magik-method-face
 
