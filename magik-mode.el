@@ -2039,17 +2039,16 @@ closing bracket into the new \"{...}\" notation."
 (put 'magik-translate-old-vec-notation 'disabled t)
 
 ;;; Package initialisation
-(let ((abbrevs-changed nil))
-  (mapc
-   #'(lambda (str)
-       (define-abbrev magik-base-mode-abbrev-table
-	 str str 'magik-expand-abbrev))
-
-   (append magik-keyword-constants magik-keyword-operators
-	   magik-keyword-class magik-keyword-statements
-	   magik-keyword-methods magik-keyword-procedures
-	   magik-keyword-loop magik-keyword-arguments
-	   magik-keyword-variable nil)))
+(define-abbrev-table 'magik-base-mode-abbrev-table
+  (mapcar (lambda (str)
+	    (list str str 'magik-expand-abbrev))
+	  (append magik-keyword-constants magik-keyword-operators
+		  magik-keyword-class magik-keyword-statements
+		  magik-keyword-methods magik-keyword-procedures
+		  magik-keyword-loop magik-keyword-arguments
+		  magik-keyword-variable))
+  "Abbrev table for Magik mode."
+  :regexp "\\<\\([+[:word:]]+\\)")
 
 (if magik-under-as-char
     (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
