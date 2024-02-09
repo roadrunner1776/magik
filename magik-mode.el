@@ -2109,7 +2109,7 @@ closing bracket into the new \"{...}\" notation."
 		  magik-keyword-class magik-keyword-statements
 		  magik-keyword-methods magik-keyword-procedures
 		  magik-keyword-loop magik-keyword-arguments
-		  magik-keyword-variable))
+		  magik-keyword-variable magik-keyword-kleenean))
   "Abbrev table for Magik mode."
   :regexp "\\<\\([+[:word:]]+\\)")
 
