@@ -1,5 +1,7 @@
 # magik-mode: Emacs major mode for Smallworld Magik files
 
+[![GNU Emacs](https://raw.githubusercontent.com/minad/corfu/screenshots/emacs.svg)](https://www.gnu.org/software/emacs/) [![MELPA](https://melpa.org/packages/magik-mode-badge.svg)](https://melpa.org/#/magik-mode) [![MELPA Stable](https://stable.melpa.org/packages/magik-mode-badge.svg)](https://stable.melpa.org/#/magik-mode)
+
 ## Content
 1. [Installation](#installation)
 2. [Features](#features)
