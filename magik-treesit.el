@@ -1,6 +1,6 @@
 ;;; magik-treesit.el ---                             -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023  Robin Putters
+;; Copyright (C) 2024 Robin Putters
 
 ;; Author: Robin Putters <krn-robin@github>
 ;; Keywords: languages
