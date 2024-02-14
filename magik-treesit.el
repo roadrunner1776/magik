@@ -118,6 +118,7 @@
      ((node-is "elif") parent 0)
      ((node-is "else") parent 0)
      ((node-is "when") parent 0)
+     ((node-is "finally") parent 0)
 
      ((parent-is "block") parent magik-indent-level)
      ((parent-is "if") parent magik-indent-level)
@@ -125,7 +126,6 @@
      ((parent-is "else") parent magik-indent-level)
      ((parent-is "iterator") parent magik-indent-level)
      ((parent-is "loop") parent magik-indent-level)
-     ((parent-is "finally") parent magik-indent-level)
      ((parent-is "while") parent magik-indent-level)
      ((parent-is "method") parent magik-indent-level)
      ((parent-is "protect") parent magik-indent-level)
