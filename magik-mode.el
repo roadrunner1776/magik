@@ -1,8 +1,8 @@
-;;; magik-mode.el --- mode for editing Magik + some utils.
+;;; magik-mode.el --- Emacs major mode for Smallworld Magik files
 
-;; Package-Version: 0.0.1
+;; Package-Version: 0.3.0
 ;; Package-Requires: ((emacs "24.4") (compat "28.1"))
-;; URL: http://github.com/roadrunner1776/magik
+;; URL: https://github.com/roadrunner1776/magik
 ;; Keywords: languages
 
 ;; This program is free software; you can redistribute it and/or modify
