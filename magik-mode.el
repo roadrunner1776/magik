@@ -487,6 +487,7 @@ because it does not have an _ preceding like all the other Magik keywords.")
 
 (defcustom magik-font-lock-keywords-1
   (list
+   (cons (concat "\\<_" (regexp-opt magik-keyword-kleenean  t) "\\>") ''magik-boolean-face)
    (cons (concat "\\<no_way\\|_" (regexp-opt magik-keyword-constants t) "\\>") 'magik-constant-face)
    (cons (concat "\\<_"
 		 (regexp-opt (append magik-keyword-operators
