@@ -90,7 +90,7 @@
      ("if" e 0 "_if " "_then" - "_endif")
      ("over" e 0 "_over " "_loop" - "_endloop")
      ("catch" e 1 "_catch" - "_endcatch")
-     ("block" e 1 "_block" - "_endblock" dollar)
+     ("block" e 1 "_block" - "_endblock")
      ("protect" e 1 "_protect" - "_protection" - "_endprotect")
      ("lock" e 0 "_lock " - "_endlock")
      ("try" e 1 "_try" - "_when" - "_endtry")
