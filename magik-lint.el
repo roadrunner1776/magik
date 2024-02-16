@@ -1,4 +1,4 @@
-;;; magik-lint.el --- Flycheck support for Magik
+;;; magik-lint.el --- Flycheck support for Magik     -*- lexical-binding: t; -*-
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -21,11 +21,34 @@
 
 (require 'flycheck)
 
-(defcustom magik-lint-jar-file (expand-file-name (concat user-emacs-directory "magik-lint/magik-lint-0.7.1.jar"))
+(defun magik-lint--latest-version ()
+  "Return latest version of the magik linter."
+  (ignore-errors
+    (with-current-buffer (url-retrieve-synchronously "https://api.github.com/repos/StevenLooman/magik-tools/releases/latest" 'silent 'inhibit-cookies)
+      (goto-char (point-min))
+      (re-search-forward "^$")
+      (delete-region (point) (point-min))
+      (let ((response (json-read)))
+	(cdr (assoc 'tag_name response))))))
+
+(defcustom magik-lint-jar-file-version
+  (or (magik-lint--latest-version) "0.8.3")
+  "Version of magik-lint to use."
+  :group 'magik
+  :type 'string)
+
+(defcustom magik-lint-jar-file "magik-lint/magik-lint-%s.jar"
   "Location of the magik-lint jar file."
   :group 'magik
   :type  '(choice (file)
                   (const nil)))
+
+(defun magik-lint--jar-file ()
+  "Expanded magik lint jar file name."
+  (expand-file-name (if magik-lint-jar-file-version
+			(format magik-lint-jar-file magik-lint-jar-file-version)
+		      magik-lint-jar-file)
+		    user-emacs-directory))
 
 (flycheck-def-config-file-var flycheck-magik-lintrc magik-lint-java ".magiklint")
 
@@ -39,7 +62,7 @@
 See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
   :command ("java"
             (eval flycheck-magik-lint-java-args)
-            "-jar" (eval (expand-file-name magik-lint-jar-file))
+            "-jar" (eval (magik-lint--jar-file))
             (eval flycheck-magik-lint-args)
             (config-file "--rcfile" flycheck-magik-lintrc)
             "--max-infractions" (eval (number-to-string flycheck-checker-error-threshold))
@@ -52,12 +75,13 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
    (warning line-start (file-name) ":" line ":" column ": (Minor) " (message) line-end))
   :modes (magik-mode magik-ts-mode))
 
-(unless (and (eq system-type 'windows-nt)
-             (funcall flycheck-executable-find "java"))
-  (setq flycheck-magik-lint-java-executable (or (executable-find (expand-file-name "bin/java" (getenv "JAVA_HOME")))
-                                                (executable-find "java"))))
+(when (and (eq system-type 'windows-nt)
+           (not (funcall flycheck-executable-find "java")))
+  (setq flycheck-magik-lint-java-executable (or (funcall flycheck-executable-find (expand-file-name "bin/java" (getenv "JAVA_HOME"))) "java")))
 
-(add-to-list 'flycheck-checkers 'magik-lint-java 'append)
+(if (file-exists-p (magik-lint--jar-file))
+    (add-to-list 'flycheck-checkers 'magik-lint-java 'append)
+  (warn (format "magik-lint executable not found: %s; please download from https://github.com/StevenLooman/magik-tools/releases/latest" (magik-lint--jar-file))))
 
 (provide 'magik-lint)
 ;;; magik-lint.el ends here
