@@ -226,7 +226,7 @@ a template type to use for normal magik files.
   (let* ((type (or magik-template-file-type
 		   (default-value 'magik-template-file-type))) ;default value used by magik-patch
 	 (template-file nil))
-    (if (eq major-mode 'magik-mode)
+    (if (derived-mode-p 'magik-base-mode)
 	(progn
 	  (cl-loop for type-data in magik-template-file-type-alist
 		   for label         = (car type-data)
