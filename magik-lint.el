@@ -32,7 +32,7 @@
 	(cdr (assoc 'tag_name response))))))
 
 (defcustom magik-lint-jar-file-version
-  (or (magik-lint--latest-version) "0.8.3")
+  (or (magik-lint--latest-version) "0.9.1")
   "Version of magik-lint to use."
   :group 'magik
   :type 'string)
