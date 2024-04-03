@@ -43,12 +43,20 @@
   :type  '(choice (file)
                   (const nil)))
 
+(defcustom magik-lint-use-custom-jar-file-location nil
+  "If non-nil respect the value of magik-lint-jar-file.
+If nil, expect the magik-lint jar file somewhere in the `user-emacs-directory'."
+  :group 'magik
+  :type 'boolean)
+
 (defun magik-lint--jar-file ()
   "Expanded magik lint jar file name."
-  (expand-file-name (if magik-lint-jar-file-version
-			(format magik-lint-jar-file magik-lint-jar-file-version)
-		      magik-lint-jar-file)
-		    user-emacs-directory))
+  (if magik-lint-use-custom-jar-file-location
+      magik-lint-jar-file
+      (expand-file-name (if magik-lint-jar-file-version
+			    (format magik-lint-jar-file magik-lint-jar-file-version)
+		          magik-lint-jar-file)
+		        user-emacs-directory)))
 
 (flycheck-def-config-file-var flycheck-magik-lintrc magik-lint-java ".magiklint")
 
