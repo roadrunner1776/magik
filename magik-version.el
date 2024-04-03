@@ -210,7 +210,9 @@ has more than one aliases file available."
 
 ;;;###autoload
 (defun magik-version-mode ()
-  "Major Mode for gis_version."
+  "Major Mode for gis_version.
+
+\\{magik-version-mode-map}"
   (interactive)
   (kill-all-local-variables)
   (make-local-variable 'magik-version-position)

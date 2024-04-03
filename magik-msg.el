@@ -138,7 +138,9 @@
 (defun magik-msg-mode ()
   "Major mode for editing Magik Message files.
 
-You can customise msg-mode with the msg-mode-hook."
+You can customise msg-mode with the msg-mode-hook.
+
+\\{magik-msg-mode-map}"
 
   (interactive)
   (kill-all-local-variables)

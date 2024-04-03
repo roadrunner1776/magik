@@ -459,7 +459,9 @@ q      - quit
            (forward-line)))))))
 
 (defun magik-pragma-topic-select-mode ()
-  "Major mode for selecting topics in pragmas"
+  "Major mode for selecting topics in pragmas.
+
+\\{magik-pragma-topic-select-mode-map}"
   (interactive)
   (kill-all-local-variables)
   (setq major-mode 'topic-select-mode)

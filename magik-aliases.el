@@ -153,7 +153,9 @@ If any function returns t, then the buffer is displayed."
 (defun magik-aliases-mode ()
   "Major mode for editing Magik aliases files.
 
-You can customise magik-aliases-mode with the magik-aliases-mode-hook."
+You can customise magik-aliases-mode with the magik-aliases-mode-hook.
+
+\\{magik-aliases-mode-map}"
 
   (interactive)
   (kill-all-local-variables)
