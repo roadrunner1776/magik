@@ -76,7 +76,9 @@ Intial ^ and final $ is automatically added in `loadlist-ignore'."
 (defun magik-loadlist-mode ()
   "Major mode for editing Magik load_list.txt files.
 
-You can customise magik-loadlist-mode with the magik-loadlist-mode-hook."
+You can customise magik-loadlist-mode with the magik-loadlist-mode-hook.
+
+\\{magik-loadlist-mode-map}"
 
   (interactive)
   (kill-all-local-variables)

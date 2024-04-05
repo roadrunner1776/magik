@@ -575,7 +575,9 @@ help on F1).
 
 Commands are sent to the gis with the F8 key or the return key.
 
-Entry to this mode calls the value of magik-session-mode-hook."
+Entry to this mode calls the value of magik-session-mode-hook.
+
+\\{magik-session-mode-map}"
 
   (interactive)
   (let

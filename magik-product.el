@@ -94,7 +94,9 @@
 (defun magik-product-mode ()
   "Major mode for editing Magik product.def files.
 
-You can customise Product Mode with the `product-mode-hook'."
+You can customise Product Mode with the `product-mode-hook'.
+
+\\{magik-product-mode-map}"
 
   (interactive)
   (kill-all-local-variables)
