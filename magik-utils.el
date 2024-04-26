@@ -250,30 +250,33 @@ Used for determining a suitable BUFFER using the following interface:
 			#'(lambda (arg mode predicate)
 			    (nth (1- arg)
 				 (reverse (magik-utils-buffer-mode-list-sorted mode predicate))))))
+	 (predicate (or predicate
+			#'(lambda ()
+			    "This assumes buffer is set by `magik-utils-buffer-mode-list'"
+			    (get-buffer-process (current-buffer)))))
 	 (prompt (concat prompt " "))
-	 (visible-bufs (magik-utils-buffer-visible-list mode predicate))
+	 (visible-buffs (magik-utils-buffer-visible-list mode predicate))
 	 (prompt-when-multiple-options
-	  #'(lambda (buffers predicate)
+	  #'(lambda (buffers)
 	      (and buffers
-	       (setq buffer
-		     (if (length= buffers 1) (caar buffers)
-		       (completing-read prompt buffers predicate t)))
-	       (not (equal buffer "")))))
-	 (prompt-always #'(lambda ()
-			    (completing-read prompt
-					     (mapcar #'(lambda (b) (cons b b))
-						     (magik-utils-buffer-mode-list mode predicate))
-					     nil nil
-					     initial))))
+		   (setq buffer
+			 (if (length= buffers 1) (car buffers)
+			   (completing-read prompt buffers nil t initial)))
+		   (not (equal buffer ""))
+		   buffer))))
     (cond ((integerp current-prefix-arg) (funcall prefix-fn current-prefix-arg mode predicate))
-	  (current-prefix-arg (funcall prompt-always))
+	  (current-prefix-arg (funcall prompt-when-multiple-options (magik-utils-buffer-mode-list mode predicate)))
 	  (buffer buffer)
-	  ((funcall prompt-when-multiple-options (seq-filter #'(lambda (buff) (cdr buff)) visible-bufs) 'cdr)
+	  ((funcall prompt-when-multiple-options (seq-reduce #'(lambda (buffers buff)
+								 (if (cdr buff) (cons (car buff) buffers)))
+							     visible-buffs nil))
 	   buffer)
-	  ((funcall prompt-when-multiple-options visible-bufs nil)
+	  ((funcall prompt-when-multiple-options (mapcar 'car visible-buffs))
 	   (select-frame-set-input-focus
-	    (window-frame (get-buffer-window buffer 'visible))))
-	  (magik-utils-by-default-prompt-buffer-p (funcall prompt-always))
+	    (window-frame (get-buffer-window buffer 'visible)))
+	   buffer)
+	  (magik-utils-by-default-prompt-buffer-p (funcall prompt-when-multiple-options
+							   (magik-utils-buffer-mode-list mode predicate)))
 	  (t default))))
 
 (defun magik-utils-delete-process-safely (process)
