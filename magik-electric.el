@@ -92,7 +92,7 @@ usage={})") ("_iter _method " prev_class_name) "\t## " "\t## " -
      ("protect" e 1 "_protect" - "_protection" - "_endprotect")
      ("lock" e 0 "_lock " - "_endlock")
      ("try" e 1 "_try" - "_when" - "_endtry")
-     ("proc" e 0 "_proc " - "_endproc")
+     ("proc" -1 0 "_proc()" - "_endproc")
      ("loop" e 1 "_loop" - "_endloop")
      ("while" e 0 "_while " "_loop" - "_endloop")
      ("for" 2 0 "_for  _over " "_loop" - "_endloop"))
