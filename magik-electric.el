@@ -87,7 +87,7 @@
      ("def_slotted_exemplar" e 2 (prev_pragma)
       ("def_slotted_exemplar(" filename_as_symbol ",\n\t## \n\t## \n\t## \n\t{\n\t},\n\t{})\n" dollar))
      ("remex" e 2 ("remex(" filename_as_symbol ")\n" dollar))
-     ("message_handler" e 0 ("message_handler.new(" filename_as_symbol ")\n" dollar))
+     ("message_handler" e 0 ("message_handler.new(" prev_class_name_as_symbol ")\n" dollar))
 
      ("if" e 0 "_if " "_then" - "_endif")
      ("over" e 0 "_over " "_loop" - "_endloop")
@@ -281,7 +281,9 @@ the previous line starts with a `#' align with that."
      ((eq line 'dollar)
       (delete-region (line-beginning-position) (point))
       (insert "$\n"))
-     ((eq line 'prev_class_name)
+     ((or
+       (eq line 'prev_class_name)
+       (eq line 'prev_class_name_as_symbol))
       (let (class)
 	(save-excursion
 	  (cond ((re-search-backward "_method[ \t]+\\(\\(\\sw\\|_\\)+\\)\\." nil t)
@@ -291,7 +293,12 @@ the previous line starts with a `#' align with that."
 		((re-search-backward "def_mixin\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
 		 (setq class (match-string 2)))
 		(t nil)))
-	(if class (insert class "."))))
+	(if (and class
+		 (eq line 'prev_class_name))
+	    (insert class "."))
+	(if (and class
+		 (eq line 'prev_class_name_as_symbol))
+	    (insert ":" class))))
      ((eq line 'filename_as_symbol)
       (let ((name (if (not (buffer-file-name)) "" (file-name-nondirectory (buffer-file-name)))))
 	(if (string-match "\\.magik$" name)
