@@ -288,6 +288,8 @@ the previous line starts with a `#' align with that."
 		 (setq class (match-string 1)))
 		((re-search-backward "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
 		 (setq class (match-string 2)))
+		((re-search-backward "def_mixin\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
+		 (setq class (match-string 2)))
 		(t nil)))
 	(if class (insert class "."))))
      ((eq line 'filename_as_symbol)
