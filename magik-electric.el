@@ -44,43 +44,47 @@
   :group 'magik-electric
   :type  'hook)
 
+(defcustom magik-electric-default-pragma "_pragma(classify_level=, topic={}, usage={})"
+  "Default pragma to use if no previous pragma could be found."
+  :group 'magik-electric
+  :type  'string)
+
 (defvar magik-electric-templates-methods
-  '(("define_shared_constant" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+  '(("define_shared_constant" -1 1 (prev_pragma)
      (prev_class_name "define_shared_constant(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_shared_variable" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_shared_variable" -1 1 (prev_pragma)
      (prev_class_name "define_shared_variable(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_slot_access" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_slot_access" -1 1 (prev_pragma)
      (prev_class_name "define_slot_access(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_pseudo_slot" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_pseudo_slot" -1 1 (prev_pragma)
      (prev_class_name "define_pseudo_slot(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_print_attributes" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_print_attributes" -1 1 (prev_pragma)
      (prev_class_name "define_print_attributes(:" "\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_show_attributes" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_show_attributes" -1 1 (prev_pragma)
      (prev_class_name "define_show_attributes(:" "\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("def_mixin" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("def_mixin" -1 1 (prev_pragma)
      (prev_class_name "def_mixin(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("def_property" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("def_property" -1 1 (prev_pragma)
      (prev_class_name "def_property(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_property" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_property" -1 1 (prev_pragma)
      (prev_class_name "define_property(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
     ("define_condition" -1 0
      ("condition.define_condition(:" ",\n\t:,\n\t{})\n" dollar))
-    ("define_binary_operator_case" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_binary_operator_case" -1 1 (prev_pragma)
      ("define_binary_operator_case(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar)))
   " These `method' templates automatically insert the class name at the front.")
 (defvar magik-electric-templates
   (append
-   '(("iter" e 1 (prev_pragma "_pragma(classify_level=, topic={},
-usage={})") ("_iter _method " prev_class_name) "\t## " "\t## " -
-"_endmethod" dollar)
+   '(("iter" e 1 (prev_pragma) ("_iter _method " prev_class_name) "\t## " "\t## "
+      - "_endmethod" dollar)
      ("private" e 1 (prev_pragma "_pragma(classify_level=restricted, topic={}, usage={})") ("_private _method " prev_class_name) "\t## " "\t## "
       - "_endmethod" dollar)
-     ("abstract" e 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})") ("_abstract _method " prev_class_name) "\t## " "\t## "
+     ("abstract" e 1 (prev_pragma) ("_abstract _method " prev_class_name) "\t## " "\t## "
       - "_endmethod" dollar)
-     ("method" e 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})") ("_method " prev_class_name) "\t## " "\t## " - "_endmethod"
-      dollar)
-     ("pragma" 17 0 (prev_pragma "_pragma(classify_level=, topic={}, usage={})"))
-     ("def_slotted_exemplar" e 2 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+     ("method" e 1 (prev_pragma) ("_method " prev_class_name) "\t## " "\t## "
+      - "_endmethod" dollar)
+     ("pragma" 17 0 (prev_pragma))
+     ("def_slotted_exemplar" e 2 (prev_pragma)
       ("def_slotted_exemplar(" filename_as_symbol ",\n\t## \n\t## \n\t## \n\t{\n\t},\n\t{})\n" dollar))
      ("remex" e 2 ("remex(" filename_as_symbol ")\n" dollar))
      ("message_handler" e 0 ("message_handler.new(" filename_as_symbol ")\n" dollar))
@@ -268,7 +272,10 @@ the previous line starts with a `#' align with that."
 		   (goto-char pt)                                 ;place point ready to insert deprecated template
 		   (magik-pragma-insert-deprecated-template)      ;because this fn assumes that it is on the pragma line
 		   )))
-	(insert (cadr line))))
+	(let ((str (if (> (length line) 1)
+		       (cadr line)
+		     magik-electric-default-pragma)))
+	  (insert str))))
      ((eq line '-)
       (magik-indent-command))
      ((eq line 'dollar)
