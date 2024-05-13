@@ -62,8 +62,6 @@
      (prev_class_name "define_print_attributes(:" "\n\t## \n\t## \n\t## \n\t)\n" dollar))
     ("define_show_attributes" -1 1 (prev_pragma)
      (prev_class_name "define_show_attributes(:" "\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("def_mixin" -1 1 (prev_pragma)
-     (prev_class_name "def_mixin(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
     ("def_property" -1 1 (prev_pragma)
      (prev_class_name "def_property(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
     ("define_property" -1 1 (prev_pragma)
@@ -86,6 +84,8 @@
      ("pragma" 17 0 (prev_pragma))
      ("def_slotted_exemplar" e 2 (prev_pragma)
       ("def_slotted_exemplar(" filename_as_symbol ",\n\t## \n\t## \n\t## \n\t{\n\t},\n\t{})\n" dollar))
+     ("def_mixin" e 2 (prev_pragma)
+      ("def_mixin(" filename_as_symbol ",\n\t## \n\t## \n\t## \n\t{})\n" dollar))
      ("remex" e 2 ("remex(" filename_as_symbol ")\n" dollar))
      ("message_handler" e 0 ("message_handler.new(" prev_class_name_as_symbol ")\n" dollar))
 
