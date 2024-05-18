@@ -142,7 +142,9 @@
 (defun magik-module-mode ()
   "Major mode for editing Magik module.def files.
 
-You can customise Module Mode with the `module-mode-hook'."
+You can customise Module Mode with the `module-mode-hook'.
+
+\\{magik-module-mode-map}"
 
   (interactive)
   (kill-all-local-variables)

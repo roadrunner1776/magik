@@ -634,7 +634,9 @@ Useful configuration variables are:
 
 cb-jump-replaces-cb-buffer
 
-To view the help on these variables type C-h v [Return] [variable-name]"
+To view the help on these variables type C-h v [Return] [variable-name]
+
+\\{magik-cb-mode-map}"
   (interactive)
   (kill-all-local-variables)
   (make-local-variable 'magik-cb-process)

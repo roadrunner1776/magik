@@ -160,8 +160,7 @@
   ;; Tree-sitter setup.
   (treesit-parser-create 'magik)
 
-  (setq-local treesit--indent-verbose t
-	      treesit-simple-indent-rules magik-ts-mode--indent-rules
+  (setq-local treesit-simple-indent-rules magik-ts-mode--indent-rules
 	      treesit-font-lock-settings magik--treesit-settings
 	      treesit-font-lock-feature-list '((comment pragma)
 					       (type constant keyword string)
