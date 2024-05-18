@@ -44,46 +44,48 @@
   :group 'magik-electric
   :type  'hook)
 
+(defcustom magik-electric-default-pragma "_pragma(classify_level=, topic={}, usage={})"
+  "Default pragma to use if no previous pragma could be found."
+  :group 'magik-electric
+  :type  'string)
+
 (defvar magik-electric-templates-methods
-  '(("define_shared_constant" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+  '(("define_shared_constant" -1 1 (prev_pragma)
      (prev_class_name "define_shared_constant(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_shared_variable" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_shared_variable" -1 1 (prev_pragma)
      (prev_class_name "define_shared_variable(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_slot_access" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_slot_access" -1 1 (prev_pragma)
      (prev_class_name "define_slot_access(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_pseudo_slot" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_pseudo_slot" -1 1 (prev_pragma)
      (prev_class_name "define_pseudo_slot(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_print_attributes" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_print_attributes" -1 1 (prev_pragma)
      (prev_class_name "define_print_attributes(:" "\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_show_attributes" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("define_show_attributes" -1 1 (prev_pragma)
      (prev_class_name "define_show_attributes(:" "\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("def_mixin" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
-     (prev_class_name "def_mixin(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("def_property" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+    ("def_property" -1 1 (prev_pragma)
      (prev_class_name "def_property(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_property" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
-     (prev_class_name "define_property(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
-    ("define_condition" -1 0
-     ("condition.define_condition(:" ",\n\t:,\n\t{})\n" dollar))
-    ("define_binary_operator_case" -1 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
-     ("define_binary_operator_case(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar)))
+    ("define_property" -1 1 (prev_pragma)
+     (prev_class_name "define_property(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar)))
   " These `method' templates automatically insert the class name at the front.")
 (defvar magik-electric-templates
   (append
-   '(("iter" e 1 (prev_pragma "_pragma(classify_level=, topic={},
-usage={})") ("_iter _method " prev_class_name) "\t## " "\t## " -
-"_endmethod" dollar)
+   '(("iter" e 1 (prev_pragma) ("_iter _method " prev_class_name) "\t## " "\t## "
+      - "_endmethod" dollar)
      ("private" e 1 (prev_pragma "_pragma(classify_level=restricted, topic={}, usage={})") ("_private _method " prev_class_name) "\t## " "\t## "
       - "_endmethod" dollar)
-     ("abstract" e 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})") ("_abstract _method " prev_class_name) "\t## " "\t## "
+     ("abstract" e 1 (prev_pragma) ("_abstract _method " prev_class_name) "\t## " "\t## "
       - "_endmethod" dollar)
-     ("method" e 1 (prev_pragma "_pragma(classify_level=, topic={}, usage={})") ("_method " prev_class_name) "\t## " "\t## " - "_endmethod"
-      dollar)
-     ("pragma" 17 0 (prev_pragma "_pragma(classify_level=, topic={}, usage={})"))
-     ("def_slotted_exemplar" e 2 (prev_pragma "_pragma(classify_level=, topic={}, usage={})")
+     ("method" e 1 (prev_pragma) ("_method " prev_class_name) "\t## " "\t## "
+      - "_endmethod" dollar)
+     ("pragma" 17 0 (prev_pragma))
+     ("def_slotted_exemplar" e 2 (prev_pragma)
       ("def_slotted_exemplar(" filename_as_symbol ",\n\t## \n\t## \n\t## \n\t{\n\t},\n\t{})\n" dollar))
+     ("def_mixin" e 2 (prev_pragma)
+      ("def_mixin(" filename_as_symbol ",\n\t## \n\t## \n\t## \n\t{})\n" dollar))
      ("remex" e 2 ("remex(" filename_as_symbol ")\n" dollar))
-     ("message_handler" e 0 ("message_handler.new(" filename_as_symbol ")\n" dollar))
+     ("message_handler" e 0 ("message_handler.new(" prev_class_name_as_symbol ")\n" dollar))
+     ("define_condition" -1 0 ("condition.define_condition(:" ",\n\t:,\n\t{})\n" dollar))
+     ("define_binary_operator_case" -1 1 (prev_pragma) ("define_binary_operator_case(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
 
      ("if" e 0 "_if " "_then" - "_endif")
      ("over" e 0 "_over " "_loop" - "_endloop")
@@ -92,7 +94,7 @@ usage={})") ("_iter _method " prev_class_name) "\t## " "\t## " -
      ("protect" e 1 "_protect" - "_protection" - "_endprotect")
      ("lock" e 0 "_lock " - "_endlock")
      ("try" e 1 "_try" - "_when" - "_endtry")
-     ("proc" e 0 "_proc " - "_endproc")
+     ("proc" -1 0 "_proc()" - "_endproc")
      ("loop" e 1 "_loop" - "_endloop")
      ("while" e 0 "_while " "_loop" - "_endloop")
      ("for" 2 0 "_for  _over " "_loop" - "_endloop"))
@@ -268,21 +270,33 @@ the previous line starts with a `#' align with that."
 		   (goto-char pt)                                 ;place point ready to insert deprecated template
 		   (magik-pragma-insert-deprecated-template)      ;because this fn assumes that it is on the pragma line
 		   )))
-	(insert (cadr line))))
+	(let ((str (if (> (length line) 1)
+		       (cadr line)
+		     magik-electric-default-pragma)))
+	  (insert str))))
      ((eq line '-)
       (magik-indent-command))
      ((eq line 'dollar)
       (delete-region (line-beginning-position) (point))
       (insert "$\n"))
-     ((eq line 'prev_class_name)
+     ((or
+       (eq line 'prev_class_name)
+       (eq line 'prev_class_name_as_symbol))
       (let (class)
 	(save-excursion
 	  (cond ((re-search-backward "_method[ \t]+\\(\\(\\sw\\|_\\)+\\)\\." nil t)
 		 (setq class (match-string 1)))
 		((re-search-backward "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
 		 (setq class (match-string 2)))
+		((re-search-backward "def_mixin\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
+		 (setq class (match-string 2)))
 		(t nil)))
-	(if class (insert class "."))))
+	(if (and class
+		 (eq line 'prev_class_name))
+	    (insert class "."))
+	(if (and class
+		 (eq line 'prev_class_name_as_symbol))
+	    (insert ":" class))))
      ((eq line 'filename_as_symbol)
       (let ((name (if (not (buffer-file-name)) "" (file-name-nondirectory (buffer-file-name)))))
 	(if (string-match "\\.magik$" name)
