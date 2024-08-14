@@ -631,6 +631,7 @@ Entry to this mode calls the value of magik-session-mode-hook.
 	  magik-session-cb-buffer    (concat "*cb*" (buffer-name))
 	  magik-session-drag-n-drop-mode-line-string " DnD"
 	  magik-transmit-debug-mode-line-string " #DEBUG"
+	  show-trailing-whitespace nil
 	  font-lock-defaults '(magik-session-font-lock-keywords
 			       nil t
 			       ((?_ . "w")))
