@@ -28,7 +28,7 @@ jobs:
         - os: ubuntu-latest
           emacs-version: 27.2
           experimental: false
-        - os: macos-11
+        - os: macos-12
           emacs-version: 27.2
           experimental: false
         - os: windows-latest
