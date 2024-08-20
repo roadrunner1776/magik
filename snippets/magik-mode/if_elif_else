@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: if_elif_else
+# key: ifele
+# group : control structure
+# --
+_if ${1:cond}
+_then
+        $2
+_elif ${3:cond}
+_then
+        $4
+_else
+        $0
+_endif

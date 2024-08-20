@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: for
+# key: for
+# group : control structure
+# --
+_for ${var} _over ${collection}
+_loop
+        $0
+_endloop

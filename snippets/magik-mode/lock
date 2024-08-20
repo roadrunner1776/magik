@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: lock
+# key: lock
+# --
+_lock
+        $0
+_endlock

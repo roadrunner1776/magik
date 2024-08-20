@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: if
+# key: if
+# group : control structure
+# --
+_if ${1:cond}
+_then
+        $0
+_endif

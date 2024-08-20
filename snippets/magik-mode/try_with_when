@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: try_with_when
+# key: try_with_when
+# --
+_try _with ${1:cond}
+        $2
+_when ${3:cond}
+        $0
+_endtry

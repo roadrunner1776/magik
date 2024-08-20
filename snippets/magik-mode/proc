@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: proc
+# key: proc
+# --
+_proc($1)
+        $0
+_endproc

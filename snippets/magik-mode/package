@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: package
+# key: pack
+# --
+_package ${1:user}
+
+$0

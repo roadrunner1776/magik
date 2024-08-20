@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: try
+# key: try
+# --
+_try
+        $0
+_endtry

@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: protect
+# key: protect
+# --
+_protect
+        $1
+_protection
+        $0
+_endprotect

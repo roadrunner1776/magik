@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: while
+# key: while
+# group : control structure
+# --
+_while ${cond}
+_loop
+        $0
+_endloop
