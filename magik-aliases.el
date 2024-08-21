@@ -175,6 +175,7 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
 	comment-start "#"
 	comment-end   ""
 	imenu-generic-expression magik-aliases-imenu-generic-expression
+	show-trailing-whitespace nil
 	font-lock-defaults
 	'(magik-aliases-font-lock-keywords
 	  nil nil))

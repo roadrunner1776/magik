@@ -1,5 +1,5 @@
 (package "magik-mode"
-         "0.3.1"
+         "0.3.3"
          "Emacs major mode for Smallworld Magik files")
 
 (website-url "https://github.com/roadrunner1776/magik")

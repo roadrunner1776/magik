@@ -661,6 +661,7 @@ To view the help on these variables type C-h v [Return] [variable-name]
   (setq major-mode 'magik-cb-mode
 	buffer-read-only t
 	buffer-undo-list t
+	show-trailing-whitespace nil
 	font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w"))))
 
   (add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu)
@@ -1549,6 +1550,7 @@ be careful to preserve the position in \"*cb2*\"."
   (setq major-mode 'magik-cb2-mode
 	buffer-read-only t
 	buffer-undo-list t
+	show-trailing-whitespace nil
 	font-lock-defaults '(magik-cb2-font-lock-keywords nil t ((?_ . "w"))))
 
   (use-local-map magik-cb-mode-map)
