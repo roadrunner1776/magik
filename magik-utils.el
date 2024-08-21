@@ -22,6 +22,16 @@
 (eval-when-compile
   (require 'sort))
 (require 'cl-lib)
+(require 'seq)
+
+(defcustom magik-utils-by-default-prompt-buffer-p nil
+  "Defines if prompting for an gis buffer is used by default.
+This relates to the function `magik-utils-get-buffer-mode'.
+Any non-nil value means that the user will be prompted with
+the possible gis buffer options.  A value of nil makes it
+use the DEFAULT value that had been passed in."
+  :type 'boolean
+  :group 'magik)
 
 (defvar magik-utils-original-process-environment (cl-copy-list process-environment)
   "Store the original `process-environment' at startup.
@@ -234,48 +244,40 @@ Used for determining a suitable BUFFER using the following interface:
 5. Use the buffer displayed in the some other frame,
    only PROMPT if more than one buffer in the other frames are displayed
    and only list those that are displayed in the other frames.
-6. Use DEFAULT value.
+6. Use DEFAULT value, or PROMPT if `magik-utils-by-default-prompt-buffer-p' is not nil.
 "
   (let* ((prefix-fn (or prefix-fn
 			#'(lambda (arg mode predicate)
 			    (nth (1- arg)
 				 (reverse (magik-utils-buffer-mode-list-sorted mode predicate))))))
+	 (predicate (or predicate
+			#'(lambda ()
+			    "This assumes buffer is set by `magik-utils-buffer-mode-list'"
+			    (get-buffer-process (current-buffer)))))
 	 (prompt (concat prompt " "))
-	 (visible-bufs (magik-utils-buffer-visible-list mode predicate))
-	 bufs
-	 (buffer (cond ((and (integerp current-prefix-arg)
-			     (setq buffer (funcall prefix-fn current-prefix-arg mode predicate)))
-			buffer)
-		       (current-prefix-arg
-			(completing-read prompt
-					 (mapcar #'(lambda (b) (cons b b))
-						 (magik-utils-buffer-mode-list mode predicate))
-					 nil nil
-					 initial))
-		       (buffer buffer)
-		       ((and
-			 (setq bufs
-			       (delete nil
-				       (mapcar (function (lambda (b) (if (cdr b) b))) visible-bufs)))
-			 ;;restrict list to those whose cdr is t.
-			 (setq buffer
-			       (if (= (length bufs) 1)
-				   (caar bufs)
-				 (completing-read prompt visible-bufs 'cdr t)))
-			 (not (equal buffer "")))
-			buffer)
-		       ((and
-			 visible-bufs
-			 (setq buffer
-			       (if (= (length visible-bufs) 1)
-				   (caar visible-bufs)
-				 (completing-read prompt visible-bufs nil t)))
-			 (not (equal buffer "")))
-			(select-frame-set-input-focus
-			 (window-frame (get-buffer-window buffer 'visible)))
-			buffer)
-		       (t default))))
-    buffer))
+	 (visible-buffs (magik-utils-buffer-visible-list mode predicate))
+	 (prompt-when-multiple-options
+	  #'(lambda (buffers)
+	      (and buffers
+		   (setq buffer
+			 (if (length= buffers 1) (car buffers)
+			   (completing-read prompt buffers nil t initial)))
+		   (not (equal buffer ""))
+		   buffer))))
+    (cond ((integerp current-prefix-arg) (funcall prefix-fn current-prefix-arg mode predicate))
+	  (current-prefix-arg (funcall prompt-when-multiple-options (magik-utils-buffer-mode-list mode predicate)))
+	  (buffer buffer)
+	  ((funcall prompt-when-multiple-options (seq-reduce #'(lambda (buffers buff)
+								 (if (cdr buff) (cons (car buff) buffers)))
+							     visible-buffs nil))
+	   buffer)
+	  ((funcall prompt-when-multiple-options (mapcar 'car visible-buffs))
+	   (select-frame-set-input-focus
+	    (window-frame (get-buffer-window buffer 'visible)))
+	   buffer)
+	  (magik-utils-by-default-prompt-buffer-p (funcall prompt-when-multiple-options
+							   (magik-utils-buffer-mode-list mode predicate)))
+	  (t default))))
 
 (defun magik-utils-delete-process-safely (process)
   "A safe `delete-process'.

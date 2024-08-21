@@ -1,8 +1,8 @@
-;;; magik-mode.el --- mode for editing Magik + some utils.
+;;; magik-mode.el --- Emacs major mode for Smallworld Magik files
 
-;; Package-Version: 0.0.1
+;; Package-Version: 0.3.3
 ;; Package-Requires: ((emacs "24.4") (compat "28.1"))
-;; URL: http://github.com/roadrunner1776/magik
+;; URL: https://github.com/roadrunner1776/magik
 ;; Keywords: languages
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -478,7 +478,7 @@ because it does not have an _ preceding like all the other Magik keywords.")
   '("concat" "case" "endcase" "otherwise" "void")
   "List of obsolete/unimplemented keywords to highlight for font-lock.")
 
-(defvar magik-other-keywords '(">>" "def_indexed_exemplar" "def_slotted_exemplar")
+(defvar magik-other-keywords '("def_indexed_exemplar" "def_slotted_exemplar")
   "List of other Magik `keywords'.")
 
 (defvar magik-warnings
@@ -487,7 +487,8 @@ because it does not have an _ preceding like all the other Magik keywords.")
 
 (defcustom magik-font-lock-keywords-1
   (list
-   (cons (concat "\\<no_way\\|_" (regexp-opt magik-keyword-constants t) "\\>") 'magik-constant-face)
+   (cons (concat "\\<_" (regexp-opt magik-keyword-kleenean  t) "\\>") ''magik-boolean-face)
+   (cons (concat "\\<no_way\\|_" (regexp-opt magik-keyword-constants t) "\\>") ''magik-constant-face)
    (cons (concat "\\<_"
 		 (regexp-opt (append magik-keyword-operators
 				     magik-keyword-class
@@ -537,24 +538,18 @@ See `magik-font-lock-keywords-1' and `magik-font-lock-keywords-2'."
 
 (defcustom magik-font-lock-keywords-4
   (append
-   magik-font-lock-keywords-2
+   magik-font-lock-keywords-3
    (list
-    (cons (concat "\\<_" (regexp-opt magik-keyword-kleenean  t) "\\>") ''magik-boolean-face)
-    (cons (concat "\\<no_way\\|_" (regexp-opt magik-keyword-constants t) "\\>") ''magik-constant-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-constants  t) "\\>") ''magik-constant-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-operators  t) "\\>") ''magik-keyword-operators-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-class      t) "\\>") ''magik-class-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-methods    t) "\\>") ''magik-method-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-procedures t) "\\>") ''magik-procedure-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-statements t) "\\>") ''magik-keyword-statements-face)
-    (cons (concat "\\<_" (regexp-opt magik-keyword-loop       t) "\\>") ''magik-keyword-loop-face)    ;; warnings
-    (list (concat "\\<\\(" (mapconcat 'identity magik-warnings "\\|") "\\)\\>") 1 ''magik-warning-face t)
-
+    (cons (concat "\\<_" (regexp-opt magik-keyword-loop       t) "\\>") ''magik-keyword-loop-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-arguments  t) "\\>") ''magik-keyword-arguments-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-variable   t) "\\>") ''magik-keyword-variable-face)
     (cons (concat "\\<_" (regexp-opt magik-keyword-obsolete   t) "\\>") ''magik-keyword-obsolete-face)
-    ;; other "keywords"
-    (cons (concat "\\<\\(" (mapconcat 'identity magik-other-keywords "\\|") "\\)\\>") 'font-lock-keyword-face)
+
     '("^_pragma\\s-*\\(([^)]*)\\)" 1 'magik-pragma-face)
     ;; methods
     '("\\(\\sw\\|\\s$\\)\\.\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\(\\s-*(\\)" 2 'magik-method-face)
@@ -564,8 +559,9 @@ See `magik-font-lock-keywords-1' and `magik-font-lock-keywords-2'."
     '("^\\(\\sw+\\)\\.define_\\(shared_constant\\|shared_variable\\|slot_access\\)\\>" 1 'magik-class-face)
     '("\\Sw\\(\\.\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\>" 1 'magik-slot-face)
     '("\\<\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\?\\>" 0 'magik-boolean-face t)
-    '("_for\\s-+\\(\\sw+\\)" 1 'magik-variable-face) ;_for loop variable
+    '("_for\\s-+\\(\\sw+\\)" 1 'magik-variable-face) ;; _for loop variable
     '("@\\s-*\\sw+" 0 'magik-global-reference-face t)
+    '(">>" 0 'magik-keyword-arguments-face t)
     ))
   "Font lock setting for 4th level of Magik fontification.
 As 1st level but also fontifies all Magik keywords according their
@@ -716,7 +712,7 @@ Use auto-complete mode \"g\" symbol convention to represent a global.")
       (if (and (eq (point) last-tok-pos)
 	       (/= (preceding-char) ?.))
 	  (insert ?_))
-      (if (and (eq major-mode 'magik-mode)
+      (if (and (derived-mode-p 'magik-base-mode)
 	       (looking-at "_else\\|_elif\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
 	  (magik-indent-command)))))
 
@@ -1503,7 +1499,7 @@ If PT is given, goto that char position."
 
 (defun magik-method-name-set ()
   "Set the name of the current Magik method in `magik-method-name'."
-  (cond ((not (eq major-mode 'magik-mode))
+  (cond ((not (derived-mode-p 'magik-base-mode))
 	 nil)
 	((not magik-method-name-mode)
 	 (setq mode-line-buffer-identification
@@ -1736,7 +1732,7 @@ Argument END ..."
   (interactive)
   (save-excursion
     (cond
-     ((eq major-mode 'magik-mode)
+     ((derived-mode-p 'magik-base-mode)
       (goto-char (point-min))
       (while (search-forward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t)
 	(magik-parse-pragma))
@@ -1749,7 +1745,7 @@ Argument END ..."
   (interactive)
   (save-excursion
     (cond
-     ((eq major-mode 'magik-mode)
+     ((derived-mode-p 'magik-base-mode)
       (forward-line)
       (let ((starting-point (line-number-at-pos))
 	    (exemplar-point nil)
@@ -1793,7 +1789,7 @@ Argument ENDING-POINT ..."
   (interactive)
   (save-excursion
     (cond
-     ((eq major-mode 'magik-mode)
+     ((derived-mode-p 'magik-base-mode)
       (goto-char (point-min))
       (while (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
 	(magik-parse-sw-method-docs (match-string 1)))
@@ -1806,7 +1802,7 @@ Argument ENDING-POINT ..."
   (interactive)
   (save-excursion
     (cond
-     ((eq major-mode 'magik-mode)
+     ((derived-mode-p 'magik-base-mode)
       (forward-line)
       (search-backward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
       (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
@@ -2180,7 +2176,7 @@ closing bracket into the new \"{...}\" notation."
 	 (handle (1- (nth 1 last))))
     (setcdr precdr (list
 		    (list
-		     '(eq major-mode 'magik-mode)
+		     '(derived-mode-p 'magik-base-mode)
 		     handle
 		     "Magik Files (%d)")
 		    last))))

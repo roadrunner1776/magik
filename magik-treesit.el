@@ -1,6 +1,6 @@
 ;;; magik-treesit.el ---                             -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023  Robin Putters
+;; Copyright (C) 2024 Robin Putters
 
 ;; Author: Robin Putters <krn-robin@github>
 ;; Keywords: languages
@@ -118,6 +118,7 @@
      ((node-is "elif") parent 0)
      ((node-is "else") parent 0)
      ((node-is "when") parent 0)
+     ((node-is "finally") parent 0)
 
      ((parent-is "block") parent magik-indent-level)
      ((parent-is "if") parent magik-indent-level)
@@ -125,7 +126,6 @@
      ((parent-is "else") parent magik-indent-level)
      ((parent-is "iterator") parent magik-indent-level)
      ((parent-is "loop") parent magik-indent-level)
-     ((parent-is "finally") parent magik-indent-level)
      ((parent-is "while") parent magik-indent-level)
      ((parent-is "method") parent magik-indent-level)
      ((parent-is "protect") parent magik-indent-level)
@@ -134,12 +134,12 @@
      ((parent-is "try") parent magik-indent-level)
      ((parent-is "catch") parent magik-indent-level)
      ((parent-is "handling") parent magik-indent-level)
-
      ((parent-is "assignment") parent magik-indent-level)
-     ((parent-is "logical_operator") parent magik-indent-level)
-     ((parent-is "relational_operator") parent magik-indent-level)
-     ((parent-is "arithmetic_operator") parent magik-indent-level)
-     ((parent-is "unary_operator") parent magik-indent-level)
+
+     ((parent-is "logical_operator") parent 0)
+     ((parent-is "relational_operator") parent 0)
+     ((parent-is "arithmetic_operator") parent 0)
+     ((parent-is "unary_operator") parent 0)
 
      ((parent-is "documentation") first-sibling 0)
      ((parent-is "invoke") (nth-sibling 2) 0)
@@ -160,8 +160,7 @@
   ;; Tree-sitter setup.
   (treesit-parser-create 'magik)
 
-  (setq-local treesit--indent-verbose t
-	      treesit-simple-indent-rules magik-ts-mode--indent-rules
+  (setq-local treesit-simple-indent-rules magik-ts-mode--indent-rules
 	      treesit-font-lock-settings magik--treesit-settings
 	      treesit-font-lock-feature-list '((comment pragma)
 					       (type constant keyword string)
