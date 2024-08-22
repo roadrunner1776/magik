@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: define_slot_access
+# key: define_slot_access
+# --
+`(magik-yasnippet-prev-pragma)`
+## 
+## 
+## 
+`(magik-yasnippet-prev-class-name-with-dot)`define_slot_access(:${1:name}, ${2:flag})
+$
+
+$0

@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: define_pseudo_slot
+# key: define_pseudo_slot
+# --
+`(magik-yasnippet-prev-pragma)`
+## 
+## 
+## 
+`(magik-yasnippet-prev-class-name-with-dot)`define_pseudo_slot(:${1:name})
+$
+
+$0

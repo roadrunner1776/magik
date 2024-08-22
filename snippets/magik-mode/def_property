@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: def_property
+# key: def_property
+# --
+`(magik-yasnippet-prev-pragma)`
+## 
+## 
+## 
+`(magik-yasnippet-prev-class-name-with-dot)`def_property(:${1:name}, ${2:flag})
+$
+
+$0

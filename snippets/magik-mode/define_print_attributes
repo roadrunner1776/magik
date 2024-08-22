@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: define_print_attributes
+# key: define_print_attributes
+# --
+`(magik-yasnippet-prev-pragma)`
+`(magik-yasnippet-prev-class-name-with-dot)`define_print_attributes(${1:list})
+$
+
+$0
