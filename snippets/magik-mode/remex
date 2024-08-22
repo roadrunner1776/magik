@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: remex
+# key: remex
+# --
+remex(${1:`(magik-yasnippet-filename-as-symbol)`})
+$
+
+$0

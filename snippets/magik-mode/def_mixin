@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: def_mixin
+# key: def_mixin
+# --
+`(magik-yasnippet-prev-pragma)`
+## 
+## 
+## 
+def_mixin(:${1:`(magik-yasnippet-filename-as-symbol)`})
+$
+
+$0
