@@ -5,5 +5,5 @@
 # --
 _for ${var} _over ${collection}
 _loop
-        $0
+		$0
 _endloop

@@ -3,5 +3,5 @@
 # key: lock
 # --
 _lock
-        $0
+		$0
 _endlock

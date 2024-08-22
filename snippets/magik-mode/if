@@ -5,5 +5,5 @@
 # --
 _if ${1:cond}
 _then
-        $0
+		$0
 _endif

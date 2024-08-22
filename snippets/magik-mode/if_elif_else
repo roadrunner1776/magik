@@ -5,10 +5,10 @@
 # --
 _if ${1:cond}
 _then
-        $2
+		$2
 _elif ${3:cond}
 _then
-        $4
+		$4
 _else
-        $0
+		$0
 _endif

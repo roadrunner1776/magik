@@ -3,5 +3,5 @@
 # key: try
 # --
 _try
-        $0
+		$0
 _endtry

@@ -4,5 +4,5 @@
 # group : control structure
 # --
 _loop
-        $0
+		$0
 _endloop

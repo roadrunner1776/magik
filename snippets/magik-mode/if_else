@@ -5,7 +5,7 @@
 # --
 _if ${1:cond}
 _then
-        $2
+		$2
 _else
-        $0
+		$0
 _endif

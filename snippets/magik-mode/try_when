@@ -3,7 +3,7 @@
 # key: try_when
 # --
 _try
-        $1
+		$1
 _when ${2:cond}
-        $0
+		$0
 _endtry

@@ -5,8 +5,8 @@
 # --
 _if ${1:cond}
 _then
-        $2
+		$2
 _elif ${3:cond}
 _then
-        $0
+		$0
 _endif

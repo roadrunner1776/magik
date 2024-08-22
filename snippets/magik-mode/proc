@@ -3,5 +3,5 @@
 # key: proc
 # --
 _proc($1)
-        $0
+		$0
 _endproc
