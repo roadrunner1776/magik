@@ -71,4 +71,37 @@ Return the file name as a symbol (prefixed with a colon `:`)."
       (setq name (substring name 0 (- (length name) 6))))
     (concat ":" name)))
 
+(defun magik-yasnippet-prev-slotted-exemplar-slots ()
+  "Search for the previous `def_slotted_exemplar` and return slot names."
+  (let ((slot_count 1)
+         (slot_name nil)
+         (slotted_loc nil)
+         (dollar_loc nil)
+         (more_slots nil)
+         (result ""))
+    (save-excursion
+      (when (re-search-backward "\\(def_slotted_exemplar\\)" nil t)
+        (setq slotted_loc (match-beginning 0))
+        (goto-char slotted_loc)
+        (when (re-search-forward "\\(\\$\\)" nil t)
+          (setq dollar_loc (match-beginning 0)))
+        (setq more_slots t)))
+
+    (while more_slots
+      (save-excursion
+        (goto-char slotted_loc)
+        (if (re-search-forward "{\\s-*:\\s-*\\(\\sw+\\)\\s-*,\\s-*\\(_unset\\)\\s-*}" dollar_loc t slot_count)
+          (progn
+            (setq
+              slot_count (1+ slot_count)
+              slot_name (match-string-no-properties 1)
+              result (concat result
+                       (if (= slot_count 2)
+                         (concat "\t." slot_name " << ")
+                         (concat "\n\t." slot_name " << ")))))
+          (setq more_slots nil)
+          (when (> slot_count 1)
+            (setq result (concat result "\n"))))))
+    result))
+
 ;;; .yas-setup.el ends here

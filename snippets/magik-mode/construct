@@ -1,0 +1,26 @@
+# -*- mode: snippet -*-
+# name: construct new and init with slots
+# key: construct
+# expand-env: ((yas-indent-line 'fixed))
+# group: object oriented
+# TODO: If we have slots, put the cursor after the first slot assignment
+# --
+`(magik-yasnippet-prev-pragma)`
+_method `(magik-yasnippet-prev-class-name-with-dot)`new()
+	## 
+	## 
+	## 
+	>> _clone.init()
+_endmethod
+$
+
+`(magik-yasnippet-prev-pragma)`
+_private _method `(magik-yasnippet-prev-class-name-with-dot)`init()
+	## 
+	## 
+	## 
+`(magik-yasnippet-prev-slotted-exemplar-slots)`
+	>> _self
+_endmethod
+$
+$0
