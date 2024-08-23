@@ -6,7 +6,7 @@
 ## 
 ## 
 ## 
-`(magik-yasnippet-prev-class-name-with-dot)`define_slot_access(:${1:name}, ${2:flag})
+`(magik-yasnippet-prev-class-name-with-dot)`define_slot_access(:${1:name}, ${2:$$(yas-completing-read "Flag: " '(":readable" ":writable" ":read" ":write"))})
 $
 
 $0

@@ -6,7 +6,7 @@
 ## 
 ## 
 ## 
-`(magik-yasnippet-prev-class-name-with-dot)`define_shared_constant(:${1:name}, ${2:value}, ${3:private?})
+`(magik-yasnippet-prev-class-name-with-dot)`define_shared_constant(:${1:name}, ${2:value}, ${3:$$(yas-completing-read "Private?: " '(":private" ":public" "_true" "_false"))})
 $
 
 $0
