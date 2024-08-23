@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: slot
+# key: slot
+# --
+{:${1:name}, _unset}
