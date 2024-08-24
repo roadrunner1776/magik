@@ -67,7 +67,7 @@ This provides an alternative interface to a gis_version program."
   :group 'magik-version
   :type  'string)
 
-(defcustom magik-version-help-file-add "To add a new installation, press '+'.\nTo open the gis_version file, press 'o'."
+(defcustom magik-version-help-file-add "To add a new installation, press '+'.\nTo open the gis_version file, press 'o'.\n"
   "Help text for Adding to `gis-version-file' displayed after `gis-version-help'."
   :group 'magik-version
   :type  'string)
