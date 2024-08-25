@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: raise
+# key: raise
+# group: condition
+# --
+condition.raise(${1:name})
+$0
