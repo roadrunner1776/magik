@@ -9,7 +9,8 @@
 ## 
 ## 
 def_slotted_exemplar(${1:`(magik-yasnippet-filename-as-symbol)`},
-		     {$2
+		     {
+			     $2
 		     }$3)
 $
 

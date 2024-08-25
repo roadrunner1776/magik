@@ -23,4 +23,5 @@ _private _method `(magik-yasnippet-prev-class-name-with-dot)`init()
 	>> _self
 _endmethod
 $
+
 $0
