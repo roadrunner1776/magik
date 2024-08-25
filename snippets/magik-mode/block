@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: block
 # key: block
+# expand-env: ((yas-indent-line 'fixed))
 # --
 _block
 	$0

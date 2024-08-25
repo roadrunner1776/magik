@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: protect
 # key: protect
+# expand-env: ((yas-indent-line 'fixed))
 # --
 _protect
 		$1

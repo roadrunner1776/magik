@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: catch
 # key: catch
+# expand-env: ((yas-indent-line 'fixed))
 # --
 _catch ${1:cond}
 	$0

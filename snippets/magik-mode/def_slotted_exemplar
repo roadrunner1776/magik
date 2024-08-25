@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: def_slotted_exemplar
 # key: def_slotted_exemplar
+# expand-env: ((yas-indent-line 'fixed))
 # --
 `(magik-yasnippet-prev-pragma)`
 ## 

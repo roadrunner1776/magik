@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: try, with and when
 # key: try_with_when
+# expand-env: ((yas-indent-line 'fixed))
 # --
 _try _with ${1:cond}
 		$2
