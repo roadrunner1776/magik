@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: language
+# key: language
+# group: keywords
+# --
+language ${1:name}$0

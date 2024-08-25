@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: requires
+# key: requires
+# expand-env: ((yas-indent-line 'fixed))
+# group: keywords
+# --
+requires
+	${1:module_name}$2
+end
+
+$0

@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: messages
+# key: messages
+# expand-env: ((yas-indent-line 'fixed))
+# group: keywords
+# --
+messages
+	${1:message}$2
+end
+
+$0
