@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: define_pseudo_slot
 # key: define_pseudo_slot
+# group: define.object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
 ## 

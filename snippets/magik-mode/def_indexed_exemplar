@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: def_indexed_exemplar
 # key: def_indexed_exemplar
+# group: object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
 ##

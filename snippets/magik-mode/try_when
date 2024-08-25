@@ -2,6 +2,7 @@
 # name: try and when
 # key: try_when
 # expand-env: ((yas-indent-line 'fixed))
+# group: control structure.try
 # --
 _try
 		$1

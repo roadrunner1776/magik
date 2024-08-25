@@ -1,6 +1,5 @@
 # -*- mode: snippet -*-
 # name: do_not_translate
 # key: dnt
-# group: keywords
 # --
 do_not_translate$0

@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: package
 # key: pack
+# group: keywords
 # --
 _package ${1:user}
 

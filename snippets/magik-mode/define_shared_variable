@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: define_shared_variable
 # key: define_shared_variable
+# group: define.object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
 ## 

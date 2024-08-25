@@ -2,6 +2,7 @@
 # name: proc
 # key: proc
 # expand-env: ((yas-indent-line 'fixed))
+# group: proc
 # --
 _proc($1)
 		$0

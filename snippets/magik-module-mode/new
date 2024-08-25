@@ -2,7 +2,6 @@
 # name: new
 # key: new
 # expand-env: ((yas-indent-line 'fixed))
-# group: keywords
 # --
 ${1:module_name}	${2:1}
 

@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: define_binary_operator_case
 # key: define_binary_operator_case
+# group: define.object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
 ## 

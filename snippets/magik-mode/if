@@ -2,7 +2,7 @@
 # name: if
 # key: if
 # expand-env: ((yas-indent-line 'fixed))
-# group : control structure
+# group: control structure.if
 # --
 _if ${1:cond}
 _then

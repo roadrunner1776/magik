@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: define_shared_constant
 # key: define_shared_constant
+# group: define.object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
 ## 

@@ -2,7 +2,7 @@
 # name: requires_java
 # key: requires_java
 # expand-env: ((yas-indent-line 'fixed))
-# group: keywords
+# group: requirements
 # --
 requires_java
 	${1:java_module_name}$2

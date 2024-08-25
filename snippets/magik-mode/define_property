@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: define_property
 # key: define_property
+# group: deprecated
 # --
 `(magik-yasnippet-prev-pragma)`
 ## 

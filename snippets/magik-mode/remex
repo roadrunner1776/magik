@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: remex
 # key: remex
+# group: object oriented
 # --
 remex(${1:`(magik-yasnippet-filename-as-symbol)`})
 $

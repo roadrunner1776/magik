@@ -2,7 +2,7 @@
 # name: optional
 # key: optional
 # expand-env: ((yas-indent-line 'fixed))
-# group: keywords
+# group: requirements
 # --
 optional
 	${1:module_name}$2

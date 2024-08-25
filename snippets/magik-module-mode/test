@@ -2,7 +2,7 @@
 # name: test
 # key: test
 # expand-env: ((yas-indent-line 'fixed))
-# group: keywords
+# group: testing
 # --
 test
 	name		${1:test_name}

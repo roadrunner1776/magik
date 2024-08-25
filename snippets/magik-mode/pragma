@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: pragma
 # key: pragma
+# group: documentation
 # TODO: If we use the default pragma, put the cursor after classify_level=
 # --
 `(magik-yasnippet-prev-pragma)`
