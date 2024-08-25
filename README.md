@@ -86,6 +86,10 @@ Major mode for editing Magik product.def files.
 
 Major mode for editing Magik Message files.
 
+### magik-trn
+
+Major mode for editing Magik Translation files.
+
 ### magik-lint
 
 [Magik-lint](https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint) support.
