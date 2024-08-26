@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
 # name: def_property
 # key: def_property
-# group define.object oriented
+# group: define.object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
 ## 
