@@ -31,8 +31,10 @@
 (require 'magik-utils)
 
 ;;;###autoload
-(define-derived-mode magik-trn-mode text-mode "Translation"
-  "Major mode for editing Magik Translation files."
+(define-derived-mode magik-trn-mode nil "Translation"
+  "Major mode for editing Magik Translation files.
+
+\\{magik-trn-mode-map}"
   :group 'magik
   :abbrev-table nil
   :syntax-table nil
