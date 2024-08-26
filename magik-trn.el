@@ -36,26 +36,21 @@
   :group 'magik
   :group 'tools)
 
-(defcustom magik-trn-mode-hook nil
-  "*Hook to run after TRN mode is set."
-  :group 'trn
-  :type  'hook)
+;;;###autoload
+(define-derived-mode magik-trn-mode text-mode "Translation"
+  "Major mode for editing Magik Translation files."
+  :group 'magik
+  :abbrev-table nil
+  :syntax-table nil
 
-(defvar magik-trn-mode-map (make-sparse-keymap)
-  "Keymap for Magik Translation files.")
-
-(defvar magik-trn-f2-map (make-sparse-keymap)
-  "Keymap for the F2 function key in Magik Translation buffers.")
-
-(fset 'magik-trn-f2-map   magik-trn-f2-map)
-
-(define-key magik-trn-mode-map [f2]    'magik-trn-f2-map)
-
-(define-key magik-trn-f2-map    "b"    'magik-trn-transmit-buffer)
-(define-key magik-trn-mode-map  " "    yas-maybe-expand)
+  (setq-local require-final-newline t
+    indent-tabs-mode t))
 
 (defvar magik-trn-menu nil
   "Keymap for the Magik Translation buffer menu bar.")
+
+(defvar magik-trn-mode-map (make-sparse-keymap)
+  "Keymap for Magik Translation files.")
 
 (easy-menu-define magik-trn-menu magik-trn-mode-map
   "Menu for trn mode."
@@ -68,29 +63,6 @@
   "Open Customization buffer for Trn Mode."
   (interactive)
   (customize-group 'trn))
-
-;;;###autoload
-(defun magik-trn-mode ()
-  "Major mode for editing Magik Translation files.
-
-You can customise trn-mode with the trn-mode-hook.
-
-\\{magik-trn-mode-map}"
-
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'indent-tabs-mode)
-
-  (use-local-map magik-trn-mode-map)
-  (easy-menu-add magik-trn-menu)
-
-  (setq major-mode 'magik-trn-mode
-    mode-name "Translation"
-    require-final-newline t
-    indent-tabs-mode t)
-
-  (run-hooks 'magik-trn-mode-hook))
 
 (defun magik-trn-transmit-buffer (&optional gis)
   "Send the buffer to the GIS process.
@@ -138,6 +110,12 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
 
 (with-eval-after-load 'msb
   (magik-trn-msb-configuration))
+
+(progn
+  ;; ------------------------ magik trn mode -------------------------
+  (define-key magik-trn-mode-map (kbd "<f2> b") 'magik-trn-transmit-buffer)
+  (with-eval-after-load 'yasnippet
+    (define-key magik-trn-mode-map (kbd "SPC") yas-maybe-expand)))
 
 (provide 'magik-trn)
 ;;; magik-trn.el ends here
