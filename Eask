@@ -16,7 +16,6 @@
 (depends-on "auto-complete")
 (depends-on "compat")
 (depends-on "flycheck")
-(depends-on "yasnippet")
 
 ;; do not try to compile magik-treesit.el if we are below 29.1
 (when (version< emacs-version "29.1")

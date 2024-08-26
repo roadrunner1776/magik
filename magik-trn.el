@@ -24,17 +24,10 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'easymenu)
-  (require 'yasnippet)
-  (defvar msb-menu-cond)
+  (require 'easymenu))
 
-  (require 'magik-utils)
-  (require 'magik-session))
-
-(defgroup magik-trn nil
-  "Customise Magik Translations group."
-  :group 'magik
-  :group 'tools)
+(require 'magik-session)
+(require 'magik-utils)
 
 ;;;###autoload
 (define-derived-mode magik-trn-mode text-mode "Translation"
@@ -55,14 +48,7 @@
 (easy-menu-define magik-trn-menu magik-trn-mode-map
   "Menu for trn mode."
   `(,"Translation"
-     [,"Transmit Buffer"      magik-trn-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]
-     "---"
-     [,"Customize"            magik-trn-customize               t]))
-
-(defun magik-trn-customize ()
-  "Open Customization buffer for Trn Mode."
-  (interactive)
-  (customize-group 'trn))
+     [,"Transmit Buffer"      magik-trn-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]))
 
 (defun magik-trn-transmit-buffer (&optional gis)
   "Send the buffer to the GIS process.
@@ -90,32 +76,8 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
 (or (assoc "\\.trn$" auto-mode-alist)
   (push '("\\.trn$" . magik-trn-mode) auto-mode-alist))
 
-;; speedbar configuration
-(with-eval-after-load 'speedbar
-  (speedbar-add-supported-extension ".trn"))
-
-;;MSB configuration
-(defun magik-trn-msb-configuration ()
-  "Add Trn files to msb menu, supposes that msb is already loaded."
-  (let* ((l (length msb-menu-cond))
-          (last (nth (1- l) msb-menu-cond))
-          (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
-          (handle (1- (nth 1 last))))
-    (setcdr precdr (list
-                     (list
-                       '(eq major-mode 'magik-trn-mode)
-                       handle
-                       "Trn Files (%d)")
-                     last))))
-
-(with-eval-after-load 'msb
-  (magik-trn-msb-configuration))
-
-(progn
-  ;; ------------------------ magik trn mode -------------------------
-  (define-key magik-trn-mode-map (kbd "<f2> b") 'magik-trn-transmit-buffer)
-  (with-eval-after-load 'yasnippet
-    (define-key magik-trn-mode-map (kbd "SPC") yas-maybe-expand)))
+;; ------------------------ magik trn mode -------------------------
+(define-key magik-trn-mode-map (kbd "<f2> b") 'magik-trn-transmit-buffer)
 
 (provide 'magik-trn)
 ;;; magik-trn.el ends here
