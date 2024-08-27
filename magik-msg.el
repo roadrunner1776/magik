@@ -59,13 +59,13 @@
 (easy-menu-define magik-msg-menu magik-msg-mode-map
   "Menu for msg mode."
   `(,"Message"
-     [,"Transmit Buffer"      magik-msg-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]
-     [,"Compile Message File" magik-msg-compile-module-messages (magik-utils-buffer-mode-list 'magik-session-mode)]
-     [,"Next"                 magik-msg-forward-message         t]
-     [,"Previous"             magik-msg-backward-message        t]
-     [,"Mark Message"         magik-msg-mark-message            t]
-     "---"
-     [,"Customize"            magik-msg-customize               t]))
+    [,"Transmit Buffer"      magik-msg-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Compile Message File" magik-msg-compile-module-messages (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Next"                 magik-msg-forward-message         t]
+    [,"Previous"             magik-msg-backward-message        t]
+    [,"Mark Message"         magik-msg-mark-message            t]
+    "---"
+    [,"Customize"            magik-msg-customize               t]))
 
 (defvar magik-msg-mode-syntax-table nil
   "Syntax table in use in MSG-mode buffers.")
@@ -73,26 +73,26 @@
 ;; Imenu configuration
 (defvar magik-msg-imenu-generic-expression
   '(
-     (nil "^:\\(\\sw+\\)" 1) ;;Normal messages
-     (nil "^:\\s$\\(\\S$+\\)\\s$" 1) ;; | | Quoted messages
-     ("Groups" "^+\\s-+\\(\\sw+\\)" 1)
-     )
+    (nil "^:\\(\\sw+\\)" 1) ;;Normal messages
+    (nil "^:\\s$\\(\\S$+\\)\\s$" 1) ;; | | Quoted messages
+    ("Groups" "^+\\s-+\\(\\sw+\\)" 1)
+    )
   "Imenu generic expression for Magik Message mode.  See `imenu-generic-expression'.")
 
 ;; Font-lock configuration
 (defcustom magik-msg-font-lock-keywords
   (list
-    '("^\\(:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\s-+\\(:\\sw+\\)"
-       (1 font-lock-function-name-face)
-       (3 font-lock-constant-face))
-    '("^\\([+]\\)\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)"
-       (1 font-lock-type-face)
-       (2 font-lock-keyword-face))
-    '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . font-lock-function-name-face)
-    '("^#%\\s-*text_encoding.*$" . font-lock-warning-face)
-    '("#[0-9]+" . font-lock-variable-name-face)
-    '("#.*" . font-lock-comment-face)
-    )
+   '("^\\(:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\s-+\\(:\\sw+\\)"
+     (1 font-lock-function-name-face)
+     (3 font-lock-constant-face))
+   '("^\\([+]\\)\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)"
+     (1 font-lock-type-face)
+     (2 font-lock-keyword-face))
+   '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . font-lock-function-name-face)
+   '("^#%\\s-*text_encoding.*$" . font-lock-warning-face)
+   '("#[0-9]+" . font-lock-variable-name-face)
+   '("#.*" . font-lock-comment-face)
+   )
   "Default fontification of Magik Messages."
   :group 'msg
   :type 'sexp)
@@ -106,20 +106,20 @@
   "Put point at beginning of line of next message."
   (interactive)
   (if (not (looking-at "^:"))
-    (re-search-forward "^:" nil t)
+      (re-search-forward "^:" nil t)
     (forward-char 1)
     (or (re-search-forward "^:" nil t)
-      (goto-char (point-max))))
+        (goto-char (point-max))))
   (beginning-of-line))
 
 (defun magik-msg-backward-message ()
   "Put point at beginning of line of previous message."
   (interactive)
   (if (not (looking-at "^:"))
-    (re-search-backward "^:" nil t)
+      (re-search-backward "^:" nil t)
     (backward-char 1)
     (or (re-search-backward "^:" nil t)
-      (goto-char (point-min))))
+        (goto-char (point-min))))
   (beginning-of-line))
 
 (defun magik-msg-mark-message ()
@@ -129,7 +129,7 @@
   (push-mark (point))
   (magik-msg-forward-message)
   (if (save-match-data (string-match "hmsg$" (buffer-name)))
-    nil
+      nil
     (re-search-backward "^\n" (- (point) 1) t))
   (push-mark (point) nil t)
   (magik-msg-backward-message))
@@ -153,13 +153,13 @@ You can customise msg-mode with the msg-mode-hook.
   (set-syntax-table magik-msg-mode-syntax-table)
 
   (setq major-mode 'magik-msg-mode
-    mode-name "Message"
-    require-final-newline t
-    imenu-generic-expression magik-msg-imenu-generic-expression
-    font-lock-defaults
-    '(magik-msg-font-lock-keywords
-       nil t)
-    outline-regexp "^:\\(\\sw+\\).*")
+        mode-name "Message"
+        require-final-newline t
+        imenu-generic-expression magik-msg-imenu-generic-expression
+        font-lock-defaults
+        '(magik-msg-font-lock-keywords
+          nil t)
+        outline-regexp "^:\\(\\sw+\\).*")
 
   (run-hooks 'magik-msg-mode-hook))
 
@@ -168,19 +168,19 @@ You can customise msg-mode with the msg-mode-hook.
 The GIS process used is either that given by BUF or the variable `gis-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
-               'magik-session-mode
-               "Enter Magik process buffer:"
-               magik-session-buffer
-               'magik-session-buffer-alist-prefix-function))
-         (process (barf-if-no-gis gis))
-         (filename (buffer-file-name)))
+                                          'magik-session-mode
+                                          "Enter Magik process buffer:"
+                                          magik-session-buffer
+                                          'magik-session-buffer-alist-prefix-function))
+        (process (barf-if-no-gis gis))
+        (filename (buffer-file-name)))
     ;; Load messages
     (message "%s loaded in buffer %s." filename gis)
     (process-send-string
-      process
-      (concat
-        (magik-function "message_handler.compile_message_file" filename)
-        "\n$\n"))
+     process
+     (concat
+      (magik-function "message_handler.compile_message_file" filename)
+      "\n$\n"))
     gis))
 
 (defun magik-msg-compile-module-messages (&optional gis)
@@ -188,22 +188,22 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
 The GIS process used is either that given by BUF or the variable `gis-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
-               'magik-session-mode
-               "Enter Magik process buffer:"
-               magik-session-buffer
-               'magik-session-buffer-alist-prefix-function))
-         (process (barf-if-no-gis gis))
-         (directory (file-name-directory (buffer-file-name))))
+                                          'magik-session-mode
+                                          "Enter Magik process buffer:"
+                                          magik-session-buffer
+                                          'magik-session-buffer-alist-prefix-function))
+        (process (barf-if-no-gis gis))
+        (directory (file-name-directory (buffer-file-name))))
     ;; Load messages
     (message "Compiling all module messages in %s. " gis)
     (process-send-string
-      process
-      (format
-        "_proc(directory)
+     process
+     (format
+      "_proc(directory)
    module << sw_module_manager.locate_module(directory)
    sw_module_manager.compile_messages(module)
       _endproc(%S)\n$\n"
-        directory))
+      directory))
     gis))
 
 (defun magik-msg-gis-drag-n-drop-load (gis filename)
@@ -212,17 +212,17 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
   (let ((process (barf-if-no-gis gis)))
     (message "%s loaded in buffer %s." filename gis)
     (process-send-string
-      process
-      (concat
-        (magik-function "load_message_file" filename 'image_override)
-        "$\n"))))
+     process
+     (concat
+      (magik-function "load_message_file" filename 'image_override)
+      "$\n"))))
 
 (defvar magik-msg-multi-gis-processes nil
   "Note whether more than one GIS has been used.")
 
 ;;; Package initialisation
 (if magik-msg-mode-syntax-table
-  ()
+    ()
   (setq magik-msg-mode-syntax-table (make-syntax-table))
   (modify-syntax-entry ?: "w" magik-msg-mode-syntax-table)
   (modify-syntax-entry ?_ "w" magik-msg-mode-syntax-table)
@@ -237,9 +237,9 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
 
 ;;;###autoload
 (or (assoc "\\.msg$" auto-mode-alist)
-  (push '("\\.msg$" . magik-msg-mode) auto-mode-alist))
+    (push '("\\.msg$" . magik-msg-mode) auto-mode-alist))
 (or (assoc "\\.hmsg$" auto-mode-alist)
-  (push '("\\.hmsg$" . magik-msg-mode) auto-mode-alist))
+    (push '("\\.hmsg$" . magik-msg-mode) auto-mode-alist))
 
 ;; speedbar configuration
 (with-eval-after-load 'speedbar
@@ -250,15 +250,15 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
 (defun magik-msg-msb-configuration ()
   "Adds Msg files to msb menu, supposes that msb is already loaded."
   (let* ((l (length msb-menu-cond))
-          (last (nth (1- l) msb-menu-cond))
-          (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
-          (handle (1- (nth 1 last))))
+         (last (nth (1- l) msb-menu-cond))
+         (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
+         (handle (1- (nth 1 last))))
     (setcdr precdr (list
-                     (list
-                       '(eq major-mode 'magik-msg-mode)
-                       handle
-                       "Msg Files (%d)")
-                     last))))
+                    (list
+                     '(eq major-mode 'magik-msg-mode)
+                     handle
+                     "Msg Files (%d)")
+                    last))))
 
 (with-eval-after-load 'msb
   (magik-msg-msb-configuration))
