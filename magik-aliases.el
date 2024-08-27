@@ -144,11 +144,6 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
   (compat-call add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
   (compat-call add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
 
-(define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
-(define-key magik-aliases-mode-map " "                'magik-aliases-n)
-(define-key magik-aliases-mode-map (kbd "<down>")     'magik-aliases-down)
-(define-key magik-aliases-mode-map "q"                'magik-aliases-q)
-
 (defvar magik-aliases-menu nil
   "Menu for Aliases mode.")
 
@@ -501,6 +496,14 @@ Returns nil if FILE cannot be expanded."
 
 (with-eval-after-load 'msb
   (magik-aliases-msb-configuration))
+
+(progn
+  ;; ------------------------ magik aliases mode ------------------------
+
+  (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
+  (define-key magik-aliases-mode-map " "                'magik-aliases-n)
+  (define-key magik-aliases-mode-map (kbd "<down>")     'magik-aliases-down)
+  (define-key magik-aliases-mode-map "q"                'magik-aliases-q))
 
 (provide 'magik-aliases)
 ;;; magik-aliases.el ends here

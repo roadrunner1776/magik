@@ -112,22 +112,6 @@ You can customize msg-mode with the `magik-msg-mode-hook`.
     font-lock-defaults '(magik-msg-font-lock-keywords nil t)
     outline-regexp "^:\\(\\sw+\\).*"))
 
-(defvar magik-msg-mode-map (make-sparse-keymap)
-  "Keymap for Magik Message files.")
-
-(defvar magik-msg-f2-map (make-sparse-keymap)
-  "Keymap for the F2 function key in Magik Message buffers.")
-
-(fset 'magik-msg-f2-map   magik-msg-f2-map)
-
-(define-key magik-msg-mode-map [f2]    'magik-msg-f2-map)
-
-(define-key magik-msg-f2-map    [down] 'magik-msg-forward-message)
-(define-key magik-msg-f2-map    [up]   'magik-msg-backward-message)
-(define-key magik-msg-f2-map    "b"    'magik-msg-transmit-buffer)
-(define-key magik-msg-f2-map    "c"    'magik-msg-compile-module-messages)
-(define-key magik-msg-f2-map    "m"    'magik-msg-mark-message)
-
 (defvar magik-msg-menu nil
   "Keymap for the Magik Message buffer menu bar.")
 
@@ -200,17 +184,14 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
   "Note whether more than one GIS has been used.")
 
 ;;; Package initialisation
-(if magik-msg-mode-syntax-table
-    ()
-  (setq magik-msg-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?: "w" magik-msg-mode-syntax-table)
-  (modify-syntax-entry ?_ "w" magik-msg-mode-syntax-table)
-  (modify-syntax-entry ?? "w" magik-msg-mode-syntax-table)
-  (modify-syntax-entry ?! "w" magik-msg-mode-syntax-table)
-  ;; multi quote
-  (modify-syntax-entry ?| "$" magik-msg-mode-syntax-table)
-  ;; variable intro
-  (modify-syntax-entry ?# "/" magik-msg-mode-syntax-table))
+(modify-syntax-entry ?: "w" magik-msg-mode-syntax-table)
+(modify-syntax-entry ?_ "w" magik-msg-mode-syntax-table)
+(modify-syntax-entry ?? "w" magik-msg-mode-syntax-table)
+(modify-syntax-entry ?! "w" magik-msg-mode-syntax-table)
+;; multi quote
+(modify-syntax-entry ?| "$" magik-msg-mode-syntax-table)
+;; variable intro
+(modify-syntax-entry ?# "/" magik-msg-mode-syntax-table)
 
 ;;; Package registration
 
@@ -241,6 +222,22 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
 
 (with-eval-after-load 'msb
   (magik-msg-msb-configuration))
+
+(defvar magik-msg-f2-map (make-sparse-keymap)
+  "Keymap for the F2 function key in Magik Message buffers.")
+
+(progn
+  ;; ------------------------ magik msg mode ------------------------
+
+  (fset 'magik-msg-f2-map   magik-msg-f2-map)
+
+  (define-key magik-msg-mode-map [f2]    'magik-msg-f2-map)
+
+  (define-key magik-msg-f2-map    [down] 'magik-msg-forward-message)
+  (define-key magik-msg-f2-map    [up]   'magik-msg-backward-message)
+  (define-key magik-msg-f2-map    "b"    'magik-msg-transmit-buffer)
+  (define-key magik-msg-f2-map    "c"    'magik-msg-compile-module-messages)
+  (define-key magik-msg-f2-map    "m"    'magik-msg-mark-message))
 
 (provide 'magik-msg)
 ;;; magik-msg.el ends here

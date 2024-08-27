@@ -1533,6 +1533,7 @@ be careful to preserve the position in \"*cb2*\"."
 
   (magik-cb-redraw-modeline))
 
+;;; Package initialisation
 (modify-syntax-entry ?\" "w" magik-cb2-mode-syntax-table)
 (modify-syntax-entry ?- "w" magik-cb2-mode-syntax-table)
 
@@ -2443,7 +2444,7 @@ See the variable `magik-cb-generalise-file-name-alist' to provide more customisa
   (require 'magik-cb-ac))
 
 (progn
-  ;; ----------------------- cb mode ------------------------
+  ;; ------------------------ magik cb mode  ------------------------
 
   (cl-loop for i from ?  to ?~ do
 	   (define-key magik-cb-mode-map (char-to-string i) 'magik-cb-insert-command))

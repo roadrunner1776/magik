@@ -2201,7 +2201,7 @@ closing bracket into the new \"{...}\" notation."
   (magik-ac-configuration))
 
 (progn
-  ;; ------------------------ magik mode -------------------------
+  ;; ------------------------ magik mode ------------------------
 
   (define-key magik-mode-map "\r" 'magik-newline)
   (define-key magik-mode-map "\n" 'newline)

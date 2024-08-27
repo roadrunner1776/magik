@@ -61,9 +61,6 @@ You can customize magik-loadlist-mode with the magik-loadlist-mode-hook.
     require-final-newline t
     font-lock-defaults '(magik-loadlist-font-lock-keywords nil t)))
 
-(define-key magik-loadlist-mode-map (kbd "<f2> b")      'magik-loadlist-transmit)
-(define-key magik-loadlist-mode-map "\C-cr" 'magik-loadlist-refresh-contents)
-
 (defvar magik-loadlist-menu nil
   "Keymap for the Magik loadlist buffer menu bar.")
 
@@ -225,17 +222,20 @@ Called by `gis-drag-n-drop-load' when a load_list.txt file is dropped."
       "$\n"))))
 
 ;;; Package initialisation
-(if magik-loadlist-mode-syntax-table
-    nil
-  (setq magik-loadlist-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?_ "w" magik-loadlist-mode-syntax-table)
-  (modify-syntax-entry ?# "<" magik-loadlist-mode-syntax-table)
-  (modify-syntax-entry ?\n ">" magik-loadlist-mode-syntax-table))
+(modify-syntax-entry ?_ "w" magik-loadlist-mode-syntax-table)
+(modify-syntax-entry ?# "<" magik-loadlist-mode-syntax-table)
+(modify-syntax-entry ?\n ">" magik-loadlist-mode-syntax-table)
 
 ;;; Package registration
 ;;;###autoload
 (or (assoc "load_list\\.txt$" auto-mode-alist)
     (push '("load_list\\.txt$" . magik-loadlist-mode) auto-mode-alist))
+
+(progn
+  ;; ------------------------ magik loadlist mode  ------------------------
+
+  (define-key magik-loadlist-mode-map (kbd "<f2> b")      'magik-loadlist-transmit)
+  (define-key magik-loadlist-mode-map "\C-cr" 'magik-loadlist-refresh-contents))
 
 (provide 'magik-loadlist)
 ;;; magik-loadlist.el ends here
