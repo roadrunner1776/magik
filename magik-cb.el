@@ -559,7 +559,7 @@ Do a no-op if already in the cb."
   (let ((current-prefix-arg t))
     (call-interactively 'magik-cb)))
 
-(define-derived-mode magik-cb-mode nil "Magik-CB"
+(define-derived-mode magik-cb-mode magik-base-mode "Magik-CB"
   "Major mode for running the Smallworld Class Browser.
 Full help is available on the CB pull-down menu or by typing
 
