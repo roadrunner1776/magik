@@ -32,44 +32,6 @@
   :group 'magik
   :group 'tools)
 
-(defcustom magik-msg-mode-hook nil
-  "*Hook to run after MSG mode is set."
-  :group 'msg
-  :type  'hook)
-
-(defvar magik-msg-mode-map (make-sparse-keymap)
-  "Keymap for Magik Message files")
-
-(defvar magik-msg-f2-map (make-sparse-keymap)
-  "Keymap for the F2 function key in Magik Message buffers")
-
-(fset 'magik-msg-f2-map   magik-msg-f2-map)
-
-(define-key magik-msg-mode-map [f2]    'magik-msg-f2-map)
-
-(define-key magik-msg-f2-map    [down] 'magik-msg-forward-message)
-(define-key magik-msg-f2-map    [up]   'magik-msg-backward-message)
-(define-key magik-msg-f2-map    "b"    'magik-msg-transmit-buffer)
-(define-key magik-msg-f2-map    "c"    'magik-msg-compile-module-messages)
-(define-key magik-msg-f2-map    "m"    'magik-msg-mark-message)
-
-(defvar magik-msg-menu nil
-  "Keymap for the Magik Message buffer menu bar")
-
-(easy-menu-define magik-msg-menu magik-msg-mode-map
-  "Menu for msg mode."
-  `(,"Message"
-    [,"Transmit Buffer"      magik-msg-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]
-    [,"Compile Message File" magik-msg-compile-module-messages (magik-utils-buffer-mode-list 'magik-session-mode)]
-    [,"Next"                 magik-msg-forward-message         t]
-    [,"Previous"             magik-msg-backward-message        t]
-    [,"Mark Message"         magik-msg-mark-message            t]
-    "---"
-    [,"Customize"            magik-msg-customize               t]))
-
-(defvar magik-msg-mode-syntax-table nil
-  "Syntax table in use in MSG-mode buffers.")
-
 ;; Imenu configuration
 (defvar magik-msg-imenu-generic-expression
   '(
@@ -135,33 +97,50 @@
   (magik-msg-backward-message))
 
 ;;;###autoload
-(defun magik-msg-mode ()
+(define-derived-mode magik-msg-mode nil "Message"
   "Major mode for editing Magik Message files.
 
-You can customise msg-mode with the msg-mode-hook.
+You can customize msg-mode with the `magik-msg-mode-hook`.
 
 \\{magik-msg-mode-map}"
+  :group 'magik
+  :abbrev-table nil
 
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'font-lock-defaults)
-  (make-local-variable 'outline-regexp)
+  (compat-call setq-local
+    require-final-newline t
+    imenu-generic-expression magik-msg-imenu-generic-expression
+    font-lock-defaults '(magik-msg-font-lock-keywords nil t)
+    outline-regexp "^:\\(\\sw+\\).*"))
 
-  (use-local-map magik-msg-mode-map)
-  (easy-menu-add magik-msg-menu)
-  (set-syntax-table magik-msg-mode-syntax-table)
+(defvar magik-msg-mode-map (make-sparse-keymap)
+  "Keymap for Magik Message files.")
 
-  (setq major-mode 'magik-msg-mode
-	mode-name "Message"
-	require-final-newline t
-	imenu-generic-expression magik-msg-imenu-generic-expression
-	font-lock-defaults
-	'(magik-msg-font-lock-keywords
-	  nil t)
-	outline-regexp "^:\\(\\sw+\\).*")
+(defvar magik-msg-f2-map (make-sparse-keymap)
+  "Keymap for the F2 function key in Magik Message buffers.")
 
-  (run-hooks 'magik-msg-mode-hook))
+(fset 'magik-msg-f2-map   magik-msg-f2-map)
+
+(define-key magik-msg-mode-map [f2]    'magik-msg-f2-map)
+
+(define-key magik-msg-f2-map    [down] 'magik-msg-forward-message)
+(define-key magik-msg-f2-map    [up]   'magik-msg-backward-message)
+(define-key magik-msg-f2-map    "b"    'magik-msg-transmit-buffer)
+(define-key magik-msg-f2-map    "c"    'magik-msg-compile-module-messages)
+(define-key magik-msg-f2-map    "m"    'magik-msg-mark-message)
+
+(defvar magik-msg-menu nil
+  "Keymap for the Magik Message buffer menu bar.")
+
+(easy-menu-define magik-msg-menu magik-msg-mode-map
+  "Menu for msg mode."
+  `(,"Message"
+    [,"Transmit Buffer"      magik-msg-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Compile Message File" magik-msg-compile-module-messages (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Next"                 magik-msg-forward-message         t]
+    [,"Previous"             magik-msg-backward-message        t]
+    [,"Mark Message"         magik-msg-mark-message            t]
+    "---"
+    [,"Customize"            magik-msg-customize               t]))
 
 (defun magik-msg-transmit-buffer (&optional gis)
   "Send the buffer to the GIS process.
