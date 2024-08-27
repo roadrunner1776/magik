@@ -162,11 +162,6 @@ that use command string matching are not affected by this setting."
   :type 'sexp
   :group 'magik)
 
-(defcustom magik-session-mode-hook nil
-  "*Hook for customising GIS mode."
-  :type 'hook
-  :group 'magik)
-
 (defcustom magik-session-start-process-pre-hook nil
   "*Hook run before starting the process."
   :type 'hook
@@ -214,52 +209,6 @@ this variable buffer-local by putting the following in your .emacs
 (defvar magik-session-filter-state nil
   "State variable for the filter function.")
 
-(defvar magik-session-mode-map (make-keymap)
-  "Keymap for Magik session command buffers")
-
-(defvar magik-session-menu nil
-  "Keymap for the Magik session buffer menu bar")
-
-(easy-menu-define magik-session-menu magik-session-mode-map
-  "Menu for Magik session mode."
-  `(,"Magik Session"
-    [,"Previous Command"                 magik-session-recall-prev-cmd           t]
-    [,"Next Command"                     magik-session-recall-next-cmd           t]
-    [,"Previous Matching Command"        magik-session-recall-prev-matching-cmd  t]
-    [,"Next Matching Command"            magik-session-recall-next-matching-cmd  t]
-    "----"
-    [,"Fold"                             magik-session-display-history   :active t :keys "<f2> <up>,   <f2> C-p"]
-    [,"Unfold"                           magik-session-undisplay-history :active t :keys "<f2> <down>,   <f2> C-n"]
-    "----"
-    [,"Electric Template"                magik-explicit-electric-space           t]
-    [,"Symbol Complete"                  magik-symbol-complete                   t]
-    ;; [,"Deep Print"                       magik-deep-print                      :active t :keys "<f2> x"]
-    "----"
-    [,"Previous Traceback"               magik-session-traceback-up              t]
-    [,"Next Traceback"                   magik-session-traceback-down            t]
-    [,"Print Traceback"                  magik-session-traceback-print   :active t :keys "<f4> P,   <f2> ="]
-    [,"Save Traceback"                   magik-session-traceback-save            t]
-    "----"
-    [,"External Shell Process"           magik-session-shell                     t]
-    [,"Kill Magik Process"               magik-session-kill-process              (and magik-session-process
-										      (eq (process-status magik-session-process) 'run))]
-    (,"Magik Session Command History")
-    "---"
-    (,"Toggle..."
-     [,"Magik Session Filter"             magik-session-filter-toggle-filter     :active t
-      :style toggle :selected (let ((b (get-buffer-process
-					(current-buffer))))
-				(and b (process-filter b)))]
-     [,"Drag and Drop"                  magik-session-drag-n-drop-mode       :active t
-      :style toggle :selected magik-session-drag-n-drop-mode])
-    [,"Customize"                       magik-session-customize               t]))
-
-(defvar magik-session-mode-error-map (make-sparse-keymap)
-  "Keymap for Jumping to error messages.")
-
-(define-key magik-session-mode-error-map [mouse-2]  'magik-session-error-goto-mouse)
-(define-key magik-session-mode-error-map [C-return] 'magik-session-error-goto)
-
 (defvar magik-session-process nil
   "The process object of the command running in the buffer.")
 
@@ -294,31 +243,6 @@ markers.")
 
 (defvar magik-session-history-length 20
   "The default number of commands to fold.")
-
-(defvar magik-session-command-syntax-table nil
-  "Syntax table in use for parsing quotes in magik-session-command.")
-
-;; Create the syntax table
-(if magik-session-command-syntax-table
-    ()
-  (setq magik-session-command-syntax-table (make-syntax-table))
-  ;; Allow embedded environment variables in Windows %% and Unix $ or ${} formats
-  (modify-syntax-entry ?$  "w"  magik-session-command-syntax-table)
-  (modify-syntax-entry ?\{ "w"  magik-session-command-syntax-table)
-  (modify-syntax-entry ?\} "w"  magik-session-command-syntax-table)
-  (modify-syntax-entry ?%  "w"  magik-session-command-syntax-table)
-
-  (modify-syntax-entry ?_  "w"  magik-session-command-syntax-table) ;make _ a word character for environment variable sustitution
-
-  (modify-syntax-entry ?\' "\"" magik-session-command-syntax-table) ;count single quotes as a true quote
-  (modify-syntax-entry ?\" "\"" magik-session-command-syntax-table) ;count double quotes as a true quote
-  (modify-syntax-entry ?\\ "\\" magik-session-command-syntax-table) ;allow a \ as an escape character
-  (modify-syntax-entry ?.  "w"  magik-session-command-syntax-table) ;(for filenames)
-
-  ;; Special characters for Windows filenames
-  (modify-syntax-entry ?:  "w"  magik-session-command-syntax-table)
-  (modify-syntax-entry ?~  "w"  magik-session-command-syntax-table) ;(mainly for NT 8.3 filenames)
-  )
 
 (defconst magik-session-command-default "[%HOME%] %SMALLWORLD_GIS%/bin/x86/runalias.exe swaf_mega"
   "The default value for magik-session-command.
@@ -564,123 +488,121 @@ and return a list of all the components of the command."
 		      (or shell-list (list "No Processes")))))
 
 
-(defun magik-session-mode ()
-  "Major mode for run a gis as a direct sub-process.
+(define-derived-mode magik-session-mode nil "Magik Session"
+  "Major mode to run a GIS as a direct subprocess.
 
-The default name for a buffer running a gis is \"*gis*\".  The name of
-the current gis buffer is kept in the user-option, `magik-session-buffer'.
+The default name for a buffer running a GIS is \"*gis*\". The name of
+the current GIS buffer is stored in the user option `magik-session-buffer`.
 
-There are many ways of recalling previous commands (see the on-line
-help on F1).
+There are many ways to recall previous commands (see the online
+help with \\[help-command]).
 
-Commands are sent to the gis with the F8 key or the return key.
+Commands are sent to the GIS with the F8 key or the return key.
 
-Entry to this mode calls the value of magik-session-mode-hook.
+Entry to this mode runs `magik-session-mode-hook`.
 
 \\{magik-session-mode-map}"
+  :group 'magik
 
-  (interactive)
-  (let
-      ((tmp-no-of-gis-cmds            magik-session-no-of-cmds)
-       (tmp-gis-cmd-num               magik-session-cmd-num)
-       (tmp-prev-gis-cmds             magik-session-prev-cmds))
-    (kill-all-local-variables)
-    (make-local-variable 'selective-display)
-    (make-local-variable 'comint-last-input-start)
-    (make-local-variable 'comint-last-input-end)
-    (make-local-variable 'font-lock-defaults)
+  (let ((tmp-no-of-gis-cmds magik-session-no-of-cmds)
+         (tmp-gis-cmd-num magik-session-cmd-num)
+         (tmp-prev-gis-cmds magik-session-prev-cmds))
 
-    (make-local-variable 'magik-session-command-history)
-    (make-local-variable 'magik-session-current-command)
-    (make-local-variable 'magik-session-no-of-cmds)
-    (make-local-variable 'magik-session-cmd-num)
-    (make-local-variable 'magik-session-prev-cmds)
-    (make-local-variable 'magik-session-filter-state)
-    (make-local-variable 'magik-session-process)
-    (make-local-variable 'magik-session-prompt)
-    (make-local-variable 'magik-session-exec-path)
-    (make-local-variable 'magik-session-process-environment)
-    (make-local-variable 'magik-session-cb-buffer)
-    (make-local-variable 'magik-session-drag-n-drop-mode-line-string)
-    (make-local-variable 'magik-transmit-debug-mode-line-string)
-    (make-local-variable 'ac-sources)
-
-    (use-local-map magik-session-mode-map)
-    (set-syntax-table magik-base-mode-syntax-table)
+    (compat-call setq-local
+      selective-display t
+      comint-last-input-start (make-marker)
+      comint-last-input-end (make-marker)
+      magik-session-command-history (or magik-session-command-history
+                                      (default-value 'magik-session-command-history))
+      magik-session-filter-state "\C-a"
+      magik-session-cb-buffer (concat "*cb*" (buffer-name))
+      magik-session-drag-n-drop-mode-line-string " DnD"
+      magik-transmit-debug-mode-line-string " #DEBUG"
+      show-trailing-whitespace nil
+      font-lock-defaults '(magik-session-font-lock-keywords nil t ((?_ . "w")))
+      ac-sources (append '(magik-ac-class-method-source
+                            magik-ac-dynamic-source
+                            magik-ac-global-source
+                            magik-ac-object-source
+                            magik-ac-raise-condition-source)
+                   ac-sources)
+      magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
+      magik-session-process-environment (cl-copy-list (or magik-session-process-environment process-environment))
+      mode-line-process '(": %s")
+      local-abbrev-table magik-base-mode-abbrev-table)
 
     (if (null tmp-no-of-gis-cmds)
-	(progn
-	  (setq magik-session-no-of-cmds 1)
-	  (setq magik-session-cmd-num 0)
-	  (setq magik-session-prev-cmds (make-vector 100 nil))
-	  ;; the null marker-pair is a pair of references to the same marker.
-	  ;; This is so that they will always move together and therefore be null.
-	  (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
-      (setq magik-session-no-of-cmds            tmp-no-of-gis-cmds)
-      (setq magik-session-cmd-num               tmp-gis-cmd-num)
-      (setq magik-session-prev-cmds             tmp-prev-gis-cmds))
+      (progn
+        (setq magik-session-no-of-cmds 1
+          magik-session-cmd-num 0
+          magik-session-prev-cmds (make-vector 100 nil))
+        (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
+      (setq magik-session-no-of-cmds tmp-no-of-gis-cmds
+        magik-session-cmd-num tmp-gis-cmd-num
+        magik-session-prev-cmds tmp-prev-gis-cmds))
 
-    (setq major-mode 'magik-session-mode
-	  mode-name "Magik Session"
-	  selective-display t
-	  local-abbrev-table magik-base-mode-abbrev-table
-	  comint-last-input-start (make-marker)
-	  comint-last-input-end   (make-marker)
-	  magik-session-command-history (or magik-session-command-history (default-value 'magik-session-command-history))
-	  magik-session-filter-state "\C-a"
-	  magik-session-cb-buffer    (concat "*cb*" (buffer-name))
-	  magik-session-drag-n-drop-mode-line-string " DnD"
-	  magik-transmit-debug-mode-line-string " #DEBUG"
-	  show-trailing-whitespace nil
-	  font-lock-defaults '(magik-session-font-lock-keywords
-			       nil t
-			       ((?_ . "w")))
-	  ac-sources (append '(
-			       magik-ac-class-method-source
-			       magik-ac-dynamic-source
-			       magik-ac-global-source
-			       magik-ac-object-source
-			       magik-ac-raise-condition-source
-			       )
-			     ac-sources))
-
-    ;; Update magik-session-buffer to current buffer name if magik-session-buffer's buffer
-    ;; does not exist.  this effectively stores the first most likely
-    ;; default value in magik-session-buffer even if an aliases file GIS session
-    ;; was started first.
-    (if (and magik-session-buffer (get-buffer magik-session-buffer))
-	nil
+    (unless (and magik-session-buffer (get-buffer magik-session-buffer))
       (setq-default magik-session-buffer (buffer-name)))
 
-    (if (rassoc (buffer-name) magik-session-buffer-alist)
-	nil
-      ;; Update magik-session-buffer-alist
+    (unless (rassoc (buffer-name) magik-session-buffer-alist)
       (let ((n 1))
-	(while (cdr (assq n magik-session-buffer-alist))
-	  (setq n (1+ n)))
-	(if (assq n magik-session-buffer-alist)
-	    (setcdr (assq n magik-session-buffer-alist) (buffer-name))
-	  (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
+        (while (cdr (assq n magik-session-buffer-alist))
+          (setq n (1+ n)))
+        (if (assq n magik-session-buffer-alist)
+          (setcdr (assq n magik-session-buffer-alist) (buffer-name))
+          (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
 
-    ;; *gis* buffer always inherits the current global environment
+    ;; Special handling for *gis* buffer
     (if (equal (buffer-name) "*gis*")
-	(setq magik-session-exec-path (cl-copy-list exec-path)
-	      magik-session-process-environment (cl-copy-list process-environment))
-      (setq magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
-	    magik-session-process-environment (cl-copy-list (or magik-session-process-environment
-								process-environment))))
-
-    (setq mode-line-process '(": %s"))
+      (setq magik-session-exec-path (cl-copy-list exec-path)
+        magik-session-process-environment (cl-copy-list process-environment)))
 
     (abbrev-mode 1)
+
     (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
       (erase-buffer))
 
-    (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu)
-    (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu)
-    (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu)
-    (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t) ;local hook
-    (run-hooks 'magik-session-mode-hook)))
+    (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu nil t)
+    (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu nil t)
+    (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu nil t)
+    (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t)))
+
+(defvar magik-session-menu nil
+  "Keymap for the Magik session buffer menu bar.")
+
+(easy-menu-define magik-session-menu magik-session-mode-map
+  "Menu for Magik session mode."
+  `(,"Magik Session"
+    [,"Previous Command"                 magik-session-recall-prev-cmd           t]
+    [,"Next Command"                     magik-session-recall-next-cmd           t]
+    [,"Previous Matching Command"        magik-session-recall-prev-matching-cmd  t]
+    [,"Next Matching Command"            magik-session-recall-next-matching-cmd  t]
+    "----"
+    [,"Fold"                             magik-session-display-history   :active t :keys "<f2> <up>,   <f2> C-p"]
+    [,"Unfold"                           magik-session-undisplay-history :active t :keys "<f2> <down>,   <f2> C-n"]
+    "----"
+    [,"Electric Template"                magik-explicit-electric-space           t]
+    [,"Symbol Complete"                  magik-symbol-complete                   t]
+    ;; [,"Deep Print"                       magik-deep-print                      :active t :keys "<f2> x"]
+    "----"
+    [,"Previous Traceback"               magik-session-traceback-up              t]
+    [,"Next Traceback"                   magik-session-traceback-down            t]
+    [,"Print Traceback"                  magik-session-traceback-print   :active t :keys "<f4> P,   <f2> ="]
+    [,"Save Traceback"                   magik-session-traceback-save            t]
+    "----"
+    [,"External Shell Process"           magik-session-shell                     t]
+    [,"Kill Magik Process"               magik-session-kill-process              (and magik-session-process
+										      (eq (process-status magik-session-process) 'run))]
+    (,"Magik Session Command History")
+    "---"
+    (,"Toggle..."
+     [,"Magik Session Filter"             magik-session-filter-toggle-filter     :active t
+      :style toggle :selected (let ((b (get-buffer-process
+					(current-buffer))))
+				(and b (process-filter b)))]
+     [,"Drag and Drop"                  magik-session-drag-n-drop-mode       :active t
+      :style toggle :selected magik-session-drag-n-drop-mode])
+    [,"Customize"                       magik-session-customize               t]))
 
 (defun magik-session-sentinel (proc msg)
   "Sentinel function, runs when the magik process exits."
@@ -1276,7 +1198,7 @@ An internal function that deals with 4 cases."
 	  ))))
 
 (defun magik-session-recall-prev-cmd ()
-  "Recall the earlier magik session commands 
+  "Recall the earlier magik session commands
 
 The variable \\[magik-session-recall-cmd-move-to-end\\] decides
 whether cursor point is placed at end of command.  Compare with
@@ -1579,6 +1501,25 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (interactive)
   (message "Can't save Magik Session buffer."))
 
+;;; Package initialisation
+
+;; Allow embedded environment variables in Windows %% and Unix $ or ${} formats
+(modify-syntax-entry ?$  "w"  magik-session-command-syntax-table)
+(modify-syntax-entry ?\{ "w"  magik-session-command-syntax-table)
+(modify-syntax-entry ?\} "w"  magik-session-command-syntax-table)
+(modify-syntax-entry ?%  "w"  magik-session-command-syntax-table)
+
+(modify-syntax-entry ?_  "w"  magik-session-command-syntax-table) ;make _ a word character for environment variable sustitution
+
+(modify-syntax-entry ?\' "\"" magik-session-command-syntax-table) ;count single quotes as a true quote
+(modify-syntax-entry ?\" "\"" magik-session-command-syntax-table) ;count double quotes as a true quote
+(modify-syntax-entry ?\\ "\\" magik-session-command-syntax-table) ;allow a \ as an escape character
+(modify-syntax-entry ?.  "w"  magik-session-command-syntax-table) ;(for filenames)
+
+;; Special characters for Windows filenames
+(modify-syntax-entry ?:  "w"  magik-session-command-syntax-table)
+(modify-syntax-entry ?~  "w"  magik-session-command-syntax-table) ;(mainly for NT 8.3 filenames)
+
 ;;;Package registration
 
 ;;Ensure Default magik-session-command are placed at head of magik-session-command-history
@@ -1617,11 +1558,17 @@ where MODE is the name of the major mode with the '-mode' postfix."
 (with-eval-after-load 'auto-complete
   (add-to-list 'ac-modes 'magik-session-mode))
 
+(defvar magik-session-mode-error-map (make-sparse-keymap)
+  "Keymap for Jumping to error messages.")
+
 (progn
-  ;; ---------------------- magik session mode -------------------------
+  ;; ------------------------ magik session mode ------------------------
 
   (cl-loop for i from ?  to ?~ do
-	   (define-key magik-session-mode-map (char-to-string i) 'magik-session-insert-char))
+	  (define-key magik-session-mode-map (char-to-string i) 'magik-session-insert-char))
+
+  (define-key magik-session-mode-error-map [mouse-2]  'magik-session-error-goto-mouse)
+  (define-key magik-session-mode-error-map [C-return] 'magik-session-error-goto)
 
   (define-key magik-session-mode-map "\ep"       'magik-session-recall-prev-cmd)
   (define-key magik-session-mode-map "\en"       'magik-session-recall-next-cmd)
