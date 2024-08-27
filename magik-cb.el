@@ -86,6 +86,7 @@
 (require 'magik-session)
 (require 'magik-utils)
 (require 'easymenu)
+(require 'compat)
 
 (defgroup magik-cb nil
   "Running Magik Class Browser."
@@ -622,11 +623,9 @@ Do a no-op if already in the cb."
   (let ((current-prefix-arg t))
     (call-interactively 'magik-cb)))
 
-;; This function is not a user-level entry-point.  It is just a place
-;; to put the mode help.
-(defun magik-cb-mode ()
+(define-derived-mode magik-cb-mode nil "Magik-CB"
   "Major mode for running the Smallworld Class Browser.
-   Full help is available on the CB pull-down menu or by typing
+Full help is available on the CB pull-down menu or by typing
 
   M-x magik-cb-help
 
@@ -637,36 +636,27 @@ cb-jump-replaces-cb-buffer
 To view the help on these variables type C-h v [Return] [variable-name]
 
 \\{magik-cb-mode-map}"
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'magik-cb-process)
-  (make-local-variable 'magik-cb-topics)
-  (make-local-variable 'magik-cb-quote-file-name)
-  (make-local-variable 'magik-cb-mf-extended-flags)
-  (make-local-variable 'magik-cb-filename)
-  (make-local-variable 'magik-cb-filter-str)
-  (make-local-variable 'magik-cb-n-methods-str)
-  (make-local-variable 'magik-cb-topic-pos)
-  (make-local-variable 'magik-cb-cursor-pos)
-  (make-local-variable 'magik-cb-pending-message)
+  :group 'magik
+  :abbrev-table nil
 
-  (make-local-variable 'font-lock-defaults)
+  (compat-call setq-local
+    buffer-read-only t
+    buffer-undo-list t
+    show-trailing-whitespace nil
+    font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w")))
+    magik-cb-process nil
+    magik-cb-topics nil
+    magik-cb-quote-file-name nil
+    magik-cb-mf-extended-flags nil
+    magik-cb-filename nil
+    magik-cb-filter-str nil
+    magik-cb-n-methods-str nil
+    magik-cb-topic-pos nil
+    magik-cb-cursor-pos nil
+    magik-cb-pending-message nil)
 
-					;(make-local-hook 'kill-buffer-hook) ;add-hook uses local option
-
-  (use-local-map magik-cb-mode-map)
-  (easy-menu-add magik-cb-menu)
-  (set-syntax-table magik-base-mode-syntax-table)
-
-  (setq major-mode 'magik-cb-mode
-	buffer-read-only t
-	buffer-undo-list t
-	show-trailing-whitespace nil
-	font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w"))))
-
-  (add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu)
-  (add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t) ;local hook
-  (run-hooks 'magik-cb-mode-hook))
+  (compat-call add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu nil t)
+  (compat-call add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t))
 
 (defun magik-cb-gis-buffer (&optional buffer)
   "Return the GIS process buffer associated with this Class Browser."
