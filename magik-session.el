@@ -244,6 +244,31 @@ markers.")
 (defvar magik-session-history-length 20
   "The default number of commands to fold.")
 
+(defvar magik-session-command-syntax-table nil
+  "Syntax table in use for parsing quotes in magik-session-command.")
+
+;; Create the syntax table
+(if magik-session-command-syntax-table
+    ()
+  (setq magik-session-command-syntax-table (make-syntax-table))
+  ;; Allow embedded environment variables in Windows %% and Unix $ or ${} formats
+  (modify-syntax-entry ?$  "w"  magik-session-command-syntax-table)
+  (modify-syntax-entry ?\{ "w"  magik-session-command-syntax-table)
+  (modify-syntax-entry ?\} "w"  magik-session-command-syntax-table)
+  (modify-syntax-entry ?%  "w"  magik-session-command-syntax-table)
+
+  (modify-syntax-entry ?_  "w"  magik-session-command-syntax-table) ;make _ a word character for environment variable sustitution
+
+  (modify-syntax-entry ?\' "\"" magik-session-command-syntax-table) ;count single quotes as a true quote
+  (modify-syntax-entry ?\" "\"" magik-session-command-syntax-table) ;count double quotes as a true quote
+  (modify-syntax-entry ?\\ "\\" magik-session-command-syntax-table) ;allow a \ as an escape character
+  (modify-syntax-entry ?.  "w"  magik-session-command-syntax-table) ;(for filenames)
+
+  ;; Special characters for Windows filenames
+  (modify-syntax-entry ?:  "w"  magik-session-command-syntax-table)
+  (modify-syntax-entry ?~  "w"  magik-session-command-syntax-table) ;(mainly for NT 8.3 filenames)
+  )
+
 (defconst magik-session-command-default "[%HOME%] %SMALLWORLD_GIS%/bin/x86/runalias.exe swaf_mega"
   "The default value for magik-session-command.
 It illustrates how Environment variables can be embedded in the command.
@@ -1500,25 +1525,6 @@ where MODE is the name of the major mode with the '-mode' postfix."
   "Like `save-buffer', but does nothing in magik-session-mode."
   (interactive)
   (message "Can't save Magik Session buffer."))
-
-;;; Package initialisation
-
-;; Allow embedded environment variables in Windows %% and Unix $ or ${} formats
-(modify-syntax-entry ?$  "w"  magik-session-command-syntax-table)
-(modify-syntax-entry ?\{ "w"  magik-session-command-syntax-table)
-(modify-syntax-entry ?\} "w"  magik-session-command-syntax-table)
-(modify-syntax-entry ?%  "w"  magik-session-command-syntax-table)
-
-(modify-syntax-entry ?_  "w"  magik-session-command-syntax-table) ;make _ a word character for environment variable sustitution
-
-(modify-syntax-entry ?\' "\"" magik-session-command-syntax-table) ;count single quotes as a true quote
-(modify-syntax-entry ?\" "\"" magik-session-command-syntax-table) ;count double quotes as a true quote
-(modify-syntax-entry ?\\ "\\" magik-session-command-syntax-table) ;allow a \ as an escape character
-(modify-syntax-entry ?.  "w"  magik-session-command-syntax-table) ;(for filenames)
-
-;; Special characters for Windows filenames
-(modify-syntax-entry ?:  "w"  magik-session-command-syntax-table)
-(modify-syntax-entry ?~  "w"  magik-session-command-syntax-table) ;(mainly for NT 8.3 filenames)
 
 ;;;Package registration
 
