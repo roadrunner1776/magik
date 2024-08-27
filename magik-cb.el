@@ -563,13 +563,13 @@ Do a no-op if already in the cb."
   "Major mode for running the Smallworld Class Browser.
 Full help is available on the CB pull-down menu or by typing
 
-  M-x magik-cb-help
+  Use \\<magik-cb-mode-map>\\[magik-cb-help] for help.
 
 Useful configuration variables are:
 
 cb-jump-replaces-cb-buffer
 
-To view the help on these variables type C-h v [Return] [variable-name]
+To view the help on these variables type \\[describe-variable] and enter the variable name.
 
 \\{magik-cb-mode-map}"
   :group 'magik
