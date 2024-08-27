@@ -55,13 +55,6 @@ This provides an alternative interface to a gis_version program."
   :group 'magik-version
   :type  'string)
 
-(defcustom magik-version-select-hook nil
-  "*Hook to run after a selection has been made."
-  :group 'magik-version
-  :type  'hook)
-
-(add-hook 'magik-version-select-hook  'magik-aliases-update-menu)
-
 (defcustom magik-version-help "Select a Smallworld Core Product Installation.\n\nThe product you select will define the environment for any new Smallworld\nsessions that are started.\n\nTo make the selection, move the cursor to the line you want and press RETURN.\nOr press 'a' to open the gis_aliases file.\n\n\nPress 'q' to exit and do nothing.\n\n"
   "Help text displayed at top of gis_version buffer."
   :group 'magik-version
@@ -100,39 +93,6 @@ This provides an alternative interface to a gis_version program."
 
 (defvar magik-version-sw-path-list nil
   "Stores list of Smallworld directories added to PATH.")
-
-(defvar magik-version-mode-map (make-sparse-keymap)
-  "Keymap for selection of alternative GIS environments")
-
-(defvar magik-version-menu nil
-  "Keymap for the gis_version buffer menu bar")
-
-(easy-menu-define magik-version-menu magik-version-mode-map
-  "Menu for gis_version mode."
-  `(,"Environment"
-    [,"Select"                    magik-version-select      t]
-    [,"Run"                       magik-version-run         t]
-    [,"Next"                      magik-version-next        t]
-    [,"Open aliases file"         magik-version-gis-aliases t]
-    [,"Quit"                      magik-version-quit        t]
-    "---"
-    [,"Add new installation"      magik-version-file-add    magik-version-file]
-    [,"Open gis aliases file"     magik-version-file-open t]
-    "---"
-    [,"Customize"                 magik-version-customize   t]))
-
-(define-key magik-version-mode-map " "    'magik-version-next)
-(define-key magik-version-mode-map "a"    'magik-version-gis-aliases)
-(define-key magik-version-mode-map "+"    'magik-version-file-add)
-(define-key magik-version-mode-map "o"    'magik-version-file-open)
-(define-key magik-version-mode-map "q"    'magik-version-quit)
-(define-key magik-version-mode-map "r"    'magik-version-run)
-(define-key magik-version-mode-map "\r"   'magik-version-select)
-(define-key magik-version-mode-map [mouse-2] 'magik-version-mouse-select)
-(define-key magik-version-mode-map [remap read-only-mode] 'magik-version-disable-read-only-mode)
-
-(defvar magik-version-mode-syntax-table nil
-  "Syntax table in use in DEF-mode buffers.")
 
 (defvar magik-version-current nil
   "Current gis_version stream.")
@@ -209,27 +169,36 @@ has more than one aliases file available."
     magik-version-current))
 
 ;;;###autoload
-(defun magik-version-mode ()
-  "Major Mode for gis_version.
+(define-derived-mode magik-version-mode nil "Environment"
+  "Major mode for editing gis_version files.
 
 \\{magik-version-mode-map}"
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'magik-version-position)
+  :group 'magik
+  :abbrev-table nil
 
-  (use-local-map magik-version-mode-map)
-  (easy-menu-add magik-version-menu)
-  (set-syntax-table magik-version-mode-syntax-table)
+  (compat-call setq-local
+    magik-version-position nil
+    buffer-undo-list t
+    font-lock-defaults '(magik-version-font-lock-keywords nil t (("-" . "w")))))
 
-  (setq major-mode 'magik-version-mode
-	mode-name "Environment"
-	buffer-undo-list t
-	font-lock-defaults
-	'(magik-version-font-lock-keywords
-	  nil t
-	  (("-" . "w"))))
+(defvar magik-version-menu nil
+  "Keymap for the gis_version buffer menu bar.")
 
-  (run-hooks 'magik-version-hook))
+(easy-menu-define magik-version-menu magik-version-mode-map
+  "Menu for gis_version mode."
+  `(,"Environment"
+    [,"Select"                    magik-version-select      t]
+    [,"Run"                       magik-version-run         t]
+    [,"Next"                      magik-version-next        t]
+    [,"Open aliases file"         magik-version-gis-aliases t]
+    [,"Quit"                      magik-version-quit        t]
+    "---"
+    [,"Add new installation"      magik-version-file-add    magik-version-file]
+    [,"Open gis aliases file"     magik-version-file-open t]
+    "---"
+    [,"Customize"                 magik-version-customize   t]))
+
+(add-hook 'magik-version-select-hook  'magik-aliases-update-menu)
 
 (defun magik-version-smallworld-gis-p (path)
   "Return t if path points to a Smallworld installation."
@@ -512,14 +481,25 @@ Used before running a GIS process."
 	   (insert (format "Gis Environment: %s\n" magik-version-current))))))
 
 ;;; Package initialisation
-(if magik-version-mode-syntax-table
-    nil
-  (setq magik-version-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?_  "w"  magik-version-mode-syntax-table))
+(modify-syntax-entry ?_  "w"  magik-version-mode-syntax-table)
 
 (setq-default magik-version-current (magik-version-current))
 
 (add-hook 'gis-start-process-pre-hook 'magik-version-header-string)
+
+(progn
+  ;; ------------------------ magik version mode ------------------------
+
+  (define-key magik-version-mode-map " "    'magik-version-next)
+  (define-key magik-version-mode-map "a"    'magik-version-gis-aliases)
+  (define-key magik-version-mode-map "+"    'magik-version-file-add)
+  (define-key magik-version-mode-map "o"    'magik-version-file-open)
+  (define-key magik-version-mode-map "q"    'magik-version-quit)
+  (define-key magik-version-mode-map "r"    'magik-version-run)
+  (define-key magik-version-mode-map "\r"   'magik-version-select)
+  (define-key magik-version-mode-map [mouse-2] 'magik-version-mouse-select)
+  (define-key magik-version-mode-map [remap read-only-mode] 'magik-version-disable-read-only-mode))
+
 
 (provide 'magik-version)
 ;;; magik-version.el ends here
