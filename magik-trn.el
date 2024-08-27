@@ -39,7 +39,8 @@
   :abbrev-table nil
   :syntax-table nil
 
-  (compat-call setq-local require-final-newline t
+  (compat-call setq-local 
+    require-final-newline t
     indent-tabs-mode t))
 
 (defvar magik-trn-menu nil
