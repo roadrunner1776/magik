@@ -23,6 +23,9 @@
   (defvar msb-menu-cond)
   (require 'magik-utils))
 
+(require 'easymenu)
+(require 'compat)
+
 (defgroup magik-aliases nil
   "Customise Magik aliases files group."
   :group 'magik
@@ -150,46 +153,26 @@ If any function returns t, then the buffer is displayed."
   (customize-group 'magik-aliases))
 
 ;;;###autoload
-(defun magik-aliases-mode ()
+(define-derived-mode magik-aliases-mode nil "Aliases"
   "Major mode for editing Magik aliases files.
 
 You can customise magik-aliases-mode with the magik-aliases-mode-hook.
 
 \\{magik-aliases-mode-map}"
+  :group 'magik
+  :abbrev-table nil
 
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'font-lock-defaults)
-  (make-local-variable 'magik-aliases-program)
-  (make-local-variable 'magik-aliases-exec-path)
-  (make-local-variable 'magik-aliases-process-environment)
+  (compat-call setq-local
+    require-final-newline t
+    comment-start "#"
+    comment-end ""
+    show-trailing-whitespace nil
+    magik-aliases-program (magik-aliases-program-set magik-aliases-program)
+    imenu-generic-expression magik-aliases-imenu-generic-expression
+    font-lock-defaults '(magik-aliases-font-lock-keywords nil nil))
 
-  (use-local-map magik-aliases-mode-map)
-  (set-syntax-table magik-aliases-mode-syntax-table)
-
-  (setq major-mode 'magik-aliases-mode
-	mode-name "Aliases"
-	magik-aliases-program (magik-aliases-program-set magik-aliases-program)
-	require-final-newline t
-	comment-start "#"
-	comment-end   ""
-	imenu-generic-expression magik-aliases-imenu-generic-expression
-	show-trailing-whitespace nil
-	font-lock-defaults
-	'(magik-aliases-font-lock-keywords
-	  nil nil))
-
-  (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu)
-  (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t)
-  ;;Avoid menu-bar-update-hook, since this is executed
-  ;;many times and the magik-aliases-update-sw-menu function does
-  ;;perform file existence checks. So by using a local kill-buffer-hook
-  ;;it should cut down on the number of times this function is executed
-  ;;whilst still retaining the accuracy of the SW->Alias Files submenu.
-  ;;(add-hook menu-bar-update-hook-sym 'magik-aliases-update-sw-menu)
-
-  (run-hooks 'magik-aliases-mode-hook))
+  (compat-call add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
+  (compat-call add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
 
 (defun magik-aliases-kill-buffer ()
   "Function to run when an Aliases mode buffer is run."
