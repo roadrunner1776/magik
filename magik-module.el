@@ -24,15 +24,12 @@
 		   (require 'magik-utils)
 		   (require 'magik-session))
 
+(require 'compat)
+
 (defgroup magik-module nil
   "Customise Magik module.def files group."
   :group 'magik
   :group 'tools)
-
-(defcustom magik-module-mode-hook nil
-  "*Hook to run after Module Mode is set."
-  :group 'module
-  :type  'hook)
 
 (defcustom magik-module-option-save-magikc t
   "*If t, save .magikc files when loading module."
@@ -43,6 +40,51 @@
   "*If t, save .magikc files when loading module."
   :group 'smallworld
   :type  'boolean)
+
+;; Imenu configuration
+(defvar magik-module-imenu-generic-expression
+  '(
+    (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
+    )
+  "Imenu generic expression for Magik Message mode.  See `imenu-generic-expression'.")
+
+;; Font-lock configuration
+(defcustom magik-module-font-lock-keywords
+  (list
+   '("^end\\s-*$" . font-lock-keyword-face)
+   '("^hidden$" . font-lock-keyword-face)
+   '("^\\(language\\)\\s-+\\(\\sw+\\)"
+     (1 font-lock-keyword-face)
+     (2 font-lock-type-face))
+   '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
+   '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
+     (1 font-lock-function-name-face)
+     (2 font-lock-constant-face))
+   )
+  "Default fontification of module.def files."
+  :group 'module
+  :type 'sexp)
+
+(defun magik-module-customize ()
+  "Open Customization buffer for Module Mode."
+  (interactive)
+  (customize-group 'magik-module))
+
+;;;###autoload
+(define-derived-mode magik-module-mode nil "Module"
+  "Major mode for editing Magik module.def files.
+
+You can customize Module Mode with the `magik-module-mode-hook`.
+
+\\{magik-module-mode-map}"
+
+  :group 'magik
+  :abbrev-table nil
+
+  (compat-call setq-local
+    require-final-newline t
+    imenu-generic-expression magik-module-imenu-generic-expression
+    font-lock-defaults '(magik-module-font-lock-keywords nil t)))
 
 (defvar magik-module-mode-map (make-sparse-keymap)
   "Keymap for Magik module.def files.")
@@ -105,65 +147,6 @@
       :keys "M-1 <f2> r,   <f2> r"])
     "---"
     [,"Customize"                     magik-module-customize   t]))
-
-(defvar magik-module-mode-syntax-table nil
-  "Syntax table in use in Module Mode buffers.")
-
-;; Imenu configuration
-(defvar magik-module-imenu-generic-expression
-  '(
-    (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
-    )
-  "Imenu generic expression for Magik Message mode.  See `imenu-generic-expression'.")
-
-;; Font-lock configuration
-(defcustom magik-module-font-lock-keywords
-  (list
-   '("^end\\s-*$" . font-lock-keyword-face)
-   '("^hidden$" . font-lock-keyword-face)
-   '("^\\(language\\)\\s-+\\(\\sw+\\)"
-     (1 font-lock-keyword-face)
-     (2 font-lock-type-face))
-   '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
-   '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
-     (1 font-lock-function-name-face)
-     (2 font-lock-constant-face))
-   )
-  "Default fontification of module.def files."
-  :group 'module
-  :type 'sexp)
-
-(defun magik-module-customize ()
-  "Open Customization buffer for Module Mode."
-  (interactive)
-  (customize-group 'magik-module))
-
-;;;###autoload
-(defun magik-module-mode ()
-  "Major mode for editing Magik module.def files.
-
-You can customise Module Mode with the `module-mode-hook'.
-
-\\{magik-module-mode-map}"
-
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'font-lock-defaults)
-
-  (use-local-map magik-module-mode-map)
-  (easy-menu-add magik-module-menu)
-  (set-syntax-table magik-module-mode-syntax-table)
-
-  (setq major-mode 'magik-module-mode
-	mode-name "Module"
-	require-final-newline t
-	imenu-generic-expression magik-module-imenu-generic-expression
-	font-lock-defaults
-	'(magik-module-font-lock-keywords
-	  nil t))
-
-  (run-hooks 'magik-module-mode-hook))
 
 (defun magik-module-toggle-save-magikc (arg)
   "Toggle saving of .magikc files when loading module."
