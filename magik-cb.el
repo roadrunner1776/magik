@@ -1518,25 +1518,23 @@ be careful to preserve the position in \"*cb2*\"."
 ;; C B 2
 ;; _____
 
-(defun magik-cb2-mode ()
-  "Make sure \"*cb2*\" exists and is in magik-cb-mode and has the right keymap and modeline."
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'magik-cb2-mode)
+(define-derived-mode magik-cb2-mode magik-base-mode "Magik-CB2"
+  "Ensure \"*cb2*\" exists in magik-cb-mode with the correct keymap and modeline.
 
-  (setq major-mode 'magik-cb2-mode
-	buffer-read-only t
-	buffer-undo-list t
-	show-trailing-whitespace nil
-	font-lock-defaults '(magik-cb2-font-lock-keywords nil t ((?_ . "w"))))
+\\{magik-cb2-mode-map}"
+  :group 'magik
+  :abbrev-table nil
 
-  (use-local-map magik-cb-mode-map)
-  (set-syntax-table (copy-syntax-table magik-base-mode-syntax-table))
-  (modify-syntax-entry ?\" "w")
-  (modify-syntax-entry ?- "w")
+  (compat-call setq-local
+    buffer-read-only t
+    buffer-undo-list t
+    show-trailing-whitespace nil
+    font-lock-defaults '(magik-cb2-font-lock-keywords nil t ((?_ . "w"))))
 
-  (magik-cb-redraw-modeline)
-  (run-hooks 'magik-cb2-mode-hook))
+  (magik-cb-redraw-modeline))
+
+(modify-syntax-entry ?\" "w" magik-cb2-mode-syntax-table)
+(modify-syntax-entry ?- "w" magik-cb2-mode-syntax-table)
 
 (defun magik-cb2-buffer (&optional buffer)
   "Name of the CB2 buffer."
