@@ -135,11 +135,6 @@ Based upon `font-lock-variable-name-face'"
 Based upon `font-lock-variable-name-face'"
   :group 'magik-cb-faces)
 
-(defcustom magik-cb-mode-hook '()
-  "*Hook for customising CB mode."
-  :group 'magik-cb
-  :type 'hook)
-
 (defcustom magik-cb-font-lock-class-face 'font-lock-type-face
   "*Font-lock Face to use when displaying the class."
   :group 'magik-cb
@@ -453,11 +448,6 @@ Not used yet.")
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)
-
-(defcustom magik-cb2-mode-hook '()
-  "*Hook for customising CB toggle mode (CB2)."
-  :group 'magik-cb
-  :type 'hook)
 
 ;;; Functions
 ;;; _________
