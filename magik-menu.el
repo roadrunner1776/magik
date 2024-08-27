@@ -30,65 +30,65 @@
 
 (defconst magik-menu-main-menu
   `(,"Magik"
-    (,"Alias Files")
-    "---"
-    [,"Select Environment" magik-version-selection          t]
-    [,"Run/Goto session"   magik-session                    t]
-    [,"Start new session"  magik-session-new-buffer :active t :keys "C-u <f2> z"]
-    (,"Magik Session Processes")
-    "---"
-    (,"Class Browser")
-    (,"Class Browser Processes")
-    "---"
-    (,"External Shell Processes")
-    [,"List Processes"    list-processes  t]
-    "---"
-    [,"Customize"         magik-customize t]
-    (,"Help")))
+     (,"Alias Files")
+     "---"
+     [,"Select Environment" magik-version-selection          t]
+     [,"Run/Goto session"   magik-session                    t]
+     [,"Start new session"  magik-session-new-buffer :active t :keys "C-u <f2> z"]
+     (,"Magik Session Processes")
+     "---"
+     (,"Class Browser")
+     (,"Class Browser Processes")
+     "---"
+     (,"External Shell Processes")
+     [,"List Processes"    list-processes  t]
+     "---"
+     [,"Customize"         magik-customize t]
+     (,"Help")))
 
 (defconst magik-menu-cb-menu
   `(,"Class Browser"
-    [,"Run/Goto Class Browser"       magik-cb                      t]
-    [,"Start New Class Browser"      magik-cb-new-buffer   :active t :keys "C-u <f3> <f3>"]
-    [,"Paste Method in CB"           magik-cb-paste-method         t]
-    [,"Paste Class in CB"            magik-cb-paste-class          t]
-    [,"Clear Method and Class in CB" magik-cb-and-clear            t]
-    "---"
-    [,"Jump to Source"               magik-cb-jump-to-source t]
-    "---"
-    [,"Customize"                    magik-cb-customize      t]
-    ;; [,"Help"                         magik-cb-help
-    ;;  :active t
-    ;;  :keys "<f3> ?"]
-    ))
+     [,"Run/Goto Class Browser"       magik-cb                      t]
+     [,"Start New Class Browser"      magik-cb-new-buffer   :active t :keys "C-u <f3> <f3>"]
+     [,"Paste Method in CB"           magik-cb-paste-method         t]
+     [,"Paste Class in CB"            magik-cb-paste-class          t]
+     [,"Clear Method and Class in CB" magik-cb-and-clear            t]
+     "---"
+     [,"Jump to Source"               magik-cb-jump-to-source t]
+     "---"
+     [,"Customize"                    magik-cb-customize      t]
+     ;; [,"Help"                         magik-cb-help
+     ;;  :active t
+     ;;  :keys "<f3> ?"]
+     ))
 
 ;;;###autoload
 (defun magik-menu-set-menus ()
   "Setup main Magik menus."
   (easy-menu-change (list "Tools")
-		    "Magik"
-		    (cdr magik-menu-main-menu)
-		    "Search Files (Grep)...")
+    "Magik"
+    (cdr magik-menu-main-menu)
+    "Search Files (Grep)...")
   (easy-menu-change (list "Tools" "Magik")
-		    "Class Browser"
-		    (cdr magik-menu-cb-menu))
+    "Class Browser"
+    (cdr magik-menu-cb-menu))
 
   ;; Due to a minor bug in easy-menu-change, have to set the "No Process" etc.
   ;; strings separately
   (easy-menu-change (list "Tools" "Magik")
-		    "Magik Session Processes"
-		    (list "No Processes"))
+    "Magik Session Processes"
+    (list "No Processes"))
   (easy-menu-change (list "Tools" "Magik")
-		    "Class Browser Processes"
-		    (list "No Processes"))
+    "Class Browser Processes"
+    (list "No Processes"))
   (easy-menu-change (list "Tools" "Magik")
-		    "External Shell Processes"
-		    (list "No Processes"))
+    "External Shell Processes"
+    (list "No Processes"))
 
   (easy-menu-change (list "Tools") "--" nil "Search Files (Grep)...")
 
   (and (fboundp 'magik-aliases-update-sw-menu)
-       (magik-aliases-update-sw-menu)))
+    (magik-aliases-update-sw-menu)))
 
 (provide 'magik-menu)
 ;;; magik-menu.el ends here

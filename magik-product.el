@@ -20,9 +20,9 @@
 ;;; Code:
 
 (eval-when-compile (require 'easymenu)
-		   (require 'font-lock)
-		   (require 'magik-utils)
-		   (require 'magik-session))
+  (require 'font-lock)
+  (require 'magik-utils)
+  (require 'magik-session))
 
 (defgroup magik-product nil
   "Customise Magik product.def files group."
@@ -53,10 +53,10 @@
 (easy-menu-define magik-product-menu magik-product-mode-map
   "Menu for Product mode."
   `(,"Product"
-    [,"Add product"          magik-product-transmit-buffer (magik-utils-buffer-mode-list 'magik-session-mode)]
-    [,"Reinitialise product" magik-product-reinitialise    (magik-utils-buffer-mode-list 'magik-session-mode)]
-    "---"
-    [,"Customize"            magik-product-customize       t]))
+     [,"Add product"          magik-product-transmit-buffer (magik-utils-buffer-mode-list 'magik-session-mode)]
+     [,"Reinitialise product" magik-product-reinitialise    (magik-utils-buffer-mode-list 'magik-session-mode)]
+     "---"
+     [,"Customize"            magik-product-customize       t]))
 
 (defvar magik-product-mode-syntax-table nil
   "Syntax table in use in Product Mode buffers.")
@@ -64,23 +64,23 @@
 ;; Imenu configuration
 (defvar magik-product-imenu-generic-expression
   '(
-    (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
-    )
+     (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
+     )
   "Imenu generic expression for Magik Message mode.  See `imenu-generic-expression'.")
 
 ;; Font-lock configuration
 (defcustom magik-product-font-lock-keywords
   (list
-   '("^end\\s-*$" . font-lock-keyword-face)
-   '("^hidden$" . font-lock-keyword-face)
-   '("^\\(language\\)\\s-+\\(\\sw+\\)"
-     (1 font-lock-keyword-face)
-     (2 font-lock-type-face))
-   '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
-   '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
-     (1 font-lock-function-name-face)
-     (2 font-lock-constant-face))
-   )
+    '("^end\\s-*$" . font-lock-keyword-face)
+    '("^hidden$" . font-lock-keyword-face)
+    '("^\\(language\\)\\s-+\\(\\sw+\\)"
+       (1 font-lock-keyword-face)
+       (2 font-lock-type-face))
+    '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
+    '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
+       (1 font-lock-function-name-face)
+       (2 font-lock-constant-face))
+    )
   "Default fontification of product.def files."
   :group 'product
   :type 'sexp)
@@ -108,12 +108,12 @@ You can customise Product Mode with the `product-mode-hook'.
   (set-syntax-table magik-product-mode-syntax-table)
 
   (setq major-mode 'magik-product-mode
-	mode-name "Product"
-	require-final-newline t
-	imenu-generic-expression magik-product-imenu-generic-expression
-	font-lock-defaults
-	'(magik-product-font-lock-keywords
-	  nil t))
+    mode-name "Product"
+    require-final-newline t
+    imenu-generic-expression magik-product-imenu-generic-expression
+    font-lock-defaults
+    '(magik-product-font-lock-keywords
+       nil t))
 
   (run-hooks 'magik-product-mode-hook))
 
@@ -127,38 +127,38 @@ You can customise Product Mode with the `product-mode-hook'.
   "Reinitialise this product in GIS."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Magik process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (process (barf-if-no-gis gis)))
+                'magik-session-mode
+                "Enter Magik process buffer:"
+                magik-session-buffer
+                'magik-session-buffer-alist-prefix-function))
+          (process (barf-if-no-gis gis)))
     (display-buffer gis t)
     (process-send-string
-     process
-     (concat ;; the .products[] interface is used for backwards compatibility.
-      "smallworld_product"
-      ".products[:|" (magik-product-name) "|]"
-      ".reinitialise()\n$\n"))
+      process
+      (concat ;; the .products[] interface is used for backwards compatibility.
+        "smallworld_product"
+        ".products[:|" (magik-product-name) "|]"
+        ".reinitialise()\n$\n"))
     gis))
 
 (defun magik-product-transmit-add-product (filename process)
   "Add the product to the GIS process."
   (process-send-string
-   process
-   (concat
-    (magik-function "smallworld_product.add_product" filename)
-    "\n$\n")))
+    process
+    (concat
+      (magik-function "smallworld_product.add_product" filename)
+      "\n$\n")))
 
 (defun magik-product-transmit-buffer (&optional gis)
   "Send current buffer to GIS."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Magik process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (process (barf-if-no-gis gis))
-	 (filename (buffer-file-name)))
+                'magik-session-mode
+                "Enter Magik process buffer:"
+                magik-session-buffer
+                'magik-session-buffer-alist-prefix-function))
+          (process (barf-if-no-gis gis))
+          (filename (buffer-file-name)))
     (pop-to-buffer gis t)
     (magik-product-transmit-add-product filename process)
     gis))
@@ -172,7 +172,7 @@ Called by `gis-drag-n-drop-load' when a Product file is dropped."
 
 ;;; Package initialisation
 (if magik-product-mode-syntax-table
-    nil
+  nil
   (setq magik-product-mode-syntax-table (make-syntax-table))
   (modify-syntax-entry ?_ "w" magik-product-mode-syntax-table)
   (modify-syntax-entry ?# "<" magik-product-mode-syntax-table)
@@ -182,7 +182,7 @@ Called by `gis-drag-n-drop-load' when a Product file is dropped."
 
 ;;;###autoload
 (or (assoc "product\\.def$" auto-mode-alist)
-    (push '("product\\.def$" . magik-product-mode) auto-mode-alist))
+  (push '("product\\.def$" . magik-product-mode) auto-mode-alist))
 
 (provide 'magik-product)
 ;;; magik-product.el ends here
