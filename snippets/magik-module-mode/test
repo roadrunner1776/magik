@@ -7,7 +7,7 @@
 test
 	name		${1:test_name}
 	framework	${2:munit}
-	args		$1
+	args		$3
 end
 
 $0
