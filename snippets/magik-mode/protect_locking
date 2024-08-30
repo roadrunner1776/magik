@@ -5,7 +5,7 @@
 # group: control structure.protect
 # --
 _protect _locking ${1}
-		$2
+	$2
 _protection
-		$0
+	$0
 _endprotect

@@ -6,5 +6,5 @@
 # --
 _over ${1:collection}
 _loop
-		$0
+	$0
 _endloop

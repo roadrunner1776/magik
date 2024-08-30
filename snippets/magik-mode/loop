@@ -5,5 +5,5 @@
 # group: control structure.loop
 # --
 _loop
-		$0
+	$0
 _endloop

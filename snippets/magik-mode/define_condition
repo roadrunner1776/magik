@@ -1,11 +1,12 @@
 # -*- mode: snippet -*-
 # name: define_condition
 # key: define_condition
+# expand-env: ((yas-indent-line 'fixed))
 # group: condition
 # --
 condition.define_condition(:${1:condition_name},
-		:${2:parent_condition_name},
-		{${3:data_name_list}})
+	:${2:parent_condition_name},
+	{${3:data_name_list}})
 $
 
 $0

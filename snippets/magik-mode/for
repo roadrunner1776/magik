@@ -6,5 +6,5 @@
 # --
 _for ${1:var} _over ${2:collection}
 _loop
-		$0
+	$0
 _endloop
