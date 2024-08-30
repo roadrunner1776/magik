@@ -32,12 +32,12 @@
 This command handles multiline _pragma statements."
   ;; try to work out which field we're in.
   (let ((start-bracket (car pragma-brackets))
-	(end-bracket (cdr pragma-brackets)))
+        (end-bracket (cdr pragma-brackets)))
     (save-match-data
       (if (re-search-forward "\\s-*\\sw+\\s-*=" end-bracket t) ;find the start of the next option
-	  (goto-char (match-end 0))
-	(goto-char start-bracket)
-	(search-forward "=" end-bracket t)))))
+          (goto-char (match-end 0))
+        (goto-char start-bracket)
+        (search-forward "=" end-bracket t)))))
 
 (defun magik-electric-pragma-slash (arg)
   "Insert the char, `/', unless the current line starts with `_pragma', in
@@ -62,20 +62,20 @@ Note that this command does handle a multiline _pragma statement."
   (save-excursion
     (save-match-data
       (let* ((pt (point))
-	     (end-bracket (search-forward ")" (save-excursion (forward-line 3) (point)) t))
-	     (start-bracket (and end-bracket (condition-case err
-						 (progn
-						   (backward-sexp)
-						   (point))
-					       (error nil)))))
-	(and start-bracket
-	     end-bracket
-	     (goto-char start-bracket)
-	     (forward-line 0)
-	     (looking-at "_pragma(")
-	     (>= pt (point))      ;;ensure original point location is after start of _pragma
-	     (<= pt end-bracket)  ;;and before the final bracket.
-	     (cons start-bracket end-bracket))))))
+             (end-bracket (search-forward ")" (save-excursion (forward-line 3) (point)) t))
+             (start-bracket (and end-bracket (condition-case err
+                                                 (progn
+                                                   (backward-sexp)
+                                                   (point))
+                                               (error nil)))))
+        (and start-bracket
+             end-bracket
+             (goto-char start-bracket)
+             (forward-line 0)
+             (looking-at "_pragma(")
+             (>= pt (point))      ;;ensure original point location is after start of _pragma
+             (<= pt end-bracket)  ;;and before the final bracket.
+             (cons start-bracket end-bracket))))))
 
 (defun magik-pragma-do-if-match (list &optional default-elem reverse)
   "Given an list of elems (NAME MATCH FUNCTION [OTHER...]) execute each match until it returns t.
@@ -98,31 +98,31 @@ Returns nil if no change or the list (CURRENT-ELEM NEXT-ELEM) elements."
   (if reverse
       (setq list (reverse list)))
   (let* ((len          (1- (length list)))
-	 (first-elem   (elt list 0))
-	 (current-elem nil)
-	 (next-elem    first-elem)
-	 (n -1)
-	 (fn nil))
+         (first-elem   (elt list 0))
+         (current-elem nil)
+         (next-elem    first-elem)
+         (n -1)
+         (fn nil))
     (while (and (<= n len)
-		(progn
-		  (setq n (1+ n)
-			current-elem (elt list n)
-			next-elem (if (eq n len) first-elem (elt list (1+ n)))
-			fn (caddr current-elem))
-		  (not (eval (cadr current-elem))))))
+                (progn
+                  (setq n (1+ n)
+                        current-elem (elt list n)
+                        next-elem (if (eq n len) first-elem (elt list (1+ n)))
+                        fn (caddr current-elem))
+                  (not (eval (cadr current-elem))))))
     (cond ((and (symbolp fn) (fboundp fn))
-	   (funcall fn current-elem next-elem reverse)
-	   (list current-elem next-elem))
-	  (fn
-					;fn is not a function so we evaluate it. The form can
-					;can access current-elem, next-elem and reverse since we are still inside the let. I think...
-	   (eval fn)
-	   (list current-elem next-elem))
-	  ((and default-elem
-		(eval (cadr default-elem)))
-	   (funcall (caddr default-elem) default-elem first-elem reverse)
-	   (list default-elem first-elem))
-	  (t nil))))
+           (funcall fn current-elem next-elem reverse)
+           (list current-elem next-elem))
+          (fn
+                                        ;fn is not a function so we evaluate it. The form can
+                                        ;can access current-elem, next-elem and reverse since we are still inside the let. I think...
+           (eval fn)
+           (list current-elem next-elem))
+          ((and default-elem
+                (eval (cadr default-elem)))
+           (funcall (caddr default-elem) default-elem first-elem reverse)
+           (list default-elem first-elem))
+          (t nil))))
 
 (defun magik-pragma-if-match-replace-with-next (current next reverse)
   "Removes the current match region and inserts the car of the NEXT element.
@@ -131,11 +131,11 @@ It says to replace just that subexpression instead of the whole match.
 The element follows that described in pragma-do-if-match."
   (save-excursion
     (let ((match-num (or (elt current 3) 0))
-	  (key (car next)))
+          (key (car next)))
       (delete-region (match-beginning match-num) (match-end match-num))
       (insert (if (symbolp key)
-		  (symbol-name key)
-		key)))))
+                  (symbol-name key)
+                key)))))
 
 
 ;;;;;;;;;;;;;;;;;;;; Pragma deprecated magik code ;;;;;;;;;;;;;;;;;;;
@@ -156,12 +156,12 @@ This is used for searching for the end of a template.")
 
 (defvar magik-pragma-deprecated-template
   (concat magik-pragma-deprecated-template-start
-	  "## Reason     : <why>
+          "## Reason     : <why>
 ## Use instead: <other method>
 ## Action     : <action to be taken - use / for options>
 ## Deprecated : <timestamp>
 "
-	  magik-pragma-deprecated-template-end)
+          magik-pragma-deprecated-template-end)
   "Template for inserting into comment header for deprecated methods.")
 
 (defvar magik-pragma-deprecated-template-re nil
@@ -188,33 +188,33 @@ The format follows that described in pragma-do-if-match.")
   "toggle the current deprecated action option"
   (goto-char (match-end 0))
   (magik-pragma-do-if-match magik-pragma-deprecated-action-list
-			    '(default  (looking-at "<.*>") magik-pragma-if-match-replace-with-next)
-			    (eq direction 'backward)))
+                            '(default  (looking-at "<.*>") magik-pragma-if-match-replace-with-next)
+                            (eq direction 'backward)))
 
 (defun magik-pragma-goto-magik-deprecated-template ()
   "Goto the point at which the template should be placed."
   ;;limit is set so that the searching only looks at the next non-blank line.
   (let ((limit (save-excursion (skip-chars-forward " \n") (end-of-line) (point))))
     (cond ((looking-at "\\s-*##")
-	   (forward-line 0)
-	   t)
-	  ((re-search-forward "_method" limit t)
-	   (forward-line 1)
-	   t)
-	  ((re-search-forward "(" limit t)
-	   ;;This is intended to catch lines with define_shared_constant, define_shared_variable,
-	   ;; define_slot_access, def_mixin, def_indexed_mixin, new_slotted_exemplar, new_indexed_exemplar
-	   ;; i.e. anything which has a ( following it and which could include a ## comment
-	   ;; between the ( and the matching ).
-	   (backward-char) ; to place point in front of '(' ready for forward-sexp call
-	   ;;if following search fails then the default is to insert immediately before this line
-	   (re-search-forward "\\s-*##" (save-excursion (forward-sexp) (point)) t)
-	   (forward-line 0)
-	   t)
-	  (t
-	   ;;By default insert immediately after the pragma line
-	   (forward-line 0)
-	   t))))
+           (forward-line 0)
+           t)
+          ((re-search-forward "_method" limit t)
+           (forward-line 1)
+           t)
+          ((re-search-forward "(" limit t)
+           ;;This is intended to catch lines with define_shared_constant, define_shared_variable,
+           ;; define_slot_access, def_mixin, def_indexed_mixin, new_slotted_exemplar, new_indexed_exemplar
+           ;; i.e. anything which has a ( following it and which could include a ## comment
+           ;; between the ( and the matching ).
+           (backward-char) ; to place point in front of '(' ready for forward-sexp call
+           ;;if following search fails then the default is to insert immediately before this line
+           (re-search-forward "\\s-*##" (save-excursion (forward-sexp) (point)) t)
+           (forward-line 0)
+           t)
+          (t
+           ;;By default insert immediately after the pragma line
+           (forward-line 0)
+           t))))
 
 (defun magik-pragma-insert-deprecated-template ()
   "Inserts the template for deprecated methods."
@@ -223,20 +223,20 @@ The format follows that described in pragma-do-if-match.")
       (search-forward ")") ; find end of _pragma statement
       (delete-horizontal-space)
       (if (eq (point) (point-max)) ;protect against being at the end of the buffer
-	  (insert "\n")
-	(forward-line 1))
+          (insert "\n")
+        (forward-line 1))
       ;;Now search for a suitable place to insert the template
       (and (magik-pragma-goto-magik-deprecated-template)
-	   (not (looking-at (concat "\\s-*" magik-pragma-deprecated-template-start)))
-	   (let ((start (point))
-		 (column (current-indentation))
-		 (template (copy-sequence magik-pragma-deprecated-template)))
-	     (string-match "<timestamp>" template)
-	     (setq template (replace-match (format-time-string "%d %B %Y") t t template))
-	     ;;Insert the template setting read-only property on the start and end text fields
-	     (insert template)
-	     (indent-region start (point) column)
-	     (message "Use toggle keys, \\\\ and /, on 'Action' line to choose action."))))))
+           (not (looking-at (concat "\\s-*" magik-pragma-deprecated-template-start)))
+           (let ((start (point))
+                 (column (current-indentation))
+                 (template (copy-sequence magik-pragma-deprecated-template)))
+             (string-match "<timestamp>" template)
+             (setq template (replace-match (format-time-string "%d %B %Y") t t template))
+             ;;Insert the template setting read-only property on the start and end text fields
+             (insert template)
+             (indent-region start (point) column)
+             (message "Use toggle keys, \\\\ and /, on 'Action' line to choose action."))))))
 
 (defun magik-pragma-remove-magik-deprecated-template ()
   "Removes the template for deprecated methods.
@@ -246,18 +246,18 @@ wish to remove it otherwise the template is removed silently."
     (search-forward ")") ; find end of _pragma statement
     (forward-line 1)
     (if (magik-pragma-goto-magik-deprecated-template)
-	(let ((start nil)
-	      (end nil))
-	  (if (looking-at magik-pragma-deprecated-template-re)
-	      ;;No changes made just remove whole template
-	      (delete-region (match-beginning 0) (match-end 0))
-	    (and (looking-at (concat "\\s-*" magik-pragma-deprecated-template-start))
-		 (setq start (match-beginning 0)))
-	    (setq end (re-search-forward (concat "\\s-*" magik-pragma-deprecated-template-end) nil t))
-	    (and start
-		 end
-		 (y-or-n-p "Remove modifed deprecated comments? ")
-		 (delete-region start end)))))))
+        (let ((start nil)
+              (end nil))
+          (if (looking-at magik-pragma-deprecated-template-re)
+              ;;No changes made just remove whole template
+              (delete-region (match-beginning 0) (match-end 0))
+            (and (looking-at (concat "\\s-*" magik-pragma-deprecated-template-start))
+                 (setq start (match-beginning 0)))
+            (setq end (re-search-forward (concat "\\s-*" magik-pragma-deprecated-template-end) nil t))
+            (and start
+                 end
+                 (y-or-n-p "Remove modifed deprecated comments? ")
+                 (delete-region start end)))))))
 
 ;;;;;;;;;;;;;;;;;;;; Pragma toggle options ;;;;;;;;;;;;;;;;;;;
 
@@ -304,32 +304,32 @@ which case we toggle through the various pragma options."
   (save-match-data
     (let ((magik-pragma-brackets (magik-pragma-line-p)))
       (cond ((consp magik-pragma-brackets)
-	     (let ((curr-pos (point))
-		   (start-bracket (car magik-pragma-brackets))
-		   (end-bracket (cdr magik-pragma-brackets))
-		   option-pos)
-	       (goto-char (1+ start-bracket))
-	       (re-search-forward "\\s-*" nil t)
-	       (setq option-pos (point))
+             (let ((curr-pos (point))
+                   (start-bracket (car magik-pragma-brackets))
+                   (end-bracket (cdr magik-pragma-brackets))
+                   option-pos)
+               (goto-char (1+ start-bracket))
+               (re-search-forward "\\s-*" nil t)
+               (setq option-pos (point))
 
-	       ;;loop over the positions where each option starts and check to see which option
-	       ;;point is currently located in. This loop copes with multiline pragmas and sensibly
-	       ;;handles the cases when point is in a whitespace section between , and the start of the next option
-	       (search-forward "=" end-bracket t) ; skip over current option
-	       (while (and (re-search-forward "\\s-*\\(\\sw+\\)\\s-*=" end-bracket t)
-			   (goto-char (match-beginning 0))        ;found start of next option including preceeding space
-			   (<= (point) curr-pos)                  ;test if point is in this option or a later one.
-			   (setq option-pos (match-beginning 1))) ;store true start of option
-		 (search-forward "=" end-bracket t))              ; LOOP: skip passed current option
+               ;;loop over the positions where each option starts and check to see which option
+               ;;point is currently located in. This loop copes with multiline pragmas and sensibly
+               ;;handles the cases when point is in a whitespace section between , and the start of the next option
+               (search-forward "=" end-bracket t) ; skip over current option
+               (while (and (re-search-forward "\\s-*\\(\\sw+\\)\\s-*=" end-bracket t)
+                           (goto-char (match-beginning 0))        ;found start of next option including preceeding space
+                           (<= (point) curr-pos)                  ;test if point is in this option or a later one.
+                           (setq option-pos (match-beginning 1))) ;store true start of option
+                 (search-forward "=" end-bracket t))              ; LOOP: skip passed current option
 
-	       (goto-char option-pos)
-	       (magik-pragma-electric-toggle direction)))
-	    ((save-excursion
-	       (beginning-of-line)
-	       (looking-at "\\s-*## Action\\s-+: "))
-	     (magik-pragma-deprecated-action-toggle direction))
-	    (t
-	     (self-insert-command arg))))))
+               (goto-char option-pos)
+               (magik-pragma-electric-toggle direction)))
+            ((save-excursion
+               (beginning-of-line)
+               (looking-at "\\s-*## Action\\s-+: "))
+             (magik-pragma-deprecated-action-toggle direction))
+            (t
+             (self-insert-command arg))))))
 
 (defun magik-pragma-electric-toggle (direction)
   "Toggle the values for the different fields used in the pragma line.
@@ -339,10 +339,10 @@ relative the current setting and available values."
   ;;Handle the case where the pragma line is completely empty separately.
   (if (save-excursion (beginning-of-line) (looking-at "_pragma()"))
       (progn
-	;;Insert classify_level and place point between ( and c.
-	(delete-region (match-beginning 0) (match-end 0))
-	(insert "_pragma(classify_level=)")
-	(backward-char 16)))
+        ;;Insert classify_level and place point between ( and c.
+        (delete-region (match-beginning 0) (match-end 0))
+        (insert "_pragma(classify_level=)")
+        (backward-char 16)))
 
   (magik-pragma-do-if-match magik-pragma-electric-toggle-list nil (eq direction 'backward)))
 
@@ -356,15 +356,15 @@ if they wish to remove the contents of the depreacted template."
   (search-forward "=")
   (save-excursion
     (let ((res (magik-pragma-do-if-match magik-pragma-classify_level-list
-					 '(default (looking-at "\\([^,]*\\),") magik-pragma-if-match-replace-with-next 1)
-					 reverse)))
+                                         '(default (looking-at "\\([^,]*\\),") magik-pragma-if-match-replace-with-next 1)
+                                         reverse)))
       (cond ((eq (caadr res) 'deprecated)
-	     ;;next element is deprecated i.e. user has just selected deprecated
-	     (magik-pragma-insert-deprecated-template))
-	    ((eq (caar res) 'deprecated)
-	     ;;current element is deprecated i.e. user has just deselected deprecated
-	     (magik-pragma-remove-magik-deprecated-template))
-	    (t nil)))))
+             ;;next element is deprecated i.e. user has just selected deprecated
+             (magik-pragma-insert-deprecated-template))
+            ((eq (caar res) 'deprecated)
+             ;;current element is deprecated i.e. user has just deselected deprecated
+             (magik-pragma-remove-magik-deprecated-template))
+            (t nil)))))
 
 (defun magik-pragma-if-match-insert-usage (current next reverse)
   "Insert the usage according to the current setting."
@@ -372,8 +372,8 @@ if they wish to remove the contents of the depreacted template."
   (search-forward "=")
   (save-excursion
     (magik-pragma-do-if-match magik-pragma-usage-list
-			      '(default (looking-at "{.*}") magik-pragma-if-match-replace-with-next)
-			      reverse)))
+                              '(default (looking-at "{.*}") magik-pragma-if-match-replace-with-next)
+                              reverse)))
 
 ;;;;;;;;;;;;;;;;;;;; Topic Select Mode ;;;;;;;;;;;;;;;;;;;
 
@@ -383,9 +383,9 @@ if they wish to remove the contents of the depreacted template."
 (defun magik-pragma-if-match-do-the-electric-pragma-topics (current next reverse)
   "Select pragma topics from a menu."
   (let* ((buffer-dir (if buffer-file-name (file-name-directory buffer-file-name) default-directory))
-	 (magik-pragma-files (if buffer-dir (magik-utils-find-files-up buffer-dir "data/doc/pragma_topics")))
-	 (product-pragma-file (if (getenv "SMALLWORLD_GIS") (expand-file-name (concat (getenv "SMALLWORLD_GIS") "/data/doc/pragma_topics"))))
-	 topics pos)
+         (magik-pragma-files (if buffer-dir (magik-utils-find-files-up buffer-dir "data/doc/pragma_topics")))
+         (product-pragma-file (if (getenv "SMALLWORLD_GIS") (expand-file-name (concat (getenv "SMALLWORLD_GIS") "/data/doc/pragma_topics"))))
+         topics pos)
     (re-search-forward "= *")
     (setq pos (point))
     (if (not (eq (following-char) ?{ ))
@@ -416,12 +416,12 @@ q      - quit
 ")
     (mapc 'insert-file-contents magik-pragma-files)
     (and product-pragma-file
-	 (not (member product-pragma-file magik-pragma-files))
-	 (file-exists-p product-pragma-file)
-	 (insert-file-contents product-pragma-file))
+         (not (member product-pragma-file magik-pragma-files))
+         (file-exists-p product-pragma-file)
+         (insert-file-contents product-pragma-file))
     (or magik-pragma-files
-	product-pragma-file
-	(error "There is no value for $SMALLWORLD_GIS"))
+        product-pragma-file
+        (error "There is no value for $SMALLWORLD_GIS"))
     (goto-char
      (prog1
          (point)
@@ -429,7 +429,7 @@ q      - quit
          (let
              ((topic
                (and
-		(looking-at "\\s-*\\S-+\\s-+\\(\\S-+\\)")
+                (looking-at "\\s-*\\S-+\\s-+\\(\\S-+\\)")
                 (match-string 1))))
            (beginning-of-line)
            (insert
@@ -497,15 +497,15 @@ Beep if not looking at \"[ >] (\""
   "Edit the topics file for the Smallworld Product \".../data/doc/pragma_topics\"."
   (interactive)
   (let* ((buffer-dir (if buffer-file-name (file-name-directory buffer-file-name) default-directory))
-	 (magik-pragma-file (if buffer-dir (magik-utils-find-files-up buffer-dir "data/doc/pragma_topics" t))))
+         (magik-pragma-file (if buffer-dir (magik-utils-find-files-up buffer-dir "data/doc/pragma_topics" t))))
     (cond (magik-pragma-file
-	   (find-file (car magik-pragma-file)))
-	  ((getenv "SMALLWORLD_GIS")
-	   (find-file
-	    (concat (file-name-as-directory (getenv "SMALLWORLD_GIS"))
-		    "data/doc/pragma_topics")))
-	  (t
-	   (error "There is no value for $SMALLWORLD_GIS")))))
+           (find-file (car magik-pragma-file)))
+          ((getenv "SMALLWORLD_GIS")
+           (find-file
+            (concat (file-name-as-directory (getenv "SMALLWORLD_GIS"))
+                    "data/doc/pragma_topics")))
+          (t
+           (error "There is no value for $SMALLWORLD_GIS")))))
 
 (progn
   ;; ------------------------ magik pragma topic select mode ------------------------

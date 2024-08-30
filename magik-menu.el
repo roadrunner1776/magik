@@ -66,24 +66,24 @@
 (defun magik-menu-set-menus ()
   "Setup main Magik menus."
   (easy-menu-change (list "Tools")
-		    "Magik"
-		    (cdr magik-menu-main-menu)
-		    "Search Files (Grep)...")
+                    "Magik"
+                    (cdr magik-menu-main-menu)
+                    "Search Files (Grep)...")
   (easy-menu-change (list "Tools" "Magik")
-		    "Class Browser"
-		    (cdr magik-menu-cb-menu))
+                    "Class Browser"
+                    (cdr magik-menu-cb-menu))
 
   ;; Due to a minor bug in easy-menu-change, have to set the "No Process" etc.
   ;; strings separately
   (easy-menu-change (list "Tools" "Magik")
-		    "Magik Session Processes"
-		    (list "No Processes"))
+                    "Magik Session Processes"
+                    (list "No Processes"))
   (easy-menu-change (list "Tools" "Magik")
-		    "Class Browser Processes"
-		    (list "No Processes"))
+                    "Class Browser Processes"
+                    (list "No Processes"))
   (easy-menu-change (list "Tools" "Magik")
-		    "External Shell Processes"
-		    (list "No Processes"))
+                    "External Shell Processes"
+                    (list "No Processes"))
 
   (easy-menu-change (list "Tools") "--" nil "Search Files (Grep)...")
 

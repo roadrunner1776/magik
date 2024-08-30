@@ -19,10 +19,11 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'easymenu)
-		   (require 'font-lock)
-		   (require 'magik-utils)
-		   (require 'magik-session))
+(eval-when-compile
+  (require 'easymenu)
+  (require 'font-lock)
+  (require 'magik-utils)
+  (require 'magik-session))
 
 (defgroup magik-product nil
   "Customise Magik product.def files group."
@@ -98,11 +99,11 @@ You can customize Product Mode with the `magik-product-mode-hook`.
   "Reinitialise this product in GIS."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Magik process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (process (barf-if-no-gis gis)))
+                                           'magik-session-mode
+                                           "Enter Magik process buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (process (barf-if-no-gis gis)))
     (display-buffer gis t)
     (process-send-string
      process
@@ -124,12 +125,12 @@ You can customize Product Mode with the `magik-product-mode-hook`.
   "Send current buffer to GIS."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Magik process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (process (barf-if-no-gis gis))
-	 (filename (buffer-file-name)))
+                                           'magik-session-mode
+                                           "Enter Magik process buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (process (barf-if-no-gis gis))
+         (filename (buffer-file-name)))
     (pop-to-buffer gis t)
     (magik-product-transmit-add-product filename process)
     gis))

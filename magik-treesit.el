@@ -175,8 +175,8 @@
 
 ;;;###autoload
 (when (and (or (featurep 'treesit)
-	       (require 'treesit nil 'noerror))
-	   (fboundp 'treesit-ready-p))
+               (require 'treesit nil 'noerror))
+           (fboundp 'treesit-ready-p))
   (add-to-list 'treesit-language-source-alist '(magik "https://github.com/krn-robin/tree-sitter-magik"))
   (when (treesit-ready-p 'magik)
     (add-to-list 'major-mode-remap-alist '(magik-mode . magik-ts-mode))

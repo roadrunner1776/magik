@@ -162,8 +162,8 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
   "Function to run when an Aliases mode buffer is run."
   (if (eq major-mode 'magik-aliases-mode)
       (progn
-	(setq major-mode 'fundamental-mode) ; prevent current buffer being listed.
-	(magik-aliases-update-sw-menu))))
+        (setq major-mode 'fundamental-mode) ; prevent current buffer being listed.
+        (magik-aliases-update-sw-menu))))
 
 (defun magik-aliases-n ()
   "If buffer is read-only goto next alias, else insert SPC."
@@ -186,8 +186,8 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
   (if (re-search-forward magik-aliases-definition-regexp nil t)
       (forward-line)
     (goto-char (point-min))
-      (when (re-search-forward magik-aliases-definition-regexp nil t)
-	(forward-line))))
+    (when (re-search-forward magik-aliases-definition-regexp nil t)
+      (forward-line))))
 
 (defun magik-aliases-q ()
   "If buffer is read-only goto next alias, else insert q."
@@ -210,9 +210,9 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
   (let (list)
     (save-excursion
       (save-match-data
-	(goto-char (point-max))
-	(while (re-search-backward magik-aliases-definition-regexp nil t)
-	  (push (match-string-no-properties 1) list))))
+        (goto-char (point-max))
+        (while (re-search-backward magik-aliases-definition-regexp nil t)
+          (push (match-string-no-properties 1) list))))
     (reverse list)))
 
 (defun magik-aliases-switch-to-buffer (alias)
@@ -231,30 +231,30 @@ when the buffer is displayed:
        If this is t then the buffer is displayed.
 "
   (cond ((run-hook-with-args-until-success 'magik-aliases-switch-to-buffer-hooks alias)
-	 t)
-	((stringp magik-aliases-switch-to-buffer-regexp)
-	 (save-match-data
-	   (match-string magik-aliases-switch-to-buffer-regexp alias)))
-	(t
-	 magik-aliases-switch-to-buffer)))
+         t)
+        ((stringp magik-aliases-switch-to-buffer-regexp)
+         (save-match-data
+           (match-string magik-aliases-switch-to-buffer-regexp alias)))
+        (t
+         magik-aliases-switch-to-buffer)))
 
 (defun magik-aliases-program-set (&optional default)
   "Return the program to use to operate on a gis_aliases file."
   (let ((path magik-aliases-program-path)
-	program)
+        program)
     (while path
       (setq program (expand-file-name
-		     (concat (file-name-as-directory (car path)) default))
-	    path (cdr path))
+                     (concat (file-name-as-directory (car path)) default))
+            path (cdr path))
       (if (file-executable-p program)
-	  (setq path nil)
-	(setq program nil)))
+          (setq path nil)
+        (setq program nil)))
     (unless program
       (setq program (expand-file-name
-		     (concat (getenv "SMALLWORLD_GIS") "/config/"
-			     (file-name-as-directory (car magik-aliases-program-path)) magik-aliases-program)))
+                     (concat (getenv "SMALLWORLD_GIS") "/config/"
+                             (file-name-as-directory (car magik-aliases-program-path)) magik-aliases-program)))
       (unless (file-executable-p program)
-	(setq program nil)))
+        (setq program nil)))
     (or program default)))
 
 (defun magik-aliases-run-program (&optional alias file dir)
@@ -262,42 +262,42 @@ when the buffer is displayed:
 
 With a prefix arg, ask user for current directory to use."
   (interactive (if (not (magik-aliases-at-alias-definition))
-		   (list
-		    (completing-read "Definition: "
-				     (mapcar (function
-					      (lambda (d) (cons d d)))
-					     (magik-aliases-list))
-				     nil t)
-		    nil nil)))
+                   (list
+                    (completing-read "Definition: "
+                                     (mapcar (function
+                                              (lambda (d) (cons d d)))
+                                             (magik-aliases-list))
+                                     nil t)
+                    nil nil)))
   (cond (current-prefix-arg
-	 (setq dir (file-name-as-directory
-		    (expand-file-name
-		     (read-file-name "Set current working directory: ")))))
-	((null dir)
-	 (setq dir default-directory)))
+         (setq dir (file-name-as-directory
+                    (expand-file-name
+                     (read-file-name "Set current working directory: ")))))
+        ((null dir)
+         (setq dir default-directory)))
 
   (let ((program magik-aliases-program)
-	(args    magik-aliases-program-args)
-	(file    (or file (buffer-file-name)))
-	(buf     "gis")
-	(version (if (boundp 'magik-version-current)
-		     (symbol-value 'magik-version-current)))
-	(process-environment-aliases magik-aliases-process-environment)
-	(exec-path-aliases magik-aliases-exec-path))
+        (args    magik-aliases-program-args)
+        (file    (or file (buffer-file-name)))
+        (buf     "gis")
+        (version (if (boundp 'magik-version-current)
+                     (symbol-value 'magik-version-current)))
+        (process-environment-aliases magik-aliases-process-environment)
+        (exec-path-aliases magik-aliases-exec-path))
     (save-excursion
       (cond (alias nil)
-	    ((re-search-backward magik-aliases-definition-regexp nil t)
-	     (setq alias (match-string-no-properties 1)))
-	    (t
-	     (error "Cannot find any alias definitions")))
+            ((re-search-backward magik-aliases-definition-regexp nil t)
+             (setq alias (match-string-no-properties 1)))
+            (t
+             (error "Cannot find any alias definitions")))
       (if (file-exists-p (concat (file-name-directory file) "environment.bat"))
-	  (setq args (append args (list "-e" (concat (file-name-directory file) "environment.bat")) nil)))
+          (setq args (append args (list "-e" (concat (file-name-directory file) "environment.bat")) nil)))
       (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last
 
       (if (stringp version)
-	  (setq buf (concat buf " " version)))
+          (setq buf (concat buf " " version)))
       (if alias
-	  (setq buf (concat buf " " alias)))
+          (setq buf (concat buf " " alias)))
       (setq buf (generate-new-buffer (concat "*" buf "*")))
       (kill-buffer (current-buffer))
       (set-buffer buf)
@@ -306,17 +306,17 @@ With a prefix arg, ask user for current directory to use."
       (insert "Command: " program " ")
       (mapc (function (lambda (s) (insert s " "))) args)
       (setq default-directory dir
-	    args (append (list program) args)
-	    magik-session-exec-path (cl-copy-list (or exec-path-aliases exec-path))
-	    magik-session-process-environment (cl-copy-list (or process-environment-aliases process-environment))
-	    magik-session-current-command (mapconcat 'identity args " "))
+            args (append (list program) args)
+            magik-session-exec-path (cl-copy-list (or exec-path-aliases exec-path))
+            magik-session-process-environment (cl-copy-list (or process-environment-aliases process-environment))
+            magik-session-current-command (mapconcat 'identity args " "))
       (if (stringp version)
-	  (set 'magik-version-current version))
+          (set 'magik-version-current version))
 
       (insert (format "\nCwd is: %s\n\n" default-directory))
       (magik-session-start-process args))
     (if (magik-aliases-switch-to-buffer alias)
-	(display-buffer buf))))
+        (display-buffer buf))))
 
 (defun magik-aliases-at-alias-definition ()
   "Return definition, if point is in an alias definition."
@@ -324,13 +324,13 @@ With a prefix arg, ask user for current directory to use."
     (beginning-of-line)
     (save-match-data
       (cond ((looking-at magik-aliases-definition-regexp)
-	     (match-string-no-properties 1))
-	    ((looking-at "\\(\\s-\\|\n\\)*\n\\sw+:\\s-*$")
-	     ;;At point in between definitions
-	     nil)
-	    ((re-search-backward magik-aliases-definition-regexp nil t)
-	     (match-string-no-properties 1))
-	    (t nil)))))
+             (match-string-no-properties 1))
+            ((looking-at "\\(\\s-\\|\n\\)*\n\\sw+:\\s-*$")
+             ;;At point in between definitions
+             nil)
+            ((re-search-backward magik-aliases-definition-regexp nil t)
+             (match-string-no-properties 1))
+            (t nil)))))
 
 (defun magik-aliases-expand-file (file)
   "Expand FILE path including environment variables.
@@ -349,7 +349,7 @@ Returns nil if FILE cannot be expanded."
       ;; in case the value has been manually modified but we still wish to locate
       ;; a gis_aliases file next to the LAYERED_PRODUCTS file.
       (goto-char (point-min))
-      (insert "sw_core:\n	path		= %SMALLWORLD_GIS%\n")
+      (insert "sw_core:\n path    = %SMALLWORLD_GIS%\n")
       (magik--aliases-layered-products-alist))))
 
 (defun magik--aliases-layered-products-alist ()
@@ -357,22 +357,22 @@ Returns nil if FILE cannot be expanded."
   (save-excursion
     (save-match-data
       (let (alist pt lp dir)
-	(goto-char (point-min))
-	(while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
-	  (setq lp (match-string-no-properties 1))
-	  (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
-	      (progn
-		(setq pt (point))
-		(end-of-line)
-		(skip-syntax-backward "-")
-		(skip-chars-backward "/\\") ;avoid trailing directory character.
-		(setq dir
-		      (magik-aliases-expand-file
-		       (buffer-substring-no-properties pt (point))))
-		(if (file-exists-p (concat dir "/config/gis_aliases"))
-		    (let ((lp-dir (cons lp dir)))
-		      (or (member lp-dir alist) (push lp-dir alist))) ))))
-	alist))))
+        (goto-char (point-min))
+        (while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
+          (setq lp (match-string-no-properties 1))
+          (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
+              (progn
+                (setq pt (point))
+                (end-of-line)
+                (skip-syntax-backward "-")
+                (skip-chars-backward "/\\") ;avoid trailing directory character.
+                (setq dir
+                      (magik-aliases-expand-file
+                       (buffer-substring-no-properties pt (point))))
+                (if (file-exists-p (concat dir "/config/gis_aliases"))
+                    (let ((lp-dir (cons lp dir)))
+                      (or (member lp-dir alist) (push lp-dir alist))) ))))
+        alist))))
 
 (defun magik-aliases-layered-products-acp-path (file)
   "Read LAYERED_PRODUCTS configuration file.
@@ -387,7 +387,7 @@ Returns nil if FILE cannot be expanded."
       ;; in case the value has been manually modified but we still wish to locate
       ;; a gis_aliases file next to the LAYERED_PRODUCTS file.
       (goto-char (point-min))
-      (insert "sw_core:\n	path		= %SMALLWORLD_GIS%\n")
+      (insert "sw_core:\n path    = %SMALLWORLD_GIS%\n")
       (magik--aliases-layered-products-acp-list))))
 
 (defun magik--aliases-layered-products-acp-list ()
@@ -395,75 +395,75 @@ Returns nil if FILE cannot be expanded."
   (save-excursion
     (save-match-data
       (let (paths pt dir etc-dir)
-	(goto-char (point-min))
-	(while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
-	  (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
-	      (progn
-		(setq pt (point))
-		(end-of-line)
-		(skip-syntax-backward "-")
-		(skip-chars-backward "/\\") ;avoid trailing directory character.
-		(setq dir
-		      (magik-aliases-expand-file
- 		       (buffer-substring-no-properties pt (point)))
-		      etc-dir (concat dir (if (eq system-type 'windows-nt)
-					      "/etc/x86"
-					    "/etc/Linux.x86")))
-		(if (file-directory-p etc-dir)
-		    (push etc-dir paths)))))
-	paths))))
+        (goto-char (point-min))
+        (while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
+          (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
+              (progn
+                (setq pt (point))
+                (end-of-line)
+                (skip-syntax-backward "-")
+                (skip-chars-backward "/\\") ;avoid trailing directory character.
+                (setq dir
+                      (magik-aliases-expand-file
+                       (buffer-substring-no-properties pt (point)))
+                      etc-dir (concat dir (if (eq system-type 'windows-nt)
+                                              "/etc/x86"
+                                            "/etc/Linux.x86")))
+                (if (file-directory-p etc-dir)
+                    (push etc-dir paths)))))
+        paths))))
 
 (defun magik-aliases-update-menu ()
   "Update the dynamic Aliases submenu."
   (interactive)
   (if (eq major-mode 'magik-aliases-mode)
       (let ((aliases (magik-aliases-list))
-	    entries def)
-	(while aliases
-	  (setq def (car aliases)
-		aliases (cdr aliases))
-	  (push (vector def (list 'magik-aliases-run-program def) t) entries)) ;; :key-sequence nil
-	(easy-menu-change (list "Aliases")
-			  "Definitions"
-			  (or entries (list "No Aliases found"))))))
+            entries def)
+        (while aliases
+          (setq def (car aliases)
+                aliases (cdr aliases))
+          (push (vector def (list 'magik-aliases-run-program def) t) entries)) ;; :key-sequence nil
+        (easy-menu-change (list "Aliases")
+                          "Definitions"
+                          (or entries (list "No Aliases found"))))))
 
 (defun magik-aliases-update-sw-menu ()
   "Update `Alias Files' submenu in SW menu bar."
   (interactive)
   (let (default-files
-	 lp-files
-	 buffers
-	 (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t))))
+        lp-files
+        buffers
+        (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t))))
     (dolist (f (append magik-aliases-user-file-list magik-aliases-common-file-list ))
       (push `[,f
-	      (progn
-		(find-file (magik-aliases-expand-file ,f))
-		(magik-aliases-mode))
-	      (and ,f (magik-aliases-expand-file ,f))
-	      ]
-	    default-files))
+              (progn
+                (find-file (magik-aliases-expand-file ,f))
+                (magik-aliases-mode))
+              (and ,f (magik-aliases-expand-file ,f))
+              ]
+            default-files))
 
     (when (getenv "SMALLWORLD_GIS")
       (dolist (lp (magik-aliases-layered-products-file
-		   (magik-aliases-expand-file magik-aliases-layered-products-file)))
-	(push `[,(format "%s: %s" (car lp) (cdr lp))
-		(progn
-		  (find-file ,(concat (cdr lp) "/config/gis_aliases"))
-		  (magik-aliases-mode))
-		,(cdr lp)
-		]
-	      lp-files))
+                   (magik-aliases-expand-file magik-aliases-layered-products-file)))
+        (push `[,(format "%s: %s" (car lp) (cdr lp))
+                (progn
+                  (find-file ,(concat (cdr lp) "/config/gis_aliases"))
+                  (magik-aliases-mode))
+                ,(cdr lp)
+                ]
+              lp-files))
       (push "---" lp-files))
 
     (cl-loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)
-	     do (push (vector (buffer-file-name (get-buffer buf))
-			      (list 'display-buffer buf)
-			      t) buffers))
+             do (push (vector (buffer-file-name (get-buffer buf))
+                              (list 'display-buffer buf)
+                              t) buffers))
     (or (eq (length buffers) 0) (push "---" buffers))
 
     (easy-menu-change (list "Tools" "Magik")
-		      "Alias Files"
-		      (append default-files lp-files buffers rescan))))
+                      "Alias Files"
+                      (append default-files lp-files buffers rescan))))
 
 ;;; Package initialisation
 (add-hook 'magik-aliases-mode-hook 'magik-aliases-update-sw-menu)
@@ -484,15 +484,15 @@ Returns nil if FILE cannot be expanded."
 (defun magik-aliases-msb-configuration ()
   "Adds Aliases files to msb menu, supposes that msb is already loaded."
   (let* ((l (length msb-menu-cond))
-	 (last (nth (1- l) msb-menu-cond))
-	 (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
-	 (handle (1- (nth 1 last))))
+         (last (nth (1- l) msb-menu-cond))
+         (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
+         (handle (1- (nth 1 last))))
     (setcdr precdr (list
-		    (list
-		     '(eq major-mode 'magik-aliases-mode)
-		     handle
-		     "Aliases Files (%d)")
-		    last))))
+                    (list
+                     '(eq major-mode 'magik-aliases-mode)
+                     handle
+                     "Aliases Files (%d)")
+                    last))))
 
 (with-eval-after-load 'msb
   (magik-aliases-msb-configuration))

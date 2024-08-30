@@ -1,0 +1,6 @@
+# -*- mode: snippet; -*-
+# name: external_name
+# key: external_name
+# expand-env: ((yas-indent-line 'fixed))
+# --
+external_name	${1:name}	unset	${2:language}	${3:string}	${4:translation}
