@@ -7,7 +7,16 @@
 ## 
 ## 
 ## 
-`(magik-yasnippet-prev-class-name-with-dot)`define_slot_access(:${1:name}, ${2:$$(yas-completing-read "Flag: " '(":readable" ":writable" ":read" ":write"))})
+`(magik-yasnippet-prev-class-name-with-dot)`define_slot_access(:${1:name}, ${2:$$(yas-completing-read
+"Flag?:
+##  flag               flavour        get  set  boot
+##  ------------------------------------------------
+##  :read/:readable    :public/false  pub  x    x
+##  :read/:readable    :private/true  pri  x    x
+##  :write/:writable   :public        pub  pub  pub
+##  :write/:writable   :read_only     pub  pri  pri
+##  :write/:writable   :private       pri  pri  pri
+" '(":readable" ":writable" ":read" ":write"))})
 $
 
 $0

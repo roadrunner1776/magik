@@ -7,7 +7,14 @@
 ## 
 ## 
 ## 
-`(magik-yasnippet-prev-class-name-with-dot)`define_shared_variable(:${1:name}, ${2:initial_value}, ${3:$$(yas-completing-read "Flavour: " '(":private" ":public" ":readonly"))})
+`(magik-yasnippet-prev-class-name-with-dot)`define_shared_variable(:${1:name}, ${2:initial_value}, ${3:$$(yas-completing-read
+"Flavour?:
+##  flavour    get  set  boot
+##  -------------------------
+##  :private   pri  pri  pri
+##  :public    pub  pub  pub
+##  :readonly  pri  pri  pri
+" '(":private" ":public" ":readonly"))})
 $
 
 $0
