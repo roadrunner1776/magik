@@ -19,10 +19,11 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'easymenu)
-		   (require 'font-lock)
-		   (require 'magik-utils)
-		   (require 'magik-session))
+(eval-when-compile
+  (require 'easymenu)
+  (require 'font-lock)
+  (require 'magik-utils)
+  (require 'magik-session))
 
 (defgroup magik-product nil
   "Customise Magik product.def files group."
@@ -108,12 +109,12 @@ You can customise Product Mode with the `product-mode-hook'.
   (set-syntax-table magik-product-mode-syntax-table)
 
   (setq major-mode 'magik-product-mode
-	mode-name "Product"
-	require-final-newline t
-	imenu-generic-expression magik-product-imenu-generic-expression
-	font-lock-defaults
-	'(magik-product-font-lock-keywords
-	  nil t))
+        mode-name "Product"
+        require-final-newline t
+        imenu-generic-expression magik-product-imenu-generic-expression
+        font-lock-defaults
+        '(magik-product-font-lock-keywords
+          nil t))
 
   (run-hooks 'magik-product-mode-hook))
 
@@ -127,11 +128,11 @@ You can customise Product Mode with the `product-mode-hook'.
   "Reinitialise this product in GIS."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Magik process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (process (barf-if-no-gis gis)))
+                                           'magik-session-mode
+                                           "Enter Magik process buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (process (barf-if-no-gis gis)))
     (display-buffer gis t)
     (process-send-string
      process
@@ -153,12 +154,12 @@ You can customise Product Mode with the `product-mode-hook'.
   "Send current buffer to GIS."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Magik process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (process (barf-if-no-gis gis))
-	 (filename (buffer-file-name)))
+                                           'magik-session-mode
+                                           "Enter Magik process buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (process (barf-if-no-gis gis))
+         (filename (buffer-file-name)))
     (pop-to-buffer gis t)
     (magik-product-transmit-add-product filename process)
     gis))

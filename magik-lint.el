@@ -29,7 +29,7 @@
       (re-search-forward "^$")
       (delete-region (point) (point-min))
       (let ((response (json-read)))
-	(cdr (assoc 'tag_name response))))))
+        (cdr (assoc 'tag_name response))))))
 
 (defcustom magik-lint-jar-file-version
   (or (magik-lint--latest-version) "0.9.1")
@@ -46,9 +46,9 @@
 (defun magik-lint--jar-file ()
   "Expanded magik lint jar file name."
   (expand-file-name (if magik-lint-jar-file-version
-			(format magik-lint-jar-file magik-lint-jar-file-version)
-		      magik-lint-jar-file)
-		    user-emacs-directory))
+                        (format magik-lint-jar-file magik-lint-jar-file-version)
+                      magik-lint-jar-file)
+                    user-emacs-directory))
 
 (flycheck-def-config-file-var flycheck-magik-lintrc magik-lint-java ".magiklint")
 
