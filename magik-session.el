@@ -530,41 +530,41 @@ Entry to this mode runs `magik-session-mode-hook`.
   :group 'magik
 
   (let ((tmp-no-of-gis-cmds magik-session-no-of-cmds)
-         (tmp-gis-cmd-num magik-session-cmd-num)
-         (tmp-prev-gis-cmds magik-session-prev-cmds))
+        (tmp-gis-cmd-num magik-session-cmd-num)
+        (tmp-prev-gis-cmds magik-session-prev-cmds))
 
     (compat-call setq-local
-      selective-display t
-      comint-last-input-start (make-marker)
-      comint-last-input-end (make-marker)
-      magik-session-command-history (or magik-session-command-history
-                                      (default-value 'magik-session-command-history))
-      magik-session-filter-state "\C-a"
-      magik-session-cb-buffer (concat "*cb*" (buffer-name))
-      magik-session-drag-n-drop-mode-line-string " DnD"
-      magik-transmit-debug-mode-line-string " #DEBUG"
-      show-trailing-whitespace nil
-      font-lock-defaults '(magik-session-font-lock-keywords nil t ((?_ . "w")))
-      ac-sources (append '(magik-ac-class-method-source
-                            magik-ac-dynamic-source
-                            magik-ac-global-source
-                            magik-ac-object-source
-                            magik-ac-raise-condition-source)
-                   ac-sources)
-      magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
-      magik-session-process-environment (cl-copy-list (or magik-session-process-environment process-environment))
-      mode-line-process '(": %s")
-      local-abbrev-table magik-base-mode-abbrev-table)
+                 selective-display t
+                 comint-last-input-start (make-marker)
+                 comint-last-input-end (make-marker)
+                 magik-session-command-history (or magik-session-command-history
+                                                   (default-value 'magik-session-command-history))
+                 magik-session-filter-state "\C-a"
+                 magik-session-cb-buffer (concat "*cb*" (buffer-name))
+                 magik-session-drag-n-drop-mode-line-string " DnD"
+                 magik-transmit-debug-mode-line-string " #DEBUG"
+                 show-trailing-whitespace nil
+                 font-lock-defaults '(magik-session-font-lock-keywords nil t ((?_ . "w")))
+                 ac-sources (append '(magik-ac-class-method-source
+                                      magik-ac-dynamic-source
+                                      magik-ac-global-source
+                                      magik-ac-object-source
+                                      magik-ac-raise-condition-source)
+                                    ac-sources)
+                 magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
+                 magik-session-process-environment (cl-copy-list (or magik-session-process-environment process-environment))
+                 mode-line-process '(": %s")
+                 local-abbrev-table magik-base-mode-abbrev-table)
 
     (if (null tmp-no-of-gis-cmds)
-      (progn
-        (setq magik-session-no-of-cmds 1
-          magik-session-cmd-num 0
-          magik-session-prev-cmds (make-vector 100 nil))
-        (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
+        (progn
+          (setq magik-session-no-of-cmds 1
+                magik-session-cmd-num 0
+                magik-session-prev-cmds (make-vector 100 nil))
+          (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
       (setq magik-session-no-of-cmds tmp-no-of-gis-cmds
-        magik-session-cmd-num tmp-gis-cmd-num
-        magik-session-prev-cmds tmp-prev-gis-cmds))
+            magik-session-cmd-num tmp-gis-cmd-num
+            magik-session-prev-cmds tmp-prev-gis-cmds))
 
     (unless (and magik-session-buffer (get-buffer magik-session-buffer))
       (setq-default magik-session-buffer (buffer-name)))
@@ -574,13 +574,13 @@ Entry to this mode runs `magik-session-mode-hook`.
         (while (cdr (assq n magik-session-buffer-alist))
           (setq n (1+ n)))
         (if (assq n magik-session-buffer-alist)
-          (setcdr (assq n magik-session-buffer-alist) (buffer-name))
+            (setcdr (assq n magik-session-buffer-alist) (buffer-name))
           (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
 
     ;; Special handling for *gis* buffer
     (if (equal (buffer-name) "*gis*")
-      (setq magik-session-exec-path (cl-copy-list exec-path)
-        magik-session-process-environment (cl-copy-list process-environment)))
+        (setq magik-session-exec-path (cl-copy-list exec-path)
+              magik-session-process-environment (cl-copy-list process-environment)))
 
     (abbrev-mode 1)
 
@@ -617,14 +617,14 @@ Entry to this mode runs `magik-session-mode-hook`.
     "----"
     [,"External Shell Process"           magik-session-shell                     t]
     [,"Kill Magik Process"               magik-session-kill-process              (and magik-session-process
-										      (eq (process-status magik-session-process) 'run))]
+                                                                                      (eq (process-status magik-session-process) 'run))]
     (,"Magik Session Command History")
     "---"
     (,"Toggle..."
      [,"Magik Session Filter"             magik-session-filter-toggle-filter     :active t
       :style toggle :selected (let ((b (get-buffer-process
-					(current-buffer))))
-				(and b (process-filter b)))]
+                                        (current-buffer))))
+                                (and b (process-filter b)))]
      [,"Drag and Drop"                  magik-session-drag-n-drop-mode       :active t
       :style toggle :selected magik-session-drag-n-drop-mode])
     [,"Customize"                       magik-session-customize               t]))
@@ -1571,7 +1571,7 @@ where MODE is the name of the major mode with the '-mode' postfix."
   ;; ------------------------ magik session mode ------------------------
 
   (cl-loop for i from ?  to ?~ do
-	  (define-key magik-session-mode-map (char-to-string i) 'magik-session-insert-char))
+           (define-key magik-session-mode-map (char-to-string i) 'magik-session-insert-char))
 
   (define-key magik-session-mode-error-map [mouse-2]  'magik-session-error-goto-mouse)
   (define-key magik-session-mode-error-map [C-return] 'magik-session-error-goto)

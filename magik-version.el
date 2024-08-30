@@ -177,9 +177,9 @@ has more than one aliases file available."
   :abbrev-table nil
 
   (compat-call setq-local
-    magik-version-position nil
-    buffer-undo-list t
-    font-lock-defaults '(magik-version-font-lock-keywords nil t (("-" . "w")))))
+               magik-version-position nil
+               buffer-undo-list t
+               font-lock-defaults '(magik-version-font-lock-keywords nil t (("-" . "w")))))
 
 (defvar magik-version-menu nil
   "Keymap for the gis_version buffer menu bar.")

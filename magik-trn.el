@@ -39,9 +39,9 @@
   :abbrev-table nil
   :syntax-table nil
 
-  (compat-call setq-local 
-    require-final-newline t
-    indent-tabs-mode t))
+  (compat-call setq-local
+               require-final-newline t
+               indent-tabs-mode t))
 
 (defvar magik-trn-menu nil
   "Keymap for the Magik Translation buffer menu bar.")
@@ -52,33 +52,33 @@
 (easy-menu-define magik-trn-menu magik-trn-mode-map
   "Menu for trn mode."
   `(,"Translation"
-     [,"Transmit Buffer"      magik-trn-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]))
+    [,"Transmit Buffer"      magik-trn-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]))
 
 (defun magik-trn-transmit-buffer (&optional gis)
   "Send the buffer to the GIS process.
 The GIS process used is either that given by BUF or the variable `gis-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
-               'magik-session-mode
-               "Enter Magik process buffer:"
-               magik-session-buffer
-               'magik-session-buffer-alist-prefix-function))
-         (process (barf-if-no-gis gis))
-         (filename (buffer-file-name)))
+                                          'magik-session-mode
+                                          "Enter Magik process buffer:"
+                                          magik-session-buffer
+                                          'magik-session-buffer-alist-prefix-function))
+        (process (barf-if-no-gis gis))
+        (filename (buffer-file-name)))
     ;; Load messages
     (message "%s loaded in buffer %s." filename gis)
     (process-send-string
-      process
-      (concat
-        (magik-function "text_translator.load_tabbed" filename)
-        "\n$\n"))
+     process
+     (concat
+      (magik-function "text_translator.load_tabbed" filename)
+      "\n$\n"))
     gis))
 
 ;;; Package registration
 
 ;;;###autoload
 (or (assoc "\\.trn$" auto-mode-alist)
-  (push '("\\.trn$" . magik-trn-mode) auto-mode-alist))
+    (push '("\\.trn$" . magik-trn-mode) auto-mode-alist))
 
 ;; ------------------------ magik trn mode -------------------------
 (define-key magik-trn-mode-map (kbd "<f2> b") 'magik-trn-transmit-buffer)

@@ -107,10 +107,10 @@ You can customize msg-mode with the `magik-msg-mode-hook`.
   :abbrev-table nil
 
   (compat-call setq-local
-    require-final-newline t
-    imenu-generic-expression magik-msg-imenu-generic-expression
-    font-lock-defaults '(magik-msg-font-lock-keywords nil t)
-    outline-regexp "^:\\(\\sw+\\).*"))
+               require-final-newline t
+               imenu-generic-expression magik-msg-imenu-generic-expression
+               font-lock-defaults '(magik-msg-font-lock-keywords nil t)
+               outline-regexp "^:\\(\\sw+\\).*"))
 
 (defvar magik-msg-menu nil
   "Keymap for the Magik Message buffer menu bar.")

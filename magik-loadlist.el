@@ -58,8 +58,8 @@ You can customize magik-loadlist-mode with the magik-loadlist-mode-hook.
   :abbrev-table nil
 
   (compat-call setq-local
-    require-final-newline t
-    font-lock-defaults '(magik-loadlist-font-lock-keywords nil t)))
+               require-final-newline t
+               font-lock-defaults '(magik-loadlist-font-lock-keywords nil t)))
 
 (defvar magik-loadlist-menu nil
   "Keymap for the Magik loadlist buffer menu bar.")

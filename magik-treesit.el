@@ -163,13 +163,13 @@
   (treesit-parser-create 'magik)
 
   (setq-local
-    treesit-simple-indent-rules magik-ts-mode--indent-rules
-	  treesit-font-lock-settings magik--treesit-settings
-	  treesit-font-lock-feature-list '((comment pragma)
-					                            (type constant keyword string)
-					                            ()
-					                            ()
-					                            (error)))
+   treesit-simple-indent-rules magik-ts-mode--indent-rules
+   treesit-font-lock-settings magik--treesit-settings
+   treesit-font-lock-feature-list '((comment pragma)
+                                    (type constant keyword string)
+                                    ()
+                                    ()
+                                    (error)))
 
   (treesit-major-mode-setup))
 

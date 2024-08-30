@@ -83,9 +83,9 @@ You can customize Module Mode with the `magik-module-mode-hook`.
   :abbrev-table nil
 
   (compat-call setq-local
-    require-final-newline t
-    imenu-generic-expression magik-module-imenu-generic-expression
-    font-lock-defaults '(magik-module-font-lock-keywords nil t)))
+               require-final-newline t
+               imenu-generic-expression magik-module-imenu-generic-expression
+               font-lock-defaults '(magik-module-font-lock-keywords nil t)))
 
 (defvar magik-module-menu nil
   "Keymap for the Magik module.def buffer menu bar.")

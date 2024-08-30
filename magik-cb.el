@@ -576,20 +576,20 @@ To view the help on these variables type \\[describe-variable] and enter the var
   :abbrev-table nil
 
   (compat-call setq-local
-    buffer-read-only t
-    buffer-undo-list t
-    show-trailing-whitespace nil
-    font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w")))
-    magik-cb-process nil
-    magik-cb-topics nil
-    magik-cb-quote-file-name nil
-    magik-cb-mf-extended-flags nil
-    magik-cb-filename nil
-    magik-cb-filter-str nil
-    magik-cb-n-methods-str nil
-    magik-cb-topic-pos nil
-    magik-cb-cursor-pos nil
-    magik-cb-pending-message nil)
+               buffer-read-only t
+               buffer-undo-list t
+               show-trailing-whitespace nil
+               font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w")))
+               magik-cb-process nil
+               magik-cb-topics nil
+               magik-cb-quote-file-name nil
+               magik-cb-mf-extended-flags nil
+               magik-cb-filename nil
+               magik-cb-filter-str nil
+               magik-cb-n-methods-str nil
+               magik-cb-topic-pos nil
+               magik-cb-cursor-pos nil
+               magik-cb-pending-message nil)
 
   (compat-call add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu nil t)
   (compat-call add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t))
@@ -603,13 +603,13 @@ To view the help on these variables type \\[describe-variable] and enter the var
     [,"Jump to Source" magik-cb-jump-to-source        :active t :keys "<f3> j,   <mouse-2>"]
     [,"Family Tree"    magik-cb-family                :active t :keys "<f3> f,   <mouse-2>"]
     [,"Fold"           magik-cb-fold                  (or (magik-cb-topic-on-p "show-topics")
-							  (magik-cb-topic-on-p "show-comments")
-							  (magik-cb-topic-on-p "show-args")
-							  (magik-cb-topic-on-p "show-classes"))]
+                                                          (magik-cb-topic-on-p "show-comments")
+                                                          (magik-cb-topic-on-p "show-args")
+                                                          (magik-cb-topic-on-p "show-classes"))]
     [,"Unfold"         magik-cb-unfold                (or (not (magik-cb-topic-on-p "show-topics"))
-							  (not (magik-cb-topic-on-p "show-comments"))
-							  (not (magik-cb-topic-on-p "show-args"))
-							  (not (magik-cb-topic-on-p "show-classes")))]
+                                                          (not (magik-cb-topic-on-p "show-comments"))
+                                                          (not (magik-cb-topic-on-p "show-args"))
+                                                          (not (magik-cb-topic-on-p "show-classes")))]
     "---"
     [,"Set Options"             magik-cb-edit-topics-and-flags :active t :keys "<f3> s,   ;"]
     [,"Turn All Topics On/Off"  magik-cb-toggle-all-topics     t]
@@ -639,7 +639,7 @@ To view the help on these variables type \\[describe-variable] and enter the var
     "---"
     [,"Magik Process"                  magik-cb-gis                   (get-buffer (magik-cb-gis-buffer))]
     [,"Magik External Shell Process"   magik-cb-gis-shell             (get-buffer
-								       (concat "*shell*" (magik-cb-gis-buffer)))]
+                                                                       (concat "*shell*" (magik-cb-gis-buffer)))]
     "---"
     [,"Customize"                      magik-cb-customize             t]
     ;; [,"Help"                           magik-cb-help                  t]
@@ -1526,10 +1526,10 @@ be careful to preserve the position in \"*cb2*\"."
   :abbrev-table nil
 
   (compat-call setq-local
-    buffer-read-only t
-    buffer-undo-list t
-    show-trailing-whitespace nil
-    font-lock-defaults '(magik-cb2-font-lock-keywords nil t ((?_ . "w"))))
+               buffer-read-only t
+               buffer-undo-list t
+               show-trailing-whitespace nil
+               font-lock-defaults '(magik-cb2-font-lock-keywords nil t ((?_ . "w"))))
 
   (magik-cb-redraw-modeline))
 

@@ -89,31 +89,31 @@ concrete implementations."
   :interactive nil
 
   (compat-call setq-local
-    magik-template-file-type (magik-template-file-type)
-	  paragraph-start (concat "^$\\|" page-delimiter)
-	  paragraph-separate paragraph-start
-	  require-final-newline mode-require-final-newline
-	  comment-start "#"
-	  comment-end ""
-	  comment-column 8
-	  comment-start-skip "#+ *"
-	  comment-multi-line nil
-	  parse-sexp-ignore-comments nil
-	  magik-transmit-debug-mode-line-string " #DEBUG"
-	  imenu-generic-expression imenu-generic-expression
-	  imenu-create-index-function 'magik-imenu-create-index-function
-	  imenu-syntax-alist '((?_ . "w"))
-	  ac-sources (append '(
-				                  magik-ac-class-method-source
-				                  magik-ac-dynamic-source
-				                  magik-ac-global-source
-				                  magik-ac-object-source
-				                  magik-ac-raise-condition-source
-				                  )
-				         (and (boundp 'ac-sources)
-				           ac-sources))
+               magik-template-file-type (magik-template-file-type)
+               paragraph-start (concat "^$\\|" page-delimiter)
+               paragraph-separate paragraph-start
+               require-final-newline mode-require-final-newline
+               comment-start "#"
+               comment-end ""
+               comment-column 8
+               comment-start-skip "#+ *"
+               comment-multi-line nil
+               parse-sexp-ignore-comments nil
+               magik-transmit-debug-mode-line-string " #DEBUG"
+               imenu-generic-expression imenu-generic-expression
+               imenu-create-index-function 'magik-imenu-create-index-function
+               imenu-syntax-alist '((?_ . "w"))
+               ac-sources (append '(
+                                    magik-ac-class-method-source
+                                    magik-ac-dynamic-source
+                                    magik-ac-global-source
+                                    magik-ac-object-source
+                                    magik-ac-raise-condition-source
+                                    )
+                                  (and (boundp 'ac-sources)
+                                       ac-sources))
 
-	  outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
+               outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
 
   (when magik-auto-abbrevs (abbrev-mode 1))
 
@@ -129,19 +129,19 @@ concrete implementations."
   :syntax-table nil
 
   (compat-call setq-local
-    font-lock-defaults '((magik-font-lock-keywords
-				                   magik-font-lock-keywords-1
-				                   magik-font-lock-keywords-2
-				                   magik-font-lock-keywords-3
-				                   magik-font-lock-keywords-4
-				                   magik-font-lock-keywords-5)
-				                  nil t
-				                  ((?_ . "w"))
-				                  magik-goto-code
-				                  (font-lock-fontify-buffer-function   . magik-font-lock-fontify-buffer)
-				                  (font-lock-fontify-region-function   . magik-font-lock-fontify-region)
-				                  (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))
-	  indent-line-function 'magik-indent-line))
+               font-lock-defaults '((magik-font-lock-keywords
+                                     magik-font-lock-keywords-1
+                                     magik-font-lock-keywords-2
+                                     magik-font-lock-keywords-3
+                                     magik-font-lock-keywords-4
+                                     magik-font-lock-keywords-5)
+                                    nil t
+                                    ((?_ . "w"))
+                                    magik-goto-code
+                                    (font-lock-fontify-buffer-function   . magik-font-lock-fontify-buffer)
+                                    (font-lock-fontify-region-function   . magik-font-lock-fontify-region)
+                                    (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))
+               indent-line-function 'magik-indent-line))
 
 (defvar magik-menu nil
   "Keymap for the Magik buffer menu bar.")

@@ -133,13 +133,13 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
   :abbrev-table nil
 
   (compat-call setq-local
-    require-final-newline t
-    comment-start "#"
-    comment-end ""
-    show-trailing-whitespace nil
-    magik-aliases-program (magik-aliases-program-set magik-aliases-program)
-    imenu-generic-expression magik-aliases-imenu-generic-expression
-    font-lock-defaults '(magik-aliases-font-lock-keywords nil nil))
+               require-final-newline t
+               comment-start "#"
+               comment-end ""
+               show-trailing-whitespace nil
+               magik-aliases-program (magik-aliases-program-set magik-aliases-program)
+               imenu-generic-expression magik-aliases-imenu-generic-expression
+               font-lock-defaults '(magik-aliases-font-lock-keywords nil nil))
 
   (compat-call add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
   (compat-call add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
