@@ -1,0 +1,6 @@
+# -*- mode: snippet; -*-
+# name: field_value
+# key: field_value
+# expand-env: ((yas-indent-line 'fixed))
+# --
+field_value	${1:name}	unset	${2:language}	${3:string}	${4:translation}
