@@ -109,7 +109,7 @@
       (re-search-forward "^:" nil t)
     (forward-char 1)
     (or (re-search-forward "^:" nil t)
-	(goto-char (point-max))))
+        (goto-char (point-max))))
   (beginning-of-line))
 
 (defun magik-msg-backward-message ()
@@ -119,7 +119,7 @@
       (re-search-backward "^:" nil t)
     (backward-char 1)
     (or (re-search-backward "^:" nil t)
-	(goto-char (point-min))))
+        (goto-char (point-min))))
   (beginning-of-line))
 
 (defun magik-msg-mark-message ()
@@ -153,13 +153,13 @@ You can customise msg-mode with the msg-mode-hook.
   (set-syntax-table magik-msg-mode-syntax-table)
 
   (setq major-mode 'magik-msg-mode
-	mode-name "Message"
-	require-final-newline t
-	imenu-generic-expression magik-msg-imenu-generic-expression
-	font-lock-defaults
-	'(magik-msg-font-lock-keywords
-	  nil t)
-	outline-regexp "^:\\(\\sw+\\).*")
+        mode-name "Message"
+        require-final-newline t
+        imenu-generic-expression magik-msg-imenu-generic-expression
+        font-lock-defaults
+        '(magik-msg-font-lock-keywords
+          nil t)
+        outline-regexp "^:\\(\\sw+\\).*")
 
   (run-hooks 'magik-msg-mode-hook))
 
@@ -168,12 +168,12 @@ You can customise msg-mode with the msg-mode-hook.
 The GIS process used is either that given by BUF or the variable `gis-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
-					  'magik-session-mode
-					  "Enter Magik process buffer:"
-					  magik-session-buffer
-					  'magik-session-buffer-alist-prefix-function))
-	(process (barf-if-no-gis gis))
-	(filename (buffer-file-name)))
+                                          'magik-session-mode
+                                          "Enter Magik process buffer:"
+                                          magik-session-buffer
+                                          'magik-session-buffer-alist-prefix-function))
+        (process (barf-if-no-gis gis))
+        (filename (buffer-file-name)))
     ;; Load messages
     (message "%s loaded in buffer %s." filename gis)
     (process-send-string
@@ -194,20 +194,20 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
 The GIS process used is either that given by BUF or the variable `gis-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
-					  'magik-session-mode
-					  "Enter Magik process buffer:"
-					  magik-session-buffer
-					  'magik-session-buffer-alist-prefix-function))
-	(process (barf-if-no-gis gis))
-	(directory (file-name-directory (buffer-file-name))))
+                                          'magik-session-mode
+                                          "Enter Magik process buffer:"
+                                          magik-session-buffer
+                                          'magik-session-buffer-alist-prefix-function))
+        (process (barf-if-no-gis gis))
+        (directory (file-name-directory (buffer-file-name))))
     ;; Load messages
     (message "Compiling all module messages in %s. " gis)
     (process-send-string
      process
      (format
       "_proc(directory)
-	 module << sw_module_manager.locate_module(directory)
-	 sw_module_manager.compile_messages(module)
+   module << sw_module_manager.locate_module(directory)
+   sw_module_manager.compile_messages(module)
       _endproc(%S)\n$\n"
       directory))
     gis))
@@ -256,15 +256,15 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
 (defun magik-msg-msb-configuration ()
   "Adds Msg files to msb menu, supposes that msb is already loaded."
   (let* ((l (length msb-menu-cond))
-	 (last (nth (1- l) msb-menu-cond))
-	 (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
-	 (handle (1- (nth 1 last))))
+         (last (nth (1- l) msb-menu-cond))
+         (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
+         (handle (1- (nth 1 last))))
     (setcdr precdr (list
-		    (list
-		     '(eq major-mode 'magik-msg-mode)
-		     handle
-		     "Msg Files (%d)")
-		    last))))
+                    (list
+                     '(eq major-mode 'magik-msg-mode)
+                     handle
+                     "Msg Files (%d)")
+                    last))))
 
 (with-eval-after-load 'msb
   (magik-msg-msb-configuration))
