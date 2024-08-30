@@ -7,7 +7,7 @@
 ## 
 ## 
 ## 
-`(magik-yasnippet-prev-class-name-with-dot)`def_property(:${1:name}, ${2:flag})
+`(magik-yasnippet-prev-class-name-with-dot)`def_property(:${1:name})
 $
 
 $0
