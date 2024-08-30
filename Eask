@@ -21,7 +21,7 @@
 ;; do not try to compile magik-treesit.el if we are below 29.1
 (when (version< emacs-version "29.1")
   (add-hook 'eask-before-compile-hook
-    (lambda () 
+    (lambda ()
       (delete-file "magik-treesit.el")
       (eask-info "(Removed magik-treesit, since it would not compile in Emacs below 29.1)"))))
 

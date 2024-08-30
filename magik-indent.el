@@ -196,10 +196,10 @@ like \"_endif\" or \"}\" or \"_then\"."
       (+ (current-column) magik-indent-level))
 
      ;; Indent " _try _with ..."
-					;This does not work if _try is first token in a file
-					;because toks variable then includes the point-min token.
-					;However, since this is rare, I have not attempted to
-					;resolve it.
+                                        ;This does not work if _try is first token in a file
+                                        ;because toks variable then includes the point-min token.
+                                        ;However, since this is rare, I have not attempted to
+                                        ;resolve it.
      ((and (equal last-str "\n")
            (equal (caadr toks) "_with")
            (equal (caar toks) "_try"))
@@ -360,8 +360,8 @@ and corresponding begin keywords and left brackets are popped off the stack."
         (goto-char (cdr (cl-second toks)))
       (while
           (and
-	   (eq (forward-line) 0)
-	   (null (setq toks (magik-tokenise-line-no-eol-nor-point-min)))))
+           (eq (forward-line) 0)
+           (null (setq toks (magik-tokenise-line-no-eol-nor-point-min)))))
       (if toks
           (goto-char (cdr (car toks)))))))
 
@@ -395,20 +395,20 @@ is an operator."
       (while
           (and (<= (point) end)
                (not reached-the-end))
-	;;In multibyte mode, following-char will return a value > 256.
-	;;In this case we normally set the character's state to be whatever the
-	;;current state is unless the state is neutral in which case
-	;;the character is probably unquoted so we raise an error.
-	;;Otherwise the lisp goes into an infinite loop.
-	;;I have tried setting up magik-state-table
-	;; to have vectors of length 65536 but the memory usage is quite high.
-	(cond ((<= (following-char) 256)
-	       (setq new-state (aref arr (following-char))))
-	      ((eq state 'neutral)
-	       (error "Found unquoted multibyte character at position %s"
-		      (number-to-string (point))))
-	      (t
-	       (setq new-state state)))
+        ;;In multibyte mode, following-char will return a value > 256.
+        ;;In this case we normally set the character's state to be whatever the
+        ;;current state is unless the state is neutral in which case
+        ;;the character is probably unquoted so we raise an error.
+        ;;Otherwise the lisp goes into an infinite loop.
+        ;;I have tried setting up magik-state-table
+        ;; to have vectors of length 65536 but the memory usage is quite high.
+        (cond ((<= (following-char) 256)
+               (setq new-state (aref arr (following-char))))
+              ((eq state 'neutral)
+               (error "Found unquoted multibyte character at position %s"
+                      (number-to-string (point))))
+              (t
+               (setq new-state state)))
         (if
             (eq new-state 'stay)
             ()
