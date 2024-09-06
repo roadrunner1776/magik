@@ -3,7 +3,7 @@
 # key: define_property
 # group: deprecated
 # --
-`(magik-yasnippet-prev-class-name-with-dot)`define_property(:${1:name}, ${2:$$(yas-completing-read "Type: " '(":float" ":integer" ":symbol" ":string" ":boolean" ":object"))}. ${3:description})
+`(magik-yasnippet-prev-class-name-with-dot)`define_property(:${1:name}, ${2:$$(yas-completing-read "Type: " '(":float" ":integer" ":symbol" ":string" ":boolean" ":object"))}, ${3:description})
 $
 
 $0
