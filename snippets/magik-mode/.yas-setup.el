@@ -38,6 +38,8 @@ Returns the class name as a string, or nil if no class name is found."
       (when (re-search-backward "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
         (match-string-no-properties 2))
       (when (re-search-backward "def_mixin\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
+        (match-string-no-properties 2))
+      (when (re-search-backward "def_indexed_exemplar\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
         (match-string-no-properties 2)))))
 
 (defun magik-yasnippet-prev-class-name-with-dot ()
