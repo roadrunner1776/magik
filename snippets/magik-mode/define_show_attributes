@@ -3,7 +3,6 @@
 # key: define_show_attributes
 # group: define.object oriented.attributes
 # --
-`(magik-yasnippet-prev-pragma)`
 `(magik-yasnippet-prev-class-name-with-dot)`define_show_attributes(${1:list})
 $
 

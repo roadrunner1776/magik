@@ -3,10 +3,6 @@
 # key: define_binary_operator_case
 # group: define.object oriented
 # --
-`(magik-yasnippet-prev-pragma)`
-## 
-## 
-## 
 define_binary_operator_case(:${1:name}, ${2:lhs}, ${3:rhs}, _proc($4) $5 _endproc)
 $
 

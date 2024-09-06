@@ -3,7 +3,6 @@
 # key: define_print_attributes
 # group: define.object oriented.attributes
 # --
-`(magik-yasnippet-prev-pragma)`
 `(magik-yasnippet-prev-class-name-with-dot)`define_print_attributes(${1:list})
 $
 
