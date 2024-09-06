@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: define_slot_externally_readable
+# key: define_slot_externally_readable
+# group: object oriented.slot
+# --
+`(magik-yasnippet-prev-pragma)`
+##
+##
+##
+`(magik-yasnippet-prev-class-name-with-dot)`define_slot_externally_readable(:${1:name})
+$
+
+$0
