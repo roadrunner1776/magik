@@ -4,5 +4,4 @@
 # group: documentation
 # TODO: If we use the default pragma, put the cursor after classify_level=
 # --
-`(magik-yasnippet-prev-pragma)`
-$0
+`(magik-yasnippet-prev-pragma)`$0
