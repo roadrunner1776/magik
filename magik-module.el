@@ -191,7 +191,6 @@ You can customise Module Mode with the `module-mode-hook'.
 
   (run-hooks 'magik-module-mode-hook))
 
->>>>>>> upstream/master
 (defun magik-module-toggle-save-magikc (arg)
   "Toggle saving of .magikc files when loading module."
   (interactive "P")
