@@ -141,8 +141,8 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
                imenu-generic-expression magik-aliases-imenu-generic-expression
                font-lock-defaults '(magik-aliases-font-lock-keywords nil nil))
 
-  (compat-call add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
-  (compat-call add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
+  (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
+  (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
 
 (defvar magik-aliases-menu nil
   "Menu for Aliases mode.")
