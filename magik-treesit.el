@@ -126,6 +126,7 @@
      ((parent-is "else") parent magik-indent-level)
      ((parent-is "iterator") parent magik-indent-level)
      ((parent-is "loop") parent magik-indent-level)
+     ((parent-is "finally") parent magik-indent-level)
      ((parent-is "while") parent magik-indent-level)
      ((parent-is "method") parent magik-indent-level)
      ((parent-is "protect") parent magik-indent-level)
