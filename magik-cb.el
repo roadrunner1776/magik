@@ -86,6 +86,7 @@
 (require 'magik-session)
 (require 'magik-utils)
 (require 'easymenu)
+(require 'compat)
 
 (defgroup magik-cb nil
   "Running Magik Class Browser."
@@ -133,11 +134,6 @@ Based upon `font-lock-variable-name-face'"
 
 Based upon `font-lock-variable-name-face'"
   :group 'magik-cb-faces)
-
-(defcustom magik-cb-mode-hook '()
-  "*Hook for customising CB mode."
-  :group 'magik-cb
-  :type 'hook)
 
 (defcustom magik-cb-font-lock-class-face 'font-lock-type-face
   "*Font-lock Face to use when displaying the class."
@@ -301,60 +297,6 @@ This will stop the \"Loading documentation...\" message from hanging around.")
 (defvar magik-cb-dynamic t
   "*Non-nil if the cb is connected to a live gis, rather than a static file.")
 
-(defvar magik-cb-mode-map (make-keymap)
-  "Keymap for the Class Browser")
-
-(defvar magik-cb-menu nil
-  "Keymap for the CB menu bar")
-
-(easy-menu-define magik-cb-menu magik-cb-mode-map
-  "Menu for CB mode."
-  `(,"CB"
-    [,"Jump to Source" magik-cb-jump-to-source        :active t :keys "<f3> j,   <mouse-2>"]
-    [,"Family Tree"    magik-cb-family                :active t :keys "<f3> f,   <mouse-2>"]
-    [,"Fold"           magik-cb-fold                  (or (magik-cb-topic-on-p "show-topics")
-                                                          (magik-cb-topic-on-p "show-comments")
-                                                          (magik-cb-topic-on-p "show-args")
-                                                          (magik-cb-topic-on-p "show-classes"))]
-    [,"Unfold"         magik-cb-unfold                (or (not (magik-cb-topic-on-p "show-topics"))
-                                                          (not (magik-cb-topic-on-p "show-comments"))
-                                                          (not (magik-cb-topic-on-p "show-args"))
-                                                          (not (magik-cb-topic-on-p "show-classes")))]
-    "---"
-    [,"Set Options"             magik-cb-edit-topics-and-flags :active t :keys "<f3> s,   ;"]
-    [,"Turn All Topics On/Off"  magik-cb-toggle-all-topics     t]
-    [,"Reset All Options"       magik-cb-reset                 t]
-    [,"Hide"                    magik-cb-quit                  :active t :keys "SPC,   <f3> h"]
-    "---"
-    [,"Override Flags"
-     magik-cb-toggle-override-flags
-     :active t
-     :style toggle
-     :selected (magik-cb-topic-on-p "override-flags")
-     :keys "<f3> F,   <f3> o"]
-    [,"Override Topics"
-     magik-cb-toggle-override-topics
-     :active t
-     :style toggle
-     :selected (magik-cb-topic-on-p "override-topics")]
-    [,"Override 200 Limit"
-     magik-cb-toggle-override-200-limit
-     :active t
-     :style toggle
-     :selected (magik-cb-topic-on-p "override-200-limit")]
-    "---"
-    [,"Hop"                            magik-cb-tab                   t]
-    [,"Clear"                          magik-cb-clear                 t]
-    [,"Clear Method and Class"         magik-cb-and-clear             t]
-    "---"
-    [,"Magik Process"                  magik-cb-gis                   (get-buffer (magik-cb-gis-buffer))]
-    [,"Magik External Shell Process"   magik-cb-gis-shell             (get-buffer
-                                                                       (concat "*shell*" (magik-cb-gis-buffer)))]
-    "---"
-    [,"Customize"                      magik-cb-customize             t]
-    ;; [,"Help"                           magik-cb-help                  t]
-    ))
-
 (defvar magik-cb--mf-socket-synchronised nil
   "Internal variable for controlling Class Browser processes started from GIS processes.
 Set to the socketname returned by `gis-filter-action-cb-mf' when starting CB from Gis process via \\[cb].")
@@ -452,11 +394,6 @@ Not used yet.")
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)
-
-(defcustom magik-cb2-mode-hook '()
-  "*Hook for customising CB toggle mode (CB2)."
-  :group 'magik-cb
-  :type 'hook)
 
 ;;; Functions
 ;;; _________
@@ -622,51 +559,91 @@ Do a no-op if already in the cb."
   (let ((current-prefix-arg t))
     (call-interactively 'magik-cb)))
 
-;; This function is not a user-level entry-point.  It is just a place
-;; to put the mode help.
-(defun magik-cb-mode ()
+(define-derived-mode magik-cb-mode magik-base-mode "Magik-CB"
   "Major mode for running the Smallworld Class Browser.
-   Full help is available on the CB pull-down menu or by typing
+Full help is available on the CB pull-down menu or by typing
 
-  M-x magik-cb-help
+  Use \\<magik-cb-mode-map>\\[magik-cb-help] for help.
 
 Useful configuration variables are:
 
 cb-jump-replaces-cb-buffer
 
-To view the help on these variables type C-h v [Return] [variable-name]
+To view the help on these variables type \\[describe-variable] and enter the variable name.
 
 \\{magik-cb-mode-map}"
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'magik-cb-process)
-  (make-local-variable 'magik-cb-topics)
-  (make-local-variable 'magik-cb-quote-file-name)
-  (make-local-variable 'magik-cb-mf-extended-flags)
-  (make-local-variable 'magik-cb-filename)
-  (make-local-variable 'magik-cb-filter-str)
-  (make-local-variable 'magik-cb-n-methods-str)
-  (make-local-variable 'magik-cb-topic-pos)
-  (make-local-variable 'magik-cb-cursor-pos)
-  (make-local-variable 'magik-cb-pending-message)
+  :group 'magik
+  :abbrev-table nil
 
-  (make-local-variable 'font-lock-defaults)
+  (compat-call setq-local
+               buffer-read-only t
+               buffer-undo-list t
+               show-trailing-whitespace nil
+               font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w")))
+               magik-cb-process nil
+               magik-cb-topics nil
+               magik-cb-quote-file-name nil
+               magik-cb-mf-extended-flags nil
+               magik-cb-filename nil
+               magik-cb-filter-str nil
+               magik-cb-n-methods-str nil
+               magik-cb-topic-pos nil
+               magik-cb-cursor-pos nil
+               magik-cb-pending-message nil)
 
-                                        ;(make-local-hook 'kill-buffer-hook) ;add-hook uses local option
+  (add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu nil t)
+  (add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t))
 
-  (use-local-map magik-cb-mode-map)
-  (easy-menu-add magik-cb-menu)
-  (set-syntax-table magik-base-mode-syntax-table)
+(defvar magik-cb-menu nil
+  "Keymap for the CB menu bar.")
 
-  (setq major-mode 'magik-cb-mode
-        buffer-read-only t
-        buffer-undo-list t
-        show-trailing-whitespace nil
-        font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w"))))
-
-  (add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu)
-  (add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t) ;local hook
-  (run-hooks 'magik-cb-mode-hook))
+(easy-menu-define magik-cb-menu magik-cb-mode-map
+  "Menu for CB mode."
+  `(,"CB"
+    [,"Jump to Source" magik-cb-jump-to-source        :active t :keys "<f3> j,   <mouse-2>"]
+    [,"Family Tree"    magik-cb-family                :active t :keys "<f3> f,   <mouse-2>"]
+    [,"Fold"           magik-cb-fold                  (or (magik-cb-topic-on-p "show-topics")
+                                                          (magik-cb-topic-on-p "show-comments")
+                                                          (magik-cb-topic-on-p "show-args")
+                                                          (magik-cb-topic-on-p "show-classes"))]
+    [,"Unfold"         magik-cb-unfold                (or (not (magik-cb-topic-on-p "show-topics"))
+                                                          (not (magik-cb-topic-on-p "show-comments"))
+                                                          (not (magik-cb-topic-on-p "show-args"))
+                                                          (not (magik-cb-topic-on-p "show-classes")))]
+    "---"
+    [,"Set Options"             magik-cb-edit-topics-and-flags :active t :keys "<f3> s,   ;"]
+    [,"Turn All Topics On/Off"  magik-cb-toggle-all-topics     t]
+    [,"Reset All Options"       magik-cb-reset                 t]
+    [,"Hide"                    magik-cb-quit                  :active t :keys "SPC,   <f3> h"]
+    "---"
+    [,"Override Flags"
+     magik-cb-toggle-override-flags
+     :active t
+     :style toggle
+     :selected (magik-cb-topic-on-p "override-flags")
+     :keys "<f3> F,   <f3> o"]
+    [,"Override Topics"
+     magik-cb-toggle-override-topics
+     :active t
+     :style toggle
+     :selected (magik-cb-topic-on-p "override-topics")]
+    [,"Override 200 Limit"
+     magik-cb-toggle-override-200-limit
+     :active t
+     :style toggle
+     :selected (magik-cb-topic-on-p "override-200-limit")]
+    "---"
+    [,"Hop"                            magik-cb-tab                   t]
+    [,"Clear"                          magik-cb-clear                 t]
+    [,"Clear Method and Class"         magik-cb-and-clear             t]
+    "---"
+    [,"Magik Process"                  magik-cb-gis                   (get-buffer (magik-cb-gis-buffer))]
+    [,"Magik External Shell Process"   magik-cb-gis-shell             (get-buffer
+                                                                       (concat "*shell*" (magik-cb-gis-buffer)))]
+    "---"
+    [,"Customize"                      magik-cb-customize             t]
+    ;; [,"Help"                           magik-cb-help                  t]
+    ))
 
 (defun magik-cb-gis-buffer (&optional buffer)
   "Return the GIS process buffer associated with this Class Browser."
@@ -1541,25 +1518,24 @@ be careful to preserve the position in \"*cb2*\"."
 ;; C B 2
 ;; _____
 
-(defun magik-cb2-mode ()
-  "Make sure \"*cb2*\" exists and is in magik-cb-mode and has the right keymap and modeline."
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'magik-cb2-mode)
+(define-derived-mode magik-cb2-mode magik-base-mode "Magik-CB2"
+  "Ensure \"*cb2*\" exists in magik-cb-mode with the correct keymap and modeline.
 
-  (setq major-mode 'magik-cb2-mode
-        buffer-read-only t
-        buffer-undo-list t
-        show-trailing-whitespace nil
-        font-lock-defaults '(magik-cb2-font-lock-keywords nil t ((?_ . "w"))))
+\\{magik-cb2-mode-map}"
+  :group 'magik
+  :abbrev-table nil
 
-  (use-local-map magik-cb-mode-map)
-  (set-syntax-table (copy-syntax-table magik-base-mode-syntax-table))
-  (modify-syntax-entry ?\" "w")
-  (modify-syntax-entry ?- "w")
+  (compat-call setq-local
+               buffer-read-only t
+               buffer-undo-list t
+               show-trailing-whitespace nil
+               font-lock-defaults '(magik-cb2-font-lock-keywords nil t ((?_ . "w"))))
 
-  (magik-cb-redraw-modeline)
-  (run-hooks 'magik-cb2-mode-hook))
+  (magik-cb-redraw-modeline))
+
+;;; Package initialisation
+(modify-syntax-entry ?\" "w" magik-cb2-mode-syntax-table)
+(modify-syntax-entry ?- "w" magik-cb2-mode-syntax-table)
 
 (defun magik-cb2-buffer (&optional buffer)
   "Name of the CB2 buffer."
@@ -2468,7 +2444,7 @@ See the variable `magik-cb-generalise-file-name-alist' to provide more customisa
   (require 'magik-cb-ac))
 
 (progn
-  ;; ----------------------- cb mode ------------------------
+  ;; ------------------------ magik cb mode  ------------------------
 
   (cl-loop for i from ?  to ?~ do
            (define-key magik-cb-mode-map (char-to-string i) 'magik-cb-insert-command))

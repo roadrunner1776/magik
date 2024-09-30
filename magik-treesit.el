@@ -153,7 +153,9 @@
 
 ;;;###autoload
 (define-derived-mode magik-ts-mode magik-base-mode "Magik"
-  "Major mode for editing Magik code, using tree-sitter library."
+  "Major mode for editing Magik code, using tree-sitter library.
+
+\\{magik-ts-mode-map}"
   :group 'magik
   :abbrev-table nil
   :syntax-table nil
@@ -161,13 +163,15 @@
   ;; Tree-sitter setup.
   (treesit-parser-create 'magik)
 
-  (setq-local treesit-simple-indent-rules magik-ts-mode--indent-rules
-              treesit-font-lock-settings magik--treesit-settings
-              treesit-font-lock-feature-list '((comment pragma)
-                                               (type constant keyword string)
-                                               ()
-                                               ()
-                                               (error)))
+  (setq-local
+   treesit-simple-indent-rules magik-ts-mode--indent-rules
+   treesit-font-lock-settings magik--treesit-settings
+   treesit-font-lock-feature-list '((comment pragma)
+                                    (type constant keyword string)
+                                    ()
+                                    ()
+                                    (error)))
+
   (treesit-major-mode-setup))
 
 ;;;###autoload

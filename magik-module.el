@@ -25,15 +25,12 @@
   (require 'magik-utils)
   (require 'magik-session))
 
+(require 'compat)
+
 (defgroup magik-module nil
   "Customise Magik module.def files group."
   :group 'magik
   :group 'tools)
-
-(defcustom magik-module-mode-hook nil
-  "*Hook to run after Module Mode is set."
-  :group 'module
-  :type  'hook)
 
 (defcustom magik-module-option-save-magikc t
   "*If t, save .magikc files when loading module."
@@ -45,22 +42,50 @@
   :group 'smallworld
   :type  'boolean)
 
-(defvar magik-module-mode-map (make-sparse-keymap)
-  "Keymap for Magik module.def files.")
+;; Imenu configuration
+(defvar magik-module-imenu-generic-expression
+  '(
+    (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
+    )
+  "Imenu generic expression for Magik Message mode.  See `imenu-generic-expression'.")
 
-(defvar magik-module-f2-map (make-sparse-keymap)
-  "Keymap for the F2 function key in Magik module.def buffers.")
+;; Font-lock configuration
+(defcustom magik-module-font-lock-keywords
+  (list
+   '("^end\\s-*$" . font-lock-keyword-face)
+   '("^hidden$" . font-lock-keyword-face)
+   '("^\\(language\\)\\s-+\\(\\sw+\\)"
+     (1 font-lock-keyword-face)
+     (2 font-lock-type-face))
+   '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
+   '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
+     (1 font-lock-function-name-face)
+     (2 font-lock-constant-face))
+   )
+  "Default fontification of module.def files."
+  :group 'module
+  :type 'sexp)
 
-(fset 'magik-module-f2-map   magik-module-f2-map)
+(defun magik-module-customize ()
+  "Open Customization buffer for Module Mode."
+  (interactive)
+  (customize-group 'magik-module))
 
-(define-key magik-module-mode-map [f2]    'magik-module-f2-map)
+;;;###autoload
+(define-derived-mode magik-module-mode nil "Module"
+  "Major mode for editing Magik module.def files.
 
-(define-key magik-module-f2-map   "b"     'magik-module-transmit-buffer)
-(define-key magik-module-f2-map   "c"     'magik-module-compile-messages)
-(define-key magik-module-f2-map   "d"     'magik-module-reload-module-definition)
-(define-key magik-module-f2-map   "m"     'magik-module-toggle-save-magikc)
-(define-key magik-module-f2-map   "r"     'magik-module-toggle-force-reload)
-(define-key magik-module-f2-map   "R"     'magik-module-remove-module)
+You can customize Module Mode with the `magik-module-mode-hook`.
+
+\\{magik-module-mode-map}"
+
+  :group 'magik
+  :abbrev-table nil
+
+  (compat-call setq-local
+               require-final-newline t
+               imenu-generic-expression magik-module-imenu-generic-expression
+               font-lock-defaults '(magik-module-font-lock-keywords nil t)))
 
 (defvar magik-module-menu nil
   "Keymap for the Magik module.def buffer menu bar.")
@@ -307,12 +332,9 @@ Called by `gis-drag-n-drop-load' when a Module file is dropped."
     gis))
 
 ;;; Package initialisation
-(if magik-module-mode-syntax-table
-    nil
-  (setq magik-module-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?_ "w" magik-module-mode-syntax-table)
-  (modify-syntax-entry ?# "<" magik-module-mode-syntax-table)
-  (modify-syntax-entry ?\n ">" magik-module-mode-syntax-table))
+(modify-syntax-entry ?_ "w" magik-module-mode-syntax-table)
+(modify-syntax-entry ?# "<" magik-module-mode-syntax-table)
+(modify-syntax-entry ?\n ">" magik-module-mode-syntax-table)
 
 ;;; Package registration
 
@@ -320,5 +342,22 @@ Called by `gis-drag-n-drop-load' when a Module file is dropped."
 (or (assoc "module\\.def$" auto-mode-alist)
     (push '("module\\.def$" . magik-module-mode) auto-mode-alist))
 
+(defvar magik-module-f2-map (make-sparse-keymap)
+  "Keymap for the F2 function key in Magik module.def buffers.")
+
+(progn
+  ;; ------------------------ magik module mode ------------------------
+
+  (fset 'magik-module-f2-map   magik-module-f2-map)
+
+  (define-key magik-module-mode-map [f2]    'magik-module-f2-map)
+
+  (define-key magik-module-f2-map   "b"     'magik-module-transmit-buffer)
+  (define-key magik-module-f2-map   "c"     'magik-module-compile-messages)
+  (define-key magik-module-f2-map   "d"     'magik-module-reload-module-definition)
+  (define-key magik-module-f2-map   "m"     'magik-module-toggle-save-magikc)
+  (define-key magik-module-f2-map   "r"     'magik-module-toggle-force-reload)
+  (define-key magik-module-f2-map   "R"     'magik-module-remove-module))
+
 (provide 'magik-module)
-;;; module.el ends here
+;;; magik-module.el ends here
