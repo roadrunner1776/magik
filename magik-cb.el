@@ -580,16 +580,16 @@ To view the help on these variables type \\[describe-variable] and enter the var
                buffer-undo-list t
                show-trailing-whitespace nil
                font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w")))
-               magik-cb-process nil
-               magik-cb-topics nil
-               magik-cb-quote-file-name nil
-               magik-cb-mf-extended-flags nil
+               magik-cb-cursor-pos 'method-name
                magik-cb-filename nil
-               magik-cb-filter-str nil
-               magik-cb-n-methods-str nil
-               magik-cb-topic-pos nil
-               magik-cb-cursor-pos nil
-               magik-cb-pending-message nil)
+               magik-cb-filter-str ""
+               magik-cb-mf-extended-flags nil
+               magik-cb-n-methods-str "0"
+               magik-cb-pending-message t
+               magik-cb-process (magik-cb-process)
+               magik-cb-quote-file-name nil
+               magik-cb-topic-pos 1
+               magik-cb-topics (mapcar #'(lambda (x) (append x ())) magik-cb-initial-topics))
 
   (add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu nil t)
   (add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t))
@@ -854,14 +854,7 @@ It also detects the method_finder version and configures the following buffer lo
                 (magik-cb-mode)
                 (setq magik-cb-quote-file-name   (string< "5.2.0" version)
                       magik-cb-mf-extended-flags (string< "6.0.0" version)
-                      magik-cb-filter-str ""
-                      magik-cb-cursor-pos 'method-name
-                      magik-cb-n-methods-str "0"
-                      magik-cb-topic-pos 1
-                      magik-cb-topics (mapcar #'(lambda (x) (append x ())) magik-cb-initial-topics)
-                      magik-cb-pending-message t
-                      magik-cb-filename cb-file
-                      magik-cb-process magik-cb-process)))
+                      magik-cb-filename cb-file)))
             ;; Note that magik-cb-start-process uses magik-cb-filter when the process starts.
             ;; This is so that it can handle the topic information that the method finder
             ;; process sends back. At the moment magik-cb-ac-filter (the only other filter in use)
