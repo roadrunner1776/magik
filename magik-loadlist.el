@@ -19,43 +19,18 @@
 
 ;;; Code:
 
+(require 'compat)
 (require 'font-lock)
 
 (defgroup magik-loadlist nil
   "Customise Magik load_list.txt files group."
   :group 'magik)
 
-(defcustom magik-loadlist-mode-hook nil
-  "*Hook to run after loadlist mode is set."
-  :group 'magik-loadlist
-  :type  'hook)
-
 (defcustom magik-loadlist-ignore-regexp-list '("\\..*")
   "List of Regexps used to miss certain files from load_list.txt files.
 Intial ^ and final $ is automatically added in `loadlist-ignore'."
   :group 'magik-loadlist
   :type  '(repeat regexp))
-
-(defvar magik-loadlist-mode-map (make-sparse-keymap)
-  "Keymap for Magik load_list.txt files")
-
-(define-key magik-loadlist-mode-map (kbd "<f2> b")      'magik-loadlist-transmit)
-(define-key magik-loadlist-mode-map "\C-cr" 'magik-loadlist-refresh-contents)
-
-(defvar magik-loadlist-menu nil
-  "Keymap for the Magik loadlist buffer menu bar")
-
-(easy-menu-define magik-loadlist-menu magik-loadlist-mode-map
-  "Menu for loadlist mode."
-  `(,"Loadlist"
-    [,"Refresh Buffer from Directory"    magik-loadlist-refresh-contents t]
-    "---"
-    [,"Transmit Buffer"                  magik-loadlist-transmit         t]
-    "---"
-    [,"Customize"                        magik-loadlist-customize        t]))
-
-(defvar magik-loadlist-mode-syntax-table nil
-  "Syntax table in use in loadlist mode buffers.")
 
 ;; Font-lock configuration
 (defcustom magik-loadlist-font-lock-keywords
@@ -73,30 +48,30 @@ Intial ^ and final $ is automatically added in `loadlist-ignore'."
   (customize-group 'magik-loadlist))
 
 ;;;###autoload
-(defun magik-loadlist-mode ()
+(define-derived-mode magik-loadlist-mode nil "Loadlist"
   "Major mode for editing Magik load_list.txt files.
 
-You can customise magik-loadlist-mode with the magik-loadlist-mode-hook.
+You can customize magik-loadlist-mode with the magik-loadlist-mode-hook.
 
 \\{magik-loadlist-mode-map}"
+  :group 'magik
+  :abbrev-table nil
 
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'font-lock-defaults)
+  (compat-call setq-local
+               require-final-newline t
+               font-lock-defaults '(magik-loadlist-font-lock-keywords nil t)))
 
-  (use-local-map magik-loadlist-mode-map)
-  (easy-menu-add magik-loadlist-menu)
-  (set-syntax-table magik-loadlist-mode-syntax-table)
+(defvar magik-loadlist-menu nil
+  "Keymap for the Magik loadlist buffer menu bar.")
 
-  (setq major-mode 'magik-loadlist-mode
-        mode-name "loadlist"
-        require-final-newline t
-        font-lock-defaults
-        '(magik-loadlist-font-lock-keywords
-          nil t))
-
-  (run-hooks 'magik-loadlist-mode-hook))
+(easy-menu-define magik-loadlist-menu magik-loadlist-mode-map
+  "Menu for loadlist mode."
+  `(,"Loadlist"
+    [,"Refresh Buffer from Directory"    magik-loadlist-refresh-contents t]
+    "---"
+    [,"Transmit Buffer"                  magik-loadlist-transmit         t]
+    "---"
+    [,"Customize"                        magik-loadlist-customize        t]))
 
 (defun magik-loadlist-buffer-list ()
   "Return contents of loadlist buffer."
@@ -247,17 +222,20 @@ Called by `gis-drag-n-drop-load' when a load_list.txt file is dropped."
       "$\n"))))
 
 ;;; Package initialisation
-(if magik-loadlist-mode-syntax-table
-    nil
-  (setq magik-loadlist-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?_ "w" magik-loadlist-mode-syntax-table)
-  (modify-syntax-entry ?# "<" magik-loadlist-mode-syntax-table)
-  (modify-syntax-entry ?\n ">" magik-loadlist-mode-syntax-table))
+(modify-syntax-entry ?_ "w" magik-loadlist-mode-syntax-table)
+(modify-syntax-entry ?# "<" magik-loadlist-mode-syntax-table)
+(modify-syntax-entry ?\n ">" magik-loadlist-mode-syntax-table)
 
 ;;; Package registration
 ;;;###autoload
 (or (assoc "load_list\\.txt$" auto-mode-alist)
     (push '("load_list\\.txt$" . magik-loadlist-mode) auto-mode-alist))
+
+(progn
+  ;; ------------------------ magik loadlist mode  ------------------------
+
+  (define-key magik-loadlist-mode-map (kbd "<f2> b")      'magik-loadlist-transmit)
+  (define-key magik-loadlist-mode-map "\C-cr" 'magik-loadlist-refresh-contents))
 
 (provide 'magik-loadlist)
 ;;; magik-loadlist.el ends here

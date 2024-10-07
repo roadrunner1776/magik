@@ -25,18 +25,6 @@
   "Magik Pragma features."
   :group 'magik)
 
-(defvar magik-pragma-topic-select-mode-map (make-keymap)
-  "Keymap for Topic selection in _pragma lines")
-
-(define-key magik-pragma-topic-select-mode-map "y"  'magik-pragma-topic-select-mark)
-(define-key magik-pragma-topic-select-mode-map "n"  'magik-pragma-topic-select-unmark)
-(define-key magik-pragma-topic-select-mode-map "m"  'magik-pragma-topic-select-mark)
-(define-key magik-pragma-topic-select-mode-map "u"  'magik-pragma-topic-select-unmark)
-(define-key magik-pragma-topic-select-mode-map " "  'forward-line)
-(define-key magik-pragma-topic-select-mode-map "q"  'magik-pragma-topic-select-quit)
-(define-key magik-pragma-topic-select-mode-map "\r" 'magik-pragma-topic-select-select)
-(define-key magik-pragma-topic-select-mode-map "e"  'magik-pragma-topic-edit)
-
 ;;;;;;;;;;;;;;;;;;;; User interface ;;;;;;;;;;;;;;;;;;;
 
 (defun magik-electric-pragma-tab (pragma-brackets)
@@ -389,16 +377,6 @@ if they wish to remove the contents of the depreacted template."
 
 ;;;;;;;;;;;;;;;;;;;; Topic Select Mode ;;;;;;;;;;;;;;;;;;;
 
-(defvar magik-pragma-topic-select-mode-syntax-table nil
-  "Syntax table used while in topic-select mode.")
-(if magik-pragma-topic-select-mode-syntax-table
-    ()
-  (setq magik-pragma-topic-select-mode-syntax-table (make-syntax-table)))
-
-(defvar magik-pragma-topic-select-mode-abbrev-table nil
-  "Abbrev table used while in topic-select mode.")
-(define-abbrev-table 'topic-select-mode-abbrev-table ())
-
 (defvar magik-pragma-window-configuration nil
   "Window configuration to return to after topic selection mode.")
 
@@ -458,18 +436,13 @@ q      - quit
             (if (assoc topic topics) "> " "  "))
            (forward-line)))))))
 
-(defun magik-pragma-topic-select-mode ()
+(define-derived-mode magik-pragma-topic-select-mode nil "Topic Select"
   "Major mode for selecting topics in pragmas.
 
 \\{magik-pragma-topic-select-mode-map}"
-  (interactive)
-  (kill-all-local-variables)
-  (setq major-mode 'topic-select-mode)
-  (setq mode-name "Topic Select")
-  (use-local-map magik-pragma-topic-select-mode-map)
-  (set-syntax-table magik-pragma-topic-select-mode-syntax-table)
-  (setq local-abbrev-table topic-select-mode-abbrev-table)
-  (run-hooks 'topic-select-mode-hook))
+  :group 'magik
+  :abbrev-table nil
+  :syntax-table nil)
 
 (defun magik-pragma-topic-select-mark ()
   "Mark a line to indicate that the process should be run"
@@ -533,6 +506,18 @@ Beep if not looking at \"[ >] (\""
                     "data/doc/pragma_topics")))
           (t
            (error "There is no value for $SMALLWORLD_GIS")))))
+
+(progn
+  ;; ------------------------ magik pragma topic select mode ------------------------
+
+  (define-key magik-pragma-topic-select-mode-map "y"  'magik-pragma-topic-select-mark)
+  (define-key magik-pragma-topic-select-mode-map "n"  'magik-pragma-topic-select-unmark)
+  (define-key magik-pragma-topic-select-mode-map "m"  'magik-pragma-topic-select-mark)
+  (define-key magik-pragma-topic-select-mode-map "u"  'magik-pragma-topic-select-unmark)
+  (define-key magik-pragma-topic-select-mode-map " "  'forward-line)
+  (define-key magik-pragma-topic-select-mode-map "q"  'magik-pragma-topic-select-quit)
+  (define-key magik-pragma-topic-select-mode-map "\r" 'magik-pragma-topic-select-select)
+  (define-key magik-pragma-topic-select-mode-map "e"  'magik-pragma-topic-edit))
 
 (provide 'magik-pragma)
 ;;; magik-pragma.el ends here
