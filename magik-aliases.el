@@ -23,6 +23,9 @@
   (defvar msb-menu-cond)
   (require 'magik-utils))
 
+(require 'easymenu)
+(require 'compat)
+
 (defgroup magik-aliases nil
   "Customise Magik aliases files group."
   :group 'magik
@@ -41,11 +44,6 @@ a user can setup their personal gis_aliases file list using
 form the top section of the SW->Alias Files submenu."
   :group 'magik-aliases
   :type  '(repeat file))
-
-(defcustom magik-aliases-mode-hook nil
-  "*Hook to run after ALIASES mode is set."
-  :group 'magik-aliases
-  :type  'hook)
 
 (defcustom magik-aliases-program "runalias.exe"
   "*Program to process an alias file."
@@ -90,31 +88,6 @@ If any function returns t, then the buffer is displayed."
   :group 'magik-aliases
   :type  'hook)
 
-(defvar magik-aliases-mode-map (make-sparse-keymap)
-  "Keymap for GIS aliases files")
-
-(define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
-(define-key magik-aliases-mode-map " "                'magik-aliases-n)
-(define-key magik-aliases-mode-map (kbd "<down>")     'magik-aliases-down)
-(define-key magik-aliases-mode-map "q"                'magik-aliases-q)
-
-(defvar magik-aliases-menu nil
-  "Menu for Aliases mode.")
-
-(easy-menu-define magik-aliases-menu magik-aliases-mode-map
-  "Menu for aliases mode."
-  `(,"Aliases"
-    [,"Run current definition"        magik-aliases-run-program t]
-    [,"Next"                          magik-aliases-next        t]
-    [,"Quit"                          magik-aliases-quit        t]
-    "----"
-    (,"Definitions")
-    "---"
-    [,"Customize"                     magik-aliases-customize   t]))
-
-(defvar magik-aliases-mode-syntax-table nil
-  "Syntax table in use in Aliases-mode buffers.")
-
 (defvar magik-aliases-definition-regexp "^\\([^#]\\S-+\\):\\s-*$"
   "Regexp matching an alias definition")
 
@@ -150,46 +123,40 @@ If any function returns t, then the buffer is displayed."
   (customize-group 'magik-aliases))
 
 ;;;###autoload
-(defun magik-aliases-mode ()
+(define-derived-mode magik-aliases-mode nil "Aliases"
   "Major mode for editing Magik aliases files.
 
 You can customise magik-aliases-mode with the magik-aliases-mode-hook.
 
 \\{magik-aliases-mode-map}"
+  :group 'magik
+  :abbrev-table nil
 
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'font-lock-defaults)
-  (make-local-variable 'magik-aliases-program)
-  (make-local-variable 'magik-aliases-exec-path)
-  (make-local-variable 'magik-aliases-process-environment)
+  (compat-call setq-local
+               require-final-newline t
+               comment-start "#"
+               comment-end ""
+               show-trailing-whitespace nil
+               magik-aliases-program (magik-aliases-program-set magik-aliases-program)
+               imenu-generic-expression magik-aliases-imenu-generic-expression
+               font-lock-defaults '(magik-aliases-font-lock-keywords nil nil))
 
-  (use-local-map magik-aliases-mode-map)
-  (set-syntax-table magik-aliases-mode-syntax-table)
+  (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
+  (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
 
-  (setq major-mode 'magik-aliases-mode
-        mode-name "Aliases"
-        magik-aliases-program (magik-aliases-program-set magik-aliases-program)
-        require-final-newline t
-        comment-start "#"
-        comment-end   ""
-        imenu-generic-expression magik-aliases-imenu-generic-expression
-        show-trailing-whitespace nil
-        font-lock-defaults
-        '(magik-aliases-font-lock-keywords
-          nil nil))
+(defvar magik-aliases-menu nil
+  "Menu for Aliases mode.")
 
-  (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu)
-  (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t)
-  ;;Avoid menu-bar-update-hook, since this is executed
-  ;;many times and the magik-aliases-update-sw-menu function does
-  ;;perform file existence checks. So by using a local kill-buffer-hook
-  ;;it should cut down on the number of times this function is executed
-  ;;whilst still retaining the accuracy of the SW->Alias Files submenu.
-  ;;(add-hook menu-bar-update-hook-sym 'magik-aliases-update-sw-menu)
-
-  (run-hooks 'magik-aliases-mode-hook))
+(easy-menu-define magik-aliases-menu magik-aliases-mode-map
+  "Menu for aliases mode."
+  `(,"Aliases"
+    [,"Run current definition"        magik-aliases-run-program t]
+    [,"Next"                          magik-aliases-next        t]
+    [,"Quit"                          magik-aliases-quit        t]
+    "----"
+    (,"Definitions")
+    "---"
+    [,"Customize"                     magik-aliases-customize   t]))
 
 (defun magik-aliases-kill-buffer ()
   "Function to run when an Aliases mode buffer is run."
@@ -501,14 +468,11 @@ Returns nil if FILE cannot be expanded."
 ;;; Package initialisation
 (add-hook 'magik-aliases-mode-hook 'magik-aliases-update-sw-menu)
 
-(if magik-aliases-mode-syntax-table
-    ()
-  (setq magik-aliases-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?_ "w" magik-aliases-mode-syntax-table)
-  (modify-syntax-entry ?: "w" magik-aliases-mode-syntax-table)
-  (modify-syntax-entry ?% "$" magik-aliases-mode-syntax-table); Windows Environment vars
-  (modify-syntax-entry ?# "<" magik-aliases-mode-syntax-table)
-  (modify-syntax-entry ?\n ">" magik-aliases-mode-syntax-table))
+(modify-syntax-entry ?_ "w" magik-aliases-mode-syntax-table)
+(modify-syntax-entry ?: "w" magik-aliases-mode-syntax-table)
+(modify-syntax-entry ?% "$" magik-aliases-mode-syntax-table); Windows Environment vars
+(modify-syntax-entry ?# "<" magik-aliases-mode-syntax-table)
+(modify-syntax-entry ?\n ">" magik-aliases-mode-syntax-table)
 
 ;;; Package registration
 (or (assoc "aliases$" auto-mode-alist)
@@ -532,6 +496,14 @@ Returns nil if FILE cannot be expanded."
 
 (with-eval-after-load 'msb
   (magik-aliases-msb-configuration))
+
+(progn
+  ;; ------------------------ magik aliases mode ------------------------
+
+  (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
+  (define-key magik-aliases-mode-map " "                'magik-aliases-n)
+  (define-key magik-aliases-mode-map (kbd "<down>")     'magik-aliases-down)
+  (define-key magik-aliases-mode-map "q"                'magik-aliases-q))
 
 (provide 'magik-aliases)
 ;;; magik-aliases.el ends here

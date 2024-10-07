@@ -86,10 +86,11 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
 
 This is a generic major mode intended to be inherited by
 concrete implementations."
-  :interactive nil
   :group 'magik
+  :interactive nil
 
-  (compat-call setq-local magik-template-file-type (magik-template-file-type)
+  (compat-call setq-local
+               magik-template-file-type (magik-template-file-type)
                paragraph-start (concat "^$\\|" page-delimiter)
                paragraph-separate paragraph-start
                require-final-newline mode-require-final-newline
@@ -121,24 +122,27 @@ concrete implementations."
 
 ;;;###autoload
 (define-derived-mode magik-mode magik-base-mode "Magik"
-  "Major mode for editing Magik code."
+  "Major mode for editing Magik code.
+
+\\{magik-mode-map}"
   :group 'magik
   :abbrev-table nil
   :syntax-table nil
 
-  (setq-local font-lock-defaults '((magik-font-lock-keywords
-                                    magik-font-lock-keywords-1
-                                    magik-font-lock-keywords-2
-                                    magik-font-lock-keywords-3
-                                    magik-font-lock-keywords-4
-                                    magik-font-lock-keywords-5)
-                                   nil t
-                                   ((?_ . "w"))
-                                   magik-goto-code
-                                   (font-lock-fontify-buffer-function   . magik-font-lock-fontify-buffer)
-                                   (font-lock-fontify-region-function   . magik-font-lock-fontify-region)
-                                   (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))
-              indent-line-function 'magik-indent-line))
+  (compat-call setq-local
+               font-lock-defaults '((magik-font-lock-keywords
+                                     magik-font-lock-keywords-1
+                                     magik-font-lock-keywords-2
+                                     magik-font-lock-keywords-3
+                                     magik-font-lock-keywords-4
+                                     magik-font-lock-keywords-5)
+                                    nil t
+                                    ((?_ . "w"))
+                                    magik-goto-code
+                                    (font-lock-fontify-buffer-function   . magik-font-lock-fontify-buffer)
+                                    (font-lock-fontify-region-function   . magik-font-lock-fontify-region)
+                                    (font-lock-unfontify-buffer-function . magik-font-lock-unfontify-buffer))
+               indent-line-function 'magik-indent-line))
 
 (defvar magik-menu nil
   "Keymap for the Magik buffer menu bar.")
@@ -2198,7 +2202,7 @@ closing bracket into the new \"{...}\" notation."
   (magik-ac-configuration))
 
 (progn
-  ;; ------------------------ magik mode -------------------------
+  ;; ------------------------ magik mode ------------------------
 
   (define-key magik-mode-map "\r" 'magik-newline)
   (define-key magik-mode-map "\n" 'newline)
