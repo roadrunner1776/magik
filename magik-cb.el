@@ -789,17 +789,7 @@ BUFFER may be nil, in which case only the process is started."
 Either starts a method_finder process or if a GIS session is running
 it starts a mf_connector process to communicate with the method_finder
 in the GIS.
-If FILTER is given then it is set on the process.
-It also detects the method_finder version and configures the following buffer local variables:
-  `magik-cb-quote-file-name'
-  `magik-cb-mf-extended-flags'
-  `magik-cb-filter-str'
-  `magik-cb-cursor-pos'
-  `magik-cb-n-methods-str'
-  `magik-cb-topic-pos'
-  `magik-cb-topics'
-  `magik-cb-process'
-"
+If FILTER is given then it is set on the process."
   (setq buffer (get-buffer-create buffer)) ; get a real buffer object.
   (if (get-buffer-process buffer)
       (get-buffer-process buffer) ;returns running process
