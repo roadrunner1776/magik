@@ -211,6 +211,7 @@ this variable buffer-local by putting the following in your .emacs
 
 (defvar magik-session-process nil
   "The process object of the command running in the buffer.")
+(make-variable-buffer-local 'magik-session-process)
 
 (defvar magik-session-current-command nil
   "The current `magik-session-command' in the current buffer.")
