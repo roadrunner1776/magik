@@ -558,13 +558,15 @@ Entry to this mode runs `magik-session-mode-hook`.
 
     (if (null tmp-no-of-gis-cmds)
         (progn
-          (setq magik-session-no-of-cmds 1
-                magik-session-cmd-num 0
-                magik-session-prev-cmds (make-vector 100 nil))
+          (compat-call setq-local
+                       magik-session-no-of-cmds 1
+                       magik-session-cmd-num 0
+                       magik-session-prev-cmds (make-vector 100 nil))
           (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
-      (setq magik-session-no-of-cmds tmp-no-of-gis-cmds
-            magik-session-cmd-num tmp-gis-cmd-num
-            magik-session-prev-cmds tmp-prev-gis-cmds))
+      (compat-call setq-local
+                   magik-session-no-of-cmds tmp-no-of-gis-cmds
+                   magik-session-cmd-num tmp-gis-cmd-num
+                   magik-session-prev-cmds tmp-prev-gis-cmds))
 
     (unless (and magik-session-buffer (get-buffer magik-session-buffer))
       (setq-default magik-session-buffer (buffer-name)))
@@ -579,8 +581,9 @@ Entry to this mode runs `magik-session-mode-hook`.
 
     ;; Special handling for *gis* buffer
     (if (equal (buffer-name) "*gis*")
-        (setq magik-session-exec-path (cl-copy-list exec-path)
-              magik-session-process-environment (cl-copy-list process-environment)))
+        (compat-call setq-local
+                     magik-session-exec-path (cl-copy-list exec-path)
+                     magik-session-process-environment (cl-copy-list process-environment)))
 
     (abbrev-mode 1)
 
