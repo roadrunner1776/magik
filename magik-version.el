@@ -339,7 +339,7 @@ Will set `gis-version-file' to FILE."
                 (delete-char 1)
                 (insert "*"))))))
 
-  (setq magik-version-position (point))
+  (compat-call setq-local magik-version-position (point))
   (save-match-data
     (if (search-forward "-------" nil t) (setq magik-version-position (point)))) ;skip a header
 

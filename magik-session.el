@@ -211,7 +211,6 @@ this variable buffer-local by putting the following in your .emacs
 
 (defvar magik-session-process nil
   "The process object of the command running in the buffer.")
-(make-variable-buffer-local 'magik-session-process)
 
 (defvar magik-session-current-command nil
   "The current `magik-session-command' in the current buffer.")
@@ -329,8 +328,8 @@ queried irrespective of default value of `magik-session-prompt'"
   (if (and (null force-query-p)
            (stringp (default-value 'magik-session-prompt))) ;user has overridden setting
       (progn
-        (setq magik-session-prompt (or magik-session-prompt ;user may have set a local value for it
-                                       (default-value 'magik-session-prompt)))
+        (compat-call setq-local magik-session-prompt (or magik-session-prompt ;user may have set a local value for it
+                                                         (default-value 'magik-session-prompt)))
         (magik-session-prompt-update-font-lock))
     (process-send-string
      magik-session-process
@@ -470,8 +469,7 @@ and return a list of all the components of the command."
         (save-match-data
           ;;Delete duplicates from magik-session-command-history local and global values
           ;;Note: delete-duplicates does not appear to work on localised variables.
-          (setq magik-session-command-history
-                (cl-remove-duplicates magik-session-command-history :test 'equal))
+          (compat-call setq-local magik-session-command-history (cl-remove-duplicates magik-session-command-history :test 'equal))
           (setq-default magik-session-command-history
                         (cl-remove-duplicates (default-value 'magik-session-command-history)
                                               :test 'equal))
@@ -666,8 +664,7 @@ Adds `magik-session-current-command' to `magik-session-command-history' if not a
   (run-hooks 'magik-session-start-process-pre-hook)
   (or (member magik-session-current-command magik-session-command-history)
       (add-to-list 'magik-session-command-history magik-session-current-command))
-  (setq magik-session-process
-        (apply 'start-process "magik-session-process" (current-buffer) (car args) (cdr args)))
+  (compat-call setq-local magik-session-process (apply 'start-process "magik-session-process" (current-buffer) (car args) (cdr args)))
   (set-process-sentinel magik-session-process 'magik-session-sentinel)
   (set-marker (process-mark magik-session-process) (point-max))
   (set-process-filter magik-session-process 'magik-session-filter)
@@ -805,10 +802,11 @@ there is not, prompt for a command to run, and then run it."
       (insert "\n" (current-time-string) "\n")
       (setq default-directory (expand-file-name
                                (file-name-as-directory
-                                (substitute-in-file-name dir)))
-            magik-session-current-command (copy-sequence magik-session-command)
-            magik-session-command-history (cons magik-session-current-command
-                                                (delete magik-session-current-command magik-session-command-history)))
+                                (substitute-in-file-name dir))))
+      (compat-call setq-local
+                   magik-session-current-command (copy-sequence magik-session-command)
+                   magik-session-command-history (cons magik-session-current-command
+                                                       (delete magik-session-current-command magik-session-command-history)))
       (setq-default magik-session-command-history (cons magik-session-current-command
                                                         (delete magik-session-current-command magik-session-command-history)))
       (or (file-directory-p default-directory)
@@ -902,7 +900,7 @@ Also update `magik-session-cmd-num'.  Also append the string to \" *history**gis
     ;; NB: we are keeping a null marker at the end and this must be moved along.
     (aset magik-session-prev-cmds n (aref magik-session-prev-cmds (1- n)))
     (aset magik-session-prev-cmds (1- n) (cons (copy-marker beg) (copy-marker end)))
-    (setq magik-session-cmd-num magik-session-no-of-cmds)
+    (compat-call setq-local magik-session-cmd-num magik-session-no-of-cmds)
     (cl-incf magik-session-no-of-cmds)
 
     (set-marker comint-last-input-start beg)
@@ -934,8 +932,9 @@ non-degenerate commands into it."
     (let
         ((m (copy-marker (point-min))))
       (aset v v_i (cons m m)))
-    (setq magik-session-no-of-cmds (1+ v_i))
-    (setq magik-session-prev-cmds v)
+    (compat-call setq-local
+                 magik-session-no-of-cmds (1+ v_i)
+                 magik-session-prev-cmds v)
     (message "Re-sizing the command history vector... Done. (%s commands)." (number-to-string v_i))))
 
 (defun magik-session-beginning-of-line (&optional n)
@@ -1218,7 +1217,7 @@ An internal function that deals with 4 cases."
                             (if (equal str "")
                                 (- (point) mark)
                               (length str)))
-    (setq magik-session-cmd-num n)
+    (compat-call setq-local magik-session-cmd-num n)
     (if end-of-command-p
         (progn
           (goto-char (point-max))
@@ -1273,7 +1272,7 @@ If ARG is null, use a default of `magik-session-history-length'."
       ((b (current-buffer)))
     (or (eq major-mode 'magik-session-mode)
         (set-buffer magik-session-buffer))
-    (setq selective-display t)
+    (compat-call setq-local selective-display t)
     (let
         ((p (point))
          (i (max 0 (min (- magik-session-no-of-cmds arg 1) (1- magik-session-no-of-cmds))))
@@ -1317,7 +1316,7 @@ If ARG is null, use a default of `magik-session-history-length'."
       ((b (current-buffer)))
     (or (eq major-mode 'magik-session-mode)
         (set-buffer magik-session-buffer))
-    (setq selective-display t)
+    (compat-call setq-local selective-display t)
     (let
         ((p (point))
          (i (max 0 (min (- magik-session-no-of-cmds arg 1) (1- magik-session-no-of-cmds)))))
