@@ -580,16 +580,16 @@ To view the help on these variables type \\[describe-variable] and enter the var
                buffer-undo-list t
                show-trailing-whitespace nil
                font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w")))
-               magik-cb-cursor-pos 'method-name
+               magik-cb-process (magik-cb-process)
+               magik-cb-topics (mapcar #'(lambda (x) (append x ())) magik-cb-initial-topics)
+               magik-cb-quote-file-name nil
+               magik-cb-mf-extended-flags nil
                magik-cb-filename nil
                magik-cb-filter-str ""
-               magik-cb-mf-extended-flags nil
                magik-cb-n-methods-str "0"
-               magik-cb-pending-message t
-               magik-cb-process (magik-cb-process)
-               magik-cb-quote-file-name nil
                magik-cb-topic-pos 1
-               magik-cb-topics (mapcar #'(lambda (x) (append x ())) magik-cb-initial-topics))
+               magik-cb-cursor-pos 'method-name
+               magik-cb-pending-message t)
 
   (add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu nil t)
   (add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t))
