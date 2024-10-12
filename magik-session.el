@@ -527,6 +527,7 @@ Entry to this mode runs `magik-session-mode-hook`.
 
 \\{magik-session-mode-map}"
   :group 'magik
+  :syntax-table magik-base-mode-syntax-table
 
   (let ((tmp-no-of-gis-cmds magik-session-no-of-cmds)
         (tmp-gis-cmd-num magik-session-cmd-num)
