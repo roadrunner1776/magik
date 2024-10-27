@@ -306,7 +306,8 @@ With a prefix arg, ask user for current directory to use."
       (insert "Command: " program " ")
       (mapc (function (lambda (s) (insert s " "))) args)
       (setq default-directory dir
-            args (append (list program) args)
+            args (append (list program) args))
+      (compat-call setq-local
             magik-session-exec-path (cl-copy-list (or exec-path-aliases exec-path))
             magik-session-process-environment (cl-copy-list (or process-environment-aliases process-environment))
             magik-session-current-command (mapconcat 'identity args " "))

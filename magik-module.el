@@ -164,33 +164,6 @@ You can customize Module Mode with the `magik-module-mode-hook`.
   (interactive)
   (customize-group 'magik-module))
 
-;;;###autoload
-(defun magik-module-mode ()
-  "Major mode for editing Magik module.def files.
-
-You can customise Module Mode with the `module-mode-hook'.
-
-\\{magik-module-mode-map}"
-
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'font-lock-defaults)
-
-  (use-local-map magik-module-mode-map)
-  (easy-menu-add magik-module-menu)
-  (set-syntax-table magik-module-mode-syntax-table)
-
-  (setq major-mode 'magik-module-mode
-        mode-name "Module"
-        require-final-newline t
-        imenu-generic-expression magik-module-imenu-generic-expression
-        font-lock-defaults
-        '(magik-module-font-lock-keywords
-          nil t))
-
-  (run-hooks 'magik-module-mode-hook))
-
 (defun magik-module-toggle-save-magikc (arg)
   "Toggle saving of .magikc files when loading module."
   (interactive "P")
