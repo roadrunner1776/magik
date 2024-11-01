@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: throw
+# key: throw_with
+# expand-env: ((yas-indent-line 'fixed))
+# group: control structure.throw
+# --
+_throw ${1:cond} _with ${2}
+$0

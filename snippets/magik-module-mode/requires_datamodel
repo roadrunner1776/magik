@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: requires datamodel
+# key: requires_datamodel
+# expand-env: ((yas-indent-line 'fixed))
+# group: requirements
+# --
+requires_datamodel
+	${1:datamodel_module_name}$2
+end
+
+$0
