@@ -535,7 +535,8 @@ Do a no-op if already in the cb."
            (setq gis-proc nil)))
     (pop-to-buffer buffer)
     (with-current-buffer buffer
-      (magik-cb-mode)
+      (unless (eq major-mode 'magik-cb-mode)
+        (magik-cb-mode))
 
       (if (not running-p)
           (progn
@@ -840,7 +841,8 @@ If FILTER is given then it is set on the process."
             (save-excursion
               (let ((version (magik-cb-method-finder-version)))
                 (set-buffer (get-buffer-create buffer))
-                (magik-cb-mode)
+                (unless (eq major-mode 'magik-cb-mode)
+                  (magik-cb-mode))
                 (compat-call setq-local
                              magik-cb-quote-file-name   (string< "5.2.0" version)
                              magik-cb-mf-extended-flags (string< "6.0.0" version)
@@ -1195,7 +1197,8 @@ separated by spaces."
   (let ((cb2 (magik-cb2-buffer))
         (topic-pos (with-current-buffer (magik-cb-buffer) magik-cb-topic-pos)))
     (set-buffer (get-buffer-create cb2))
-    (magik-cb2-mode)
+    (unless (derived-mode-p 'magik-cb2-mode)
+      (magik-cb2-mode))
     (if (magik-cb2-get-window 'topic) ;YUCK relies on buffer not being displayed...
         (let ((buffer-read-only nil))
           (compat-call setq-local magik-cb2-mode 'topic)
