@@ -535,8 +535,6 @@ Do a no-op if already in the cb."
            (setq gis-proc nil)))
     (pop-to-buffer buffer)
     (with-current-buffer buffer
-      (unless (eq major-mode 'magik-cb-mode)
-        (magik-cb-mode))
 
       (if (not running-p)
           (progn
