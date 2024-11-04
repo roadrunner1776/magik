@@ -528,64 +528,64 @@ Entry to this mode runs `magik-session-mode-hook`.
   :group 'magik
   :syntax-table magik-base-mode-syntax-table
 
-    (compat-call setq-local
-                 selective-display t
-                 comint-last-input-start (make-marker)
-                 comint-last-input-end (make-marker)
-                 magik-session-command-history (or magik-session-command-history
-                                                   (default-value 'magik-session-command-history))
-                 magik-session-filter-state "\C-a"
-                 magik-session-cb-buffer (concat "*cb*" (buffer-name))
-                 magik-session-cmd-num magik-session-cmd-num
-                 magik-session-drag-n-drop-mode-line-string " DnD"
-                 magik-session-no-of-cmds magik-session-no-of-cmds
-                 magik-session-prev-cmds magik-session-prev-cmds
-                 magik-transmit-debug-mode-line-string " #DEBUG"
-                 show-trailing-whitespace nil
-                 font-lock-defaults '(magik-session-font-lock-keywords nil t ((?_ . "w")))
-                 ac-sources (append '(magik-ac-class-method-source
-                                      magik-ac-dynamic-source
-                                      magik-ac-global-source
-                                      magik-ac-object-source
-                                      magik-ac-raise-condition-source)
-                                    ac-sources)
-                 magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
-                 magik-session-process-environment (cl-copy-list (or magik-session-process-environment process-environment))
-                 mode-line-process '(": %s")
-                 local-abbrev-table magik-base-mode-abbrev-table)
+  (compat-call setq-local
+               selective-display t
+               comint-last-input-start (make-marker)
+               comint-last-input-end (make-marker)
+               magik-session-command-history (or magik-session-command-history
+                                                 (default-value 'magik-session-command-history))
+               magik-session-filter-state "\C-a"
+               magik-session-cb-buffer (concat "*cb*" (buffer-name))
+               magik-session-cmd-num magik-session-cmd-num
+               magik-session-drag-n-drop-mode-line-string " DnD"
+               magik-session-no-of-cmds magik-session-no-of-cmds
+               magik-session-prev-cmds magik-session-prev-cmds
+               magik-transmit-debug-mode-line-string " #DEBUG"
+               show-trailing-whitespace nil
+               font-lock-defaults '(magik-session-font-lock-keywords nil t ((?_ . "w")))
+               ac-sources (append '(magik-ac-class-method-source
+                                    magik-ac-dynamic-source
+                                    magik-ac-global-source
+                                    magik-ac-object-source
+                                    magik-ac-raise-condition-source)
+                                  ac-sources)
+               magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
+               magik-session-process-environment (cl-copy-list (or magik-session-process-environment process-environment))
+               mode-line-process '(": %s")
+               local-abbrev-table magik-base-mode-abbrev-table)
 
   (unless magik-session-no-of-cmds
-          (compat-call setq-local
-                       magik-session-no-of-cmds 1
-                       magik-session-cmd-num 0
-                       magik-session-prev-cmds (make-vector 100 nil))
-          (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
+    (compat-call setq-local
+                 magik-session-no-of-cmds 1
+                 magik-session-cmd-num 0
+                 magik-session-prev-cmds (make-vector 100 nil))
+    (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
 
-    (unless (and magik-session-buffer (get-buffer magik-session-buffer))
-      (setq-default magik-session-buffer (buffer-name)))
+  (unless (and magik-session-buffer (get-buffer magik-session-buffer))
+    (setq-default magik-session-buffer (buffer-name)))
 
-    (unless (rassoc (buffer-name) magik-session-buffer-alist)
-      (let ((n 1))
-        (while (cdr (assq n magik-session-buffer-alist))
-          (setq n (1+ n)))
-        (if (assq n magik-session-buffer-alist)
-            (setcdr (assq n magik-session-buffer-alist) (buffer-name))
-          (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
+  (unless (rassoc (buffer-name) magik-session-buffer-alist)
+    (let ((n 1))
+      (while (cdr (assq n magik-session-buffer-alist))
+        (setq n (1+ n)))
+      (if (assq n magik-session-buffer-alist)
+          (setcdr (assq n magik-session-buffer-alist) (buffer-name))
+        (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
 
-    ;; Special handling for *gis* buffer
-    (if (equal (buffer-name) "*gis*")
-        (compat-call setq-local
-                     magik-session-exec-path (cl-copy-list exec-path)
-                     magik-session-process-environment (cl-copy-list process-environment)))
+  ;; Special handling for *gis* buffer
+  (if (equal (buffer-name) "*gis*")
+      (compat-call setq-local
+                   magik-session-exec-path (cl-copy-list exec-path)
+                   magik-session-process-environment (cl-copy-list process-environment)))
 
-    (abbrev-mode 1)
+  (abbrev-mode 1)
 
-    (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
-      (erase-buffer))
+  (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
+    (erase-buffer))
 
-    (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu nil t)
-    (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu nil t)
-    (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu nil t)
+  (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu nil t)
+  (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu nil t)
+  (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu nil t)
   (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t))
 
 (defvar magik-session-menu nil
@@ -792,7 +792,7 @@ there is not, prompt for a command to run, and then run it."
 
       (pop-to-buffer (get-buffer-create buffer))
       (unless (eq major-mode 'magik-session-mode)
-	(magik-session-mode))
+        (magik-session-mode))
       (goto-char (point-max))
       (insert "\n" (current-time-string) "\n")
       (setq default-directory (expand-file-name
