@@ -511,7 +511,6 @@ and return a list of all the components of the command."
                       "External Shell Processes"
                       (or shell-list (list "No Processes")))))
 
-
 (define-derived-mode magik-session-mode nil "Magik Session"
   "Major mode to run a GIS as a direct subprocess.
 
@@ -529,10 +528,6 @@ Entry to this mode runs `magik-session-mode-hook`.
   :group 'magik
   :syntax-table magik-base-mode-syntax-table
 
-  (let ((tmp-no-of-gis-cmds magik-session-no-of-cmds)
-        (tmp-gis-cmd-num magik-session-cmd-num)
-        (tmp-prev-gis-cmds magik-session-prev-cmds))
-
     (compat-call setq-local
                  selective-display t
                  comint-last-input-start (make-marker)
@@ -541,7 +536,10 @@ Entry to this mode runs `magik-session-mode-hook`.
                                                    (default-value 'magik-session-command-history))
                  magik-session-filter-state "\C-a"
                  magik-session-cb-buffer (concat "*cb*" (buffer-name))
+                 magik-session-cmd-num magik-session-cmd-num
                  magik-session-drag-n-drop-mode-line-string " DnD"
+                 magik-session-no-of-cmds magik-session-no-of-cmds
+                 magik-session-prev-cmds magik-session-prev-cmds
                  magik-transmit-debug-mode-line-string " #DEBUG"
                  show-trailing-whitespace nil
                  font-lock-defaults '(magik-session-font-lock-keywords nil t ((?_ . "w")))
@@ -556,17 +554,12 @@ Entry to this mode runs `magik-session-mode-hook`.
                  mode-line-process '(": %s")
                  local-abbrev-table magik-base-mode-abbrev-table)
 
-    (if (null tmp-no-of-gis-cmds)
-        (progn
+  (unless magik-session-no-of-cmds
           (compat-call setq-local
                        magik-session-no-of-cmds 1
                        magik-session-cmd-num 0
                        magik-session-prev-cmds (make-vector 100 nil))
           (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
-      (compat-call setq-local
-                   magik-session-no-of-cmds tmp-no-of-gis-cmds
-                   magik-session-cmd-num tmp-gis-cmd-num
-                   magik-session-prev-cmds tmp-prev-gis-cmds))
 
     (unless (and magik-session-buffer (get-buffer magik-session-buffer))
       (setq-default magik-session-buffer (buffer-name)))
@@ -593,7 +586,7 @@ Entry to this mode runs `magik-session-mode-hook`.
     (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu nil t)
     (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu nil t)
     (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu nil t)
-    (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t)))
+  (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t))
 
 (defvar magik-session-menu nil
   "Keymap for the Magik session buffer menu bar.")
@@ -798,7 +791,8 @@ there is not, prompt for a command to run, and then run it."
         (kill-buffer alias-buffer))
 
       (pop-to-buffer (get-buffer-create buffer))
-      (magik-session-mode)
+      (unless (eq major-mode 'magik-session-mode)
+	(magik-session-mode))
       (goto-char (point-max))
       (insert "\n" (current-time-string) "\n")
       (setq default-directory (expand-file-name
@@ -1201,6 +1195,8 @@ n<0 or n>=magik-session-no-of-cmds)."
   "Recall a command starting with STR in the direction STEP.
 If END-OF-COMMAND-P is t then cursor is placed at and of the recalled command.
 An internal function that deals with 4 cases."
+  (or (get-buffer-process (current-buffer))
+      (error "There is no process running in this buffer"))
   (let ((n magik-session-cmd-num)
         mark )
     (while
