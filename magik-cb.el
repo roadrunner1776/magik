@@ -2336,7 +2336,9 @@ comments etc."
           (error "No current word to use as a class-name"))
       (save-match-data
         (if (string-match ":" class)
-            (setq class (replace-match ":^" nil t class))
+            (if (not (string-equal (substring-no-properties class 0 1) ":"))
+                (setq class (replace-match ":^" nil t class))
+              (setq class (replace-match "^" nil t class)))
           (setq class (concat "^" class))))
       (setq class (concat class "$")))))
 
