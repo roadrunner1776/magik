@@ -19,47 +19,16 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'easymenu)
-		   (require 'font-lock)
-		   (require 'magik-utils)
-		   (require 'magik-session))
+(eval-when-compile
+  (require 'easymenu)
+  (require 'font-lock)
+  (require 'magik-utils)
+  (require 'magik-session))
 
 (defgroup magik-product nil
   "Customise Magik product.def files group."
   :group 'magik
   :group 'tools)
-
-(defcustom magik-product-mode-hook nil
-  "*Hook to run after Product Mode is set."
-  :group 'product
-  :type  'hook)
-
-(defvar magik-product-mode-map (make-sparse-keymap)
-  "Keymap for Magik product.def files")
-
-(defvar magik-product-f2-map (make-sparse-keymap)
-  "Keymap for the F2 function key in Magik product.def buffers")
-
-(fset 'magik-product-f2-map   magik-product-f2-map)
-
-(define-key magik-product-mode-map [f2]    'magik-product-f2-map)
-
-(define-key magik-product-f2-map    "b"    'magik-product-transmit-buffer)
-(define-key magik-product-f2-map    "r"    'magik-product-reinitialise)
-
-(defvar magik-product-menu nil
-  "Keymap for the Magik product.def buffer menu bar")
-
-(easy-menu-define magik-product-menu magik-product-mode-map
-  "Menu for Product mode."
-  `(,"Product"
-    [,"Add product"          magik-product-transmit-buffer (magik-utils-buffer-mode-list 'magik-session-mode)]
-    [,"Reinitialise product" magik-product-reinitialise    (magik-utils-buffer-mode-list 'magik-session-mode)]
-    "---"
-    [,"Customize"            magik-product-customize       t]))
-
-(defvar magik-product-mode-syntax-table nil
-  "Syntax table in use in Product Mode buffers.")
 
 ;; Imenu configuration
 (defvar magik-product-imenu-generic-expression
@@ -91,31 +60,34 @@
   (customize-group 'product))
 
 ;;;###autoload
-(defun magik-product-mode ()
+(define-derived-mode magik-product-mode nil "Product"
   "Major mode for editing Magik product.def files.
 
-You can customise Product Mode with the `product-mode-hook'.
+You can customize Product Mode with the `magik-product-mode-hook`.
 
 \\{magik-product-mode-map}"
+  :group 'magik
+  :abbrev-table nil
+  :syntax-table nil
 
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'font-lock-defaults)
+  (compat-call setq-local
+               require-final-newline t
+               imenu-generic-expression magik-product-imenu-generic-expression
+               font-lock-defaults '(magik-product-font-lock-keywords nil t)))
 
-  (use-local-map magik-product-mode-map)
-  (easy-menu-add magik-product-menu)
-  (set-syntax-table magik-product-mode-syntax-table)
+(defvar magik-product-menu nil
+  "Keymap for the Magik product.def buffer menu bar.")
 
-  (setq major-mode 'magik-product-mode
-	mode-name "Product"
-	require-final-newline t
-	imenu-generic-expression magik-product-imenu-generic-expression
-	font-lock-defaults
-	'(magik-product-font-lock-keywords
-	  nil t))
+(easy-menu-define magik-product-menu magik-product-mode-map
+  "Menu for Product mode."
+  `(,"Product"
+    [,"Add product"          magik-product-transmit-buffer (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Reinitialise product" magik-product-reinitialise    (magik-utils-buffer-mode-list 'magik-session-mode)]
+    "---"
+    [,"Customize"            magik-product-customize       t]))
 
-  (run-hooks 'magik-product-mode-hook))
+(defvar magik-product-mode-syntax-table nil
+  "Syntax table in use in Product Mode buffers.")
 
 (defun magik-product-name ()
   "Return current Product's name as a string."
@@ -127,11 +99,11 @@ You can customise Product Mode with the `product-mode-hook'.
   "Reinitialise this product in GIS."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Magik process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (process (barf-if-no-gis gis)))
+                                           'magik-session-mode
+                                           "Enter Magik process buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (process (barf-if-no-gis gis)))
     (display-buffer gis t)
     (process-send-string
      process
@@ -153,12 +125,12 @@ You can customise Product Mode with the `product-mode-hook'.
   "Send current buffer to GIS."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Magik process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (process (barf-if-no-gis gis))
-	 (filename (buffer-file-name)))
+                                           'magik-session-mode
+                                           "Enter Magik process buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (process (barf-if-no-gis gis))
+         (filename (buffer-file-name)))
     (pop-to-buffer gis t)
     (magik-product-transmit-add-product filename process)
     gis))
@@ -171,18 +143,28 @@ Called by `gis-drag-n-drop-load' when a Product file is dropped."
     gis))
 
 ;;; Package initialisation
-(if magik-product-mode-syntax-table
-    nil
-  (setq magik-product-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?_ "w" magik-product-mode-syntax-table)
-  (modify-syntax-entry ?# "<" magik-product-mode-syntax-table)
-  (modify-syntax-entry ?\n ">" magik-product-mode-syntax-table))
+(modify-syntax-entry ?_ "w" magik-product-mode-syntax-table)
+(modify-syntax-entry ?# "<" magik-product-mode-syntax-table)
+(modify-syntax-entry ?\n ">" magik-product-mode-syntax-table)
 
 ;;; Package registration
 
 ;;;###autoload
 (or (assoc "product\\.def$" auto-mode-alist)
     (push '("product\\.def$" . magik-product-mode) auto-mode-alist))
+
+(defvar magik-product-f2-map (make-sparse-keymap)
+  "Keymap for the F2 function key in Magik product.def buffers.")
+
+(progn
+  ;; ------------------------ magik product mode ------------------------
+
+  (fset 'magik-product-f2-map   magik-product-f2-map)
+
+  (define-key magik-product-mode-map [f2]    'magik-product-f2-map)
+
+  (define-key magik-product-f2-map    "b"    'magik-product-transmit-buffer)
+  (define-key magik-product-f2-map    "r"    'magik-product-reinitialise))
 
 (provide 'magik-product)
 ;;; magik-product.el ends here

@@ -11,7 +11,7 @@
 
 ## Installation
 
-These packages are available on [MELPA](https://melpa.org/). 
+These packages are available on [MELPA](https://melpa.org/).
 See [Emacs Wiki](https://www.emacswiki.org/emacs/InstallingPackages) for instructions on how to set up and install packages.
 
 The alternative, and recommended, way of installing [magik-mode](https://github.com/roadrunner1776/magik) is using [use-package](https://github.com/jwiegley/use-package):
@@ -85,6 +85,10 @@ Major mode for editing Magik product.def files.
 ### magik-msg
 
 Major mode for editing Magik Message files.
+
+### magik-trn
+
+Major mode for editing Magik Translation files.
 
 ### magik-lint
 

@@ -1,0 +1,6 @@
+# -*- mode: snippet; -*-
+# name: enumerator
+# key: enumerator
+# expand-env: ((yas-indent-line 'fixed))
+# --
+enumerator	${1:name}	unset	${2:language}	${3:string}	${4:translation}

@@ -32,44 +32,6 @@
   :group 'magik
   :group 'tools)
 
-(defcustom magik-msg-mode-hook nil
-  "*Hook to run after MSG mode is set."
-  :group 'msg
-  :type  'hook)
-
-(defvar magik-msg-mode-map (make-sparse-keymap)
-  "Keymap for Magik Message files")
-
-(defvar magik-msg-f2-map (make-sparse-keymap)
-  "Keymap for the F2 function key in Magik Message buffers")
-
-(fset 'magik-msg-f2-map   magik-msg-f2-map)
-
-(define-key magik-msg-mode-map [f2]    'magik-msg-f2-map)
-
-(define-key magik-msg-f2-map    [down] 'magik-msg-forward-message)
-(define-key magik-msg-f2-map    [up]   'magik-msg-backward-message)
-(define-key magik-msg-f2-map    "b"    'magik-msg-transmit-buffer)
-(define-key magik-msg-f2-map    "c"    'magik-msg-compile-module-messages)
-(define-key magik-msg-f2-map    "m"    'magik-msg-mark-message)
-
-(defvar magik-msg-menu nil
-  "Keymap for the Magik Message buffer menu bar")
-
-(easy-menu-define magik-msg-menu magik-msg-mode-map
-  "Menu for msg mode."
-  `(,"Message"
-    [,"Transmit Buffer"      magik-msg-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]
-    [,"Compile Message File" magik-msg-compile-module-messages (magik-utils-buffer-mode-list 'magik-session-mode)]
-    [,"Next"                 magik-msg-forward-message         t]
-    [,"Previous"             magik-msg-backward-message        t]
-    [,"Mark Message"         magik-msg-mark-message            t]
-    "---"
-    [,"Customize"            magik-msg-customize               t]))
-
-(defvar magik-msg-mode-syntax-table nil
-  "Syntax table in use in MSG-mode buffers.")
-
 ;; Imenu configuration
 (defvar magik-msg-imenu-generic-expression
   '(
@@ -109,7 +71,7 @@
       (re-search-forward "^:" nil t)
     (forward-char 1)
     (or (re-search-forward "^:" nil t)
-	(goto-char (point-max))))
+        (goto-char (point-max))))
   (beginning-of-line))
 
 (defun magik-msg-backward-message ()
@@ -119,7 +81,7 @@
       (re-search-backward "^:" nil t)
     (backward-char 1)
     (or (re-search-backward "^:" nil t)
-	(goto-char (point-min))))
+        (goto-char (point-min))))
   (beginning-of-line))
 
 (defun magik-msg-mark-message ()
@@ -135,45 +97,46 @@
   (magik-msg-backward-message))
 
 ;;;###autoload
-(defun magik-msg-mode ()
+(define-derived-mode magik-msg-mode nil "Message"
   "Major mode for editing Magik Message files.
 
-You can customise msg-mode with the msg-mode-hook.
+You can customize msg-mode with the `magik-msg-mode-hook`.
 
 \\{magik-msg-mode-map}"
+  :group 'magik
+  :abbrev-table nil
 
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'font-lock-defaults)
-  (make-local-variable 'outline-regexp)
+  (compat-call setq-local
+               require-final-newline t
+               imenu-generic-expression magik-msg-imenu-generic-expression
+               font-lock-defaults '(magik-msg-font-lock-keywords nil t)
+               outline-regexp "^:\\(\\sw+\\).*"))
 
-  (use-local-map magik-msg-mode-map)
-  (easy-menu-add magik-msg-menu)
-  (set-syntax-table magik-msg-mode-syntax-table)
+(defvar magik-msg-menu nil
+  "Keymap for the Magik Message buffer menu bar.")
 
-  (setq major-mode 'magik-msg-mode
-	mode-name "Message"
-	require-final-newline t
-	imenu-generic-expression magik-msg-imenu-generic-expression
-	font-lock-defaults
-	'(magik-msg-font-lock-keywords
-	  nil t)
-	outline-regexp "^:\\(\\sw+\\).*")
-
-  (run-hooks 'magik-msg-mode-hook))
+(easy-menu-define magik-msg-menu magik-msg-mode-map
+  "Menu for msg mode."
+  `(,"Message"
+    [,"Transmit Buffer"      magik-msg-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Compile Message File" magik-msg-compile-module-messages (magik-utils-buffer-mode-list 'magik-session-mode)]
+    [,"Next"                 magik-msg-forward-message         t]
+    [,"Previous"             magik-msg-backward-message        t]
+    [,"Mark Message"         magik-msg-mark-message            t]
+    "---"
+    [,"Customize"            magik-msg-customize               t]))
 
 (defun magik-msg-transmit-buffer (&optional gis)
   "Send the buffer to the GIS process.
 The GIS process used is either that given by BUF or the variable `gis-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
-					  'magik-session-mode
-					  "Enter Magik process buffer:"
-					  magik-session-buffer
-					  'magik-session-buffer-alist-prefix-function))
-	(process (barf-if-no-gis gis))
-	(filename (buffer-file-name)))
+                                          'magik-session-mode
+                                          "Enter Magik process buffer:"
+                                          magik-session-buffer
+                                          'magik-session-buffer-alist-prefix-function))
+        (process (barf-if-no-gis gis))
+        (filename (buffer-file-name)))
     ;; Load messages
     (message "%s loaded in buffer %s." filename gis)
     (process-send-string
@@ -188,20 +151,20 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
 The GIS process used is either that given by BUF or the variable `gis-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
-					  'magik-session-mode
-					  "Enter Magik process buffer:"
-					  magik-session-buffer
-					  'magik-session-buffer-alist-prefix-function))
-	(process (barf-if-no-gis gis))
-	(directory (file-name-directory (buffer-file-name))))
+                                          'magik-session-mode
+                                          "Enter Magik process buffer:"
+                                          magik-session-buffer
+                                          'magik-session-buffer-alist-prefix-function))
+        (process (barf-if-no-gis gis))
+        (directory (file-name-directory (buffer-file-name))))
     ;; Load messages
     (message "Compiling all module messages in %s. " gis)
     (process-send-string
      process
      (format
       "_proc(directory)
-	 module << sw_module_manager.locate_module(directory)
-	 sw_module_manager.compile_messages(module)
+   module << sw_module_manager.locate_module(directory)
+   sw_module_manager.compile_messages(module)
       _endproc(%S)\n$\n"
       directory))
     gis))
@@ -221,17 +184,14 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
   "Note whether more than one GIS has been used.")
 
 ;;; Package initialisation
-(if magik-msg-mode-syntax-table
-    ()
-  (setq magik-msg-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?: "w" magik-msg-mode-syntax-table)
-  (modify-syntax-entry ?_ "w" magik-msg-mode-syntax-table)
-  (modify-syntax-entry ?? "w" magik-msg-mode-syntax-table)
-  (modify-syntax-entry ?! "w" magik-msg-mode-syntax-table)
-  ;; multi quote
-  (modify-syntax-entry ?| "$" magik-msg-mode-syntax-table)
-  ;; variable intro
-  (modify-syntax-entry ?# "/" magik-msg-mode-syntax-table))
+(modify-syntax-entry ?: "w" magik-msg-mode-syntax-table)
+(modify-syntax-entry ?_ "w" magik-msg-mode-syntax-table)
+(modify-syntax-entry ?? "w" magik-msg-mode-syntax-table)
+(modify-syntax-entry ?! "w" magik-msg-mode-syntax-table)
+;; multi quote
+(modify-syntax-entry ?| "$" magik-msg-mode-syntax-table)
+;; variable intro
+(modify-syntax-entry ?# "/" magik-msg-mode-syntax-table)
 
 ;;; Package registration
 
@@ -250,18 +210,34 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
 (defun magik-msg-msb-configuration ()
   "Adds Msg files to msb menu, supposes that msb is already loaded."
   (let* ((l (length msb-menu-cond))
-	 (last (nth (1- l) msb-menu-cond))
-	 (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
-	 (handle (1- (nth 1 last))))
+         (last (nth (1- l) msb-menu-cond))
+         (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
+         (handle (1- (nth 1 last))))
     (setcdr precdr (list
-		    (list
-		     '(eq major-mode 'magik-msg-mode)
-		     handle
-		     "Msg Files (%d)")
-		    last))))
+                    (list
+                     '(eq major-mode 'magik-msg-mode)
+                     handle
+                     "Msg Files (%d)")
+                    last))))
 
 (with-eval-after-load 'msb
   (magik-msg-msb-configuration))
+
+(defvar magik-msg-f2-map (make-sparse-keymap)
+  "Keymap for the F2 function key in Magik Message buffers.")
+
+(progn
+  ;; ------------------------ magik msg mode ------------------------
+
+  (fset 'magik-msg-f2-map   magik-msg-f2-map)
+
+  (define-key magik-msg-mode-map [f2]    'magik-msg-f2-map)
+
+  (define-key magik-msg-f2-map    [down] 'magik-msg-forward-message)
+  (define-key magik-msg-f2-map    [up]   'magik-msg-backward-message)
+  (define-key magik-msg-f2-map    "b"    'magik-msg-transmit-buffer)
+  (define-key magik-msg-f2-map    "c"    'magik-msg-compile-module-messages)
+  (define-key magik-msg-f2-map    "m"    'magik-msg-mark-message))
 
 (provide 'magik-msg)
 ;;; magik-msg.el ends here

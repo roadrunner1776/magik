@@ -105,9 +105,9 @@
   "Toggle the electric switch."
   (interactive)
   (setq magik-electric-mode
-	(if (null arg)
-	    (not magik-electric-mode)
-	  (> (prefix-numeric-value arg) 0)))
+        (if (null arg)
+            (not magik-electric-mode)
+          (> (prefix-numeric-value arg) 0)))
   (message (if magik-electric-mode
                "Electric Magik on"
              "Electric Magik off")))
@@ -131,12 +131,12 @@ the previous line starts with a `#' align with that."
   ;;first prepare the line we are inserting on
   (beginning-of-line)
   (let ((blank-linep (looking-at "^\\s-*$"))
-	(end-of-bufferp (save-excursion (end-of-line) (eq (point) (point-max)))))
+        (end-of-bufferp (save-excursion (end-of-line) (eq (point) (point-max)))))
     (and blank-linep (delete-horizontal-space))
     (if (or (not blank-linep) end-of-bufferp)
-	(progn
-	  (insert "\n")
-	  (forward-line -1))))
+        (progn
+          (insert "\n")
+          (forward-line -1))))
   ;;Insert the default pragma statement
   (insert "prag")
   (magik-explicit-electric-space))
@@ -155,19 +155,19 @@ the previous line starts with a `#' align with that."
     ;;Since we now allow for _ in templates for def_slotted_exemplar etc.
     ;;we have to remove any initial _ for normal magik keywords
     (if (and (> (length str) 0)
-	     (equal (substring str 0 1) "_"))
-	(setq str (substring str 1)
-	      len (length str)))
+             (equal (substring str 0 1) "_"))
+        (setq str (substring str 1)
+              len (length str)))
     (setq keyword (all-completions str magik-electric-templates))
     (cond ((null keyword)
-	   nil)
-	  ((eq (length keyword) 1)
-	   (setq keyword (car keyword)))
-	  (t
-	   (setq keyword (completing-read
-			  "Electric template: "
-			  (mapcar (function (lambda (k) (cons k k))) keyword)
-			  nil t))))
+           nil)
+          ((eq (length keyword) 1)
+           (setq keyword (car keyword)))
+          (t
+           (setq keyword (completing-read
+                          "Electric template: "
+                          (mapcar (function (lambda (k) (cons k k))) keyword)
+                          nil t))))
     (if keyword
         (progn
           (save-excursion
@@ -187,13 +187,13 @@ the previous line starts with a `#' align with that."
       (looking-at "##?"))
     (let*
         ((match-str (match-string 0))
-	 (auto-fill-function 'do-auto-fill)
+         (auto-fill-function 'do-auto-fill)
          (fill-prefix (concat
                        (save-excursion
                          (back-to-indentation)
-			 (buffer-substring (line-beginning-position) (point)))
+                         (buffer-substring (line-beginning-position) (point)))
                        match-str
-		       " "));we want to make the next line indented with a space
+                       " "));we want to make the next line indented with a space
          (fill-column (save-excursion
                         (back-to-indentation)
                         (+ (current-column) 63))))
@@ -229,9 +229,9 @@ the previous line starts with a `#' align with that."
        (p (point)))
     (delete-char (- len))
     (if (save-excursion (re-search-forward "[^ \t]" (line-end-position) t))
-	(progn
-	  (insert ?\n)
-	  (backward-char))
+        (progn
+          (insert ?\n)
+          (backward-char))
       (delete-region (point) (line-end-position)))
     (setq template (cddr template))
     (while template
@@ -242,38 +242,38 @@ the previous line starts with a `#' align with that."
     (goto-char p)
     (forward-line y)
     (cond ((not (numberp x))
-	   (end-of-line))
-	  ((>= x 0)
-	   (move-to-column (+ col len x)))
-	  (t
-	   (end-of-line)
-	   (forward-char x)))))
+           (end-of-line))
+          ((>= x 0)
+           (move-to-column (+ col len x)))
+          (t
+           (end-of-line)
+           (forward-char x)))))
 
 (defun magik-electric-insert-template-line (name line col)
   "Interpret one line of the electric template."
   (if (and (listp line)
-	   (not (eq (car line) 'prev_pragma)))
+           (not (eq (car line) 'prev_pragma)))
       ;;RECURSIVE
       (dolist (x line)
         (magik-electric-insert-template-line name x col))
     (run-hook-with-args 'magik-electric-insert-template-line-pre-hook name line col)
     (cond
      ((and (listp line)
-	   (eq (car line) 'prev_pragma))
+           (eq (car line) 'prev_pragma))
       (if (save-excursion
-	    (re-search-backward "^_pragma([^)]*)" nil t))
-	  (let ((str (match-string 0))
-		(pt (point)))
-	    (insert str)
-	    (save-excursion
-	      (and (string-match "classify_level=deprecated" str) ;Was it deprecated?
-		   (goto-char pt)                                 ;place point ready to insert deprecated template
-		   (magik-pragma-insert-deprecated-template)      ;because this fn assumes that it is on the pragma line
-		   )))
-	(let ((str (if (> (length line) 1)
-		       (cadr line)
-		     magik-electric-default-pragma)))
-	  (insert str))))
+            (re-search-backward "^_pragma([^)]*)" nil t))
+          (let ((str (match-string 0))
+                (pt (point)))
+            (insert str)
+            (save-excursion
+              (and (string-match "classify_level=deprecated" str) ;Was it deprecated?
+                   (goto-char pt)                                 ;place point ready to insert deprecated template
+                   (magik-pragma-insert-deprecated-template)      ;because this fn assumes that it is on the pragma line
+                   )))
+        (let ((str (if (> (length line) 1)
+                       (cadr line)
+                     magik-electric-default-pragma)))
+          (insert str))))
      ((eq line '-)
       (magik-indent-command))
      ((eq line 'dollar)
@@ -283,25 +283,25 @@ the previous line starts with a `#' align with that."
        (eq line 'prev_class_name)
        (eq line 'prev_class_name_as_symbol))
       (let (class)
-	(save-excursion
-	  (cond ((re-search-backward "_method[ \t]+\\(\\(\\sw\\|_\\)+\\)\\." nil t)
-		 (setq class (match-string 1)))
-		((re-search-backward "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
-		 (setq class (match-string 2)))
-		((re-search-backward "def_mixin\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
-		 (setq class (match-string 2)))
-		(t nil)))
-	(if (and class
-		 (eq line 'prev_class_name))
-	    (insert class "."))
-	(if (and class
-		 (eq line 'prev_class_name_as_symbol))
-	    (insert ":" class))))
+        (save-excursion
+          (cond ((re-search-backward "_method[ \t]+\\(\\(\\sw\\|_\\)+\\)\\." nil t)
+                 (setq class (match-string 1)))
+                ((re-search-backward "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
+                 (setq class (match-string 2)))
+                ((re-search-backward "def_mixin\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
+                 (setq class (match-string 2)))
+                (t nil)))
+        (if (and class
+                 (eq line 'prev_class_name))
+            (insert class "."))
+        (if (and class
+                 (eq line 'prev_class_name_as_symbol))
+            (insert ":" class))))
      ((eq line 'filename_as_symbol)
       (let ((name (if (not (buffer-file-name)) "" (file-name-nondirectory (buffer-file-name)))))
-	(if (string-match "\\.magik$" name)
-	    (setq name (substring name 0 (- (length name) 6))))
-	(insert ":" name)))
+        (if (string-match "\\.magik$" name)
+            (setq name (substring name 0 (- (length name) 6))))
+        (insert ":" name)))
      ((eq (string-to-char line) ?\t)
       (indent-to (+ col magik-indent-level))
       (insert (substring line 1)))

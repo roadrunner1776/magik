@@ -126,6 +126,7 @@
      ((parent-is "else") parent magik-indent-level)
      ((parent-is "iterator") parent magik-indent-level)
      ((parent-is "loop") parent magik-indent-level)
+     ((parent-is "finally") parent magik-indent-level)
      ((parent-is "while") parent magik-indent-level)
      ((parent-is "method") parent magik-indent-level)
      ((parent-is "protect") parent magik-indent-level)
@@ -152,7 +153,9 @@
 
 ;;;###autoload
 (define-derived-mode magik-ts-mode magik-base-mode "Magik"
-  "Major mode for editing Magik code, using tree-sitter library."
+  "Major mode for editing Magik code, using tree-sitter library.
+
+\\{magik-ts-mode-map}"
   :group 'magik
   :abbrev-table nil
   :syntax-table nil
@@ -160,19 +163,21 @@
   ;; Tree-sitter setup.
   (treesit-parser-create 'magik)
 
-  (setq-local treesit-simple-indent-rules magik-ts-mode--indent-rules
-	      treesit-font-lock-settings magik--treesit-settings
-	      treesit-font-lock-feature-list '((comment pragma)
-					       (type constant keyword string)
-					       ()
-					       ()
-					       (error)))
+  (setq-local
+   treesit-simple-indent-rules magik-ts-mode--indent-rules
+   treesit-font-lock-settings magik--treesit-settings
+   treesit-font-lock-feature-list '((comment pragma)
+                                    (type constant keyword string)
+                                    ()
+                                    ()
+                                    (error)))
+
   (treesit-major-mode-setup))
 
 ;;;###autoload
 (when (and (or (featurep 'treesit)
-	       (require 'treesit nil 'noerror))
-	   (fboundp 'treesit-ready-p))
+               (require 'treesit nil 'noerror))
+           (fboundp 'treesit-ready-p))
   (add-to-list 'treesit-language-source-alist '(magik "https://github.com/krn-robin/tree-sitter-magik"))
   (when (treesit-ready-p 'magik)
     (add-to-list 'major-mode-remap-alist '(magik-mode . magik-ts-mode))

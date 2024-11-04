@@ -19,20 +19,18 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'easymenu)
-		   (require 'font-lock)
-		   (require 'magik-utils)
-		   (require 'magik-session))
+(eval-when-compile
+  (require 'easymenu)
+  (require 'font-lock)
+  (require 'magik-utils)
+  (require 'magik-session))
+
+(require 'compat)
 
 (defgroup magik-module nil
   "Customise Magik module.def files group."
   :group 'magik
   :group 'tools)
-
-(defcustom magik-module-mode-hook nil
-  "*Hook to run after Module Mode is set."
-  :group 'module
-  :type  'hook)
 
 (defcustom magik-module-option-save-magikc t
   "*If t, save .magikc files when loading module."
@@ -44,22 +42,50 @@
   :group 'smallworld
   :type  'boolean)
 
-(defvar magik-module-mode-map (make-sparse-keymap)
-  "Keymap for Magik module.def files.")
+;; Imenu configuration
+(defvar magik-module-imenu-generic-expression
+  '(
+    (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
+    )
+  "Imenu generic expression for Magik Message mode.  See `imenu-generic-expression'.")
 
-(defvar magik-module-f2-map (make-sparse-keymap)
-  "Keymap for the F2 function key in Magik module.def buffers.")
+;; Font-lock configuration
+(defcustom magik-module-font-lock-keywords
+  (list
+   '("^end\\s-*$" . font-lock-keyword-face)
+   '("^hidden$" . font-lock-keyword-face)
+   '("^\\(language\\)\\s-+\\(\\sw+\\)"
+     (1 font-lock-keyword-face)
+     (2 font-lock-type-face))
+   '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
+   '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
+     (1 font-lock-function-name-face)
+     (2 font-lock-constant-face))
+   )
+  "Default fontification of module.def files."
+  :group 'module
+  :type 'sexp)
 
-(fset 'magik-module-f2-map   magik-module-f2-map)
+(defun magik-module-customize ()
+  "Open Customization buffer for Module Mode."
+  (interactive)
+  (customize-group 'magik-module))
 
-(define-key magik-module-mode-map [f2]    'magik-module-f2-map)
+;;;###autoload
+(define-derived-mode magik-module-mode nil "Module"
+  "Major mode for editing Magik module.def files.
 
-(define-key magik-module-f2-map   "b"     'magik-module-transmit-buffer)
-(define-key magik-module-f2-map   "c"     'magik-module-compile-messages)
-(define-key magik-module-f2-map   "d"     'magik-module-reload-module-definition)
-(define-key magik-module-f2-map   "m"     'magik-module-toggle-save-magikc)
-(define-key magik-module-f2-map   "r"     'magik-module-toggle-force-reload)
-(define-key magik-module-f2-map   "R"     'magik-module-remove-module)
+You can customize Module Mode with the `magik-module-mode-hook`.
+
+\\{magik-module-mode-map}"
+
+  :group 'magik
+  :abbrev-table nil
+
+  (compat-call setq-local
+               require-final-newline t
+               imenu-generic-expression magik-module-imenu-generic-expression
+               font-lock-defaults '(magik-module-font-lock-keywords nil t)))
 
 (defvar magik-module-menu nil
   "Keymap for the Magik module.def buffer menu bar.")
@@ -138,42 +164,15 @@
   (interactive)
   (customize-group 'magik-module))
 
-;;;###autoload
-(defun magik-module-mode ()
-  "Major mode for editing Magik module.def files.
-
-You can customise Module Mode with the `module-mode-hook'.
-
-\\{magik-module-mode-map}"
-
-  (interactive)
-  (kill-all-local-variables)
-  (make-local-variable 'require-final-newline)
-  (make-local-variable 'font-lock-defaults)
-
-  (use-local-map magik-module-mode-map)
-  (easy-menu-add magik-module-menu)
-  (set-syntax-table magik-module-mode-syntax-table)
-
-  (setq major-mode 'magik-module-mode
-	mode-name "Module"
-	require-final-newline t
-	imenu-generic-expression magik-module-imenu-generic-expression
-	font-lock-defaults
-	'(magik-module-font-lock-keywords
-	  nil t))
-
-  (run-hooks 'magik-module-mode-hook))
-
 (defun magik-module-toggle-save-magikc (arg)
   "Toggle saving of .magikc files when loading module."
   (interactive "P")
   (setq magik-module-option-save-magikc
-	(if (null arg)
-	    (not magik-module-option-save-magikc)
-	  (> (prefix-numeric-value arg) 0)))
+        (if (null arg)
+            (not magik-module-option-save-magikc)
+          (> (prefix-numeric-value arg) 0)))
   (message "Set :save_magikc? to %s"
-	   (magik-function-convert magik-module-option-save-magikc)))
+           (magik-function-convert magik-module-option-save-magikc)))
 
 (defun magik-module-toggle-force-reload (arg)
   "Toggle force_reload? option when loading module.
@@ -181,17 +180,17 @@ If called with a non-integer prefix key then the :prerequisites
 option is set."
   (interactive "P")
   (setq magik-module-option-force-reload
-	(cond ((null arg)
-	       (not magik-module-option-force-reload))
-	      ((symbolp arg)
-	       arg)
-	      ((and current-prefix-arg (not (integerp current-prefix-arg)))
-	       'prerequisites)
-	      (t
-	       (> (prefix-numeric-value arg) 0))))
+        (cond ((null arg)
+               (not magik-module-option-force-reload))
+              ((symbolp arg)
+               arg)
+              ((and current-prefix-arg (not (integerp current-prefix-arg)))
+               'prerequisites)
+              (t
+               (> (prefix-numeric-value arg) 0))))
 
   (message "Set :force_reload? option to %s"
-	   (magik-function-convert magik-module-option-force-reload)))
+           (magik-function-convert magik-module-option-force-reload)))
 
 (defun magik-module-name ()
   "Return current Module's name as a string."
@@ -203,12 +202,12 @@ option is set."
   "Reload the module definition in the GIS process."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Gis process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (module (intern (concat "|" (magik-module-name) "|")))
-	 (process (barf-if-no-gis gis)))
+                                           'magik-session-mode
+                                           "Enter Gis process buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (module (intern (concat "|" (magik-module-name) "|")))
+         (process (barf-if-no-gis gis)))
     (message "%s reloaded in buffer %s." (magik-module-name) gis)
     (display-buffer gis t)
     (process-send-string
@@ -222,12 +221,12 @@ option is set."
   "Compile all the Module's messages in the GIS process."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Gis process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (module (intern (concat "|" (magik-module-name) "|")))
-	 (process (barf-if-no-gis gis)))
+                                           'magik-session-mode
+                                           "Enter Gis process buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (module (intern (concat "|" (magik-module-name) "|")))
+         (process (barf-if-no-gis gis)))
     (message "Compiled messages for %s in buffer %s." (magik-module-name) gis)
     (display-buffer gis t)
     (process-send-string
@@ -235,10 +234,10 @@ option is set."
      (concat
       (magik-function
        "_proc(module_name, version)
-	 _if (a_module << sw_module_manager.module(module_name, version, _true)) _isnt _unset
-	 _then
-	   a_module.compile_messages()
-	 _endif
+   _if (a_module << sw_module_manager.module(module_name, version, _true)) _isnt _unset
+   _then
+     a_module.compile_messages()
+   _endif
        _endproc"
        module 'unset) ;include version number?
       "\n$\n"))
@@ -250,12 +249,12 @@ If module definition is not known to the Magik GIS it is loaded as
 a standalone module."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Gis process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (module (intern (concat "|" (magik-module-name) "|")))
-	 (process (barf-if-no-gis gis)))
+                                           'magik-session-mode
+                                           "Enter Gis process buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (module (intern (concat "|" (magik-module-name) "|")))
+         (process (barf-if-no-gis gis)))
     (display-buffer gis t)
     (process-send-string
      process
@@ -274,12 +273,12 @@ a standalone module."
      (concat
       "_try\n"
       (magik-function "sw_module_manager.load_module" module 'unset
-		      'save_magikc?  magik-module-option-save-magikc
-		      'force_reload? magik-module-option-force-reload)
+                      'save_magikc?  magik-module-option-save-magikc
+                      'force_reload? magik-module-option-force-reload)
       "_when sw_module_no_such_module\n"
       (magik-function "sw_module_manager.load_standalone_module_definition" filename
-		      'save_magikc?  magik-module-option-save-magikc
-		      'force_reload? magik-module-option-force-reload)
+                      'save_magikc?  magik-module-option-save-magikc
+                      'force_reload? magik-module-option-force-reload)
       "_endtry\n"
       "$\n"))))
 
@@ -287,12 +286,12 @@ a standalone module."
   "Send current buffer to GIS."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-					   'magik-session-mode
-					   "Enter Gis process buffer:"
-					   magik-session-buffer
-					   'magik-session-buffer-alist-prefix-function))
-	 (process (barf-if-no-gis gis))
-	 (filename (buffer-file-name)))
+                                           'magik-session-mode
+                                           "Enter Gis process buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (process (barf-if-no-gis gis))
+         (filename (buffer-file-name)))
     (message "%s loaded in buffer %s." (magik-module-name) gis)
     (display-buffer gis t)
     (magik-module-transmit-load-module filename process)
@@ -306,12 +305,9 @@ Called by `gis-drag-n-drop-load' when a Module file is dropped."
     gis))
 
 ;;; Package initialisation
-(if magik-module-mode-syntax-table
-    nil
-  (setq magik-module-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?_ "w" magik-module-mode-syntax-table)
-  (modify-syntax-entry ?# "<" magik-module-mode-syntax-table)
-  (modify-syntax-entry ?\n ">" magik-module-mode-syntax-table))
+(modify-syntax-entry ?_ "w" magik-module-mode-syntax-table)
+(modify-syntax-entry ?# "<" magik-module-mode-syntax-table)
+(modify-syntax-entry ?\n ">" magik-module-mode-syntax-table)
 
 ;;; Package registration
 
@@ -319,5 +315,22 @@ Called by `gis-drag-n-drop-load' when a Module file is dropped."
 (or (assoc "module\\.def$" auto-mode-alist)
     (push '("module\\.def$" . magik-module-mode) auto-mode-alist))
 
+(defvar magik-module-f2-map (make-sparse-keymap)
+  "Keymap for the F2 function key in Magik module.def buffers.")
+
+(progn
+  ;; ------------------------ magik module mode ------------------------
+
+  (fset 'magik-module-f2-map   magik-module-f2-map)
+
+  (define-key magik-module-mode-map [f2]    'magik-module-f2-map)
+
+  (define-key magik-module-f2-map   "b"     'magik-module-transmit-buffer)
+  (define-key magik-module-f2-map   "c"     'magik-module-compile-messages)
+  (define-key magik-module-f2-map   "d"     'magik-module-reload-module-definition)
+  (define-key magik-module-f2-map   "m"     'magik-module-toggle-save-magikc)
+  (define-key magik-module-f2-map   "r"     'magik-module-toggle-force-reload)
+  (define-key magik-module-f2-map   "R"     'magik-module-remove-module))
+
 (provide 'magik-module)
-;;; module.el ends here
+;;; magik-module.el ends here
