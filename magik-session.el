@@ -230,16 +230,19 @@ this variable buffer-local by putting the following in your .emacs
   "No. of commands we have sent to this buffer's gis including the
 null one at the end, but excluding commands that have been spotted as
 being degenerate.")
+(put 'magik-session-no-of-cmds 'permanent-local t)
 
 (defvar magik-session-cmd-num nil
   "A number telling us what command is being recalled.  Important for
 M-p and M-n commands.  The first command typed is number 0.  The
 current command being typed is number (1- magik-session-no-of-cmds).")
+(put 'magik-session-cmd-num 'permanent-local t)
 
 (defvar magik-session-prev-cmds nil
   "A vector of pairs of markers, oldest commands first.  Every time
 the vector fills up, we copy to a new vector and clean out naff
 markers.")
+(put 'magik-session-prev-cmds 'permanent-local t)
 
 (defvar magik-session-history-length 20
   "The default number of commands to fold.")
@@ -561,17 +564,10 @@ Entry to this mode runs `magik-session-mode-hook`.
                  magik-session-prev-cmds (make-vector 100 nil))
     (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
 
-  (unless (and magik-session-buffer (get-buffer magik-session-buffer))
-    (setq-default magik-session-buffer (buffer-name)))
+  (abbrev-mode 1)
 
-  (unless (rassoc (buffer-name) magik-session-buffer-alist)
-    (let ((n 1))
-      (while (cdr (assq n magik-session-buffer-alist))
-        (setq n (1+ n)))
-      (if (assq n magik-session-buffer-alist)
-          (setcdr (assq n magik-session-buffer-alist) (buffer-name))
-        (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
-
+  (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
+    (erase-buffer))
   ;; Special handling for *gis* buffer
   (if (equal (buffer-name) "*gis*")
       (compat-call setq-local
