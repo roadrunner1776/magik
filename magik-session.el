@@ -516,17 +516,12 @@ and return a list of all the components of the command."
 
 (define-derived-mode magik-session-mode nil "Magik Session"
   "Major mode to run a GIS as a direct subprocess.
-
 The default name for a buffer running a GIS is \"*gis*\". The name of
 the current GIS buffer is stored in the user option `magik-session-buffer`.
-
 There are many ways to recall previous commands (see the online
 help with \\[help-command]).
-
 Commands are sent to the GIS with the F8 key or the return key.
-
 Entry to this mode runs `magik-session-mode-hook`.
-
 \\{magik-session-mode-map}"
   :group 'magik
   :syntax-table magik-base-mode-syntax-table
@@ -564,10 +559,17 @@ Entry to this mode runs `magik-session-mode-hook`.
                  magik-session-prev-cmds (make-vector 100 nil))
     (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
 
-  (abbrev-mode 1)
+  (unless (and magik-session-buffer (get-buffer magik-session-buffer))
+    (setq-default magik-session-buffer (buffer-name)))
 
-  (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
-    (erase-buffer))
+  (unless (rassoc (buffer-name) magik-session-buffer-alist)
+    (let ((n 1))
+      (while (cdr (assq n magik-session-buffer-alist))
+        (setq n (1+ n)))
+      (if (assq n magik-session-buffer-alist)
+          (setcdr (assq n magik-session-buffer-alist) (buffer-name))
+        (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
+
   ;; Special handling for *gis* buffer
   (if (equal (buffer-name) "*gis*")
       (compat-call setq-local
