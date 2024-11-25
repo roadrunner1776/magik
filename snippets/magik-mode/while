@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: while
+# key: while
+# expand-env: ((yas-indent-line 'fixed))
+# group: control structure.loop
+# --
+_while ${1:cond}
+_loop
+	$0
+_endloop

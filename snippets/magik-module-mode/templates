@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: templates
+# key: templates
+# expand-env: ((yas-indent-line 'fixed))
+# --
+templates
+	${1:magik_file_name.magik}$2
+end
+
+$0

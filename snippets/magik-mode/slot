@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: slot
+# key: slot
+# group: object oriented.slot
+# --
+{:${1:name}, _unset}$0

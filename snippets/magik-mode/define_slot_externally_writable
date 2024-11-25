@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: define_slot_externally_writable
+# key: define_slot_externally_writable
+# group: object oriented.slot
+# --
+`(magik-yasnippet-prev-pragma)`
+##
+##
+##
+`(magik-yasnippet-prev-class-name-with-dot)`define_slot_externally_writable(:${1:name})
+$
+
+$0

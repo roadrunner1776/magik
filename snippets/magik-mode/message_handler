@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: message_handler
+# key: message_handler
+# group: messages
+# --
+message_handler.new(${1:`(magik-yasnippet-prev-class-name-as-symbol)`})$0
+$

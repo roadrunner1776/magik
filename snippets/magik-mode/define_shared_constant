@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: define_shared_constant
+# key: define_shared_constant
+# group: define.object oriented
+# --
+`(magik-yasnippet-prev-pragma)`
+## 
+## 
+## 
+`(magik-yasnippet-prev-class-name-with-dot)`define_shared_constant(:${1:name}, ${2:value}, ${3:$$(yas-completing-read
+"Private?:
+##  private?         get
+##  --------------------
+##  :private/_true   pri
+##  :public/_false   pub
+" '(":private" ":public" "_true" "_false"))})
+$
+
+$0
