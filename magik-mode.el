@@ -1860,12 +1860,11 @@ Argument ENDING-POINT ..."
 
 (defun magik-parse-exemplar-type-docs ()
   (let ((starting-point (- (line-number-at-pos) 1))
-	(slots (magik-slotted-exemplar-slots (line-number-at-pos)))
+	(slots (magik-slotted-exemplar-slots (point)))
 	(slots-in-comments `())
 	(missing-slots `())
 	(comments nil)
 	(comments-found 0))
-    (message "%s" (line-number-at-pos))
     (while (and (not (looking-at (cdr (assoc "pragma" magik-regexp))))
 		(> (point) (point-min))
 		(not (looking-at "^\\s-*$")))
