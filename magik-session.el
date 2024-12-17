@@ -231,16 +231,19 @@ this variable buffer-local by putting the following in your .emacs
   "No. of commands we have sent to this buffer's gis including the
 null one at the end, but excluding commands that have been spotted as
 being degenerate.")
+(put 'magik-session-no-of-cmds 'permanent-local t)
 
 (defvar magik-session-cmd-num nil
   "A number telling us what command is being recalled.  Important for
 M-p and M-n commands.  The first command typed is number 0.  The
 current command being typed is number (1- magik-session-no-of-cmds).")
+(put 'magik-session-cmd-num 'permanent-local t)
 
 (defvar magik-session-prev-cmds nil
   "A vector of pairs of markers, oldest commands first.  Every time
 the vector fills up, we copy to a new vector and clean out naff
 markers.")
+(put 'magik-session-prev-cmds 'permanent-local t)
 
 (defvar magik-session-history-length 20
   "The default number of commands to fold.")
@@ -512,89 +515,77 @@ and return a list of all the components of the command."
                       "External Shell Processes"
                       (or shell-list (list "No Processes")))))
 
-
 (define-derived-mode magik-session-mode nil "Magik Session"
   "Major mode to run a GIS as a direct subprocess.
-
 The default name for a buffer running a GIS is \"*gis*\". The name of
 the current GIS buffer is stored in the user option `magik-session-buffer`.
-
 There are many ways to recall previous commands (see the online
 help with \\[help-command]).
-
 Commands are sent to the GIS with the F8 key or the return key.
-
 Entry to this mode runs `magik-session-mode-hook`.
-
 \\{magik-session-mode-map}"
   :group 'magik
   :syntax-table magik-base-mode-syntax-table
 
-  (let ((tmp-no-of-gis-cmds magik-session-no-of-cmds)
-        (tmp-gis-cmd-num magik-session-cmd-num)
-        (tmp-prev-gis-cmds magik-session-prev-cmds))
+  (compat-call setq-local
+               selective-display t
+               comint-last-input-start (make-marker)
+               comint-last-input-end (make-marker)
+               magik-session-command-history (or magik-session-command-history
+                                                 (default-value 'magik-session-command-history))
+               magik-session-filter-state "\C-a"
+               magik-session-cb-buffer (concat "*cb*" (buffer-name))
+               magik-session-cmd-num magik-session-cmd-num
+               magik-session-drag-n-drop-mode-line-string " DnD"
+               magik-session-no-of-cmds magik-session-no-of-cmds
+               magik-session-prev-cmds magik-session-prev-cmds
+               magik-transmit-debug-mode-line-string " #DEBUG"
+               show-trailing-whitespace nil
+               font-lock-defaults '(magik-session-font-lock-keywords nil t ((?_ . "w")))
+               ac-sources (append '(magik-ac-class-method-source
+                                    magik-ac-dynamic-source
+                                    magik-ac-global-source
+                                    magik-ac-object-source
+                                    magik-ac-raise-condition-source)
+                                  ac-sources)
+               magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
+               magik-session-process-environment (cl-copy-list (or magik-session-process-environment process-environment))
+               mode-line-process '(": %s")
+               local-abbrev-table magik-base-mode-abbrev-table)
 
+  (unless magik-session-no-of-cmds
     (compat-call setq-local
-                 selective-display t
-                 comint-last-input-start (make-marker)
-                 comint-last-input-end (make-marker)
-                 magik-session-command-history (or magik-session-command-history
-                                                   (default-value 'magik-session-command-history))
-                 magik-session-filter-state "\C-a"
-                 magik-session-cb-buffer (concat "*cb*" (buffer-name))
-                 magik-session-drag-n-drop-mode-line-string " DnD"
-                 magik-transmit-debug-mode-line-string " #DEBUG"
-                 show-trailing-whitespace nil
-                 font-lock-defaults '(magik-session-font-lock-keywords nil t ((?_ . "w")))
-                 ac-sources (append '(magik-ac-class-method-source
-                                      magik-ac-dynamic-source
-                                      magik-ac-global-source
-                                      magik-ac-object-source
-                                      magik-ac-raise-condition-source)
-                                    ac-sources)
-                 magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
-                 magik-session-process-environment (cl-copy-list (or magik-session-process-environment process-environment))
-                 mode-line-process '(": %s")
-                 local-abbrev-table magik-base-mode-abbrev-table)
+                 magik-session-no-of-cmds 1
+                 magik-session-cmd-num 0
+                 magik-session-prev-cmds (make-vector 100 nil))
+    (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
 
-    (if (null tmp-no-of-gis-cmds)
-        (progn
-          (compat-call setq-local
-                       magik-session-no-of-cmds 1
-                       magik-session-cmd-num 0
-                       magik-session-prev-cmds (make-vector 100 nil))
-          (aset magik-session-prev-cmds 0 (let ((m (point-min-marker))) (cons m m))))
+  (unless (and magik-session-buffer (get-buffer magik-session-buffer))
+    (setq-default magik-session-buffer (buffer-name)))
+
+  (unless (rassoc (buffer-name) magik-session-buffer-alist)
+    (let ((n 1))
+      (while (cdr (assq n magik-session-buffer-alist))
+        (setq n (1+ n)))
+      (if (assq n magik-session-buffer-alist)
+          (setcdr (assq n magik-session-buffer-alist) (buffer-name))
+        (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
+
+  ;; Special handling for *gis* buffer
+  (if (equal (buffer-name) "*gis*")
       (compat-call setq-local
-                   magik-session-no-of-cmds tmp-no-of-gis-cmds
-                   magik-session-cmd-num tmp-gis-cmd-num
-                   magik-session-prev-cmds tmp-prev-gis-cmds))
+                   magik-session-exec-path (cl-copy-list exec-path)
+                   magik-session-process-environment (cl-copy-list process-environment)))
 
-    (unless (and magik-session-buffer (get-buffer magik-session-buffer))
-      (setq-default magik-session-buffer (buffer-name)))
+  (abbrev-mode 1)
 
-    (unless (rassoc (buffer-name) magik-session-buffer-alist)
-      (let ((n 1))
-        (while (cdr (assq n magik-session-buffer-alist))
-          (setq n (1+ n)))
-        (if (assq n magik-session-buffer-alist)
-            (setcdr (assq n magik-session-buffer-alist) (buffer-name))
-          (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
+  (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
+    (erase-buffer))
 
-    ;; Special handling for *gis* buffer
-    (if (equal (buffer-name) "*gis*")
-        (compat-call setq-local
-                     magik-session-exec-path (cl-copy-list exec-path)
-                     magik-session-process-environment (cl-copy-list process-environment)))
-
-    (abbrev-mode 1)
-
-    (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
-      (erase-buffer))
-
-    (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu nil t)
-    (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu nil t)
-    (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu nil t)
-    (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t)))
+  (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu nil t)
+  (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu nil t)
+  (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu nil t)
+  (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t))
 
 (defvar magik-session-menu nil
   "Keymap for the Magik session buffer menu bar.")
@@ -799,7 +790,8 @@ there is not, prompt for a command to run, and then run it."
         (kill-buffer alias-buffer))
 
       (pop-to-buffer (get-buffer-create buffer))
-      (magik-session-mode)
+      (unless (eq major-mode 'magik-session-mode)
+        (magik-session-mode))
       (goto-char (point-max))
       (insert "\n" (current-time-string) "\n")
       (setq default-directory (expand-file-name
@@ -1202,6 +1194,8 @@ n<0 or n>=magik-session-no-of-cmds)."
   "Recall a command starting with STR in the direction STEP.
 If END-OF-COMMAND-P is t then cursor is placed at and of the recalled command.
 An internal function that deals with 4 cases."
+  (or (get-buffer-process (current-buffer))
+      (error "There is no process running in this buffer"))
   (let ((n magik-session-cmd-num)
         mark )
     (while
