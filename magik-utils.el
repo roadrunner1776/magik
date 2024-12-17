@@ -279,14 +279,5 @@ Used for determining a suitable BUFFER using the following interface:
                                                            (magik-utils-buffer-mode-list mode predicate)))
           (t default))))
 
-(defun magik-utils-delete-process-safely (process)
-  "A safe `delete-process'.
-This is to protect against Emacs 22.1.1 on Windows from hanging irretrievably
-when the subprocess being killed does not terminate quickly enough."
-  (if (and (eq system-type 'windows-nt)
-           (equal emacs-version "22.1.1"))
-      (kill-process process)
-    (delete-process process)))
-
 (provide 'magik-utils)
 ;;; magik-utils.el ends here
