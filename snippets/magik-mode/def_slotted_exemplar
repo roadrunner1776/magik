@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: def_slotted_exemplar
+# key: def_slotted_exemplar
+# expand-env: ((yas-indent-line 'fixed))
+# group: object oriented
+# --
+`(magik-yasnippet-prev-pragma)`
+## 
+## 
+## 
+def_slotted_exemplar(${1:`(magik-yasnippet-filename-as-symbol)`},
+		     {
+			     $2
+		     }$3)
+$
+
+$0

@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: test
+# key: test
+# expand-env: ((yas-indent-line 'fixed))
+# group: testing
+# --
+test
+	name		${1:test_name}
+	framework	${2:munit}
+	args		$3
+end
+
+$0

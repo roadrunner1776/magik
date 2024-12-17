@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: requires
+# key: requires
+# expand-env: ((yas-indent-line 'fixed))
+# --
+requires
+	${1:product_name}$2
+end
+
+$0

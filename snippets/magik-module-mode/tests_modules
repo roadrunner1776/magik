@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: tests_modules
+# key: tests_modules
+# expand-env: ((yas-indent-line 'fixed))
+# group: testing
+# --
+tests_modules
+	${1:module_name}$2
+end
+
+$0
