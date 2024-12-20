@@ -1774,8 +1774,8 @@ Argument END ..."
         (search-result nil))
     (save-excursion
       (search-backward-regexp "^\\$" nil t)
-      (setq starting-point (line-number-at-pos))
-      (setq search-result (search-forward-regexp (cdr (assoc "pragma" magik-regexp)) nil t))
+      (setq starting-point (line-number-at-pos)
+            search-result (search-forward-regexp (cdr (assoc "pragma" magik-regexp)) nil t))
       (when (or (and (not (equal search-result nil))
                      (< ending-point (line-number-at-pos)))
                 (equal search-result nil))
@@ -1818,6 +1818,8 @@ Argument ENDING-POINT ..."
           (magik-parse-sw-method-docs (match-string 1))))))))
 
 (defun magik-slotted-exemplar-slots (exemplar-loc)
+  "Retrieve the slots of the nearest exemplar.
+Argument EXEMPLAR-LOC ..."
   (let ((slot-count 1)
         (slot-name nil)
         (dollar-loc nil)
@@ -1825,22 +1827,22 @@ Argument ENDING-POINT ..."
         (slots '()))
     (save-excursion
       (when (re-search-forward "\\(\\$\\)" nil t)
-        (setq dollar-loc (match-beginning 0))
-        (setq more-slots t)))
+        (setq dollar-loc (match-beginning 0)
+              more-slots t)))
     (while more-slots
       (save-excursion
         (goto-char exemplar-loc)
         (if (re-search-forward "{\\s-*:\\(\\sw+\\)\\s-*,\\s-*\\(_unset\\)\\s-*}" dollar-loc t slot-count)
             (progn
-              (setq slot-count (+ 1 slot-count))
-              (setq slot-name (match-string 1))
+              (setq slot-count (+ 1 slot-count)
+                    slot-name (match-string 1))
               (push slot-name slots))
           (setq more-slots nil))))
     slots))
 
 (defun magik-file-type-docs ()
   "Search a file for missing parameters in the methods and slots in exemplar.
- then complete with Typedocs format format"
+then complete with Typedocs format format"
   (interactive)
   (save-excursion
     (cond
@@ -1859,6 +1861,7 @@ Argument ENDING-POINT ..."
       ))))
 
 (defun magik-parse-exemplar-type-docs ()
+  "Check exemplar for type-docs."
   (let ((starting-point (- (line-number-at-pos) 1))
         (slots (magik-slotted-exemplar-slots (point)))
         (slots-in-comments `())
@@ -1870,16 +1873,16 @@ Argument ENDING-POINT ..."
                 (not (looking-at "^\\s-*$")))
       (if (and (not (looking-at "^##$")) (looking-at "^##"))
           (progn
-            (setq comments-found (+ 1 comments-found))
-            (setq comments (split-string (string-trim (replace-regexp-in-string "## " "" (buffer-substring-no-properties (point) (line-end-position)))) " "))
+            (setq comments-found (+ 1 comments-found)
+                  comments (split-string (string-trim (replace-regexp-in-string "## " "" (buffer-substring-no-properties (point) (line-end-position)))) " "))
             (when (and (>= (length comments) 3) (string-match-p "@slot" (nth 0 comments)))
               (push (nth 2 comments) slots-in-comments))))
       (when (looking-at "^##$")
         (setq comments-found (+ 1 comments-found)))
       (forward-line -1))
-    (setq starting-point (+ starting-point 1))
-    (setq slots-in-comments (delq nil (delete-dups slots-in-comments)))
-    (setq missing-slots (delq nil (delete-dups missing-slots)))
+    (setq starting-point (+ starting-point 1)
+          slots-in-comments (delq nil (delete-dups slots-in-comments))
+          missing-slots (delq nil (delete-dups missing-slots)))
 
     (dolist (slot slots)
       (when (and (not (equal slot "")) (not (member slot slots-in-comments)))
@@ -1925,9 +1928,9 @@ Then complete the comments if parameters are missing."
           (when (search-backward-regexp regex nil t)
             (let ((current-point (point)))
               (when (or (not closest-point) (< (- start-point current-point) closest-point))
-                (setq closest-point (- start-point current-point))
-                (setq match-point current-point)
-                (setq match (match-string 1))))))
+                (setq closest-point (- start-point current-point)
+                      match-point current-point
+                      match (match-string 1))))))
         (when match
           (goto-char match-point)
           (magik-parse-method-type-docs match)))))))
@@ -1956,8 +1959,8 @@ Argument METHOD-STRING ..."
     (while (not (looking-at (cdr (assoc "endmethod" magik-regexp))))
       (if (and (not (looking-at "^\t##$")) (looking-at "^\t##"))
           (progn
-            (setq comments-found (+ 1 comments-found))
-            (setq comments (split-string (string-trim (replace-regexp-in-string "## " "" (buffer-substring-no-properties (point) (line-end-position)))) " "))
+            (setq comments-found (+ 1 comments-found)
+                  comments (split-string (string-trim (replace-regexp-in-string "## " "" (buffer-substring-no-properties (point) (line-end-position)))) " "))
             (when (and (>= (length comments) 3) (string-match-p "@param" (nth 0 comments)))
               (push (nth 2 comments) parameters-in-comments))
             (when (and (>= (length comments) 1) (string-match-p "@return" (nth 0 comments)))
@@ -1965,9 +1968,9 @@ Argument METHOD-STRING ..."
         (when (looking-at "^\t##$")
           (setq comments-found (+ 1 comments-found))))
       (forward-line))
-    (setq starting-point (+ comments-found starting-point))
-    (setq parameters-in-comments (delq nil (delete-dups parameters-in-comments)))
-    (setq missing-parameters (delq nil (delete-dups missing-parameters)))
+    (setq starting-point (+ comments-found starting-point)
+          parameters-in-comments (delq nil (delete-dups parameters-in-comments))
+          missing-parameters (delq nil (delete-dups missing-parameters)))
 
     (dolist (parameter parameters)
       (when (and (not (equal parameter "")) (not (member parameter parameters-in-comments)))
@@ -1978,10 +1981,11 @@ Argument METHOD-STRING ..."
     ))
 
 (defun magik-write-method-type-docs (missing-parameters starting-point comments-found write-return parameters-count)
-  "Writer function for inserting method type docs
+  "Writer function for inserting method type docs.
 Argument MISSING-PARAMETERS ...
 Argument STARTING-POINT ...
-Argument COMMENTS-FOUND ..."
+Argument COMMENTS-FOUND ...
+Argument WRITE-RETURN ..."
   (let ((comment-line (concat "\t##\n"))
         (return-line (concat "\t## @return {:}\n")))
     (if (or (equal comments-found 0) (equal comments-found 1))
@@ -2010,17 +2014,17 @@ Argument METHOD-STRING ..."
     (while (not (looking-at (cdr (assoc "endmethod" magik-regexp))))
       (if (and (not (looking-at "^\t##$")) (looking-at "^\t##"))
           (progn
-            (setq comments-found (+ 1 comments-found))
-            (setq comments (split-string (string-trim (replace-regexp-in-string "## " "" (buffer-substring-no-properties (point) (line-end-position)))) " "))
+            (setq comments-found (+ 1 comments-found)
+                  comments (split-string (string-trim (replace-regexp-in-string "## " "" (buffer-substring-no-properties (point) (line-end-position)))) " "))
             (dolist (comment comments)
               (when (and (equal (string-match-p "[[:upper:]]" comment) 0) (equal (upcase comment) comment))
                 (push comment parameters-in-comments))))
         (when (looking-at "^\t##$")
           (setq comments-found (+ 1 comments-found))))
       (forward-line))
-    (setq starting-point (+ comments-found starting-point))
-    (setq parameters-in-comments (delq nil (delete-dups parameters-in-comments)))
-    (setq missing-parameters (delq nil (delete-dups missing-parameters)))
+    (setq starting-point (+ comments-found starting-point)
+          parameters-in-comments (delq nil (delete-dups parameters-in-comments))
+          missing-parameters (delq nil (delete-dups missing-parameters)))
 
     (dolist (parameter parameters)
       (when (and (not (equal parameter "")) (not (member (upcase parameter) parameters-in-comments)))
