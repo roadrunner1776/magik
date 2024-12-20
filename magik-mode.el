@@ -1909,20 +1909,28 @@ Argument COMMENTS-FOUND ..."
     ))
 
 (defun magik-single-method-type-docs ()
-  "Search last method for missing parameters and complete the comments."
+  "Search for the closest method definition.
+Then complete the comments if parameters are missing."
   (interactive)
   (save-excursion
     (cond
-     ((derived-mode-p 'magik-base-mode)
+      ((derived-mode-p 'magik-base-mode)
       (forward-line)
-      (search-backward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
-      (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
-      (if (not (equal (match-string 1) nil))
-	  (magik-parse-method-type-docs (match-string 1))
-	(search-backward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
-	(search-forward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
-	(unless (equal (match-string 1) nil)
-	  (magik-parse-method-type-docs (match-string 1))))))))
+      (let ((start-point (point))
+            (method-regex (cdr (assoc "method-with-arguments" magik-regexp)))
+            (assignment-regex (cdr (assoc "assignment-method" magik-regexp)))
+            closest-point match match-point)
+        (dolist (regex (list method-regex assignment-regex))
+          (goto-char start-point)
+          (when (search-backward-regexp regex nil t)
+            (let ((current-point (point)))
+              (when (or (not closest-point) (< (- start-point current-point) closest-point))
+                (setq closest-point (- start-point current-point))
+                (setq match-point current-point)
+                (setq match (match-string 1))))))
+        (when match
+          (goto-char match-point)
+          (magik-parse-method-type-docs match)))))))
 
 (defun magik-single-exemplar-type-docs ()
   "Search closest exemplar for missing parameters and complete the comments."
