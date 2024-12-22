@@ -46,6 +46,8 @@
      (method
       exemplarname: (identifier) @magik-class-face
       (argument) @magik-argument-face)
+     (procedure
+      (argument) @magik-argument-face)
      (call
       message: (identifier) @magik-method-face)
      (iterator (identifier) @magik-variable-face)
