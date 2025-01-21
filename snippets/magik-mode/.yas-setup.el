@@ -106,4 +106,22 @@ Return the file name as a symbol (prefixed with a colon `:`)."
             (setq result (concat result "\n"))))))
     result))
 
+(defun magik-yassnippet-get-module ()
+  "Recursively search for the module.def and return the module name."
+  (let ((current-dir (file-name-directory (buffer-file-name))))
+    (catch 'module-found
+      (while current-dir
+        (let ((module-file (expand-file-name "module.def" current-dir)))
+          (when (file-exists-p module-file)
+            (throw 'module-found
+                   (with-temp-buffer
+                     (insert-file-contents module-file)
+                     (goto-char (point-min))
+                     (current-word)))))
+        ;; Move to the parent directory
+        (setq current-dir (if (equal current-dir "/")
+                              nil
+                            (file-name-directory (directory-file-name current-dir)))))
+      nil))) ;; Return nil if no module.def is found
+
 ;;; .yas-setup.el ends here
