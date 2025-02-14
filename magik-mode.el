@@ -32,7 +32,8 @@
   (defvar ac-modes)
   (require 'magik-indent)
   (require 'magik-electric)
-  (require 'magik-pragma))
+  (require 'magik-pragma)
+  (require 'magik-doc-gen))
 
 (require 'compat)
 (require 'imenu)

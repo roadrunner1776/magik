@@ -22,7 +22,6 @@
 ;;
 
 ;;; Code:
-(require `magik-mode)
 
 (defun magik-file-sw-method-docs ()
   "Search file for missing parameters in the methods and complete the comments."
@@ -286,3 +285,6 @@ Argument COMMENTS-FOUND ..."
       (goto-line (- starting-point 1))
       (dolist (parameter missing-parameters)
         (insert (concat "\t## " (upcase parameter) "\n"))))))
+
+(provide `magik-doc-gen)
+;;; magik-doc-gen.el ends here
