@@ -13,7 +13,7 @@
 ##  -------------------------
 ##  :private   pri  pri  pri
 ##  :public    pub  pub  pub
-##  :readonly  pri  pri  pri
+##  :readonly  pub  pri  pri
 " '(":private" ":public" ":readonly"))})
 $
 
