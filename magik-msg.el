@@ -169,8 +169,12 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
      process
      (format
       "_proc(directory)
+   _handling sw_module_already_defined, sw_module_moved_module _with procedure
+
    module << sw_module_manager.locate_module(directory)
-   sw_module_manager.compile_messages(module)
+   _if module _isnt _unset 
+   _then sw_module_manager.compile_messages(module) 
+   _endif
       _endproc(%S)\n$\n"
       directory))
     gis))
