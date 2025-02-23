@@ -32,7 +32,8 @@
   (defvar ac-modes)
   (require 'magik-indent)
   (require 'magik-electric)
-  (require 'magik-pragma))
+  (require 'magik-pragma)
+  (require 'magik-doc-gen))
 
 (require 'compat)
 (require 'imenu)
@@ -1774,8 +1775,8 @@ Argument END ..."
         (search-result nil))
     (save-excursion
       (search-backward-regexp "^\\$" nil t)
-      (setq starting-point (line-number-at-pos))
-      (setq search-result (search-forward-regexp (cdr (assoc "pragma" magik-regexp)) nil t))
+      (setq starting-point (line-number-at-pos)
+            search-result (search-forward-regexp (cdr (assoc "pragma" magik-regexp)) nil t))
       (when (or (and (not (equal search-result nil))
                      (< ending-point (line-number-at-pos)))
                 (equal search-result nil))
@@ -1787,84 +1788,6 @@ Argument END ..."
 Argument ENDING-POINT ..."
   (goto-line ending-point)
   (magik-insert-pragma))
-
-(defun magik-file-sw-method-docs ()
-  "Search file for missing parameters in the methods and complete the comments."
-  (interactive)
-  (save-excursion
-    (cond
-     ((derived-mode-p 'magik-base-mode)
-      (goto-char (point-min))
-      (while (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
-        (magik-parse-sw-method-docs (match-string 1)))
-      (goto-char (point-min))
-      (while (search-forward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
-        (magik-parse-sw-method-docs (match-string 1)))))))
-
-(defun magik-single-sw-method-docs ()
-  "Search last method for missing parameters and complete the comments."
-  (interactive)
-  (save-excursion
-    (cond
-     ((derived-mode-p 'magik-base-mode)
-      (forward-line)
-      (search-backward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
-      (search-forward-regexp (cdr (assoc "method-with-arguments" magik-regexp)) nil t)
-      (if (not (equal (match-string 1) nil))
-          (magik-parse-sw-method-docs (match-string 1))
-        (search-backward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
-        (search-forward-regexp (cdr (assoc "assignment-method" magik-regexp)) nil t)
-        (unless (equal (match-string 1) nil)
-          (magik-parse-sw-method-docs (match-string 1))))))))
-
-(defun magik-parse-sw-method-docs (method-string)
-  "Helper function for inserting sw-method-docs.
-Argument METHOD-STRING ..."
-  (let ((parameters (mapcar (lambda (x) (string-trim (replace-regexp-in-string (cdr (assoc "method-argument" magik-regexp)) "" x))) (split-string method-string "(\\|)\\|,")))
-        (parameters-in-comments '())
-        (missing-parameters '())
-        (comments nil)
-        (comments-found 0)
-        (starting-point (+ 1 (line-number-at-pos))))
-    (while (not (looking-at (cdr (assoc "endmethod" magik-regexp))))
-      (if (and (not (looking-at "^\t##$")) (looking-at "^\t##"))
-          (progn
-            (setq comments-found (+ 1 comments-found))
-            (setq comments (split-string (string-trim (replace-regexp-in-string "## " "" (buffer-substring-no-properties (point) (line-end-position)))) " "))
-            (dolist (comment comments)
-              (when (and (equal (string-match-p "[[:upper:]]" comment) 0) (equal (upcase comment) comment))
-                (push comment parameters-in-comments))))
-        (when (looking-at "^\t##$")
-          (setq comments-found (+ 1 comments-found))))
-      (forward-line))
-    (setq starting-point (+ comments-found starting-point))
-    (setq parameters-in-comments (delq nil (delete-dups parameters-in-comments)))
-    (setq missing-parameters (delq nil (delete-dups missing-parameters)))
-
-    (dolist (parameter parameters)
-      (when (and (not (equal parameter "")) (not (member (upcase parameter) parameters-in-comments)))
-        (push parameter missing-parameters)))
-    (setq missing-parameters (reverse missing-parameters))
-
-    (magik-write-sw-method-docs missing-parameters starting-point comments-found)))
-
-(defun magik-write-sw-method-docs (missing-parameters starting-point comments-found)
-  "Writer function for inserting sw-method-docs.
-Argument MISSING-PARAMETERS ...
-Argument STARTING-POINT ...
-Argument COMMENTS-FOUND ..."
-  (if (or (equal comments-found 0) (equal comments-found 1))
-      (progn
-        (goto-line starting-point)
-        (when (equal comments-found 0)
-          (insert "\t##\n"))
-        (dolist (parameter missing-parameters)
-          (insert (concat "\t## " (upcase parameter) "\n")))
-        (insert "\t##\n"))
-    (progn
-      (goto-line (- starting-point 1))
-      (dolist (parameter missing-parameters)
-        (insert (concat "\t## " (upcase parameter) "\n"))))))
 
 ;;; Imenu configuration functions
 (defun magik-imenu-method-name (index)
