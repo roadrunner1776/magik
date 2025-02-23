@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: clone
+# key: clone
+# group: object oriented
+# --
+_clone.$0

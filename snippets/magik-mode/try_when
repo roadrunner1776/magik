@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: try and when
+# key: try_when
+# expand-env: ((yas-indent-line 'fixed))
+# group: control structure.try
+# --
+_try
+	$1
+_when ${2:cond}
+	$0
+_endtry

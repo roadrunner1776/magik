@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: define_binary_operator_case
+# key: define_binary_operator_case
+# group: define.object oriented
+# --
+define_binary_operator_case(:${1:name}, ${2:lhs}, ${3:rhs}, _proc($4) $5 _endproc)
+$
+
+$0

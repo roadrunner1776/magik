@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: abstract method
+# key: abstract
+# expand-env: ((yas-indent-line 'fixed))
+# group: methods
+# --
+`(magik-yasnippet-prev-pragma)`
+_abstract _method `(magik-yasnippet-prev-class-name-with-dot)`${1:name}
+	## 
+	## 
+	## 
+	$0
+_endmethod
+$

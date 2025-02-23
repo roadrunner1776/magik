@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: version
+# key: version
+# --
+version ${1:major}.${2:minor}${3:.patch}$0

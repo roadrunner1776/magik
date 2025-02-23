@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: description
+# key: description
+# expand-env: ((yas-indent-line 'fixed))
+# --
+description
+	${1:description}
+end
+
+$0

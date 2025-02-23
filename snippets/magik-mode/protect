@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: protect
+# key: protect
+# expand-env: ((yas-indent-line 'fixed))
+# group: control structure.protect
+# --
+_protect
+	$1
+_protection
+	$0
+_endprotect

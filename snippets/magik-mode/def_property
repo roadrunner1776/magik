@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: def_property
+# key: def_property
+# group: define.object oriented
+# --
+`(magik-yasnippet-prev-pragma)`
+## 
+## 
+## 
+`(magik-yasnippet-prev-class-name-with-dot)`def_property(:${1:name})
+$
+
+$0

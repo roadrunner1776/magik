@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: new
+# key: new
+# expand-env: ((yas-indent-line 'fixed))
+# --
+${1:product_name}	${2:$$(yas-completing-read "Type: " '("layered_product" "customisation_product" "config_product"))}
+
+$0

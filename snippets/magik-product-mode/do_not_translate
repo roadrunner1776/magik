@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: do_not_translate
+# key: dnt
+# --
+do_not_translate$0

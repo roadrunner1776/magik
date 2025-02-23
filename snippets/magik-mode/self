@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: self
+# key: .
+# group: object oriented
+# --
+_self.$0

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: condition_message_accessor
+# key: condition_message_accessor
+# --
+condition_message_accessor ${1:name}$0
