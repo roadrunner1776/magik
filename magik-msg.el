@@ -141,9 +141,15 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
     (message "%s loaded in buffer %s." filename gis)
     (process-send-string
      process
-     (concat
-      (magik-function "message_handler.compile_message_file" filename)
-      "\n$\n"))
+     (format
+      "_proc(file)
+	 message_handler.compile_message_file(file)
+	 _local message_handler_name << system.split_filename(system.pathname_components(file))
+	 _if message_handler_name _isnt _unset
+	 _then sw:message_handler.new(message_handler_name).load_message_file(file)
+	 _endif
+      _endproc(%S)\n$\n"
+      filename))
     gis))
 
 (defun magik-msg-compile-module-messages (&optional gis)
