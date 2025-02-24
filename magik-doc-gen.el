@@ -286,5 +286,5 @@ Argument COMMENTS-FOUND ..."
       (dolist (parameter missing-parameters)
         (insert (concat "\t## " (upcase parameter) "\n"))))))
 
-(provide `magik-doc-gen)
+(provide 'magik-doc-gen)
 ;;; magik-doc-gen.el ends here
