@@ -27,7 +27,13 @@
 (require 'magik-mode)
 (require 'treesit)
 
-(defvar magik--treesit-settings
+(defvar magik-ts-mode--operators
+  '("<<" "^<<" "**<<" "**^<<" "*<<" "*^<<" "/<<" "/^<<" "-<<" "-^<<" "+<<" "+^<<"
+    "_and<<" "_andif<<" "_or<<" "_orif<<" "_xor<<" "_mod<<" "_div<<" ;; or should these be placed at the keyword-operators?
+    "~" "=" "~=" "<>" ">=" "<=" "<" ">" "**" "*" "/")
+  "Magik operators for tree-sitter font-locking.")
+
+(defvar magik-ts-mode--font-lock-settings
   (treesit-font-lock-rules
    :language 'magik
    :feature 'pragma
@@ -98,7 +104,22 @@
 
      ["_gather" "_scatter" "_allresults" "_optional" "_return" ">>"] @magik-keyword-arguments-face
 
-     ["_dynamic" "_global" "_import" "_local" "_class"] @magik-keyword-variable-face)))
+     ["_dynamic" "_global" "_import" "_local" "_class"] @magik-keyword-variable-face)
+
+   :language 'magik
+   :feature 'bracket
+   '((["(" ")" "[" "]"]) @font-lock-bracket-face)
+
+   :language 'magik
+   :feature 'delimiter
+   '((["," ";"]) @font-lock-delimiter-face)
+
+   :language 'magik
+   :override t
+   :feature 'operator
+   `([,@magik-ts-mode--operators] @font-lock-operator-face)
+   )
+  "Tree-sitter font-lock settings for `magik-ts-mode'.")
 
 (defvar magik-ts-mode--indent-rules
   `((magik
@@ -167,11 +188,11 @@
 
   (setq-local
    treesit-simple-indent-rules magik-ts-mode--indent-rules
-   treesit-font-lock-settings magik--treesit-settings
+   treesit-font-lock-settings magik-ts-mode--font-lock-settings
    treesit-font-lock-feature-list '((comment pragma)
                                     (type constant keyword string)
                                     ()
-                                    ()
+                                    (bracket delimiter operator)
                                     (error)))
 
   (treesit-major-mode-setup))
