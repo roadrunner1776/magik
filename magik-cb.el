@@ -305,8 +305,7 @@ Set to the socketname returned by `gis-filter-action-cb-mf' when starting CB fro
 ;; _____________________________________
 ;;
 (defvar magik-cb-initial-topics
-  '(
-    ("basic"                     t     "add basic"            "unadd basic")
+  '(("basic"                     t     "add basic"            "unadd basic")
     ("advanced"                  nil   "add advanced"         "unadd advanced")
     ("subclassable"              nil   "add subclass"         "unadd subclass")
     ("redefinable"               nil   "add redefinable"      "unadd redefinable")
@@ -316,8 +315,8 @@ Set to the socketname returned by `gis-filter-action-cb-mf' when starting CB fro
     ("deprecated"                nil   "add deprecated"       "unadd deprecated")
 
     ("local-only"                t     "local_only")
-    ("inherit-not-\"object\""  t     "inherit_not_obj")
-    ("inherit-from-\"object\"" t     "inherit_all")
+    ("inherit-not-\"object\""    t     "inherit_not_obj")
+    ("inherit-from-\"object\""   t     "inherit_all")
 
     ("show-methods"      t     "show_method_names"    "dont_show_method_names")
     ("show-classes"      t     "show_classes"         "dont_show_classes")
@@ -325,13 +324,11 @@ Set to the socketname returned by `gis-filter-action-cb-mf' when starting CB fro
     ("show-comments"     nil   "show_comments"        "dont_show_comments")
     ("show-topics"       nil   "show_topics"          "dont_show_topics")
 
-    ("override-flags"       nil    "override_flags"    "dont_override_flags")
-    ("override-topics"      nil    "override_topics"   "dont_override_topics")
-    ("override-200-limit"   nil   "method_cut_off 1000000"   "method_cut_off 200")
-    )
-  "An association list of all the topics and flags together with
-their on/off status and their corresponding commands for sending
-to the C.")
+    ("override-flags"       t      "override_flags"           "dont_override_flags")
+    ("override-topics"      nil    "override_topics"          "dont_override_topics")
+    ("override-200-limit"   nil    "method_cut_off 1000000"   "method_cut_off 200"))
+  "A list of topics and flags with their status and commands for sending to the C.
+This association provides a complete overview of configurations and controls.")
 
 (defvar magik-cb-flag-groups
   '(("basic" "advanced" "subclassable" "redefinable" "debug" "deprecated" "restricted"))
