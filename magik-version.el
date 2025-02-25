@@ -179,7 +179,9 @@ has more than one aliases file available."
   (compat-call setq-local
                magik-version-position nil
                buffer-undo-list t
-               font-lock-defaults '(magik-version-font-lock-keywords nil t (("-" . "w")))))
+               font-lock-defaults '(magik-version-font-lock-keywords nil t (("-" . "w"))))
+
+  (add-hook 'menu-bar-update-hook 'magik-versions-update-menu nil t))
 
 (defvar magik-version-menu nil
   "Keymap for the gis_version buffer menu bar.")
@@ -192,6 +194,8 @@ has more than one aliases file available."
     [,"Next"                      magik-version-next        t]
     [,"Open aliases file"         magik-version-gis-aliases t]
     [,"Quit"                      magik-version-quit        t]
+    "---"
+    (,"Definitions")
     "---"
     [,"Add new installation"      magik-version-file-add    magik-version-file]
     [,"Open gis aliases file"     magik-version-file-open t]
@@ -479,6 +483,31 @@ Used before running a GIS process."
            (insert (format "\n** Can't find the currently selected product, %s.\n** (Attempting to run anyway).\n" magik-version-current)))
           (t
            (insert (format "Gis Environment: %s\n" magik-version-current))))))
+
+(defun magik-versions-list ()
+  "Return list of version definitions."
+  (let (list)
+    (save-excursion
+      (save-match-data
+        (goto-char (point-max))
+        (while (and (re-search-backward magik-version-match nil t)
+                    (> (point) magik-version-position))
+          (push (match-string-no-properties 1) list))))
+    list))
+
+(defun magik-versions-update-menu ()
+  "Update the dynamic Versions submenu."
+  (interactive)
+  (if (eq major-mode 'magik-version-mode)
+      (let ((versions (magik-versions-list))
+            entries def)
+        (while versions
+          (setq def (car versions)
+                versions (cdr versions)
+                entries (nconc entries (list (vector def (list 'magik-version-select def) t)))))
+        (easy-menu-change (list "Environment")
+                          "Definitions"
+                          (or entries (list "No Versions found"))))))
 
 ;;; Package initialisation
 (modify-syntax-entry ?_  "w"  magik-version-mode-syntax-table)
