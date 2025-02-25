@@ -108,17 +108,16 @@
 
    :language 'magik
    :feature 'bracket
-   '((["(" ")" "[" "]"]) @font-lock-bracket-face)
+   '((["(" ")" "[" "]"]) @magik-bracket-face)
 
    :language 'magik
    :feature 'delimiter
-   '((["," ";"]) @font-lock-delimiter-face)
+   '((["," ";"]) @magik-delimiter-face)
 
    :language 'magik
    :override t
    :feature 'operator
-   `([,@magik-ts-mode--operators] @font-lock-operator-face)
-   )
+   `([,@magik-ts-mode--operators] @magik-operator-face))
   "Tree-sitter font-lock settings for `magik-ts-mode'.")
 
 (defvar magik-ts-mode--indent-rules
