@@ -287,6 +287,19 @@ concrete implementations."
   "Font-lock Face to use when displaying boolean and kleenean references."
   :group 'magik-faces)
 
+;; font-lock-punctuation-face was introduced in Emacs 29.1.
+(unless (member `font-lock-punctuation-face (face-list))
+  (put 'font-lock-punctuation-face 'face-alias nil))
+
+;; font-lock-bracket-face was introduced in Emacs 29.1.
+(unless (member `font-lock-bracket-face (face-list))
+  (put 'font-lock-bracket-face 'face-alias 'font-lock-punctuation-face))
+
+(defface magik-bracket-face
+  '((t (:inherit font-lock-bracket-face)))
+  "Font-lock Face to use when displaying brackets and parens."
+  :group 'magik-faces)
+
 (defface magik-character-face
   '((t (:inherit font-lock-constant-face)))
   "Font-lock Face to use when displaying characters."
@@ -305,6 +318,15 @@ concrete implementations."
 (defface magik-constant-face
   '((t (:inherit font-lock-constant-face)))
   "Font-lock Face to use when displaying constants."
+  :group 'magik-faces)
+
+;; font-lock-delimiter-face was introduced in Emacs 29.1.
+(unless (member `font-lock-delimiter-face (face-list))
+  (put 'font-lock-delimiter-face 'face-alias 'font-lock-punctuation-face))
+
+(defface magik-delimiter-face
+  '((t (:inherit font-lock-delimiter-face)))
+  "Font-lock Face to use when displaying delimiters."
   :group 'magik-faces)
 
 (defface magik-doc-face
@@ -374,6 +396,15 @@ concrete implementations."
 (defface magik-number-face
   '((t (:inherit font-lock-number-face)))
   "Font-lock Face to use when displaying numbers."
+  :group 'magik-faces)
+
+;; font-lock-operator-face was introduced in Emacs 29.1.
+(unless (member `font-lock-operator-face (face-list))
+  (put 'font-lock-operator-face 'face-alias 'font-lock-punctuation-face))
+
+(defface magik-operator-face
+  '((t (:inherit font-lock-operator-face)))
+  "Font-lock Face to use when displaying operators."
   :group 'magik-faces)
 
 (defface magik-pragma-face
