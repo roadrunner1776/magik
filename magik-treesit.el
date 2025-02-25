@@ -143,8 +143,8 @@
      ((parent-is "relational_operator") parent 0)
      ((parent-is "arithmetic_operator") parent 0)
      ((parent-is "unary_operator") parent 0)
+     ((parent-is "documentation") parent 0)
 
-     ((parent-is "documentation") first-sibling 0)
      ((parent-is "invoke") (nth-sibling 2) 0)
 
      ((parent-is "call") parent-bol magik-indent-level)
