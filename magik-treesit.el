@@ -29,7 +29,7 @@
 
 (defvar magik-ts-mode--operators
   '("<<" "^<<" "**<<" "**^<<" "*<<" "*^<<" "/<<" "/^<<" "-<<" "-^<<" "+<<" "+^<<"
-    "_and<<" "_andif<<" "_or<<" "_orif<<" "_xor<<" "_mod<<" "_div<<" ;; or should these be placed at the keyword-operators?
+    "_and<<" "_andif<<" "_or<<" "_orif<<" "_xor<<" "_xorif<<" "_mod<<" "_div<<" ;; or should these be placed at the keyword-operators?
     "~" "=" "~=" "<>" ">=" "<=" "<" ">" "**" "*" "/")
   "Magik operators for tree-sitter font-locking.")
 
