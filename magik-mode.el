@@ -2130,8 +2130,9 @@ closing bracket into the new \"{...}\" notation."
   (define-key magik-mode-map "\r" 'magik-newline)
   (define-key magik-mode-map "\n" 'newline)
   (define-key magik-mode-map "\t" 'magik-indent-command)
+  (define-key magik-mode-map "#"  'magik-electric-hash)
+
   (define-key magik-base-mode-map " " yas-maybe-expand)
-  (define-key magik-base-mode-map "#" 'magik-electric-hash)
   (define-key magik-base-mode-map "/" 'magik-electric-pragma-slash)
   (define-key magik-base-mode-map "\\" 'magik-electric-pragma-backslash)
 
