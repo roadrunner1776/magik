@@ -4,9 +4,9 @@
 # group: object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
-##
-##
-##
+## 
+## 
+## 
 def_mixin(:${1:`(magik-yasnippet-filename)`})
 $
 
