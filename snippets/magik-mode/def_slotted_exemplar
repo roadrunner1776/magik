@@ -5,10 +5,10 @@
 # group: object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
-## 
-## 
-## 
-def_slotted_exemplar(${1:`(magik-yasnippet-filename-as-symbol)`},
+##
+##
+##
+def_slotted_exemplar(:${1:`(magik-yasnippet-filename)`},
 		     {
 			     $2
 		     }$3)
