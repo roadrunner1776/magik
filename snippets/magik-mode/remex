@@ -3,7 +3,7 @@
 # key: remex
 # group: object oriented
 # --
-remex(${1:`(magik-yasnippet-filename-as-symbol)`})
+remex(:${1:`(magik-yasnippet-filename)`})
 $
 
 $0
