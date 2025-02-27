@@ -16,7 +16,7 @@
   :group 'magik-yasnippet
   :type  'string)
 
-(defconst magik-yasnippet-class-name-regexp "\\(\\(\\sw\\|_\\)+\\)" "The regexp to use for the Magik class name.")
+(defconst magik-yasnippet--class-name-regexp "\\(\\(\\sw\\|_\\)+\\)" "The regexp to use for the Magik class name.")
 
 (defun magik-yasnippet-prev-pragma ()
   "Search for the previous pragma in the buffer.
@@ -38,25 +38,25 @@ class name in the context of `_method`, `def_slotted_exemplar`, `def_mixin`,
 Returns the class name as a string, or nil if no class name is found."
   (save-excursion
     (or
-     (when (re-search-backward (concat "_method[ \t]+" magik-yasnippet-class-name-regexp "\\.") nil t)
+     (when (re-search-backward (concat "_method[ \t]+" magik-yasnippet--class-name-regexp "\\.") nil t)
        (match-string-no-properties 1))
-     (when (re-search-backward (concat "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet-class-name-regexp) nil t)
+     (when (re-search-backward (concat "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) nil t)
        (match-string-no-properties 2))
-     (when (re-search-backward (concat "def_mixin\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet-class-name-regexp) nil t)
+     (when (re-search-backward (concat "def_mixin\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) nil t)
        (match-string-no-properties 2))
-     (when (re-search-backward (concat "def_indexed_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet-class-name-regexp) nil t)
+     (when (re-search-backward (concat "def_indexed_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) nil t)
        (match-string-no-properties 2))
-     (when (re-search-backward (concat "^" magik-yasnippet-class-name-regexp "\\.define_shared_constant") nil t)
+     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_shared_constant") nil t)
        (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet-class-name-regexp "\\.define_shared_variable") nil t)
+     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_shared_variable") nil t)
        (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet-class-name-regexp "\\.define_slot_access") nil t)
+     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_access") nil t)
        (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet-class-name-regexp "\\.define_slot_externally_writable") nil t)
+     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_externally_writable") nil t)
        (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet-class-name-regexp "\\.define_slot_externally_readable") nil t)
+     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_externally_readable") nil t)
        (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet-class-name-regexp "\\.define_pseudo_slot") nil t)
+     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_pseudo_slot") nil t)
        (match-string-no-properties 1)))))
 
 (defun magik-yasnippet-prev-class-name-with-dot ()
@@ -118,7 +118,7 @@ If the buffer is not visiting a file, return an empty string."
             (setq result (concat result "\n"))))))
     result))
 
-(defun magik-yassnippet-get-module ()
+(defun magik-yassnippet-module-name ()
   "Recursively search for the module.def and return the module name."
   (let ((current-dir (file-name-directory (buffer-file-name))))
     (catch 'module-found
