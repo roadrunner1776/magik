@@ -588,7 +588,9 @@ To view the help on these variables type \\[describe-variable] and enter the var
                magik-cb-pending-message t)
 
   (add-hook 'menu-bar-update-hook 'magik-cb-update-tools-magik-cb-menu nil t)
-  (add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t))
+  (add-hook 'kill-buffer-hook 'magik-cb-buffer-alist-remove nil t)
+
+  (magik-cb-reset))
 
 (defvar magik-cb-menu nil
   "Keymap for the CB menu bar.")
