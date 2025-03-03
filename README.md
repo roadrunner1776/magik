@@ -33,7 +33,7 @@ Global keys are set by calling `(magik-global-bindings)` after the packages has 
 
 | Key | Description |
 | :---: | --- |
-| `F2``s` | Open Magik version selection |
+| `F2`-`s` | Open Magik version selection |
 
 ### magik-version
 
@@ -133,7 +133,7 @@ For quick usage of the keyboard-macro functions you may e.g. bind the `Ctrl`-`F2
 
 If you've been using the EMACS delivered by GE with Smallworld version 4.3 and earlier, you might want to customize some variables with default values changed with respect to the former "GE"-EMACS:
 
-| actual<br/>variable | actual<br>default | former<br/>variable | former<br/>default | Remarks |
+| actual variable | actual default | former variable | former default | Remarks |
 | :---: | --- | --- | --- | --- |
 | magik-electric-mode | t | electric-magik-mode | nil | If set (non nil), typing the `Space` after a keyworld like `for` or `if` inserts the matching control structure.<br/>If not set (nil), you have to type `F2`-`Space` to achive the same behaviour. |
 | mouse-drag-copy-region | nil | dto. | t | Paste a mouse selection (even to other programs).<br/>(Default has been changed in standard EMACS) |
