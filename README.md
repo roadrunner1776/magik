@@ -33,7 +33,7 @@ Global keys are set by calling `(magik-global-bindings)` after the packages has 
 
 | Key | Description |
 | :---: | --- |
-| `F2`-`s` | Open Magik version selection |
+| <kbd>F2</kbd><kbd>s</kbd> | Open Magik version selection |
 
 ### magik-version
 
@@ -41,9 +41,9 @@ Major mode for managing multiple Magik environments.
 
 | Key | Description |
 | :---: | --- |
-| `Return` | Select the current selected line as the current active environment. |
-| `a` | Open gis_aliases file of selected version. Will prompt for layered product to use if selected version has more than one aliases file available. |
-| `+` | Add a new entry to the currently open file. |
+| <kbd>Return</kbd> | Select the current selected line as the current active environment. |
+| <kbd>a</kbd> | Open gis_aliases file of selected version. Will prompt for layered product to use if selected version has more than one aliases file available. |
+| <kbd>+</kbd> | Add a new entry to the currently open file. |
 
 ### magik-aliases
 
@@ -51,7 +51,7 @@ Major mode for editing Magik aliases files.
 
 | Key | Description |
 | :---: | --- |
-| `Shift`-`Return` | Run a Magik session for the selected alias. |
+| <kbd>Shift</kbd>-<kbd>Return</kbd> | Run a Magik session for the selected alias. |
 
 ### magik-session
 
@@ -107,7 +107,7 @@ If you plan to use this package with Smallworld-Versions 4.x or older, you shoul
 * Customize the variable `magik-session-auto-insert-dollar` to non-nil.
 * You might customize the variable `magik-aliases-layered-products-file` to `"$SMALLWORLD_GIS/product/config/LAYERED_PRODUCTS"`.
 If you also want to use EMACS for Smallworld 5.x, it's easier to create the directory `$SMALLWORLD_GIS/../smallworld_registry` and copy or soft-link the original LAYERED_PRODUCTS file there. This ensures the same structure as in Smallworld 5.x.
-* There is no support (yet) for the Smallworld dev-tools. So if you want to do things like `f4`-`d` to start debugging a method, you may still want to use the EMACS which has been delivered with the Smallworld 4.x (or older) software.
+* There is no support (yet) for the Smallworld dev-tools. So if you want to do things like <kbd>F4</kbd>-<kbd>d</kbd> to start debugging a method, you may still want to use the EMACS which has been delivered with the Smallworld 4.x (or older) software.
 * Some more things which are at least partly not supported by Smallworld 5.x are not supported (e.g. `deep-print`)
 
 ## Side Effects
@@ -116,13 +116,13 @@ Some keys bindings are changed with respect to a standard EMACS installation, at
 
 | Key | Function in standard EMACS | Change in Magik Mode package |
 | :---: | --- | --- |
-| `F2` | `2C-command`| globally changed to prefix key |
-| `F3` | `kmacro-start-macro-or-insert-counter` | globally changed to prefix key |
-| `F4` | `kmacro-end-or-call-macro` | used in magik-mode and magik-session-mode as prefix key |
+| <kbd>F2</kbd> | `2C-command`| globally changed to prefix key |
+| <kbd>F3</kbd> | `kmacro-start-macro-or-insert-counter` | globally changed to prefix key |
+| <kbd>F4</kbd> | `kmacro-end-or-call-macro` | used in magik-mode and magik-session-mode as prefix key |
 
 The reason for that is, that many Magik developpers are familiar with these bindings from former EMACS installations.
 
-For quick usage of the keyboard-macro functions you may e.g. bind the `Ctrl`-`F2` and `Ctrl`-`F4` combinations by putting the following lines into your  `.emacs` file:
+For quick usage of the keyboard-macro functions you may e.g. bind the <kbd>Ctrl</kbd>-<kbd>F2</kbd> and <kbd>Ctrl</kbd>-<kbd>F4</kbd> combinations by putting the following lines into your  `.emacs` file:
 
 ```emacs-lisp
 (global-set-key [C-f3] 'kmacro-start-macro-or-insert-counter)
@@ -135,7 +135,7 @@ If you've been using the EMACS delivered by GE with Smallworld version 4.3 and e
 
 | actual variable | actual default | former variable | former default | Remarks |
 | :---: | --- | --- | --- | --- |
-| magik-electric-mode | t | electric-magik-mode | nil | If set (non-nil), typing the `Space` after a keyworld like `for` or `if` inserts the matching control structure. If not set (nil), you have to type `F2`-`Space` to achive the same behaviour. |
+| magik-electric-mode | t | electric-magik-mode | nil | If non-nil, typing the <kbd>Space</kbd> after a keyworld like `if` inserts the matching control structure. If nil, you have to type <kbd>F2</kbd>-<kbd>Space</kbd> to achive the same behaviour. |
 | mouse-drag-copy-region | nil | dto. | t | Paste a mouse selection (even to other programs). (Default has been changed in standard EMACS) |
 | show-paren-mode | nil | dto | t | if point is on opening or after closeing bracket, show the matching one. (GE's EMACS had done this customization) |
 
