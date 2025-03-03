@@ -50,5 +50,6 @@ jobs:
         version: 'snapshot'
 
     - name: Run tests
-      run:
+      run: |
+        tree
         make ci
