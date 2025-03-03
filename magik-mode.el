@@ -275,7 +275,7 @@ concrete implementations."
 
 ;; font-lock-variable-use-face was introduced in Emacs 29.1.
 (unless (member `font-lock-variable-use-face (face-list))
-  (put 'font-lock-variable-use 'face-alias 'font-lock-variable-name-face))
+  (put 'font-lock-variable-use-face 'face-alias 'font-lock-variable-name-face))
 
 (defface magik-argument-face
   '((t (:inherit font-lock-variable-use-face)))
