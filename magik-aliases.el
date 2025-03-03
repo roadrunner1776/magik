@@ -213,7 +213,7 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
         (goto-char (point-max))
         (while (re-search-backward magik-aliases-definition-regexp nil t)
           (push (match-string-no-properties 1) list))))
-    (reverse list)))
+    list))
 
 (defun magik-aliases-switch-to-buffer (alias)
   "Return t, to switch to the buffer that the GIS.exe process is running in.
@@ -422,8 +422,8 @@ Returns nil if FILE cannot be expanded."
             entries def)
         (while aliases
           (setq def (car aliases)
-                aliases (cdr aliases))
-          (push (vector def (list 'magik-aliases-run-program def) t) entries)) ;; :key-sequence nil
+                aliases (cdr aliases)
+                entries (nconc entries (list (vector def (list 'magik-aliases-run-program def) t)))))
         (easy-menu-change (list "Aliases")
                           "Definitions"
                           (or entries (list "No Aliases found"))))))
