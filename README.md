@@ -98,15 +98,15 @@ To enable automatic linting in `magik-mode` buffers, the following conditions ha
 * Package [flycheck](https://flycheck.org) needs to be installed and loaded.
 * `magik-lint-VERSION.jar` ([download](https://github.com/StevenLooman/sonar-magik/releases)) has to be installed in `~/.emacs.d/magik-lint/` (location can be customized with the variable `magik-lint-jar-file`).
 * The `java` executable path should be in `exec-path`, or the variable `flycheck-magik-lint-java-executable` has to be set. `flycheck-magik-lint-java-executable` will automatically be set when the environment variable `JAVA_HOME` is set.
-
 * `flycheck-mode` has to be enabled for `magik-mode` buffers. Or use `global-flycheck-mode` to enable it for all buffers.
 
 ## Usage with Smallworld 4.x or older
 
 If you plan to use this package with Smallworld-Versions 4.x or older, you should consider the following points:
 
-* Customize the variable `magik-session-auto-insert-dollar` to non nil
-* You might customize the variable `magik-aliases-layered-products-file` to "$SMALLWORLD_GIS/product/config/LAYERED_PRODUCTS". But if you want to use the EMACS for Smallworld 5.x as well, it's easier to create the directory `$SMALLWORLD_GIS/../smallworld_registry` and copy or soft-link the original LAYERED_PRODUCTS file into that directory - so you have the same structure as under Smallworld 5.x.
+* Customize the variable `magik-session-auto-insert-dollar` to non-nil.
+* You might customize the variable `magik-aliases-layered-products-file` to `"$SMALLWORLD_GIS/product/config/LAYERED_PRODUCTS"`.
+If you also want to use EMACS for Smallworld 5.x, it's easier to create the directory `$SMALLWORLD_GIS/../smallworld_registry` and copy or soft-link the original LAYERED_PRODUCTS file there. This ensures the same structure as in Smallworld 5.x.
 * There is no support (yet) for the Smallworld dev-tools. So if you want to do things like `f4`-`d` to start debugging a method, you may still want to use the EMACS which has been delivered with the Smallworld 4.x (or older) software.
 * Some more things which are at least partly not supported by Smallworld 5.x are not supported (e.g. `deep-print`)
 
@@ -116,7 +116,7 @@ Some keys bindings are changed with respect to a standard EMACS installation, at
 
 | Key | Function in standard EMACS | Change in Magik Mode package |
 | :---: | --- | --- |
-| `F2` | `2C-command`|globally changed to prefix key |
+| `F2` | `2C-command`| globally changed to prefix key |
 | `F3` | `kmacro-start-macro-or-insert-counter` | globally changed to prefix key |
 | `F4` | `kmacro-end-or-call-macro` | used in magik-mode and magik-session-mode as prefix key |
 
@@ -135,8 +135,8 @@ If you've been using the EMACS delivered by GE with Smallworld version 4.3 and e
 
 | actual variable | actual default | former variable | former default | Remarks |
 | :---: | --- | --- | --- | --- |
-| magik-electric-mode | t | electric-magik-mode | nil | If set (non nil), typing the `Space` after a keyworld like `for` or `if` inserts the matching control structure.<br/>If not set (nil), you have to type `F2`-`Space` to achive the same behaviour. |
-| mouse-drag-copy-region | nil | dto. | t | Paste a mouse selection (even to other programs).<br/>(Default has been changed in standard EMACS) |
-| show-paren-mode | nil | dto | t | if point is on opening or after closeing bracket, show the matching one.<br/>(GE's EMACS had done this customization) |
+| magik-electric-mode | t | electric-magik-mode | nil | If set (non-nil), typing the `Space` after a keyworld like `for` or `if` inserts the matching control structure. If not set (nil), you have to type `F2`-`Space` to achive the same behaviour. |
+| mouse-drag-copy-region | nil | dto. | t | Paste a mouse selection (even to other programs). (Default has been changed in standard EMACS) |
+| show-paren-mode | nil | dto | t | if point is on opening or after closeing bracket, show the matching one. (GE's EMACS had done this customization) |
 
 Eventually you'll find some more customazations in of the former GE's EMACS' installation in emacs/site-lisp/smallworld/sw_defaults.el, but you'll have to check, whether these will work the the EMACS installation you are using now.
