@@ -33,7 +33,7 @@ Global keys are set by calling `(magik-global-bindings)` after the packages has 
 
 | Key | Description |
 | :---: | --- |
-| <kbd>F2</kbd><kbd>s</kbd> | Open Magik version selection |
+| <kbd>F2</kbd>-<kbd>s</kbd> | Open Magik version selection |
 
 ### magik-version
 
@@ -135,8 +135,8 @@ If you've been using the EMACS delivered by GE with Smallworld version 4.3 and e
 
 | actual variable | actual default | former variable | former default | Remarks |
 | :---: | --- | --- | --- | --- |
-| magik-electric-mode | t | electric-magik-mode | nil | If non-nil, typing the <kbd>Space</kbd> after a keyworld like `if` inserts the matching control structure. If nil, you have to type <kbd>F2</kbd>-<kbd>Space</kbd> to achive the same behaviour. |
-| mouse-drag-copy-region | nil | dto. | t | Paste a mouse selection (even to other programs). (Default has been changed in standard EMACS) |
-| show-paren-mode | nil | dto | t | if point is on opening or after closeing bracket, show the matching one. (GE's EMACS had done this customization) |
+| `magik-electric-mode` | t | `electric-magik-mode` | nil | If non-nil, typing the <kbd>Space</kbd> after a keyworld like `if` inserts the matching control structure. If nil, you have to type <kbd>F2</kbd>-<kbd>Space</kbd> to achive the same behaviour. |
+| `mouse-drag-copy-region` | nil | dto. | t | Paste a mouse selection (even to other programs). (Default has been changed in standard EMACS) |
+| `show-paren-mode` | nil | dto. | t | if point is on opening or after closeing bracket, show the matching one. (GE's EMACS had done this customization) |
 
 Eventually you'll find some more customazations in of the former GE's EMACS' installation in emacs/site-lisp/smallworld/sw_defaults.el, but you'll have to check, whether these will work the the EMACS installation you are using now.
