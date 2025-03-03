@@ -27,7 +27,13 @@
 (require 'magik-mode)
 (require 'treesit)
 
-(defvar magik--treesit-settings
+(defvar magik-ts-mode--operators
+  '("<<" "^<<" "**<<" "**^<<" "*<<" "*^<<" "/<<" "/^<<" "-<<" "-^<<" "+<<" "+^<<"
+    "_and<<" "_andif<<" "_or<<" "_orif<<" "_xor<<" "_mod<<" "_div<<" ;; or should these be placed at the keyword-operators?
+    "~" "=" "~=" "<>" ">=" "<=" "<" ">" "**" "*" "/")
+  "Magik operators for tree-sitter font-locking.")
+
+(defvar magik-ts-mode--font-lock-settings
   (treesit-font-lock-rules
    :language 'magik
    :feature 'pragma
@@ -80,7 +86,7 @@
    `([(false) (true) (maybe)] @magik-boolean-face
      [(unset) "_constant"] @magik-constant-face
 
-     ["_and" "_andif" "_div" "_is" "_isnt" "_cf" "_mod" "_not" "_or" "_orif" "_xor" "_xorif"] @magik-keyword-operators-face
+     ["_and" "_andif" "_div" "_is" "_isnt" "_cf" "_mod" "_not" "_or" "_orif" "_xor"] @magik-keyword-operators-face
 
      [(self) (super) (clone)] @magik-class-face
 
@@ -98,7 +104,21 @@
 
      ["_gather" "_scatter" "_allresults" "_optional" "_return" ">>"] @magik-keyword-arguments-face
 
-     ["_dynamic" "_global" "_import" "_local" "_class"] @magik-keyword-variable-face)))
+     ["_dynamic" "_global" "_import" "_local" "_class"] @magik-keyword-variable-face)
+
+   :language 'magik
+   :feature 'bracket
+   '((["(" ")" "[" "]"]) @magik-bracket-face)
+
+   :language 'magik
+   :feature 'delimiter
+   '((["," ";"]) @magik-delimiter-face)
+
+   :language 'magik
+   :override t
+   :feature 'operator
+   `([,@magik-ts-mode--operators] @magik-operator-face))
+  "Tree-sitter font-lock settings for `magik-ts-mode'.")
 
 (defvar magik-ts-mode--indent-rules
   `((magik
@@ -143,8 +163,8 @@
      ((parent-is "relational_operator") parent 0)
      ((parent-is "arithmetic_operator") parent 0)
      ((parent-is "unary_operator") parent 0)
+     ((parent-is "documentation") parent 0)
 
-     ((parent-is "documentation") first-sibling 0)
      ((parent-is "invoke") (nth-sibling 2) 0)
 
      ((parent-is "call") parent-bol magik-indent-level)
@@ -167,11 +187,11 @@
 
   (setq-local
    treesit-simple-indent-rules magik-ts-mode--indent-rules
-   treesit-font-lock-settings magik--treesit-settings
+   treesit-font-lock-settings magik-ts-mode--font-lock-settings
    treesit-font-lock-feature-list '((comment pragma)
                                     (type constant keyword string)
                                     ()
-                                    ()
+                                    (bracket delimiter operator)
                                     (error)))
 
   (treesit-major-mode-setup))
