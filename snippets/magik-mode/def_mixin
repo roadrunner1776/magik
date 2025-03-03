@@ -7,7 +7,7 @@
 ## 
 ## 
 ## 
-def_mixin(${1:`(magik-yasnippet-filename-as-symbol)`})
+def_mixin(:${1:`(magik-yasnippet-filename)`})
 $
 
 $0
