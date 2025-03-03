@@ -2155,6 +2155,21 @@ closing bracket into the new \"{...}\" notation."
 (with-eval-after-load 'auto-complete
   (magik-ac-configuration))
 
+;;Flycheck configuration
+(with-eval-after-load 'flycheck
+  (require 'magik-lint))
+
+;;YASnippet configuration
+(defun magik--snippets-initialize ()
+  "Initialize the Magik snippets."
+  (let ((snip-dir (expand-file-name "snippets" (file-name-directory (or load-file-name (buffer-file-name))))))
+   (when (boundp 'yas-snippet-dirs)
+      (add-to-list 'yas-snippet-dirs snip-dir t))
+    (yas-load-directory snip-dir)))
+
+(with-eval-after-load 'yasnippet
+  (magik--snippets-initialize))
+
 (progn
   ;; ------------------------ magik mode ------------------------
 
@@ -2188,9 +2203,6 @@ closing bracket into the new \"{...}\" notation."
   (define-key magik-base-mode-map (kbd "<f4> r") 'magik-copy-region-to-buffer)
   (define-key magik-base-mode-map (kbd "<f4> s") 'magik-add-debug-statement)
   (define-key magik-base-mode-map (kbd "<f4> w") 'magik-compare-methods))
-
-(with-eval-after-load 'flycheck
-  (require 'magik-lint))
 
 (provide 'magik-mode)
 ;;; magik-mode.el ends here
