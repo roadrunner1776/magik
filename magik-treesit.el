@@ -86,7 +86,7 @@
    `([(false) (true) (maybe)] @magik-boolean-face
      [(unset) "_constant"] @magik-constant-face
 
-     ["_and" "_andif" "_div" "_is" "_isnt" "_cf" "_mod" "_not" "_or" "_orif" "_xor" "_xorif"] @magik-keyword-operators-face
+     ["_and" "_andif" "_div" "_is" "_isnt" "_cf" "_mod" "_not" "_or" "_orif" "_xor"] @magik-keyword-operators-face
 
      [(self) (super) (clone)] @magik-class-face
 
