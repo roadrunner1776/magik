@@ -2160,7 +2160,7 @@ closing bracket into the new \"{...}\" notation."
   (require 'magik-lint))
 
 ;;YASnippet configuration
-(defun magik-snippets-initialize ()
+(defun magik--snippets-initialize ()
   "Initialize the Magik snippets."
   (let ((snip-dir (expand-file-name "snippets" (file-name-directory (or load-file-name (buffer-file-name))))))
    (when (boundp 'yas-snippet-dirs)
@@ -2168,7 +2168,7 @@ closing bracket into the new \"{...}\" notation."
     (yas-load-directory snip-dir)))
 
 (with-eval-after-load 'yasnippet
-  (magik-snippets-initialize))
+  (magik--snippets-initialize))
 
 (progn
   ;; ------------------------ magik mode ------------------------

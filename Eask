@@ -6,6 +6,7 @@
 (keywords "languages")
 
 (package-file "magik-mode.el")
+(files "snippets")
 
 (script "test" "echo \"Error: no test specified\" && exit 1")
 
