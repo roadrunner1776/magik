@@ -1,4 +1,4 @@
-;;; magik-treesit.el ---                             -*- lexical-binding: t; -*-
+;;; magik-ts-mode.el --- Tree-sitter support for Smallworld Magik files  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024 Robin Putters
 
@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;;
+;; A Tree-sitter based major mode for editing Smallworld Magik files.
 
 ;;; Code:
 
@@ -205,5 +205,5 @@
     (add-to-list 'major-mode-remap-alist '(magik-mode . magik-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.magik\\'" . magik-ts-mode))))
 
-(provide 'magik-treesit)
-;;; magik-treesit.el ends here
+(provide 'magik-ts-mode)
+;;; magik-ts-mode.el ends here
