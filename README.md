@@ -135,7 +135,7 @@ If you've been using the EMACS delivered by GE with Smallworld version 4.3 and e
 
 | actual variable | actual default | former variable | former default | Remarks |
 | :---: | --- | --- | --- | --- |
-| `magik-electric-mode` | t | `electric-magik-mode` | nil | If non-nil, typing the <kbd>Space</kbd> after a keyworld like `if` inserts the matching control structure. If nil, you have to type <kbd>F2</kbd>-<kbd>Space</kbd> to achive the same behaviour. |
+| `magik-electric-mode` | t | `electric-magik-mode` | nil | If non-nil, typing <kbd>Space</kbd> after keywords like `if` inserts the matching control structure. If nil, you have to use <kbd>F2</kbd>-<kbd>Space</kbd> to achieve the same behaviour. |
 | `mouse-drag-copy-region` | nil | dto. | t | Paste a mouse selection (even to other programs). (Default has been changed in standard EMACS) |
 | `show-paren-mode` | nil | dto. | t | if point is on opening or after closeing bracket, show the matching one. (GE's EMACS had done this customization) |
 
