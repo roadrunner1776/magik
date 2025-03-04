@@ -20,6 +20,17 @@ jobs:
 
       - uses: DavidAnson/markdownlint-cli2-action@v19
 
+  codespell:
+    name: Codespell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          only_warn: true
+          ignore_words_list: ans,ine,inh      
+
   test:
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
