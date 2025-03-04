@@ -240,7 +240,7 @@ The format follows that described in pragma-do-if-match.")
 
 (defun magik-pragma-remove-magik-deprecated-template ()
   "Removes the template for deprecated methods.
-If the text to be removed has been modifed then the user is asked whether they
+If the text to be removed has been modified then the user is asked whether they
 wish to remove it otherwise the template is removed silently."
   (save-excursion
     (search-forward ")") ; find end of _pragma statement
@@ -256,7 +256,7 @@ wish to remove it otherwise the template is removed silently."
             (setq end (re-search-forward (concat "\\s-*" magik-pragma-deprecated-template-end) nil t))
             (and start
                  end
-                 (y-or-n-p "Remove modifed deprecated comments? ")
+                 (y-or-n-p "Remove modified deprecated comments? ")
                  (delete-region start end)))))))
 
 ;;;;;;;;;;;;;;;;;;;; Pragma toggle options ;;;;;;;;;;;;;;;;;;;
@@ -317,7 +317,7 @@ which case we toggle through the various pragma options."
                ;;handles the cases when point is in a whitespace section between , and the start of the next option
                (search-forward "=" end-bracket t) ; skip over current option
                (while (and (re-search-forward "\\s-*\\(\\sw+\\)\\s-*=" end-bracket t)
-                           (goto-char (match-beginning 0))        ;found start of next option including preceeding space
+                           (goto-char (match-beginning 0))        ;found start of next option including preceding space
                            (<= (point) curr-pos)                  ;test if point is in this option or a later one.
                            (setq option-pos (match-beginning 1))) ;store true start of option
                  (search-forward "=" end-bracket t))              ; LOOP: skip passed current option
@@ -351,7 +351,7 @@ relative the current setting and available values."
 Also adds a template in the comment section when the classify_level is set to deprecated.
 When the classify_level is changed from deprecrated then the template is removed.
 However, if data has been changed in the fields of the template then the user is asked
-if they wish to remove the contents of the depreacted template."
+if they wish to remove the contents of the deprecated template."
   ;;Ensure point stays immediately after = by searching for = and doing the replace inside save-excursion
   (search-forward "=")
   (save-excursion

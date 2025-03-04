@@ -232,7 +232,7 @@ concrete implementations."
     (,"new/init"
      "_method\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\.\\(new\\|init\\)\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" magik-imenu-method-name 1)
     (,"Procedures"
-     "\\b_\\sw+\\(\n\\|\\s-\\)+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\s-*<<\\(\n\\|\\s-\\)*_proc\\s-*(" 2) ;unamed, use variable assignment
+     "\\b_\\sw+\\(\n\\|\\s-\\)+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\s-*<<\\(\n\\|\\s-\\)*_proc\\s-*(" 2) ;unnamed, use variable assignment
     (,"Procedures"
      "_proc\\s-*\\(@\\s-*\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\s-*(" magik-imenu-method-name 1) ;named using @
     (,"Condition"
@@ -245,7 +245,7 @@ concrete implementations."
      "^\\s-*\\(.+\\)\\.define_shared_constant([ \t\n]*:\\s-*\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 2)
     (,"Slot Access"
      "^\\s-*\\(.+\\)\\.define_slot_\\(access\\|externally_readable\\|externally_writable\\)([ \t\n]*:\\s-*\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 3)
-    (,"Pseduo Slots"
+    (,"Pseudo Slots"
      "^\\s-*\\(.+\\)\\.define_pseudo_slot([ \t\n]*:\\s-*\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 2) ; define_slot_externally_* rarely used.
     (,"Mixins"
      "^\\s-*def_mixin([ \t\n]*:\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" 1)
@@ -756,7 +756,7 @@ Use auto-complete mode \"g\" symbol convention to represent a global.")
 ;;Actually only used by the Magik-Patch minor mode but we need a hook here
 ;;because a function must be referred to in font-lock-defaults.
 (defvar magik-goto-code-function 'point-min
-  "Function used to place point on the line immediately preceeding Magik code.")
+  "Function used to place point on the line immediately preceding Magik code.")
 
 (defun magik-goto-code ()
   "Goto start of code."
@@ -1171,7 +1171,7 @@ Optional argument GIS ..."
       (replace-match to t literal))))
 
 (defun magik-transmit-method-eom-mode (arg)
-  "Toggle whether to move the cursor to the end of the method after tranmitting.
+  "Toggle whether to move the cursor to the end of the method after transmitting.
 If nil, leave point where it is,
 If t or 'end, move point to end of method,
 If 'repeat, move point to end of method on 2nd and subsequent uses of the command.
@@ -1963,7 +1963,7 @@ the list of all possible matches, without recourse to the class browser."
           (setq ac-prefix (concat exemplar  "." (if (> (length ac-prefix) 0) (substring ac-prefix 0 1))))
           (if (and magik-ac-class-method-source-cache
                    (equal (concat " " ac-prefix) (car magik-ac-class-method-source-cache)))
-              ;; Re-use cache.
+              ;; Reuse cache.
               magik-ac-class-method-source-cache
             ;; reset cache
             (setq magik-ac-class-method-source-cache (magik-cb-ac-method-candidates)))))))

@@ -153,7 +153,7 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
     gis))
 
 (defun magik-msg-compile-module-messages (&optional gis)
-  "Compile all messages asociated with the module this buffer is assocaiated with in a GIS process.
+  "Compile all messages associated with the module this buffer is assocaiated with in a GIS process.
 The GIS process used is either that given by BUF or the variable `gis-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
@@ -172,8 +172,8 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
    _handling sw_module_already_defined, sw_module_moved_module _with procedure
 
    module << sw_module_manager.locate_module(directory)
-   _if module _isnt _unset 
-   _then sw_module_manager.compile_messages(module) 
+   _if module _isnt _unset
+   _then sw_module_manager.compile_messages(module)
    _endif
       _endproc(%S)\n$\n"
       directory))
