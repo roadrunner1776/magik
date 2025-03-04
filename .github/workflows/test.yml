@@ -28,7 +28,6 @@ jobs:
 
       - uses: codespell-project/actions-codespell@v2
         with:
-          only_warn: true
           ignore_words_list: ans,ine,inh,isnt
 
   test:
