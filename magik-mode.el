@@ -2058,7 +2058,7 @@ closing bracket into the new \"{...}\" notation."
 
 (defun magik--in-string-or-comment-p ()
   "Return non-nil if point is inside a string or comment."
-  (nth 8 (syntax-ppss)))
+  (syntax-ppss-context (syntax-ppss)))
 
 (defun magik-yas-maybe-expand ()
   "Expand `yasnippet` if possible, otherwise insert a space.
