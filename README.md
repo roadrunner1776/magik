@@ -67,7 +67,7 @@ Support for imenu. Try: `(add-hook 'magik-mode-hook 'imenu-add-menubar-index)`
 
 ### magik-electric-mode
 
-Minor mode for electic Magik.
+Minor mode for electric Magik.
 
 ### magik-cb
 
@@ -120,7 +120,7 @@ Some keys bindings are changed with respect to a standard EMACS installation, at
 | <kbd>F3</kbd> | `kmacro-start-macro-or-insert-counter` | globally changed to prefix key |
 | <kbd>F4</kbd> | `kmacro-end-or-call-macro` | used in magik-mode and magik-session-mode as prefix key |
 
-The reason for that is, that many Magik developpers are familiar with these bindings from former EMACS installations.
+The reason for that is, that many Magik developers are familiar with these bindings from former EMACS installations.
 
 For quick usage of the keyboard-macro functions you may e.g. bind the <kbd>Ctrl</kbd>-<kbd>F2</kbd> and <kbd>Ctrl</kbd>-<kbd>F4</kbd> combinations by putting the following lines into your  `.emacs` file:
 
@@ -137,6 +137,6 @@ If you've been using the EMACS delivered by GE with Smallworld version 4.3 and e
 | :---: | --- | --- | --- | --- |
 | `magik-electric-mode` | t | `electric-magik-mode` | nil | If non-nil, typing <kbd>Space</kbd> after keywords like `if` inserts the matching control structure. If nil, you have to use <kbd>F2</kbd>-<kbd>Space</kbd> to achieve the same behaviour. |
 | `mouse-drag-copy-region` | nil | dto. | t | Paste a mouse selection (even to other programs). (Default has been changed in standard EMACS) |
-| `show-paren-mode` | nil | dto. | t | if point is on opening or after closeing bracket, show the matching one. (GE's EMACS had done this customization) |
+| `show-paren-mode` | nil | dto. | t | if point is on opening or after closing bracket, show the matching one. (GE's EMACS had done this customization) |
 
 Eventually you'll find some more customazations in of the former GE's EMACS' installation in emacs/site-lisp/smallworld/sw_defaults.el, but you'll have to check, whether these will work the the EMACS installation you are using now.
