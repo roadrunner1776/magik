@@ -1,4 +1,4 @@
-;;; magik-loadlist.el --- mode for editing Magik load_list.txt files.
+;;; magik-loadlist.el --- mode for editing Magik load_list.txt files.  -*- lexical-binding: t; -*-
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
