@@ -120,7 +120,7 @@ Stores process object in `magik-cb-ac-process'."
                    (if (eq (following-char) ? )
                        (forward-char 1)))
                   (t ;catch all error
-                   (message "Found unrecognised charcter at %d in %s" (point) (current-buffer))
+                   (message "Found unrecognised character at %d in %s" (point) (current-buffer))
                    (goto-char (end-of-line))))))
         (list args optional gather)))))
 

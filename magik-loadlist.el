@@ -28,7 +28,7 @@
 
 (defcustom magik-loadlist-ignore-regexp-list '("\\..*")
   "List of Regexps used to miss certain files from load_list.txt files.
-Intial ^ and final $ is automatically added in `loadlist-ignore'."
+Initial ^ and final $ is automatically added in `loadlist-ignore'."
   :group 'magik-loadlist
   :type  '(repeat regexp))
 

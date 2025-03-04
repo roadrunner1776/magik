@@ -97,7 +97,7 @@ magik-template-file-type-alist to make the user
 selection pick up the new template file.")
 
 (defvar magik-template-file-type nil
-  "Type of Magik file being editted.
+  "Type of Magik file being edited.
 This variable is buffer local and is used to identify the type of magik file it is,
 i.e. which Template file it came from.
 
@@ -249,7 +249,7 @@ a template type to use for normal magik files.
           (setq template-file (magik-template-file magik-template-file-type))
           (if (and template-file
                    (file-exists-p template-file))
-              (let ((buffer-undo-list t)) ;prevent user accidently undoing the insertion!
+              (let ((buffer-undo-list t)) ;prevent user accidentally undoing the insertion!
                 (erase-buffer)
                 (insert-file-contents template-file)
                 (magik-template-initialise magik-template-file-type)))))))

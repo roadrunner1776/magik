@@ -102,7 +102,7 @@ Used for switching to the first Smallworld session."
   :type 'string)
 
 (defcustom magik-session-prompt nil
-  "String or Regular expression identifing the default Magik Prompt.
+  "String or Regular expression identifying the default Magik Prompt.
 If global value is nil, a GIS session will attempt to discover the current
 setting of the Magik Prompt by calling `magik-session-prompt-get'."
   :group 'magik
@@ -261,7 +261,7 @@ markers.")
   (modify-syntax-entry ?\} "w"  magik-session-command-syntax-table)
   (modify-syntax-entry ?%  "w"  magik-session-command-syntax-table)
 
-  (modify-syntax-entry ?_  "w"  magik-session-command-syntax-table) ;make _ a word character for environment variable sustitution
+  (modify-syntax-entry ?_  "w"  magik-session-command-syntax-table) ;make _ a word character for environment variable substitution
 
   (modify-syntax-entry ?\' "\"" magik-session-command-syntax-table) ;count single quotes as a true quote
   (modify-syntax-entry ?\" "\"" magik-session-command-syntax-table) ;count double quotes as a true quote
@@ -389,7 +389,7 @@ and return a list of all the components of the command."
                         (setq substr (buffer-substring start-char (point)))
                         (if (string-match "[\"\']$" substr) ;strip end-quote if any
                             (setq substr (substring substr 0 (match-beginning 0))))
-                                        ;Now look for embeded environment variables
+                                        ;Now look for embedded environment variables
                         (setq substr (substitute-in-file-name substr)))
                    collect substr
                    until (eobp)))
