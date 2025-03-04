@@ -12,6 +12,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  markdown_lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DavidAnson/markdownlint-cli2-action@v19
+
   test:
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
