@@ -7,8 +7,8 @@
 1. [Installation](#installation)
 2. [Features](#features)
 3. [Usage with Smallworld 4.x or older](#usage-with-smallworld-4x-or-older)
-4. [Side Effects](#side-effects)
-5. [Familiar with SW 4.x EMACS? Some Tipps for you!](#familiar-with-sw-4x-emacs-some-tipps-for-you)
+4. [Side effects](#side-effects)
+5. [Familiar with SW 4.x EMACS? Some tips for you!](#familiar-with-sw-4x-emacs-some-tips-for-you)
 
 ## Installation
 
@@ -110,7 +110,7 @@ If you also want to use EMACS for Smallworld 5.x, it's easier to create the dire
 * There is no support (yet) for the Smallworld dev-tools. So if you want to do things like <kbd>F4</kbd>-<kbd>d</kbd> to start debugging a method, you may still want to use the EMACS which has been delivered with the Smallworld 4.x (or older) software.
 * Some more things which are at least partly not supported by Smallworld 5.x are not supported (e.g. `deep-print`)
 
-## Side Effects
+## Side effects
 
 Some keys bindings are changed with respect to a standard EMACS installation, at least when using `(magik-global-bindings)`:
 
@@ -129,7 +129,7 @@ For quick usage of the keyboard-macro functions you may e.g. bind the <kbd>Ctrl<
 (global-set-key [C-f4] 'kmacro-end-or-call-macro)
 ```
 
-## Familiar with SW 4.x EMACS? Some Tipps for you
+## Familiar with SW 4.x EMACS? Some tips for you
 
 If you've been using the EMACS delivered by GE with Smallworld version 4.3 and earlier, you might want to customize some variables with default values changed with respect to the former "GE"-EMACS:
 
