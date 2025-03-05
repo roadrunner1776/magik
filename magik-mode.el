@@ -2066,7 +2066,7 @@ Prevents expansion inside strings and comments."
   (interactive)
   (if (or (magik--in-string-or-comment-p)
           (not (yas-expand)))
-      (insert " ")))
+      (self-insert-command 1)))
 
 ;;; Package initialisation
 (define-abbrev-table 'magik-base-mode-abbrev-table
