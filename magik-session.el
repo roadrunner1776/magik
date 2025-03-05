@@ -1562,7 +1562,7 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (define-key magik-session-mode-map "\ep"       'magik-session-recall-prev-cmd)
   (define-key magik-session-mode-map "\en"       'magik-session-recall-next-cmd)
   (define-key magik-session-mode-map "\r"        'magik-session-newline)
-  (define-key magik-session-mode-map " "         yas-maybe-expand)
+  (define-key magik-session-mode-map " "         'magik-yas-maybe-expand)
   (define-key magik-session-mode-map "\C-?"      'magik-session-backward-delete-char)
   (define-key magik-session-mode-map "\C-a"      'magik-session-beginning-of-line)
   (define-key magik-session-mode-map "\C-d"      'magik-session-delete-char)
