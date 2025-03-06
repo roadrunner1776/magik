@@ -125,27 +125,26 @@ has more than one aliases file available."
   (interactive)
   (beginning-of-line)
   (let* ((version-list (magik-version-at-version-definition))
-         lp-alist
-         alias-file)
-    (if (null (car version-list))
-        (error "Invalid selection")
-      (setq lp-alist (magik-aliases-layered-products-file
-                      (magik-aliases-expand-file magik-aliases-layered-products-file)))
-      (cond ((null lp-alist) nil)
-            ((eq (length lp-alist) 1)
-             (setq alias-file (concat (cdar lp-alist) "/config/gis_aliases")))
-            (t
-             (let* ((lp   (completing-read "Select a Layered Product with gis_aliases file: " lp-alist nil t))
-                    (path (cdr (assoc lp lp-alist))))
-               (if path
-                   (setq alias-file (concat path "/config/gis_aliases"))))))
-      (message alias-file)
-      (when alias-file
-        (kill-buffer (current-buffer))
-        (find-file alias-file)
-        (magik-aliases-next)
-        (setq buffer-read-only t)
-        (set-buffer-modified-p nil)))))
+          (stream (car version-list))
+          (smallworld-gis (nth 2 version-list))
+          (lp-alist (magik-aliases-layered-products-file (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
+          alias-file)
+    (when (not stream)
+      (error "Invalid selection"))
+    (cond ((null lp-alist) nil)
+      ((eq (length lp-alist) 1)
+        (setq alias-file (concat (cdar lp-alist) "/config/gis_aliases")))
+      (t
+        (let* ((lp (completing-read "Select a Layered Product with gis_aliases file: " lp-alist nil t))
+                (path (cdr (assoc lp lp-alist))))
+          (when path
+            (setq alias-file (concat path "/config/gis_aliases"))))))
+    (when alias-file
+      (kill-buffer (current-buffer))
+      (find-file alias-file)
+      (magik-aliases-next)
+      (setq buffer-read-only t)
+      (set-buffer-modified-p nil))))
 
 (defun magik-version-next ()
   "Move point to next valid version listed."
@@ -208,41 +207,6 @@ has more than one aliases file available."
 (defun magik-version-smallworld-gis-p (path)
   "Return t if path points to a Smallworld installation."
   (file-directory-p (concat (file-name-directory path) "config")))
-
-(defun magik-version-read-smallworld-gis-completion (string predicate flag)
-  "Provide directory completion for finding Smallworld installations.
-Repeated TAB and \\[minibuffer-completion-help] still provide
-directory listing so users can navigate a directory structure looking
-for a Smallworld installation. Only when
-`gis-version-smallworld-gis-p' returns t for a given path will the
-path be considered to be a real Smallworld installation directory
-suitable for selection."
-  (if (magik-version-smallworld-gis-p string)
-      (cond ((eq flag #'lambda) t)
-            ((null flag)       t)
-            (t            string))
-    ;;    (cl-letf (((symbol-function `read-smallworld-gis-predicate) (d) (equal d (file-name-directory d))))
-    (let ((root (file-name-directory string))
-          (completions (all-completions string
-                                        'read-file-name-internal)))
-      ;;            #'(lambda (d) (equal d (file-name-directory d))))))
-      ;;            'read-smallworld-gis-predicate)))
-      (cond ((or (eq this-command 'minibuffer-completion-help)
-                 (and flag (eq this-command 'minibuffer-complete)))
-             ;;Provide directory completions for user feedback ONLY
-             (mapcar (function (lambda (d) (concat root d))) completions))
-            (flag
-             ;; all-completions. Do not want to return anything here
-             ;; otherwise any directory is accepted after a Return
-             nil)
-            (t
-             ;;try-completion
-             (setq completions
-                   (try-completion (file-name-nondirectory string)
-                                   (mapcar 'list completions)))
-             (if (eq completions t)
-                 string
-               (concat (or root "") completions)))))))
 
 (defun magik-version-read-smallworld-gis ()
   "Prompt for a valid value for SMALLWORLD_GIS."
@@ -350,7 +314,7 @@ Will set `gis-version-file' to FILE."
 
   (setq buffer-read-only t)
   (set-buffer-modified-p nil)
-  (display-buffer (current-buffer))
+  (pop-to-buffer (current-buffer) nil t)
   (magik-version-next))
 
 (defun magik-version-quit ()

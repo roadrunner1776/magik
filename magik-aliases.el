@@ -333,14 +333,17 @@ With a prefix arg, ask user for current directory to use."
              (match-string-no-properties 1))
             (t nil)))))
 
-(defun magik-aliases-expand-file (file)
+(defun magik-aliases-expand-file (file smallworld-gis)
   "Expand FILE path including environment variables.
 Returns nil if FILE cannot be expanded."
   (condition-case nil
-      (expand-file-name (substitute-in-file-name (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) file nil 'literal)))
+    (with-environment-variables (("SMALLWORLD_GIS" smallworld-gis))
+      (expand-file-name
+        (substitute-in-file-name
+          (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) file nil 'literal))))
     (error nil)))
 
-(defun magik-aliases-layered-products-file (file)
+(defun magik-aliases-layered-products-file (file smallworld-gis)
   "Read contents of FILE with the format of LAYERED_PRODUCTS configuration file."
   (when (file-exists-p file)
     (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
@@ -351,9 +354,9 @@ Returns nil if FILE cannot be expanded."
       ;; a gis_aliases file next to the LAYERED_PRODUCTS file.
       (goto-char (point-min))
       (insert "sw_core:\n path    = %SMALLWORLD_GIS%\n")
-      (magik--aliases-layered-products-alist))))
+      (magik--aliases-layered-products-alist smallworld-gis))))
 
-(defun magik--aliases-layered-products-alist ()
+(defun magik--aliases-layered-products-alist (smallworld-gis)
   "Return alist of contents for LAYERED_PRODUCTS file."
   (save-excursion
     (save-match-data
@@ -369,7 +372,7 @@ Returns nil if FILE cannot be expanded."
                 (skip-chars-backward "/\\") ;avoid trailing directory character.
                 (setq dir
                       (magik-aliases-expand-file
-                       (buffer-substring-no-properties pt (point))))
+                       (buffer-substring-no-properties pt (point)) smallworld-gis))
                 (if (file-exists-p (concat dir "/config/gis_aliases"))
                     (let ((lp-dir (cons lp dir)))
                       (or (member lp-dir alist) (push lp-dir alist))) ))))
