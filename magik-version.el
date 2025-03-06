@@ -110,9 +110,10 @@ This provides an alternative interface to a gis_version program."
   "Run GIS command in selected version."
   (interactive)
   (beginning-of-line)
-  (let (stream version buffer)
-    (setq stream (car (magik-version-at-version-definition))
-          buffer  (concat "*gis " stream "*"))
+  (let* ((definition (magik-version-at-version-definition))
+         (stream (nth 0 definition))
+         (buffer (concat "*gis " stream "*")))
+    (magik-version--set-environment definition)
     (magik-session buffer)
     (setq magik-version-current stream)))
 
