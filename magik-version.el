@@ -395,7 +395,7 @@ SELECTED-DEFINITION is the definition using the easy-menu or the current line."
     (message "The current installation for this Emacs is now %s." stream)))
 
 (defun magik-version--set-environment (definition)
-  "Modify `process-environment' and `exec-path' for current version."
+  "Set the environment using DEFINITION."
   (let ((stream (nth 0 definition))
         (version (nth 1 definition))
         (smallworld-gis (nth 2 definition)))
@@ -424,7 +424,7 @@ no (valid) match is found."
               (match-string-no-properties 3))))))
 
 (defun magik-version-set-environment (smallworld-gis stream version)
-  "Modify the process and exec-path environment given stream and smallworld-gis path."
+  "Set the environment variables using SMALLWORLD-GIS, STREAM and VERSION."
   (setenv "SMALLWORLD_GIS" smallworld-gis)
   (setenv "SW_STREAM" stream)
   (setenv "SW_VERSION" version))
