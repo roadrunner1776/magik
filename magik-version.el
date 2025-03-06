@@ -94,6 +94,10 @@ This provides an alternative interface to a gis_version program."
 (defvar magik-version-sw-path-list nil
   "Stores list of Smallworld directories added to PATH.")
 
+(defvar magik-smallworld-gis nil
+  "Stores the current SMALLWORLD_GIS.")
+(make-variable-buffer-local 'magik-smallworld-gis)
+
 (defvar magik-version-current nil
   "Current gis_version stream.")
 (make-variable-buffer-local 'magik-version-current)
@@ -112,8 +116,9 @@ This provides an alternative interface to a gis_version program."
   (beginning-of-line)
   (let* ((definition (magik-version-at-version-definition))
          (stream (nth 0 definition))
+         (smallworld-gis (nth 2 definition))
          (buffer (concat "*gis " stream "*")))
-    (magik-version--set-environment definition)
+    (setq magik-smallworld-gis smallworld-gis)
     (magik-session buffer)
     (setq magik-version-current stream)))
 
@@ -142,6 +147,7 @@ has more than one aliases file available."
     (when alias-file
       (kill-buffer (current-buffer))
       (find-file alias-file)
+      (setq magik-smallworld-gis smallworld-gis)
       (magik-aliases-next)
       (setq buffer-read-only t)
       (set-buffer-modified-p nil))))
@@ -352,23 +358,12 @@ SELECTED-DEFINITION is the definition using the easy-menu or the current line."
   (let* ((definition (or selected-definition
                          (magik-version-at-version-definition)))
          (stream (car definition)))
-    (magik-version--set-environment definition)
-    (setq-default magik-version-current stream)
     (kill-buffer (current-buffer))
-    (magik-version-display-title)
+    (setq magik-smallworld-gis (nth 2 definition))
+    (setq-default magik-version-current stream)
     (run-hooks 'magik-version-select-hook)
+    (magik-version-display-title)
     (message "The current installation for this Emacs is now %s." stream)))
-
-(defun magik-version--set-environment (definition)
-  "Set the environment using DEFINITION."
-  (let ((stream (nth 0 definition))
-        (version (nth 1 definition))
-        (smallworld-gis (nth 2 definition)))
-    (if (not (and magik-version-current
-                  (string-equal stream magik-version-current)))
-        (magik-version-set-environment smallworld-gis
-                                       stream
-                                       version))))
 
 (defun magik-version-at-version-definition ()
   "Return version details if the point is at a version definition.
@@ -387,12 +382,6 @@ no (valid) match is found."
         (list (match-string-no-properties 1)
               (match-string-no-properties 2)
               (match-string-no-properties 3))))))
-
-(defun magik-version-set-environment (smallworld-gis stream version)
-  "Set the environment variables using SMALLWORLD-GIS, STREAM and VERSION."
-  (setenv "SMALLWORLD_GIS" smallworld-gis)
-  (setenv "SW_STREAM" stream)
-  (setenv "SW_VERSION" version))
 
 (defun magik-version-call-process-windows (&rest args)
   "Run Windows command and return the environment variables it sets up."

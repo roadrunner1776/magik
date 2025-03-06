@@ -40,7 +40,7 @@
   "*List of common gis_aliases files.
 This list is expected to be setup by the Emacs maintainer,
 a user can setup their personal gis_aliases file list using
-`aliases-user-file-list'.  Both these lists are concatenated to
+`magik-aliases-user-file-list'.  Both these lists are concatenated to
 form the top section of the SW->Alias Files submenu."
   :group 'magik-aliases
   :type  '(repeat file))
@@ -51,7 +51,7 @@ form the top section of the SW->Alias Files submenu."
   :type  'string)
 
 (defcustom magik-aliases-program-path '("../bin/x86" "../../product/bin/x86")
-  "*Path to `aliases-program'.
+  "*Path to `magik-aliases-program'.
 Setting this sets the default value.  When opening a gis_aliases file,
 the buffer local value of this variable will be set to the directory
 containing the `magik-aliases-program' if it is in a relative path to the file."
@@ -94,7 +94,7 @@ If any function returns t, then the buffer is displayed."
   :type  'hook)
 
 (defvar magik-aliases-definition-regexp "^\\([^#]\\S-+\\):\\s-*$"
-  "Regexp matching an alias definition")
+  "Regexp matching an alias definition.")
 
 ;; Imenu configuration
 (defvar magik-aliases-imenu-generic-expression
@@ -437,7 +437,7 @@ LAYERED_PRODUCTS configuration file and return paths to append to `exec-path'."
                           "Definitions"
                           (or entries (list "No Aliases found"))))))
 
-(defun magik-aliases-update-sw-menu ()
+(defun magik-aliases-update-sw-menu () ;; TODO: Use magik-smallworld-gis
   "Update `Alias Files' submenu in SW menu bar."
   (interactive)
   (let (default-files

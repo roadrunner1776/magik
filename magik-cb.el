@@ -770,10 +770,15 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
     (if (and (stringp magik-cb--mf-socket-synchronised) (not (equal magik-cb--mf-socket-synchronised "")))
         magik-cb--mf-socket-synchronised)))
 
+(defun magik-cb--acp-paths ()
+  "Return the ACP paths."
+  (magik-aliases-layered-products-acp-path
+   (magik-aliases-expand-file magik-aliases-layered-products-file magik-smallworld-gis) magik-smallworld-gis))
+
 (defun magik-cb-start-process (buffer command &rest args)
   "Start a COMMAND process in BUFFER and return process object.
 BUFFER may be nil, in which case only the process is started."
-  (let* ((exec-path (append (magik-aliases-layered-products-acp-path (magik-aliases-expand-file magik-aliases-layered-products-file)) exec-path))
+  (let* ((exec-path (append (magik-cb--acp-paths) exec-path))
          magik-cb-process)
     (compat-call setq-local magik-cb-process (apply 'start-process "cb" buffer command args))
     (set-process-filter        magik-cb-process 'magik-cb-filter)
@@ -800,6 +805,8 @@ If FILTER is given then it is set on the process."
                                       (or (symbol-value 'magik-session-exec-path) exec-path))))
            (gis-proc (and gis (get-buffer-process gis)))
            magik-cb-process)
+
+      (setq magik-smallworld-gis (buffer-local-value 'magik-smallworld-gis (get-buffer gis)))
 
       (cond (gis-proc
              ;; then ask Magik to start a method_finder.  Magik will
@@ -2349,7 +2356,7 @@ comments etc."
 
 (defun magik-cb-method-finder-version ()
   "Return as a string (e.g. \"2.0.0\") the version of the method_finder."
-  (let* ((exec-path (append (magik-aliases-layered-products-acp-path (magik-aliases-expand-file magik-aliases-layered-products-file)) exec-path))
+  (let* ((exec-path (append (magik-cb--acp-paths) exec-path))
          magik-cb-process)
     (with-current-buffer (get-buffer-create " *method finder version*")
       (erase-buffer)
