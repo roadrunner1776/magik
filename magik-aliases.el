@@ -68,6 +68,11 @@ containing the `magik-aliases-program' if it is in a relative path to the file."
   :group 'magik
   :type 'string)
 
+(defcustom magik-aliases-default-product-path "sw_core:\n path    = %SMALLWORLD_GIS%\n"
+  "*The default product path for sw_core."
+  :group 'magik
+  :type 'string)
+
 (defcustom magik-aliases-switch-to-buffer t
   "*User control for switching to the process buffer of a selected alias.
 If this is t then the buffer is displayed."
@@ -343,21 +348,27 @@ Returns nil if FILE cannot be expanded."
           (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) file nil 'literal))))
     (error nil)))
 
+(defun magik--aliases-insert-default-product-path ()
+  "Insert the default product path.
+Always ensure that a default sw_core: set to SMALLWORLD_GIS is present
+in case the value has been manually modified but we still wish to locate
+a gis_aliases file next to the LAYERED_PRODUCTS file."
+  (goto-char (point-min))
+  (insert magik-aliases-default-product-path))
+
 (defun magik-aliases-layered-products-file (file smallworld-gis)
-  "Read contents of FILE with the format of LAYERED_PRODUCTS configuration file."
+  "Read LAYERED_PRODUCTS configuration file.
+Read contents of FILE using SMALLWORLD-GIS with the format of
+LAYERED_PRODUCTS configuration file."
   (when (file-exists-p file)
     (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
       (insert-file-contents file nil nil nil 'replace)
 
-      ;; Always ensure that a default sw_core: set to SMALLWORLD_GIS is present
-      ;; in case the value has been manually modified but we still wish to locate
-      ;; a gis_aliases file next to the LAYERED_PRODUCTS file.
-      (goto-char (point-min))
-      (insert "sw_core:\n path    = %SMALLWORLD_GIS%\n")
+      (magik--aliases-insert-default-product-path)
       (magik--aliases-layered-products-alist smallworld-gis))))
 
 (defun magik--aliases-layered-products-alist (smallworld-gis)
-  "Return alist of contents for LAYERED_PRODUCTS file."
+  "Return alist of contents for LAYERED_PRODUCTS file using SMALLWORLD-GIS."
   (save-excursion
     (save-match-data
       (let (alist pt lp dir)
@@ -378,24 +389,19 @@ Returns nil if FILE cannot be expanded."
                       (or (member lp-dir alist) (push lp-dir alist))) ))))
         alist))))
 
-(defun magik-aliases-layered-products-acp-path (file)
+(defun magik-aliases-layered-products-acp-path (file smallworld-gis)
   "Read LAYERED_PRODUCTS configuration file.
-
-  Read contents of FILE with the format of LAYERED_PRODUCTS configuration file
-  and return paths to append to `exec-path'."
+Read contents of FILE using SMALLWORLD-GIS with the format of
+LAYERED_PRODUCTS configuration file and return paths to append to `exec-path'."
   (when (file-exists-p file)
     (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
       (insert-file-contents file nil nil nil 'replace)
 
-      ;; Always ensure that a default sw_core: set to SMALLWORLD_GIS is present
-      ;; in case the value has been manually modified but we still wish to locate
-      ;; a gis_aliases file next to the LAYERED_PRODUCTS file.
-      (goto-char (point-min))
-      (insert "sw_core:\n path    = %SMALLWORLD_GIS%\n")
-      (magik--aliases-layered-products-acp-list))))
+      (magik--aliases-insert-default-product-path)
+      (magik--aliases-layered-products-acp-list smallworld-gis))))
 
-(defun magik--aliases-layered-products-acp-list ()
-  "Return list of ACP paths."
+(defun magik--aliases-layered-products-acp-list (smallworld-gis)
+  "Return list of ACP paths using SMALLWORLD-GIS."
   (save-excursion
     (save-match-data
       (let (paths pt dir etc-dir)
@@ -409,7 +415,7 @@ Returns nil if FILE cannot be expanded."
                 (skip-chars-backward "/\\") ;avoid trailing directory character.
                 (setq dir
                       (magik-aliases-expand-file
-                       (buffer-substring-no-properties pt (point)))
+                       (buffer-substring-no-properties pt (point)) smallworld-gis)
                       etc-dir (concat dir (if (eq system-type 'windows-nt)
                                               "/etc/x86"
                                             "/etc/Linux.x86")))
@@ -441,15 +447,14 @@ Returns nil if FILE cannot be expanded."
     (dolist (f (append magik-aliases-user-file-list magik-aliases-common-file-list ))
       (push `[,f
               (progn
-                (find-file (magik-aliases-expand-file ,f))
+                (find-file (magik-aliases-expand-file ,f nil))
                 (magik-aliases-mode))
-              (and ,f (magik-aliases-expand-file ,f))
+              (and ,f (magik-aliases-expand-file ,f nil))
               ]
             default-files))
-
     (when (getenv "SMALLWORLD_GIS")
       (dolist (lp (magik-aliases-layered-products-file
-                   (magik-aliases-expand-file magik-aliases-layered-products-file)))
+                   (magik-aliases-expand-file magik-aliases-layered-products-file (getenv "SMALLWORLD_GIS"))))
         (push `[,(format "%s: %s" (car lp) (cdr lp))
                 (progn
                   (find-file ,(concat (cdr lp) "/config/gis_aliases"))
@@ -462,7 +467,8 @@ Returns nil if FILE cannot be expanded."
     (cl-loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)
              do (push (vector (buffer-file-name (get-buffer buf))
                               (list 'display-buffer buf)
-                              t) buffers))
+                              t)
+                      buffers))
     (or (eq (length buffers) 0) (push "---" buffers))
 
     (easy-menu-change (list "Tools" "Magik")
