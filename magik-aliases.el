@@ -40,7 +40,7 @@
   "*List of common gis_aliases files.
 This list is expected to be setup by the Emacs maintainer,
 a user can setup their personal gis_aliases file list using
-`aliases-user-file-list'.  Both these lists are concatenated to
+`magik-aliases-user-file-list'.  Both these lists are concatenated to
 form the top section of the SW->Alias Files submenu."
   :group 'magik-aliases
   :type  '(repeat file))
@@ -51,7 +51,7 @@ form the top section of the SW->Alias Files submenu."
   :type  'string)
 
 (defcustom magik-aliases-program-path '("../bin/x86" "../../product/bin/x86")
-  "*Path to `aliases-program'.
+  "*Path to `magik-aliases-program'.
 Setting this sets the default value.  When opening a gis_aliases file,
 the buffer local value of this variable will be set to the directory
 containing the `magik-aliases-program' if it is in a relative path to the file."
@@ -65,6 +65,11 @@ containing the `magik-aliases-program' if it is in a relative path to the file."
 
 (defcustom magik-aliases-layered-products-file "$SMALLWORLD_GIS/../smallworld_registry/LAYERED_PRODUCTS"
   "*The default location of the LAYERED_PRODUCTS file."
+  :group 'magik
+  :type 'string)
+
+(defcustom magik-aliases-default-product-path "sw_core:\n path    = %SMALLWORLD_GIS%\n"
+  "*The default product path for sw_core."
   :group 'magik
   :type 'string)
 
@@ -89,7 +94,7 @@ If any function returns t, then the buffer is displayed."
   :type  'hook)
 
 (defvar magik-aliases-definition-regexp "^\\([^#]\\S-+\\):\\s-*$"
-  "Regexp matching an alias definition")
+  "Regexp matching an alias definition.")
 
 ;; Imenu configuration
 (defvar magik-aliases-imenu-generic-expression
@@ -137,7 +142,6 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
                comment-start "#"
                comment-end ""
                show-trailing-whitespace nil
-               magik-aliases-program (magik-aliases-program-set magik-aliases-program)
                imenu-generic-expression magik-aliases-imenu-generic-expression
                font-lock-defaults '(magik-aliases-font-lock-keywords nil nil))
 
@@ -219,7 +223,7 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
   "Return t, to switch to the buffer that the GIS.exe process is running in.
 Since some entries in the aliases file do not start a Smallworld Magik GIS
 process we do not necessarily want to switch to the buffer running the
-process all the time. These are the following methods by which we control
+process all the time.  These are the following methods by which we control
 when the buffer is displayed:
   Hook: `aliases-switch-to-buffer-hooks'
        Each function in the hook is passed the name of the alias.
@@ -228,8 +232,7 @@ when the buffer is displayed:
        If the alias name matches the given regular expression the buffer
        is displayed.
   Variable: `aliases-switch-to-buffer'
-       If this is t then the buffer is displayed.
-"
+       If this is t then the buffer is displayed."
   (cond ((run-hook-with-args-until-success 'magik-aliases-switch-to-buffer-hooks alias)
          t)
         ((stringp magik-aliases-switch-to-buffer-regexp)
@@ -241,6 +244,7 @@ when the buffer is displayed:
 (defun magik-aliases-program-set (&optional default)
   "Return the program to use to operate on a gis_aliases file."
   (let ((path magik-aliases-program-path)
+        (smallworld-gis magik-smallworld-gis)
         program)
     (while path
       (setq program (expand-file-name
@@ -251,7 +255,7 @@ when the buffer is displayed:
         (setq program nil)))
     (unless program
       (setq program (expand-file-name
-                     (concat (getenv "SMALLWORLD_GIS") "/config/"
+                     (concat smallworld-gis "/config/"
                              (file-name-as-directory (car magik-aliases-program-path)) magik-aliases-program)))
       (unless (file-executable-p program)
         (setq program nil)))
@@ -276,10 +280,11 @@ With a prefix arg, ask user for current directory to use."
         ((null dir)
          (setq dir default-directory)))
 
-  (let ((program magik-aliases-program)
+  (let ((program (magik-aliases-program-set magik-aliases-program))
         (args    magik-aliases-program-args)
         (file    (or file (buffer-file-name)))
         (buf     "gis")
+        (smallworld-gis (buffer-local-value 'magik-smallworld-gis (current-buffer)))
         (version (if (boundp 'magik-version-current)
                      (symbol-value 'magik-version-current)))
         (process-environment-aliases magik-aliases-process-environment)
@@ -302,6 +307,7 @@ With a prefix arg, ask user for current directory to use."
       (kill-buffer (current-buffer))
       (set-buffer buf)
       (magik-session-mode)
+      (setq magik-smallworld-gis smallworld-gis)
 
       (insert "Command: " program " ")
       (mapc (function (lambda (s) (insert s " "))) args)
@@ -333,28 +339,37 @@ With a prefix arg, ask user for current directory to use."
              (match-string-no-properties 1))
             (t nil)))))
 
-(defun magik-aliases-expand-file (file)
-  "Expand FILE path including environment variables.
+(defun magik-aliases-expand-file (file smallworld-gis)
+  "Expand FILE path including environment variables using SMALLWORLD-GIS.
 Returns nil if FILE cannot be expanded."
   (condition-case nil
-      (expand-file-name (substitute-in-file-name (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) file nil 'literal)))
+      (with-environment-variables (("SMALLWORLD_GIS" smallworld-gis))
+        (expand-file-name
+         (substitute-in-file-name
+          (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) file nil 'literal))))
     (error nil)))
 
-(defun magik-aliases-layered-products-file (file)
-  "Read contents of FILE with the format of LAYERED_PRODUCTS configuration file."
+(defun magik--aliases-insert-default-product-path ()
+  "Insert the default product path.
+Always ensure that a default sw_core: set to SMALLWORLD_GIS is present
+in case the value has been manually modified but we still wish to locate
+a gis_aliases file next to the LAYERED_PRODUCTS file."
+  (goto-char (point-min))
+  (insert magik-aliases-default-product-path))
+
+(defun magik-aliases-layered-products-file (file smallworld-gis)
+  "Read LAYERED_PRODUCTS configuration file.
+Read contents of FILE using SMALLWORLD-GIS with the format of
+LAYERED_PRODUCTS configuration file."
   (when (file-exists-p file)
     (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
       (insert-file-contents file nil nil nil 'replace)
 
-      ;; Always ensure that a default sw_core: set to SMALLWORLD_GIS is present
-      ;; in case the value has been manually modified but we still wish to locate
-      ;; a gis_aliases file next to the LAYERED_PRODUCTS file.
-      (goto-char (point-min))
-      (insert "sw_core:\n path    = %SMALLWORLD_GIS%\n")
-      (magik--aliases-layered-products-alist))))
+      (magik--aliases-insert-default-product-path)
+      (magik--aliases-layered-products-alist smallworld-gis))))
 
-(defun magik--aliases-layered-products-alist ()
-  "Return alist of contents for LAYERED_PRODUCTS file."
+(defun magik--aliases-layered-products-alist (smallworld-gis)
+  "Return alist of contents for LAYERED_PRODUCTS file using SMALLWORLD-GIS."
   (save-excursion
     (save-match-data
       (let (alist pt lp dir)
@@ -369,30 +384,25 @@ Returns nil if FILE cannot be expanded."
                 (skip-chars-backward "/\\") ;avoid trailing directory character.
                 (setq dir
                       (magik-aliases-expand-file
-                       (buffer-substring-no-properties pt (point))))
+                       (buffer-substring-no-properties pt (point)) smallworld-gis))
                 (if (file-exists-p (concat dir "/config/gis_aliases"))
                     (let ((lp-dir (cons lp dir)))
                       (or (member lp-dir alist) (push lp-dir alist))) ))))
         alist))))
 
-(defun magik-aliases-layered-products-acp-path (file)
-  "Read LAYERED_PRODUCTS configuration file.
-
-  Read contents of FILE with the format of LAYERED_PRODUCTS configuration file
-  and return paths to append to `exec-path'."
+(defun magik-aliases-layered-products-acp-path (file smallworld-gis)
+  "Read LAYERED_PRODUCTS configuration file using SMALLWORLD-GIS.
+Read contents of FILE using SMALLWORLD-GIS with the format of LAYERED_PRODUCTS
+configuration file and return paths to append to variable `exec-path'."
   (when (file-exists-p file)
     (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
       (insert-file-contents file nil nil nil 'replace)
 
-      ;; Always ensure that a default sw_core: set to SMALLWORLD_GIS is present
-      ;; in case the value has been manually modified but we still wish to locate
-      ;; a gis_aliases file next to the LAYERED_PRODUCTS file.
-      (goto-char (point-min))
-      (insert "sw_core:\n path    = %SMALLWORLD_GIS%\n")
-      (magik--aliases-layered-products-acp-list))))
+      (magik--aliases-insert-default-product-path)
+      (magik--aliases-layered-products-acp-list smallworld-gis))))
 
-(defun magik--aliases-layered-products-acp-list ()
-  "Return list of ACP paths."
+(defun magik--aliases-layered-products-acp-list (smallworld-gis)
+  "Return list of ACP paths using SMALLWORLD-GIS."
   (save-excursion
     (save-match-data
       (let (paths pt dir etc-dir)
@@ -406,7 +416,7 @@ Returns nil if FILE cannot be expanded."
                 (skip-chars-backward "/\\") ;avoid trailing directory character.
                 (setq dir
                       (magik-aliases-expand-file
-                       (buffer-substring-no-properties pt (point)))
+                       (buffer-substring-no-properties pt (point)) smallworld-gis)
                       etc-dir (concat dir (if (eq system-type 'windows-nt)
                                               "/etc/x86"
                                             "/etc/Linux.x86")))
@@ -434,19 +444,19 @@ Returns nil if FILE cannot be expanded."
   (let (default-files
         lp-files
         buffers
-        (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t))))
+        (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t)))
+        (smallworld-gis (buffer-local-value 'magik-smallworld-gis (current-buffer))))
     (dolist (f (append magik-aliases-user-file-list magik-aliases-common-file-list ))
       (push `[,f
               (progn
-                (find-file (magik-aliases-expand-file ,f))
+                (find-file (magik-aliases-expand-file ,f nil))
                 (magik-aliases-mode))
-              (and ,f (magik-aliases-expand-file ,f))
+              (and ,f (magik-aliases-expand-file ,f nil))
               ]
             default-files))
-
-    (when (getenv "SMALLWORLD_GIS")
+    (when smallworld-gis
       (dolist (lp (magik-aliases-layered-products-file
-                   (magik-aliases-expand-file magik-aliases-layered-products-file)))
+                   (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
         (push `[,(format "%s: %s" (car lp) (cdr lp))
                 (progn
                   (find-file ,(concat (cdr lp) "/config/gis_aliases"))
@@ -459,7 +469,8 @@ Returns nil if FILE cannot be expanded."
     (cl-loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)
              do (push (vector (buffer-file-name (get-buffer buf))
                               (list 'display-buffer buf)
-                              t) buffers))
+                              t)
+                      buffers))
     (or (eq (length buffers) 0) (push "---" buffers))
 
     (easy-menu-change (list "Tools" "Magik")
@@ -483,7 +494,7 @@ Returns nil if FILE cannot be expanded."
 
 ;;MSB configuration
 (defun magik-aliases-msb-configuration ()
-  "Adds Aliases files to msb menu, supposes that msb is already loaded."
+  "Add Aliases files to msb menu, supposes that msb is already loaded."
   (let* ((l (length msb-menu-cond))
          (last (nth (1- l) msb-menu-cond))
          (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last

@@ -94,9 +94,8 @@ This provides an alternative interface to a gis_version program."
 (defvar magik-version-sw-path-list nil
   "Stores list of Smallworld directories added to PATH.")
 
-(defvar magik-version-current nil
+(defvar-local magik-version-current nil
   "Current gis_version stream.")
-(make-variable-buffer-local 'magik-version-current)
 
 (defvar magik-version-position nil
   "A position in the gis version buffer above which the user shouldn't click.")
@@ -110,9 +109,11 @@ This provides an alternative interface to a gis_version program."
   "Run GIS command in selected version."
   (interactive)
   (beginning-of-line)
-  (let (stream version buffer)
-    (setq stream (car (magik-version-select-internal))
-          buffer  (concat "*gis " stream "*"))
+  (let* ((definition (magik-version-at-version-definition))
+         (stream (nth 0 definition))
+         (smallworld-gis (nth 2 definition))
+         (buffer (concat "*gis " stream "*")))
+    (setq magik-smallworld-gis smallworld-gis)
     (magik-session buffer)
     (setq magik-version-current stream)))
 
@@ -123,28 +124,28 @@ has more than one aliases file available."
   ;;Does not cope with 'partial stream versions' where the directory components list 2 (or more directories)
   (interactive)
   (beginning-of-line)
-  (let* ((version-list (magik-version-select-internal))
-         lp-alist
-         alias-file)
-    (if (null (car version-list))
-        (error "Invalid selection")
-      (setq lp-alist (magik-aliases-layered-products-file
-                      (magik-aliases-expand-file magik-aliases-layered-products-file)))
-      (cond ((null lp-alist) nil)
-            ((eq (length lp-alist) 1)
-             (setq alias-file (concat (cdar lp-alist) "/config/gis_aliases")))
-            (t
-             (let* ((lp   (completing-read "Select a Layered Product with gis_aliases file: " lp-alist nil t))
-                    (path (cdr (assoc lp lp-alist))))
-               (if path
-                   (setq alias-file (concat path "/config/gis_aliases"))))))
-      (message alias-file)
-      (when alias-file
-        (kill-buffer (current-buffer))
-        (find-file alias-file)
-        (magik-aliases-next)
-        (setq buffer-read-only t)
-        (set-buffer-modified-p nil)))))
+  (let* ((version-list (magik-version-at-version-definition))
+          (stream (car version-list))
+          (smallworld-gis (nth 2 version-list))
+          (lp-alist (magik-aliases-layered-products-file (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
+          alias-file)
+    (when (not stream)
+      (error "Invalid selection"))
+    (cond ((null lp-alist) nil)
+      ((eq (length lp-alist) 1)
+        (setq alias-file (concat (cdar lp-alist) "/config/gis_aliases")))
+      (t
+        (let* ((lp (completing-read "Select a Layered Product with gis_aliases file: " lp-alist nil t))
+                (path (cdr (assoc lp lp-alist))))
+          (when path
+            (setq alias-file (concat path "/config/gis_aliases"))))))
+    (when alias-file
+      (kill-buffer (current-buffer))
+      (find-file alias-file)
+      (setq magik-smallworld-gis smallworld-gis)
+      (magik-aliases-next)
+      (setq buffer-read-only t)
+      (set-buffer-modified-p nil))))
 
 (defun magik-version-next ()
   "Move point to next valid version listed."
@@ -181,7 +182,7 @@ has more than one aliases file available."
                buffer-undo-list t
                font-lock-defaults '(magik-version-font-lock-keywords nil t (("-" . "w"))))
 
-  (add-hook 'menu-bar-update-hook 'magik-versions-update-menu nil t))
+  (add-hook 'menu-bar-update-hook #'magik-versions-update-menu nil t))
 
 (defvar magik-version-menu nil
   "Keymap for the gis_version buffer menu bar.")
@@ -202,46 +203,11 @@ has more than one aliases file available."
     "---"
     [,"Customize"                 magik-version-customize   t]))
 
-(add-hook 'magik-version-select-hook  'magik-aliases-update-menu)
+(add-hook 'magik-version-select-hook #'magik-aliases-update-menu)
 
 (defun magik-version-smallworld-gis-p (path)
   "Return t if path points to a Smallworld installation."
   (file-directory-p (concat (file-name-directory path) "config")))
-
-(defun magik-version-read-smallworld-gis-completion (string predicate flag)
-  "Provide directory completion for finding Smallworld installations.
-Repeated TAB and \\[minibuffer-completion-help] still provide
-directory listing so users can navigate a directory structure looking
-for a Smallworld installation. Only when
-`gis-version-smallworld-gis-p' returns t for a given path will the
-path be considered to be a real Smallworld installation directory
-suitable for selection."
-  (if (magik-version-smallworld-gis-p string)
-      (cond ((eq flag #'lambda) t)
-            ((null flag)       t)
-            (t            string))
-    ;;    (cl-letf (((symbol-function `read-smallworld-gis-predicate) (d) (equal d (file-name-directory d))))
-    (let ((root (file-name-directory string))
-          (completions (all-completions string
-                                        'read-file-name-internal)))
-      ;;            #'(lambda (d) (equal d (file-name-directory d))))))
-      ;;            'read-smallworld-gis-predicate)))
-      (cond ((or (eq this-command 'minibuffer-completion-help)
-                 (and flag (eq this-command 'minibuffer-complete)))
-             ;;Provide directory completions for user feedback ONLY
-             (mapcar (function (lambda (d) (concat root d))) completions))
-            (flag
-             ;; all-completions. Do not want to return anything here
-             ;; otherwise any directory is accepted after a Return
-             nil)
-            (t
-             ;;try-completion
-             (setq completions
-                   (try-completion (file-name-nondirectory string)
-                                   (mapcar 'list completions)))
-             (if (eq completions t)
-                 string
-               (concat (or root "") completions)))))))
 
 (defun magik-version-read-smallworld-gis ()
   "Prompt for a valid value for SMALLWORLD_GIS."
@@ -349,7 +315,7 @@ Will set `gis-version-file' to FILE."
 
   (setq buffer-read-only t)
   (set-buffer-modified-p nil)
-  (display-buffer (current-buffer))
+  (pop-to-buffer (current-buffer) nil t)
   (magik-version-next))
 
 (defun magik-version-quit ()
@@ -377,49 +343,40 @@ Will set `gis-version-file' to FILE."
   (beginning-of-line)
   (magik-version-select))
 
-(defun magik-version-select ()
-  "Store the gis product name in the global variable `gis-version-current'.
+(defun magik-version-select (&optional selected-definition)
+  "Store the gis product name in the global variable `magik-version-current'.
 So that `F2 z' will set the correct product's environment before starting
 the gis.  The frame and icon title strings will be modified according to
-`gis-version-frame-title-format' and `gis-version-icon-title-format'."
+`magik-version-frame-title-format' and `magik-version-icon-title-format'.
+SELECTED-DEFINITION is the definition using the easy-menu or the current line."
   (interactive)
-  (let ((stream (car (magik-version-select-internal))))
-    (setq-default magik-version-current stream)
+  (let* ((definition (or selected-definition
+                         (magik-version-at-version-definition)))
+         (stream (car definition)))
     (kill-buffer (current-buffer))
-    (magik-version-display-title)
+    (setq magik-smallworld-gis (nth 2 definition))
+    (setq-default magik-version-current stream)
     (run-hooks 'magik-version-select-hook)
+    (magik-version-display-title)
     (message "The current installation for this Emacs is now %s." stream)))
 
-(defun magik-version-select-internal ()
-  "Modify `process-environment' and `exec-path' for current version.
-Return (STREAM VERSION SMALLWORLD_GIS)."
+(defun magik-version-at-version-definition ()
+  "Return version details if the point is at a version definition.
+The return value is a list (STREAM VERSION SMALLWORLD_GIS), or nil if
+no (valid) match is found."
   (if (< (point) magik-version-position)
       (error "No Environment at this point"))
   (if (save-excursion
         (beginning-of-line)
         (search-forward magik-version-invalid-string (line-end-position) t))
       (error "You have selected an (invalid) Environment"))
-  (let (stream
-        version
-        smallworld-gis)
+  (save-excursion
     (beginning-of-line)
-    (if (looking-at magik-version-match)
-        (setq stream (match-string-no-properties 1)
-              version (match-string-no-properties 2)
-              smallworld-gis  (match-string-no-properties 3))
-      (error "No Environment on this line"))
-    (if (not (and magik-version-current
-                  (string-equal stream magik-version-current)))
-        (magik-version-set-environment smallworld-gis
-                                       stream
-                                       version))
-    (list stream version smallworld-gis)))
-
-(defun magik-version-set-environment (smallworld-gis stream version)
-  "Modify the process and exec-path environment given stream and smallworld-gis path."
-  (setenv "SMALLWORLD_GIS" smallworld-gis)
-  (setenv "SW_STREAM" stream)
-  (setenv "SW_VERSION" version))
+    (save-match-data
+      (when (looking-at magik-version-match)
+        (list (match-string-no-properties 1)
+              (match-string-no-properties 2)
+              (match-string-no-properties 3))))))
 
 (defun magik-version-call-process-windows (&rest args)
   "Run Windows command and return the environment variables it sets up."
@@ -485,29 +442,37 @@ Used before running a GIS process."
            (insert (format "Gis Environment: %s\n" magik-version-current))))))
 
 (defun magik-versions-list ()
-  "Return list of version definitions."
+  "Return a list of valid version definitions as (STREAM VERSION SMALLWORLD_GIS)."
   (let (list)
     (save-excursion
       (save-match-data
         (goto-char (point-max))
         (while (and (re-search-backward magik-version-match nil t)
                     (> (point) magik-version-position))
-          (push (match-string-no-properties 1) list))))
+          (unless (save-excursion
+                    (beginning-of-line)
+                    (search-forward magik-version-invalid-string (line-end-position) t))
+            (push (list (match-string-no-properties 1)
+                        (match-string-no-properties 2)
+                        (match-string-no-properties 3))
+                  list)))))
     list))
 
 (defun magik-versions-update-menu ()
   "Update the dynamic Versions submenu."
   (interactive)
-  (if (eq major-mode 'magik-version-mode)
-      (let ((versions (magik-versions-list))
-            entries def)
-        (while versions
-          (setq def (car versions)
-                versions (cdr versions)
-                entries (nconc entries (list (vector def (list 'magik-version-select def) t)))))
-        (easy-menu-change (list "Environment")
-                          "Definitions"
-                          (or entries (list "No Versions found"))))))
+  (when (derived-mode-p 'magik-version-mode)
+    (let ((versions (magik-versions-list))
+          entries def)
+      (while versions
+        (setq def (car versions)
+              versions (cdr versions)
+              entries (nconc entries (list (vector (car def)
+                                                   (list `(lambda () (interactive) (magik-version-select ',def)))
+                                                   t)))))
+      (easy-menu-change (list "Environment")
+                        "Definitions"
+                        (or entries (list "No Versions found"))))))
 
 ;;; Package initialisation
 (modify-syntax-entry ?_  "w"  magik-version-mode-syntax-table)
