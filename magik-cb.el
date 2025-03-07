@@ -2384,32 +2384,31 @@ Turn slash characters around.
 Expand either $foo or %foo% variables
 Introduce or remove drive names.
 
-See the variable `magik-cb-generalise-file-name-alist' to provide more customisation."
+See the variable `magik-cb-generalise-file-name-alist' for more customisation."
   (save-match-data
-    (with-environment-variables (("SMALLWORLD_GIS" magik-smallworld-gis))
-      (setq f (substitute-in-file-name f))
-      (if magik-cb-generalise-file-name-alist
-          (progn
-            (subst-char-in-string ?\\ ?/ f t)
-            (cl-loop for i in magik-cb-generalise-file-name-alist
-                     if (and (string-match (car i) f)
-                             (setq f (replace-match (cdr i) nil t f)))
-                     return f)))
-      (if (eq system-type 'windows-nt)
-          (progn
-            (subst-char-in-string ?/ ?\\ f t)
-            (if (or (string-match "^[a-zA-Z]:" f)
-                    (string-match "^\\\\\\\\" f))
-                f
-              (let* ((buffer (magik-cb-gis-buffer))
-                     (drive-name (if (get-buffer buffer)
-                                     (with-current-buffer buffer
-                                       (substring default-directory 0 2))
-                                   (substring default-directory 0 2))))
-                (concat drive-name f))))
-        (if (string-match "^[a-zA-Z]:" f)
-            (setq f (substring f 2)))
-        (subst-char-in-string ?\\ ?/ f t)))))
+    (setq f (with-environment-variables (("SMALLWORLD_GIS" magik-smallworld-gis))
+              (substitute-in-file-name f)))
+    (when magik-cb-generalise-file-name-alist
+      (subst-char-in-string ?\\ ?/ f t)
+      (cl-loop for i in magik-cb-generalise-file-name-alist
+               if (and (string-match (car i) f)
+                       (setq f (replace-match (cdr i) nil t f)))
+               return f))
+    (if (eq system-type 'windows-nt)
+        (progn
+          (subst-char-in-string ?/ ?\\ f t)
+          (if (or (string-match "^[a-zA-Z]:" f)
+                  (string-match "^\\\\\\\\" f))
+              f
+            (let* ((buffer (magik-cb-gis-buffer))
+                   (drive-name (if (get-buffer buffer)
+                                   (with-current-buffer buffer
+                                     (substring default-directory 0 2))
+                                 (substring default-directory 0 2))))
+              (concat drive-name f))))
+      (if (string-match "^[a-zA-Z]:" f)
+          (setq f (substring f 2)))
+      (subst-char-in-string ?\\ ?/ f t))))
 
 (defun magik-cb-disable-save ()
   "Like `save-buffer', but does nothing in magik-cb."

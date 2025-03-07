@@ -94,10 +94,6 @@ This provides an alternative interface to a gis_version program."
 (defvar magik-version-sw-path-list nil
   "Stores list of Smallworld directories added to PATH.")
 
-(defvar magik-smallworld-gis nil
-  "Stores the current SMALLWORLD_GIS.")
-(make-variable-buffer-local 'magik-smallworld-gis)
-
 (defvar magik-version-current nil
   "Current gis_version stream.")
 (make-variable-buffer-local 'magik-version-current)
