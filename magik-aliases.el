@@ -285,6 +285,7 @@ With a prefix arg, ask user for current directory to use."
         (args    magik-aliases-program-args)
         (file    (or file (buffer-file-name)))
         (buf     "gis")
+        (smallworld-gis (buffer-local-value 'magik-smallworld-gis (current-buffer)))
         (version (if (boundp 'magik-version-current)
                      (symbol-value 'magik-version-current)))
         (process-environment-aliases magik-aliases-process-environment)
@@ -307,6 +308,7 @@ With a prefix arg, ask user for current directory to use."
       (kill-buffer (current-buffer))
       (set-buffer buf)
       (magik-session-mode)
+      (setq magik-smallworld-gis smallworld-gis)
 
       (insert "Command: " program " ")
       (mapc (function (lambda (s) (insert s " "))) args)
@@ -339,12 +341,12 @@ With a prefix arg, ask user for current directory to use."
             (t nil)))))
 
 (defun magik-aliases-expand-file (file smallworld-gis)
-  "Expand FILE path including environment variables.
+  "Expand FILE path including environment variables using SMALLWORLD-GIS.
 Returns nil if FILE cannot be expanded."
   (condition-case nil
-    (with-environment-variables (("SMALLWORLD_GIS" smallworld-gis))
-      (expand-file-name
-        (substitute-in-file-name
+      (with-environment-variables (("SMALLWORLD_GIS" smallworld-gis))
+        (expand-file-name
+         (substitute-in-file-name
           (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) file nil 'literal))))
     (error nil)))
 
@@ -390,9 +392,9 @@ LAYERED_PRODUCTS configuration file."
         alist))))
 
 (defun magik-aliases-layered-products-acp-path (file smallworld-gis)
-  "Read LAYERED_PRODUCTS configuration file.
-Read contents of FILE using SMALLWORLD-GIS with the format of
-LAYERED_PRODUCTS configuration file and return paths to append to `exec-path'."
+  "Read LAYERED_PRODUCTS configuration file using SMALLWORLD-GIS.
+Read contents of FILE using SMALLWORLD-GIS with the format of LAYERED_PRODUCTS
+configuration file and return paths to append to variable `exec-path'."
   (when (file-exists-p file)
     (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
       (insert-file-contents file nil nil nil 'replace)
@@ -437,13 +439,14 @@ LAYERED_PRODUCTS configuration file and return paths to append to `exec-path'."
                           "Definitions"
                           (or entries (list "No Aliases found"))))))
 
-(defun magik-aliases-update-sw-menu () ;; TODO: Use magik-smallworld-gis
+(defun magik-aliases-update-sw-menu ()
   "Update `Alias Files' submenu in SW menu bar."
   (interactive)
   (let (default-files
         lp-files
         buffers
-        (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t))))
+        (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t)))
+        (smallworld-gis (buffer-local-value 'magik-smallworld-gis (current-buffer))))
     (dolist (f (append magik-aliases-user-file-list magik-aliases-common-file-list ))
       (push `[,f
               (progn
@@ -452,9 +455,9 @@ LAYERED_PRODUCTS configuration file and return paths to append to `exec-path'."
               (and ,f (magik-aliases-expand-file ,f nil))
               ]
             default-files))
-    (when (getenv "SMALLWORLD_GIS")
+    (when smallworld-gis
       (dolist (lp (magik-aliases-layered-products-file
-                   (magik-aliases-expand-file magik-aliases-layered-products-file (getenv "SMALLWORLD_GIS"))))
+                   (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
         (push `[,(format "%s: %s" (car lp) (cdr lp))
                 (progn
                   (find-file ,(concat (cdr lp) "/config/gis_aliases"))
