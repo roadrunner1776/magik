@@ -216,13 +216,11 @@ this variable buffer-local by putting the following in your .emacs
 (defvar magik-session-current-command nil
   "The current `magik-session-command' in the current buffer.")
 
-(defvar magik-session-exec-path nil
-  "Stored value of `exec-path' when the GIS process was started.")
-(make-variable-buffer-local 'magik-session-exec-path)
+(defvar-local magik-session-exec-path nil
+  "Stored value of variable `exec-path' when the GIS process was started.")
 
-(defvar magik-session-process-environment nil
+(defvar-local magik-session-process-environment nil
   "Stored value of `process-environment' when the GIS process was started.")
-(make-variable-buffer-local 'magik-session-process-environment)
 
 (defvar magik-session-cb-buffer nil
   "The Class browser buffer associated with the GIS process.")
