@@ -142,7 +142,6 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
                comment-start "#"
                comment-end ""
                show-trailing-whitespace nil
-               magik-aliases-program (magik-aliases-program-set magik-aliases-program)
                imenu-generic-expression magik-aliases-imenu-generic-expression
                font-lock-defaults '(magik-aliases-font-lock-keywords nil nil))
 
@@ -245,6 +244,7 @@ when the buffer is displayed:
 (defun magik-aliases-program-set (&optional default)
   "Return the program to use to operate on a gis_aliases file."
   (let ((path magik-aliases-program-path)
+        (smallworld-gis magik-smallworld-gis)
         program)
     (while path
       (setq program (expand-file-name
@@ -255,7 +255,7 @@ when the buffer is displayed:
         (setq program nil)))
     (unless program
       (setq program (expand-file-name
-                     (concat (getenv "SMALLWORLD_GIS") "/config/"
+                     (concat smallworld-gis "/config/"
                              (file-name-as-directory (car magik-aliases-program-path)) magik-aliases-program)))
       (unless (file-executable-p program)
         (setq program nil)))
@@ -280,7 +280,7 @@ With a prefix arg, ask user for current directory to use."
         ((null dir)
          (setq dir default-directory)))
 
-  (let ((program magik-aliases-program)
+  (let ((program (magik-aliases-program-set magik-aliases-program))
         (args    magik-aliases-program-args)
         (file    (or file (buffer-file-name)))
         (buf     "gis")
