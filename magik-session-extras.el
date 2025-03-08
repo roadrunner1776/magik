@@ -1,4 +1,4 @@
-;;; magik-session-extras.el --- Optional additions to the magik-session-mode
+;;; magik-session-extras.el --- Optional additions to the magik-session-mode  -*- lexical-binding: t; -*-
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
