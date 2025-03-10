@@ -101,7 +101,7 @@ You can customize magik-loadlist-mode with the magik-loadlist-mode-hook.
     contents))
 
 (defun magik-loadlist-file-data (file &optional data)
-  "Return list of data describing FILE."
+  "Return list of DATA describing FILE."
   (let ((lc (downcase file)))
     (list lc
           (if (equal file lc) nil file) ;used to check for case differences for UNIX
@@ -115,7 +115,7 @@ Regexp does not need to include ^ or $."
            if match return t))
 
 (defun magik-loadlist-directory-list (&optional dir)
-  "Return contents of directory."
+  "Return contents of DIR."
   (let ((contents (directory-files-and-attributes (or dir default-directory)))
         files)
     (setq contents (delq (assoc ".." contents) contents)) ; Remove .. directory from list
@@ -137,8 +137,8 @@ Regexp does not need to include ^ or $."
       files)))
 
 (defun magik-loadlist-refresh-contents (arg &optional dir)
-  "Replace contents of loadlist buffer with contents of its directory.
-With a prefix arg accept all changes without prompting."
+  "Replace contents of loadlist buffer with contents of its DIR.
+With a prefix ARG accept all changes without prompting."
   (interactive "*P")
   (unless dir
     (setq dir (file-name-directory (buffer-file-name))))
@@ -209,8 +209,8 @@ With a prefix arg accept all changes without prompting."
       "$\n"))))
 
 (defun magik-loadlist-gis-drag-n-drop-load (gis filename)
-  "Interface to Drag 'n' Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a load_list.txt file is dropped."
+  "Interface to Drag and Drop GIS mode.
+Called by `gis-drag-n-drop-load' when a load_list.txt FILENAME is dropped."
   (let ((process (barf-if-no-gis gis))
         (dir  (file-name-directory filename))
         (file (file-name-nondirectory filename)))

@@ -264,7 +264,7 @@ a standalone module."
     gis))
 
 (defun magik-module-transmit-load-module (filename process)
-  "Load the module into the GIS process.
+  "Load the module FILENAME into the GIS PROCESS.
 If module definition is not known to the Magik GIS it is loaded as
 a standalone module."
   (let ((module (intern (concat "|" (magik-module-name) "|"))))
@@ -298,8 +298,8 @@ a standalone module."
     gis))
 
 (defun magik-module-gis-drag-n-drop-load (gis filename)
-  "Interface to Drag 'n' Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a Module file is dropped."
+  "Interface to Drag and Drop GIS mode.
+Called by `gis-drag-n-drop-load' when a Module FILENAME is dropped."
   (let ((process (barf-if-no-gis gis)))
     (magik-module-transmit-load-module filename process)
     gis))

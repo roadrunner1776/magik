@@ -41,12 +41,12 @@ Note that any user defined Environment variables set via \\[setenv]
 will be lost.")
 
 (defvar magik-utils-original-exec-path (cl-copy-list exec-path)
-  "Store the original `exec-path' at startup.
+  "Store the original variable `exec-path' at startup.
 This is used by \\[gis-version-reset-emacs-environment] to reset an
 Emacs session back to the original startup settings.")
 
 (defun barf-if-no-gis (&optional buffer process)
-  "Return process object of GIS process.
+  "Return process object of GIS PROCESS.
 Signal an error if no gis is running."
   (setq buffer  (or buffer magik-session-buffer)
         process (or process (get-buffer-process buffer)))
@@ -54,7 +54,7 @@ Signal an error if no gis is running."
       (error "There is no GIS process running in buffer '%s'" buffer)))
 
 (defun gsub (str from to)
-  "return a string with any matches for the regexp, `from', replaced by `to'."
+  "Return a string with any matches for the regexp, FROM, replaced by TO."
   (save-match-data
     (prog1
         (if (string-match from str)
@@ -64,7 +64,7 @@ Signal an error if no gis is running."
           str))))
 
 (defun sub (str from to)
-  "return a string with the first match for the regexp, `from', replaced by `to'."
+  "Return a STR with the first match for the regexp, FROM, replaced by TO."
   (save-match-data
     (prog1
         (if (string-match from str)
@@ -74,7 +74,7 @@ Signal an error if no gis is running."
           str))))
 
 (defun global-replace-regexp (regexp to-string)
-  "Replace REGEXP with TO-STRING globally"
+  "Replace REGEXP with TO-STRING globally."
   (save-match-data
     (goto-char (point-min))
     (while
@@ -99,7 +99,7 @@ If FIRST is true just return the first one found."
     dirs))
 
 (defun magik-utils-curr-word ()
-  "return the word (or part-word) before point as a string."
+  "Return the word (or part-word) before point as a string."
   (save-excursion
     (buffer-substring
      (point)
@@ -109,6 +109,7 @@ If FIRST is true just return the first one found."
 
 ;; copied from emacs 18 because the emacs 19 find-tag-tag seems to be different.
 (defun magik-utils-find-tag-tag (string)
+  "Find tag for STRING."
   (let* ((default (magik-utils-find-tag-default))
          (spec (read-string
                 (if default
@@ -120,6 +121,7 @@ If FIRST is true just return the first one found."
 
 ;;also copied
 (defun magik-utils-find-tag-default ()
+  "Find tag with default behaviour."
   (save-excursion
     (while (looking-at "\\sw\\|\\s_")
       (forward-char 1))
@@ -150,7 +152,7 @@ If FIRST is true just return the first one found."
 If PATH is not given then `load-path' is used.
 nil is returned if no FILENAME found in PATH.
 
-If ERROR string is given then output as an error, %s will be replced with FILENAME."
+If ERR string is given, output as an error.  %s will be replaced with FILENAME."
   (let ((path (or path load-path))
         file)
     (while (and path
@@ -162,7 +164,8 @@ If ERROR string is given then output as an error, %s will be replced with FILENA
           (t    nil))))
 
 (defun magik-utils-file-name-display (file maxlen &optional sep)
-  "Return shortened file name suitable for display, retaining head and tail portions of path."
+  "Return shortened FILE name suitable for display.
+Retaining head and tail portions of path."
   (let ((sep (or sep "..."))
         (dirsep "\\")
         components head tail c)
@@ -184,7 +187,7 @@ If ERROR string is given then output as an error, %s will be replced with FILENA
       (mapconcat 'identity (append (reverse head) (list sep) tail) dirsep))))
 
 (defun magik-utils-buffer-mode-list-predicate-p (predicate)
-  "Return t if predicate function or variable is true or predicate is nil."
+  "Return t if PREDICATE function or variable is true or PREDICATE is nil."
   (cond ((null predicate) t) ;no predicate given
         ((functionp predicate) (funcall predicate))
         ((boundp predicate) (symbol-value predicate))
@@ -220,7 +223,7 @@ Optional PREDICATE is either a function or a variable which must not return nil.
 Optional SORT-FN overrides the default sort function, `string-lessp'.
 
 This function is provided mainly for the standardised sorting of GIS buffers.
-Since the introduction of having multiple GIS sessions with the 'key' being
+Since the introduction of having multiple GIS sessions with the key being
 the GIS buffer name, it is very useful to have a standardised sort of
 GIS buffers."
   (sort (magik-utils-buffer-mode-list mode predicate)
@@ -244,8 +247,8 @@ Used for determining a suitable BUFFER using the following interface:
 5. Use the buffer displayed in the some other frame,
    only PROMPT if more than one buffer in the other frames are displayed
    and only list those that are displayed in the other frames.
-6. Use DEFAULT value, or PROMPT if `magik-utils-by-default-prompt-buffer-p' is not nil.
-"
+6. Use DEFAULT value, or PROMPT if `magik-utils-by-default-prompt-buffer-p'
+   is not nil."
   (let* ((prefix-fn (or prefix-fn
                         #'(lambda (arg mode predicate)
                             (nth (1- arg)

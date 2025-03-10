@@ -25,7 +25,8 @@
 ;; _________________________
 
 (defun magik-cb-ac-filter (p s)
-  "Process data coming back from the CB auto-complete buffer."
+  "Process data coming back from the CB auto-complete buffer (P).
+Using S as the filter string."
   (with-current-buffer (process-buffer p)
     (unwind-protect
         (let ((buffer-read-only nil)
@@ -124,7 +125,7 @@ Stores process object in `magik-cb-ac-process'."
                    (goto-char (end-of-line))))))
         (list args optional gather)))))
 
-;;TODO extract out Magik method signature from callsification and documentation processing.
+;;TODO extract out Magik method signature from classification and documentation processing.
 (defun magik-cb-method-docstring (class candidate args classify documentation)
   "Return method documentation string."
   (let* ((required (elt args 0))

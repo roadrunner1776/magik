@@ -205,17 +205,16 @@ has more than one aliases file available."
 (add-hook 'magik-version-select-hook  'magik-aliases-update-menu)
 
 (defun magik-version-smallworld-gis-p (path)
-  "Return t if path points to a Smallworld installation."
+  "Return t if PATH points to a Smallworld installation."
   (file-directory-p (concat (file-name-directory path) "config")))
 
 (defun magik-version-read-smallworld-gis-completion (string predicate flag)
   "Provide directory completion for finding Smallworld installations.
 Repeated TAB and \\[minibuffer-completion-help] still provide
 directory listing so users can navigate a directory structure looking
-for a Smallworld installation. Only when
-`gis-version-smallworld-gis-p' returns t for a given path will the
-path be considered to be a real Smallworld installation directory
-suitable for selection."
+for a Smallworld installation.  Only when `gis-version-smallworld-gis-p'
+returns t for a given path will the path be considered to be a real Smallworld
+installation directory suitable for selection."
   (if (magik-version-smallworld-gis-p string)
       (cond ((eq flag #'lambda) t)
             ((null flag)       t)
@@ -371,7 +370,7 @@ Will set `gis-version-file' to FILE."
   (message "%s" (substitute-command-keys "Can't switch this buffer to edit. Use \\\[magik-version-file-open] if you want to edit this file.")))
 
 (defun magik-version-mouse-select (click)
-  "Choose product using mouse event."
+  "Choose product using mouse event CLICK."
   (interactive "e")
   (mouse-set-point click)
   (beginning-of-line)
@@ -391,7 +390,7 @@ the gis.  The frame and icon title strings will be modified according to
     (message "The current installation for this Emacs is now %s." stream)))
 
 (defun magik-version-select-internal ()
-  "Modify `process-environment' and `exec-path' for current version.
+  "Modify `process-environment' and variable `exec-path' for current version.
 Return (STREAM VERSION SMALLWORLD_GIS)."
   (if (< (point) magik-version-position)
       (error "No Environment at this point"))
@@ -416,7 +415,7 @@ Return (STREAM VERSION SMALLWORLD_GIS)."
     (list stream version smallworld-gis)))
 
 (defun magik-version-set-environment (smallworld-gis stream version)
-  "Modify the process and exec-path environment given stream and smallworld-gis path."
+  "Modify the process environment given STREAM, SMALLWORLD-GIS path and VERSION."
   (setenv "SMALLWORLD_GIS" smallworld-gis)
   (setenv "SW_STREAM" stream)
   (setenv "SW_VERSION" version))

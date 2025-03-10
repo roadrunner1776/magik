@@ -18,7 +18,7 @@
 ;; Adds additional functionality to magik-session-mode.
 ;; It currently adds the functionality to jump immediately from a traceback call stack line to the method definition on the prompt.
 ;; It will highlight the call stack lines and the output lines from methods such as .apropos and print_local_methods().
-;; It uses the magik-cb-process in the background. So the magik-cb-process has to be started at least once.
+;; It uses the magik-cb-process in the background, so the magik-cb-process has to be started at least once.
 ;;
 ;; Usage:
 ;; via use-package: (use-package magik-session-extras :after magik-mode :hook magik-session-mode)
@@ -82,13 +82,15 @@ Or as fallback the normal newline behaviour."
   )
 
 (defun magik-session-extras-set-cb-process-var ()
-  "Set the `magik-cb-process' variable. So that the callback to `magik-cb-send-string' will work."
+  "Set the `magik-cb-process' variable.
+So that the callback to `magik-cb-send-string' will work."
   (unless magik-cb-process
     (setq magik-cb-process (magik-cb-process (get-buffer (concat "*cb*" (buffer-name (current-buffer))))))
     (magik-cb-process))
   )
 
 (defun magik-session-extras-go-to-method-definition (method-name exemplar-name)
+  "Goto METHOD-NAME for EXEMPLAR-NAME."
   (magik-transmit-string (concat "method_finder.emacs_go_to_method_definition(\"" method-name "\",\"" exemplar-name "\")" "\n")
                          (save-excursion
                            (beginning-of-line)
@@ -99,7 +101,8 @@ Or as fallback the normal newline behaviour."
   )
 
 (defun magik-session-extras-cb-method-jump-traceback ()
-  "Jumps to the method definition based on the `magik-session-traceback-call-stack-face'.
+  "Jump to the method definition.
+Based on the `magik-session-traceback-call-stack-face'.
 Using the `magik-cb-process' in the background."
   (interactive)
   (magik-session-extras-ensure-magik-code-loaded)
@@ -125,7 +128,8 @@ Using the `magik-cb-process' in the background."
   )
 
 (defun magik-session-extras-cb-method-jump-method ()
-  "Jumps to the method definition based on the `magik-session-method-definition-face'.
+  "Jump to the method definition.
+Based on the `magik-session-method-definition-face'.
 Using the `magik-cb-process' in the background."
   (interactive)
   (magik-session-extras-ensure-magik-code-loaded)
@@ -160,7 +164,7 @@ Using the `magik-cb-process' in the background."
   "Shows if the `magik-session-extras-load-magik-code' is loaded in the current magik session.")
 
 (defun magik-session-extras-ensure-magik-code-loaded ()
-  "Loads the `magik-session-extras-load-magik-code' in the current magik session."
+  "Load the `magik-session-extras-load-magik-code' in the current magik session."
   (when (eq magik-session-extras-magik-code-loaded? nil)
     (magik-session-extras-load-magik-code)
     (setq magik-session-extras-magik-code-loaded? t)
@@ -170,7 +174,8 @@ Using the `magik-cb-process' in the background."
 ;; Inline magik code
 
 (defun magik-session-extras-load-magik-code ()
-  "Loads the required magik code in to the `magik-session', to interact with the `magik-cb-mode'."
+  "Load the required magik code in to the `magik-session'.
+To interact with the `magik-cb-mode'."
   (magik-transmit-string
    "_package sw
     _method method_finder.get_method_info_extra(method_name, class_name)
