@@ -95,7 +95,7 @@
   :group 'tools)
 
 (defconst magik-cb-in-keyword "  IN  "
-  "The method 'IN' class keyword.")
+  "The method \"IN\" class keyword.")
 
 (defgroup magik-cb-faces nil
   "Fontification colours for Class Browser."
@@ -235,7 +235,7 @@ Can be set using \\[cb-set-mode-line-cursor]."
   "Alist storing CB buffer filename and number used for prefix key switching.")
 
 (defvar magik-cb-process nil
-  "'method finder' process.")
+  "The method_finder process.")
 (put 'magik-cb-process 'permanent-local t)
 
 (defvar magik-cb-topics nil

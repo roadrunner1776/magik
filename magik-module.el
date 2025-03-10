@@ -47,7 +47,8 @@
   '(
     (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
     )
-  "Imenu generic expression for Magik Message mode.  See `imenu-generic-expression'.")
+  "Imenu generic expression for Magik Message mode.
+See `imenu-generic-expression'.")
 
 ;; Font-lock configuration
 (defcustom magik-module-font-lock-keywords
@@ -140,7 +141,8 @@ You can customize Module Mode with the `magik-module-mode-hook`.
   '(
     (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
     )
-  "Imenu generic expression for Magik Message mode.  See `imenu-generic-expression'.")
+  "Imenu generic expression for Magik Message mode.
+See `imenu-generic-expression'.")
 
 ;; Font-lock configuration
 (defcustom magik-module-font-lock-keywords
@@ -159,35 +161,30 @@ You can customize Module Mode with the `magik-module-mode-hook`.
   :group 'module
   :type 'sexp)
 
-(defun magik-module-customize ()
-  "Open Customization buffer for Module Mode."
-  (interactive)
-  (customize-group 'magik-module))
-
-(defun magik-module-toggle-save-magikc (arg)
-  "Toggle saving of .magikc files when loading module."
+(defun magik-module-toggle-save-magikc (boolean)
+  "Toggle saving of .magikc files when loading module using BOOLEAN."
   (interactive "P")
   (setq magik-module-option-save-magikc
-        (if (null arg)
+        (if (null boolean)
             (not magik-module-option-save-magikc)
-          (> (prefix-numeric-value arg) 0)))
+          (> (prefix-numeric-value boolean) 0)))
   (message "Set :save_magikc? to %s"
            (magik-function-convert magik-module-option-save-magikc)))
 
-(defun magik-module-toggle-force-reload (arg)
-  "Toggle force_reload? option when loading module.
+(defun magik-module-toggle-force-reload (boolean)
+  "Toggle force_reload? option when loading module using BOOLEAN.
 If called with a non-integer prefix key then the :prerequisites
 option is set."
   (interactive "P")
   (setq magik-module-option-force-reload
-        (cond ((null arg)
+        (cond ((null boolean)
                (not magik-module-option-force-reload))
-              ((symbolp arg)
-               arg)
+              ((symbolp boolean)
+               boolean)
               ((and current-prefix-arg (not (integerp current-prefix-arg)))
                'prerequisites)
               (t
-               (> (prefix-numeric-value arg) 0))))
+               (> (prefix-numeric-value boolean) 0))))
 
   (message "Set :force_reload? option to %s"
            (magik-function-convert magik-module-option-force-reload)))

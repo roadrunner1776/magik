@@ -434,8 +434,10 @@ Return (STREAM VERSION SMALLWORLD_GIS)."
 
 (defun magik-version-prepend-sw-paths (orig new)
   "Ensure Smallworld directories are prepended to PATH variable.
-For magik-version code to work the SMALLWORLD paths need to be prepended to PATH.
-On UNIX PATH is modified to have SMALLWORLD appended (on Windows it is prepended).
+For magik-version code to work, the SMALLWORLD paths need to be
+prepended to PATH.
+On UNIX, PATH is modified to have SMALLWORLD appended.
+On Windows it is prepended.
 
 Also sets `gis-version-sw-path-list' to be the list of directories added to PATH
 by the current Smallworld version."

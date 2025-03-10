@@ -39,7 +39,8 @@
 (defvar magik-stack)        ; a dynamic var.
 
 (defvar magik-state-table nil
-  "An alist of symbol and 256-vectors describing the lexical transitions when parsing Magik.
+  "An alist of symbol and 256-vectors describing the lexical transitions.
+Used when parsing Magik.
 
 This is compiled by `init-magik-state-table()' from the
 global constant, `magik-transitions'.")
@@ -77,7 +78,8 @@ global constant, `magik-transitions'.")
     ("{" . "}")
     ("[" . "]")
     ("(" . ")"))
-  "An association list of Magik begin keywords (like \"_if\" and \"{\") and their partners.")
+  "An association list of Magik begin keywords and their partners.
+E.g. \"_if\" and \"{\"")
 
 (defconst magik-ends-and-begins
   '(("_endif" . "_if")
@@ -92,7 +94,8 @@ global constant, `magik-transitions'.")
     ("}" . "{")
     ("]" . "[")
     (")" . "("))
-  "An association list of Magik end keywords (like \"_endif\" and \"}\" and their partners.")
+  "An association list of Magik end keywords and their partners.
+E.g. \"_endif\" and \"}\"")
 
 (defconst magik-others-and-ends
   '(("_else" . "_endif")
@@ -104,7 +107,8 @@ global constant, `magik-transitions'.")
     ;;("_with" . "_endtry")             ; we have to leave this out for now because
                                         ; it seems to confuse the leave with construct!
     ("_using" . "_endtry"))
-  "An association list of Magik keywords like \"_else\" and their corresponding endings (like \"_if\").")
+  "An association list of Magik keywords and their corresponding endings.
+E.g. like \"_else\" and \"_endif\".")
 
 (defun magik--skip-blank-lines-backward ()
   "Move back a line skipping white-space lines.
@@ -439,7 +443,7 @@ Add a newline token unless the last token is an operator."
       ans)))
 
 (defun magik-tokenise-region-no-eol (start end)
-  "Like `magik-tokenise-region()' but with end-of-line tokens chopped off."
+  "Like `magik-tokenise-region()' but with EOL tokens chopped off."
   (let
       ((reverse_ans (reverse (magik-tokenise-region start end))))
 
@@ -448,7 +452,7 @@ Add a newline token unless the last token is an operator."
     (reverse reverse_ans)))
 
 (defun magik-tokenise-region-no-eol-nor-point-min (start end)
-  "Like `magik-tokenise-region()' but with end-of-line and beginning-of-buffer tokens taken out."
+  "Like `magik-tokenise-region()' but with EOL/point min tokens taken out."
   (let
       ((ans (magik-tokenise-region-no-eol start end)))
     (if (equal (car (car ans)) "point-min")
@@ -456,7 +460,7 @@ Add a newline token unless the last token is an operator."
     ans))
 
 (defun magik-tokenise-line-no-eol-nor-point-min ()
-  "Like `magik-tokenise-line()' but with end-of-line and beginning-of-buffer tokens taken out."
+  "Like `magik-tokenise-line()' but with EOL and BOL tokens taken out."
   (magik-tokenise-region-no-eol-nor-point-min (line-beginning-position) (line-end-position)))
 
 (defconst magik-transitions

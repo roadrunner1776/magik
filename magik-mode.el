@@ -381,7 +381,7 @@ concrete implementations."
 
 (defface magik-method-face
   '((t (:inherit font-lock-function-name-face)))
-  "Font-lock Face to use when displaying method names and method and procedure keywords."
+  "Font-lock Face to use when displaying method names & method/procedure keywords."
   :group 'magik-faces)
 
 (defface magik-label-face
@@ -463,7 +463,8 @@ concrete implementations."
     ("def_slotted_exemplar" .
      "^[sw:]?def_slotted_exemplar(.*")
     )
-  "List of regexp strings which can be used for searching for a magik-specific string in a buffer.")
+  "List of regexp strings which can be used for searching.
+In a buffer searching for a Magik-specific.")
 
 (defvar magik-keyword-kleenean
   '("false" "true" "maybe")
@@ -608,7 +609,8 @@ different classifications.  e.g. loop keywords are fontified in the same face."
 
 (defcustom magik-font-lock-keywords-5
   (append magik-font-lock-keywords-4 nil)
-  "Provides an easy user configurable level for personal/site fontification of styles.  Based from `magik-font-lock-keywords-4'."
+  "Provides an easy user configurable level for personal fontification of styles.
+Based from `magik-font-lock-keywords-4'."
   :group 'magik
   :type 'sexp)
 
@@ -926,11 +928,11 @@ Optional argument ARG .."
   "Return cons cell describing the method name parts (NAME . TYPE).
 For normal methods:
   NAME is the method name root
-  TYPE is '^<<' or '<<' or '()' or '()<<' or '()^<<' or empty string.
+  TYPE is ^<< or << or () or ()<< or ()^<< or empty string.
 
 For array methods
   NAME is nil
-  TYPE is '[]' or '[]<<' or '[]^<<' or '[,]' or '[,]<<' or '[,]^<<' etc."
+  Type is [] or []<< or []^<< or [,] or [,]<< or [,]^<< etc."
   (if (eq (elt name 0) ?\[)
       (cons nil name)
     (save-match-data
@@ -1123,8 +1125,8 @@ If the last command was \\[magik-mark-method] then that region will be copied in
          x)))
 
 (defun magik-function (cmd &rest args)
-  "This function generates magik code from the supplied arguments.
-e.g. (magik-function \"system.test\" \"file\" 'unset 4) returns the string
+  "Generate Magik code from the supplied arguments.
+e.g. (magik-function \"system.test\" \"file\" \='unset 4) returns the string
      system.test(\\\"file\\\", _unset, 4)
 Argument CMD ...
 Optional argument ARGS ..."
@@ -1162,7 +1164,8 @@ Optional argument GIS ..."
           (magik-gis-error-goto)))))
 
 (defun magik-perform-replace-no-set-mark (from to regexp-flag)
-  "Like `perform-replace' but without setting the mark and without `query' or `delimited' flags."
+  "Like `perform-replace' but without setting the mark.
+Also without `query' or `delimited' flags."
   (let ((literal (not regexp-flag))
         (search-function (if regexp-flag 're-search-forward 'search-forward)))
     (while (and (not (eobp))
@@ -1272,11 +1275,12 @@ The rule is that the thing must start against the left margin."
 
 (defun magik-transmit-method ()
   "Send the current method to magik.
-The location of point is determined by variable `magik-transmit-method-eom-mode'.
-If 'repeat, then repeated calls to this function behaves like this:
+The location of point is determined by
+variable `magik-transmit-method-eom-mode'.
+If \='repeat, then repeated calls to this function behaves like this:
   First use of command will leave point where it is,
   Repeat use will move point to the end of last transmitted method.
-If 'end, then point is left at the end of the method.
+If \='end, then point is left at the end of the method.
 Otherwise, point is left where it is."
   (interactive)
   ;;DEBUG (message "this %s, last %s" this-command last-command)
@@ -1305,8 +1309,8 @@ Otherwise, point is left where it is."
 
 (defun magik-transmit-region (beg end)
   "Send current region via a temp file to Magik in a shell, using load_file.
-If this command is repeated before the previous file has been processed by Magik,
-another file shall be written."
+If this command is repeated before the previous file has been processed by
+Magik, another file shall be written."
   (interactive "r")
   (magik-transmit-string (buffer-substring-no-properties beg end)
                          (save-excursion
@@ -1331,8 +1335,8 @@ another file shall be written."
 
 (defun magik-transmit-string (str package do-magik-command tidy-magik-command &optional start gis process)
   "Generalised function to send code to Magik via a temporary file.
-If this command is repeated before the previous file has been processed by Magik,
-another file shall be written."
+If this command is repeated before the previous file has been processed by
+Magik, another file shall be written."
   (let* ((gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
                                            "Enter Magik process buffer:"
@@ -1386,8 +1390,8 @@ another file shall be written."
     gis))
 
 (defun magik-gis-drag-n-drop-load (gis filename)
-  "Interface to Drag 'n' Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a Magik file is dropped.
+  "Interface to Drag and Drop GIS mode.
+Called by `gis-drag-n-drop-load' when a Magik FILENAME is dropped.
 Argument FILENAME ..."
   (let ((process (barf-if-no-gis gis)))
     (message "Transmitting to %s" gis)
@@ -1476,7 +1480,7 @@ If PT is given, goto that char position."
             (t "")))))
 
 (defun magik-current-package-name ()
-  "Return the package name from the most recent _package line, or 'sw'."
+  "Return the package name from the most recent _package line, or \"sw\"."
   (save-excursion
     (save-match-data
       (if (re-search-backward "^\\s-*_package \\(\\w+\\)\\s-*$" nil t)
@@ -1718,7 +1722,7 @@ Argument BUFFER ..."
 (defun magik-copy-method-to-buffer (&optional buffer)
   "Copy method to BUFFER.
 If BUFFER is nil, use buffer name stored in variable `magik-work-buffer'.
-Otherwise create a sensibly named buffer based upon the class name of the method."
+Otherwise create a sensibly named buffer based on the class name of the method."
   (interactive)
   (save-excursion
     (save-match-data
@@ -1952,9 +1956,10 @@ provide extra control over the name that appears in the index."
 (defun magik-ac-class-method-source ()
   "List of methods on a class.
 Uses a cache variable `magik-ac-class-method-source-cache'.
-All the methods beginning with the first character are returned and stored in the cache.
-Thus subsequent characters refining the match are handled by auto-complete refining
-the list of all possible matches, without recourse to the class browser."
+All the methods beginning with the first character are returned and
+stored in the cache.  Thus subsequent characters refining the match are
+handled by auto-complete refining the list of all possible matches,
+without recourse to the class browser."
   (let ((exemplar (magik-ac-exemplar-near-point))
         (ac-prefix ac-prefix))
     (if exemplar
@@ -1968,7 +1973,8 @@ the list of all possible matches, without recourse to the class browser."
             (setq magik-ac-class-method-source-cache (magik-cb-ac-method-candidates)))))))
 
 (defun magik-ac-object-source-init ()
-  "Initialisation function for obtaining all Magik Objects for use in auto-complete-mode."
+  "Initialisation function for obtaining all Magik Objects.
+For use in auto-complete-mode."
   (if (magik-cb-ac-start-process)
       (let ((ac-prefix "sw:object"))
         (setq magik-ac-object-source-cache (magik-cb-ac-class-candidates)))))
@@ -1992,8 +1998,8 @@ the list of all possible matches, without recourse to the class browser."
       (match-beginning 2)))
 
 (defun magik-ac-raise-condition-source-init ()
-  "Initialisation function for obtaining all Magik Conditions for use in auto-complete-mode.
-Once initialised this variable is not refreshed."
+  "Initialisation function for obtaining all Magik Conditions.
+For use in auto-complete-mode.  Once initialised this variable is not refreshed."
   (if (magik-cb-ac-start-process)
       (let ((ac-prefix "<condition>."))
         (if magik-ac-raise-condition-source-cache
@@ -2007,8 +2013,8 @@ Once initialised this variable is not refreshed."
       (match-beginning 1)))
 
 (defun magik-ac-global-source-init ()
-  "Initialisation function for obtaining all Magik Conditions for use in auto-complete-mode.
-Once initialised this variable is not refreshed."
+  "Initialisation function for obtaining all Magik Conditions.
+For use in auto-complete-mode.  Once initialised this variable is not refreshed."
   (if (magik-cb-ac-start-process)
       (let ((ac-prefix "<global>."))
         (if magik-ac-global-source-cache

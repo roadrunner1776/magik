@@ -92,10 +92,12 @@ If this matches then the  default's function is called with next elem set to
 the first elem of the list, or last if REVERSE is t.
 Optional arg REVERSE reverses the given list.
 
-This can be thought to be equivalent to creating a cond construct using the MATCH in the list
-as the tests and the FUNCTION as the form to be evualated when MATCH is true.
-The extra bit this provides is that the called function knows what the next elem would be.
-Also being able to make up a data structure means that it is easy to add new things to test for.
+This can be thought to be equivalent to creating a cond construct using
+the MATCH in the list as the tests and the FUNCTION as the form to be
+evualated when MATCH is true.  The extra bit this provides is that
+the called function knows what the next elem would be.
+Also being able to make up a data structure means that it is easy to
+add new things to test for.
 
 Returns nil if no change or the list (CURRENT-ELEM NEXT-ELEM) elements."
   (if reverse
@@ -338,7 +340,7 @@ In which case we toggle through the various pragma options."
 (defun magik-pragma-electric-toggle (direction)
   "Toggle the values for the different fields used in the pragma line.
 
-DIRECTION indicates whether the values should change 'forward or 'backward
+DIRECTION indicates whether the values should change \='forward or \='backward
 relative the current setting and available values."
   ;;Handle the case where the pragma line is completely empty separately.
   (if (save-excursion (beginning-of-line) (looking-at "_pragma()"))

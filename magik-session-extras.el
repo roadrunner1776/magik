@@ -37,7 +37,8 @@
 (defface magik-session-method-definition-face
   '((t :inherit font-lock-function-name-face
        :underline t))
-  "*Font-lock Face to highlight the method lines outputted by apropos() and print_local_methods()."
+  "*Font-lock Face to highlight the method lines outputted.
+Outputted by apropos() and print_local_methods()."
   :group 'magik)
 
 (defvar magik-session-extras-font-lock-keywords
@@ -73,7 +74,7 @@
 
 (defun magik-session-extras-newline (fn &rest args)
   "Jump to method definition based on the face of the text.
-Or as fallback the normal newline behaviour."
+Or as fallback the normal newline behaviour with FN and ARGS."
   (cond ((eq (get-text-property (point) 'face) 'magik-session-traceback-call-stack-face)
          (magik-session-extras-cb-method-jump-traceback))
         ((eq (get-text-property (point) 'face) 'magik-session-method-definition-face)
@@ -161,10 +162,10 @@ Using the `magik-cb-process' in the background."
   )
 
 (defvar-local magik-session-extras-magik-code-loaded? nil
-  "Shows if the `magik-session-extras-load-magik-code' is loaded in the current magik session.")
+  "If t, `magik-session-extras-load-magik-code' is loaded in the Magik session.")
 
 (defun magik-session-extras-ensure-magik-code-loaded ()
-  "Load the `magik-session-extras-load-magik-code' in the current magik session."
+  "Load the `magik-session-extras-load-magik-code' in the current Magik session."
   (when (eq magik-session-extras-magik-code-loaded? nil)
     (magik-session-extras-load-magik-code)
     (setq magik-session-extras-magik-code-loaded? t)

@@ -112,13 +112,15 @@ setting of the Magik Prompt by calling `magik-session-prompt-get'."
 (setq magik-session-prompt "Magik\\(\\|SF\\)> ")
 
 (defcustom magik-session-command-history-max-length 90
-  "*The maximum length of the displayed `magik-session-command' in the Magik Session -> Magik Session Command History submenu.
+  "*The maximum length of the displayed `magik-session-command' in the submenu.
+This applies to the Magik Session -> Magik Session Command History submenu.
 `magik-session-command' is a string of the form \"[DIRECTORY] COMMAND ARGS\"."
   :group 'magik
   :type  'integer)
 
 (defcustom magik-session-command-history-max-length-dir (floor (/ magik-session-command-history-max-length 2))
-  "*The maximum length of the displayed directory path in the Magik Session -> Magik Session Command History submenu."
+  "*The maximum length of the displayed directory path in the submenu.
+This applies to the Magik Session -> Magik Session Command History submenu."
   :group 'magik
   :type  'integer)
 
@@ -174,7 +176,7 @@ that use command string matching are not affected by this setting."
   :group 'magik)
 
 (defcustom magik-session-auto-insert-dollar nil
-  "Controls whether gis mode automatically inserts a $ after each valid magik statement."
+  "If t, automatically insert a $ after each valid Magik statement."
   :group 'magik
   :type 'boolean)
 
@@ -188,13 +190,14 @@ Each hook is passed the exit status of the gis process."
   "Variable storing setting of \\[magik-session-drag-n-drop-mode].
 
 To make this mode operate on a per-buffer basis, simply make
-this variable buffer-local by putting the following in your .emacs
+this variable buffer-local by putting the following in your .emacs:
 
   (defvar magik-session-mode-hook nil)
   (defun magik-session-drag-n-drop-mode-per-buffer ()
-    (set (make-local-variable 'magik-session-drag-n-drop-mode) magik-session-drag-n-drop-mode))
-  (add-hook 'magik-session-mode-hook 'magik-session-drag-n-drop-mode-per-buffer)
-"
+    (set (make-local-variable \='magik-session-drag-n-drop-mode)
+         magik-session-drag-n-drop-mode))
+  (add-hook \='magik-session-mode-hook
+            \='magik-session-drag-n-drop-mode-per-buffer)"
 
   ;;Use of integers is a standard way of forcing minor modes on and off.
   :type '(choice (const :tag "On" 1)
@@ -205,7 +208,7 @@ this variable buffer-local by putting the following in your .emacs
   "Alist storing GIS buffer name and number used for prefix key switching.")
 
 (defvar magik-session-drag-n-drop-mode-line-string nil
-  "Mode-line string to use for Drag 'n' Drop mode.")
+  "Mode-line string to use for Drag and Drop mode.")
 
 (defvar magik-session-filter-state nil
   "State variable for the filter function.")
@@ -217,7 +220,7 @@ this variable buffer-local by putting the following in your .emacs
   "The current `magik-session-command' in the current buffer.")
 
 (defvar magik-session-exec-path nil
-  "Stored value of `exec-path' when the GIS process was started.")
+  "Stored value of variable `exec-path' when the GIS process was started.")
 (make-variable-buffer-local 'magik-session-exec-path)
 
 (defvar magik-session-process-environment nil
@@ -234,9 +237,9 @@ as being degenerate.")
 (put 'magik-session-no-of-cmds 'permanent-local t)
 
 (defvar magik-session-cmd-num nil
-  "A number telling us what command is being recalled.  Important for
-M-p and M-n commands.  The first command typed is number 0.  The
-current command being typed is number (1- magik-session-no-of-cmds).")
+  "A number telling us what command is being recalled.
+Important for M-p and M-n commands.  The first command typed is number 0.
+The current command being typed is number (1- magik-session-no-of-cmds).")
 (put 'magik-session-cmd-num 'permanent-local t)
 
 (defvar magik-session-prev-cmds nil
@@ -299,7 +302,8 @@ It is offered as the default string for next time.")
   (customize-group 'gis))
 
 (defun magik-session-prompt-update-font-lock ()
-  "Update the Font-lock variable `magik-session-font-lock-keywords' with current `magik-session-prompt' setting."
+  "Update the Font-lock variable `magik-session-font-lock-keywords'.
+Uses current `magik-session-prompt' setting as value."
   (let ((entry (list (concat "^" magik-session-prompt) 0 magik-session-font-lock-prompt-face t)))
     (if (member entry magik-session-font-lock-keywords)
         nil ;; Already entered
@@ -638,7 +642,8 @@ Entry to this mode runs `magik-session-mode-hook`.
 
 (defun magik-session-start-process (args)
   "Run a Gis process in the current buffer.
-Adds `magik-session-current-command' to `magik-session-command-history' if not already there."
+Adds `magik-session-current-command' to `magik-session-command-history'
+if not already there."
   (run-hooks 'magik-session-start-process-pre-hook)
   (or (member magik-session-current-command magik-session-command-history)
       (add-to-list 'magik-session-command-history magik-session-current-command))
@@ -670,7 +675,7 @@ The program that is offered as a default is stored in the variable,
 `magik-session-command', which you can customise.  e.g.
 
 \(setq magik-session-command
-  \"[$HOME] sw_magik_win32 -Mextdir %TEMP% -image $SMALLWORLD_GIS/images/gis.msf\"
+\"[$HOME] sw_magik_win32 -Mextdir %TEMP% -image $SMALLWORLD_GIS/images/gis.msf\"
 \)
 The command automatically expands environment variables using
 Windows %% and Unix $ and ${} nomenclature.
@@ -814,25 +819,25 @@ there is not, prompt for a command to run, and then run it."
             (insert "\nMagik is still busy and will exit at an appropriate point. Please be patient... \n")))))
 
 (defun magik-session-query-interrupt-shell-subjob ()
-  "Ask and then comint-interrupt-subjob."
+  "Ask and then `comint-interrupt-subjob'."
   (interactive)
   (if (y-or-n-p "Kill the Magik process? ")
       (comint-kill-subjob)))
 
 (defun magik-session-query-quit-shell-subjob ()
-  "Ask and then comint-quit-subjob."
+  "Ask and then `comint-quit-subjob'."
   (interactive)
   (if (y-or-n-p "Kill the Magik process? ")
       (comint-quit-subjob)))
 
 (defun magik-session-query-stop-shell-subjob ()
-  "Ask and then comint-stop-subjob."
+  "Ask and then `comint-stop-subjob'."
   (interactive)
   (if (y-or-n-p "Suspend the Magik process? ")
       (comint-stop-subjob)))
 
 (defun magik-session-query-shell-send-eof ()
-  "Ask and then comint-send-eof."
+  "Ask and then `comint-send-eof'."
   (interactive)
   (if (y-or-n-p "Send EOF to the Magik process? ")
       (comint-send-eof)))
@@ -862,7 +867,8 @@ Locate the cursor to an offset OFFSET."
 
 (defun magik-session-send-region (beg end)
   "Record in `magik-session-prev-cmds' the region BEG to END and send to the gis.
-Also update `magik-session-cmd-num'.  Also append the string to \" *history**gis*\"."
+Also update `magik-session-cmd-num'.
+Also append the string to \" *history**gis*\"."
   (save-excursion
     (let ((str (buffer-substring beg end)))
       (set-buffer (get-buffer-create (concat " *history*" (buffer-name))))
@@ -1163,8 +1169,8 @@ Copying to the end of the buffer if necessary and don't add extra dollars."
       (error "Not a command")))))
 
 (defun magik-session--matching-cmd-p (n str)
-  "Return t if magik-session-prev-cmds[N] is a non-degenerate command matching STR or off the end (i.e.
-n<0 or n>=magik-session-no-of-cmds)."
+  "Return t if magik-session-prev-cmds[N] is a command matching STR or off the end.
+E.g. n<0 or n>=magik-session-no-of-cmds."
   (or (< n 0)
       (>= n magik-session-no-of-cmds)
       (let
@@ -1206,7 +1212,7 @@ An internal function that deals with 4 cases."
           ))))
 
 (defun magik-session-recall-prev-cmd ()
-  "Recall the earlier magik session commands
+  "Recall the earlier Magik session commands.
 
 The variable \\[magik-session-recall-cmd-move-to-end\\] decides
 whether cursor point is placed at end of command.  Compare with
@@ -1289,7 +1295,8 @@ If ARG is null, use a default of `magik-session-history-length'."
       (set-buffer b))))
 
 (defun magik-session-undisplay-history (arg)
-  "Unfold the last ARG commands.  If ARG is null, use a default of `magik-session-history-length'."
+  "Unfold the last ARG commands.
+If ARG is null, use a default of `magik-session-history-length'."
   (interactive "*P")
   (setq arg (if (null arg) magik-session-history-length (prefix-numeric-value arg)))
   (let
@@ -1435,7 +1442,8 @@ Query first for \"**** Error\"."
       (error "Couldn't find a line starting with '**** Error' - nothing printed" ))))
 
 (defun magik-session-traceback-save ()
-  "Save in \"~/traceback.txt\" all the text onwards from the most recent \"**** Error\"."
+  "Save in \"~/traceback.txt\" all the text onwards from the most recent error.
+An error is is searched using \"**** Error\"."
   (interactive)
   (save-excursion
     (goto-char (point-max))
@@ -1467,7 +1475,7 @@ Query first for \"**** Error\"."
 ;; as GIS mode buffer, the file is loaded into the GIS session.
 
 (defun magik-session-drag-n-drop-mode (&optional arg)
-  "Toggle Drag 'n' drop GIS loading functionality."
+  "Toggle Drag and drop GIS loading functionality."
   (interactive "P")
   (setq magik-session-drag-n-drop-mode
         (if (null arg)

@@ -102,7 +102,7 @@ FUNCTION takes one argument, the string after the action character."
 (defun magik-session-filter-insert (buf proc n str)
   "Insert into BUF at the `process-mark' of PROC, N chars from STR.
 If N is nil insert the whole of STR.  We insert before all markers except the
- 'comint-last-input-end' and the last command from magik-session-prev-cmds."
+ `comint-last-input-end' and the last command from magik-session-prev-cmds."
   (save-excursion
     (goto-char (process-mark proc))
     ;; we make sure that the end-marker for the last command typed by the user
@@ -207,7 +207,8 @@ action's function setting."
 
 ;;; Set up filter action functions for the gis process
 (defun magik-session-filter-action-completion (proc str)
-  "Gis Filter Action interface for a magik symbol completion according to STR returned from Magik."
+  "Gis Filter Action interface for a Magik symbol completion.
+According to STR returned from Magik."
   (let ((ans (read str))
         (curr-word-len (length (magik-utils-curr-word))))
     (cond
@@ -244,7 +245,8 @@ action's function setting."
 
 
 (defun magik-session-filter-action-deep-print (proc str)
-  "Gis Filter Action interface for a deep print action according to the STR back from magik."
+  "Gis Filter Action interface for a deep print action.
+According to the STR returned from Magik."
   (let ((buffer (concat "*deep print*" (buffer-name (process-buffer proc)))))
     (pop-to-buffer buffer) ;;Buffer should always exist since the only USer interface is via deep-print.
     (if (eq (string-to-char str) ?\n)     ; then this is a sub-structure
