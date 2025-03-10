@@ -212,7 +212,7 @@ action's function setting."
         (curr-word-len (length (magik-utils-curr-word))))
     (cond
      ((eq (length ans) 0)
-      (message "Cannot find completion for %s." (magik-utils-curr-word)))
+      (message "Can't find completion for %s." (magik-utils-curr-word)))
      ((eq (length ans) 1)
       (if (eq (length (car ans)) curr-word-len)
           (message "Sole completion.")
@@ -256,7 +256,7 @@ action's function setting."
     (insert str)))
 
 (defun magik-session-filter-action-find-file (proc str)
-  "(Deprecated) Gis Filter Action interface for find-file.
+  "(Deprecated) Gis Filter Action interface for `find-file'.
 Find a file and goto a particular line number
 STR is of the form 42:/bla/bla/foo.magik or
 :/bla/bla/foo.magik which means don't jump to any
@@ -282,10 +282,10 @@ Search based keys:
   class       Class  to search for in file.
   search      String to search for in file.
 
-function must return the buffer of the file.
+PROC must return the buffer of the file.
 
 method and class searching combine to a specific search
-search is a generic search string. If given with method and class
+search is a generic search string.  If given with method and class
 the string will be searched for after the method and class search has completed.
 
 line and column can be used together.
@@ -319,7 +319,7 @@ The behaviour is undefined if any search key and line or column are used."
       (if (setq val (assq 'column alist)) (move-to-column (string-to-number (cdr val)))))))
 
 (defun magik-session-filter-action-cb-mf (proc socketname)
-  "Magik has started a method_finder and tells Emacs what the socketname is."
+  "Magik has started a method_finder PROC and tell Emacs what the SOCKETNAME is."
   (setq magik-cb--mf-socket-synchronised socketname))
 
 (defun magik-session-filter-action-cb-goto-method (proc str)

@@ -30,7 +30,7 @@
 
 ;;also defined in sw-electric.el
 (defcustom magik-indent-level 8
-  "*How much to indent each nested level"
+  "*How much to indent each nested level."
   :group 'magik
   :safe 'integerp
   :type 'integer)
@@ -107,8 +107,9 @@ global constant, `magik-transitions'.")
   "An association list of Magik keywords like \"_else\" and their corresponding endings (like \"_if\").")
 
 (defun magik--skip-blank-lines-backward ()
-  "Move back a line skipping white-space lines (lines with only spaces
-tabs and comments).  Return t if we succeed."
+  "Move back a line skipping white-space lines.
+White-space lines are lines with only spaces tabs and comments.
+Return t if we succeed."
   (if (eq (forward-line -1) -1)
       nil
     (while
@@ -160,9 +161,9 @@ tabs and comments).  Return t if we succeed."
         (magik-calc-indent-normal))))))
 
 (defun magik-calc-indent-normal ()
-  "Return the appropriate indentation for the current line, assuming it is reasonably normal.
-i.e. there is some previous non-blank line and this line doesn't start with something
-like \"_endif\" or \"}\" or \"_then\"."
+  "Return the appropriate indentation for the current line.
+Assuming it is reasonably normal.  i.e. there is some previous non-blank line
+and this line doesn't start with something like \"_endif\" or \"}\" or \"_then\"."
   (magik--skip-blank-lines-backward)
   (let*
       ((toks (magik-tokenise-line))
@@ -249,12 +250,12 @@ like \"_endif\" or \"}\" or \"_then\"."
             (current-column))))))))
 
 (defun magik-find-operator-backwards (operator-arg)
-  "Search backwards from point for an operator with a lower precedence
-than OPERATOR-ARG.  Return the token.  Take into account brackets (and
-foo/endfoo pairs) so that things inside brackets are hidden from the
-search.  An unmatched open-bracket (or begin-type keyword)
-automatically qualifies.  Statement separation and beginning-of-buffer
-are treated as the lowest level-operators."
+  "Search backward from point for operator with lower precedence than OPERATOR-ARG.
+Return the token.  Take into account brackets (and foo/endfoo pairs) so
+that things inside brackets are hidden from the search.
+An unmatched open-bracket (or begin-type keyword) automatically qualifies.
+Statement separation and beginning-of-buffer are treated as
+the lowest level-operators."
   (let
       ((toks (reverse (magik-tokenise-region (line-beginning-position) (point))))
        (magik-stack nil))  ; stack of ends looking for begins.
@@ -300,11 +301,11 @@ are treated as the lowest level-operators."
       (car toks))))
 
 (defun magik--found-the-operator (tok operator-arg)
-  "See if the token, TOK, is an `exposed' operator with lower precedence than the
-operator, OPERATOR-ARG or an extra begin keyword or left bracket.  Exposed means not
-inside brackets or a foo/endfoo pair.  This function operates on the dynamically
-imported list, `magik-stack': endfoo keywords and right brackets are pushed onto the stack
-and corresponding begin keywords and left brackets are popped off the stack."
+  "Check if TOK is an exposed operator with lower precedence than OPERATOR-ARG.
+Also check if it is an operator with lower precedence than a begin/left bracket.
+Exposed means not inside brackets or a foo/endfoo pair.
+Operates on `magik-stack'.
+Endfoo and right brackets are pushed; begin and left brackets are popped."
   (let*
       ((str (car tok))
        (pos (cdr tok)))
@@ -350,7 +351,8 @@ and corresponding begin keywords and left brackets are popped off the stack."
       nil))))
 
 (defun magik--forward-token ()
-  "Move point forward to the beginning of the next Magik token.  End of line tokens don't count."
+  "Move point forward to the beginning of the next Magik token.
+End of line tokens don't count."
   (let
       ((toks (magik-tokenise-region-no-eol (point) (line-end-position))))
 
@@ -369,15 +371,15 @@ and corresponding begin keywords and left brackets are popped off the stack."
 ;; _______________________
 ;;
 (defun magik-tokenise-line ()
-  "Return a list of the token-string and token-position pairs in the current line.
-Don't include comments and trailing @foo tokens.  Add a newline token unless the last token
-is an operator."
+  "Return list of the token-string and token-position pairs in the current line.
+Don't include comments and trailing @foo tokens.
+Add a newline token unless the last token is an operator."
   (magik-tokenise-region (line-beginning-position) (line-end-position)))
 
 (defun magik-tokenise-region (start end)
-  "Return a list of the token-string and token-position pairs between START and END.
-Don't include comments and trailing @foo tokens.  Add a newline token unless the last token
-is an operator."
+  "Return list of the token-string and token-position pairs between START and END.
+Don't include comments and trailing @foo tokens.
+Add a newline token unless the last token is an operator."
   ;;; We do this using a state machine parsing technique.
   ;;; We are also dropping the stack.  This is made possible by
   ;;; splitting the bar and slash states in to the var-bar, sym-bar,
@@ -513,12 +515,13 @@ is an operator."
             t stay)
     (string-finish t neutral)
     (comment t stay))
-  "A description of the lexical state transitions in Magik.  This gets
-compiled into a more efficient form by `init-magik-state-table()'.")
+  "A description of the lexical state transitions in Magik.
+This gets compiled into a more efficient form by `init-magik-state-table()'.")
 
 (defun magik--init-state-table ()
-  "Initialise the global variable `magik-state-table' unless it has already
-been initialised from the global variable, `magik-transitions'."
+  "Initialise the global variable `magik-state-table'.
+Unless it has already been initialised from the global variable
+called `magik-transitions'."
   (if (null magik-state-table)
       (progn
         (let

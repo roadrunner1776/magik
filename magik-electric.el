@@ -66,7 +66,8 @@
      (prev_class_name "def_property(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar))
     ("define_property" -1 1 (prev_pragma)
      (prev_class_name "define_property(:" ",\n\t## \n\t## \n\t## \n\t)\n" dollar)))
-  " These `method' templates automatically insert the class name at the front.")
+  "These method templates automatically insert the class name at the front.")
+
 (defvar magik-electric-templates
   (append
    '(("iter" e 1 (prev_pragma) ("_iter _method " prev_class_name) "\t## " "\t## "
@@ -99,7 +100,7 @@
      ("while" e 0 "_while " "_loop" - "_endloop")
      ("for" 2 0 "_for  _over " "_loop" - "_endloop"))
    magik-electric-templates-methods)
-  "*An association list of magik templates.")
+  "*An association list of Magik templates.")
 
 (defun magik-electric-mode (&optional arg)
   "Toggle the electric switch."
@@ -113,11 +114,11 @@
              "Electric Magik off")))
 (defalias 'magik-electric-toggle 'magik-electric-mode) ;compatibility
 
-(defun magik-electric-hash (arg)
-  "insert the char, `#', and if this is the first `#' on the line and
-the previous line starts with a `#' align with that."
+(defun magik-electric-hash (char)
+  "Insert the CHAR, `#'.
+If it's the first `#' and the previous line starts with `#', align with it."
   (interactive "*p")
-  (self-insert-command arg)
+  (self-insert-command char)
   (if (save-excursion
         (and (progn (back-to-indentation) (eq (following-char) ?#))
              (eq (forward-line -1) 0)
@@ -126,7 +127,7 @@ the previous line starts with a `#' align with that."
       (magik-indent-command)))
 
 (defun magik-insert-pragma ()
-  "Insert a magik pragma statement on the current line."
+  "Insert a Magik pragma statement on the current line."
   (interactive "*")
   ;;first prepare the line we are inserting on
   (beginning-of-line)
@@ -142,7 +143,7 @@ the previous line starts with a `#' align with that."
   (magik-explicit-electric-space))
 
 (defun magik-explicit-electric-space ()
-  "insert magik programming templates"
+  "Insert Magik programming templates."
   (interactive "*")
   (let*
       ((p (point))
@@ -179,7 +180,7 @@ the previous line starts with a `#' align with that."
       (error "There is no template for %s" str))))
 
 (defun magik-electric-space (arg &optional doit)
-  "expand magik keywords into programming templates"
+  "Expand Magik keywords into programming templates."
   (interactive "*p")
   (cond
    ((save-excursion

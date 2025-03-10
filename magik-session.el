@@ -231,6 +231,9 @@ this variable buffer-local by putting the following in your .emacs
   "No. of commands we have sent to this buffer's gis including the
 null one at the end, but excluding commands that have been spotted as
 being degenerate.")
+  "Number of commands we have sent to this buffer's gis.
+Including the null one at the end, but excluding commands that have been spotted
+as being degenerate.")
 (put 'magik-session-no-of-cmds 'permanent-local t)
 
 (defvar magik-session-cmd-num nil
@@ -277,14 +280,14 @@ markers.")
   "The default value for magik-session-command.
 It illustrates how Environment variables can be embedded in the command.
 Also it neatly shows the three ways of referencing Environment variables,
-via the Windows and Unix forms: %%, $ and ${}. All of which are
+via the Windows and Unix forms: %%, $ and ${}.  All of which are
 expanded irrespective of the current Operating System.")
 
 ;;Although still settable by the user via M-x set-variable,
 ;;it is preferred that magik-session-comand-history be used instead.
 (defvar magik-session-command magik-session-command-default
-  "*The command used to invoke the gis.  It is offered as the default
-string for next time.")
+  "*The command used to invoke the gis.
+It is offered as the default string for next time.")
 
 (defcustom magik-session-command-history nil
   "*List of commands run by a GIS buffer."
@@ -351,8 +354,8 @@ queried irrespective of default value of `magik-session-prompt'"
     (display-buffer buffer)))
 
 (defun magik-session-parse-gis-command (command)
-  "Parse the magik-session-command string taking care of any quoting
-and return a list of all the components of the command."
+  "Parse the magik-session-command string taking care of any quoting.
+Return a list of all the components of the COMMAND."
 
   ;;Copy the string into a temp buffer.
   ;;Use the Emacs sexp code and an appropriate syntax-table 'magik-session-command-syntax-table'
@@ -452,7 +455,7 @@ and return a list of all the components of the command."
                       (or magik-session-list (list "No Processes")))))
 
 (defun magik-session-update-magik-session-menu ()
-  "Update the Magik Session Command history in the Magik Session pulldown menu"
+  "Update the Magik Session Command history in the Magik Session pulldown menu."
   (if (eq major-mode 'magik-session-mode)
       (let (command-list)
         (save-match-data
@@ -845,8 +848,8 @@ there is not, prompt for a command to run, and then run it."
 ;;; also adds dollars and implements the history-folding feature.
 
 (defun magik-session-copy-cmd (n offset)
-  "Copy command number N to the bottom of the buffer (replacing
-any current command) and locate the cursor to an offset OFFSET."
+  "Copy command number N to the bottom of the buffer replacing any current command.
+Locate the cursor to an offset OFFSET."
   (delete-region (process-mark (get-buffer-process (current-buffer))) (point-max))
   (goto-char (point-max))
   (let*
@@ -888,8 +891,8 @@ Also update `magik-session-cmd-num'.  Also append the string to \" *history**gis
     (process-send-region (get-buffer-process (current-buffer)) beg end)))
 
 (defun magik-session--make-new-cmds-vec ()
-  "Create a new bigger vector for `magik-session-prev-cmds' and copy the
-non-degenerate commands into it."
+  "Create a new bigger vector for `magik-session-prev-cmds'.
+Copies the non-degenerate commands into it."
   (message "Resizing the command history vector...")
   (let*
       ((len (length magik-session-prev-cmds))
@@ -930,7 +933,7 @@ If command is repeated then place point at beginning of prompt."
                                         ; see also swkeys.el for key definition
 
 (defun magik-session-toggle-dollar ()
-  "Toggle auto-insertion of $ terminator"
+  "Toggle auto-insertion of $ terminator."
   (interactive )
   (setq magik-session-auto-insert-dollar (not magik-session-auto-insert-dollar))
   (if magik-session-auto-insert-dollar
@@ -938,11 +941,11 @@ If command is repeated then place point at beginning of prompt."
     (message "Insert dollar now disabled")))
 
 (defun magik-session-newline (arg)
-  "If in a prev. cmd., recall.
-If within curr. cmd., insert a newline.
-If at end of curr. cmd. and cmd. is complete, send to gis.
-If at end of curr. cmd. and cmd. is not complete, insert a newline.
-Else (not in any cmd.) recall line."
+  "If in a previous cmd, recall.
+If within current cmd, insert a newline.
+If at end of current cmd and cmd is complete, send to gis.
+If at end of current cmd and cmd is not complete, insert a newline.
+Else (not in any cmd) recall line."
   (interactive "*P")
   (let
       ((n (magik-session--get-curr-cmd-num))
@@ -994,8 +997,8 @@ Else (not in any cmd.) recall line."
         (backward-char n))))))
 
 (defun magik-session--complete-magik-p (beg end)
-  "Return t if the region from BEG to END is a syntactically complete piece of
-Magik.  Also write a message saying why the magik is not complete."
+  "Return t if the region from BEG to END is a syntactically piece of Magik.
+Also write a message saying why the magik is not complete."
   (save-excursion
     (goto-char beg)
     (let
@@ -1055,8 +1058,8 @@ Being in the prompt before the command counts too.  We do this by binary search.
   (magik-session--get-curr-cmd-num-2 0 (1- magik-session-no-of-cmds)))
 
 (defun magik-session--get-curr-cmd-num-2 (min max)
-  "Return the num of the command that point is in, or nil if it isn't in the half-open
-range [MIN, MAX)."
+  "Return the num of the command that point is in.
+Return nil if it isn't in the half-open range [MIN, MAX)."
   (if (> max min)
       (let*
           ((mid (/ (+ min max) 2))
@@ -1080,56 +1083,56 @@ range [MIN, MAX)."
           (error "Sorry... Confused command recall"))))))
 
 (defun magik-session-electric-magik-space (arg)
-  "copy blocks to the bottom of the gis buffer first and then do an electric space."
+  "Copy blocks to the bottom of the gis buffer first.
+Then do an electric space using ARG."
   (interactive "*p")
   (magik-session--prepare-for-edit-cmd)
   (magik-electric-space arg))
 
-(defun magik-session-insert-char (arg)
-  "Take a copy of a command before inserting the char."
+(defun magik-session-insert-char (char)
+  "Take a copy of a command before inserting the CHAR."
   (interactive "*p")
   (magik-session--prepare-for-edit-cmd)
-  (self-insert-command arg))
+  (self-insert-command char))
 
-(defun magik-session-delete-char (arg)
-  "Take a copy of a command before deleting the char."
+(defun magik-session-delete-char (char)
+  "Take a copy of a command before deleting the CHAR."
   (interactive "*p")
   (magik-session--prepare-for-edit-cmd)
-  (delete-char arg))
+  (delete-char char))
 
-(defun magik-session-kill-word (arg)
-  "Take a copy of a command before killing the word."
+(defun magik-session-kill-word (word)
+  "Take a copy of a command before killing the WORD."
   (interactive "*p")
   (magik-session--prepare-for-edit-cmd)
-  (kill-word arg))
+  (kill-word word))
 
-(defun magik-session-backward-kill-word (arg)
-  "Take a copy of a command before killing the word."
+(defun magik-session-backward-kill-word (word)
+  "Take a copy of a command before killing the WORD."
   (interactive "*p")
   (magik-session--prepare-for-edit-cmd)
-  (backward-kill-word arg))
+  (backward-kill-word word))
 
-(defun magik-session-backward-delete-char (arg)
-  "Take a copy of a command before deleting the char."
+(defun magik-session-backward-delete-char (char)
+  "Take a copy of a command before deleting the CHAR."
   (interactive "*p")
   (magik-session--prepare-for-edit-cmd)
-  (delete-backward-char arg))
+  (delete-backward-char char))
 
-(defun magik-session-kill-line (arg)
-  "Take a copy of a command before killing the line."
+(defun magik-session-kill-line (line)
+  "Take a copy of a command before killing the LINE."
   (interactive "*P")
   (magik-session--prepare-for-edit-cmd)
-  (kill-line arg))
+  (kill-line line))
 
 (defun magik-session-kill-region (beg end)
-  "Ask if they really want to kill the region, before killing it."
+  "Ask if they really want to kill the region from BEG to END, before killing it."
   (interactive "*r")
-  (if (y-or-n-p "Cutting and pasting big regions can confuse the gis-mode markers. Kill anyway? ")
+  (if (y-or-n-p "Cutting and pasting big regions can confuse the gis-mode markers... Kill anyway?")
       (kill-region beg end)))
 
 (defun magik-session--prepare-for-edit-cmd ()
-  "If we're in a previous command, replace any current command with
-this one."
+  "If we're in a previous command, replace any current command with this one."
   (let
       ((n (magik-session--get-curr-cmd-num)))
     (if n
@@ -1138,8 +1141,8 @@ this one."
                                    (car (aref magik-session-prev-cmds n)))))))
 
 (defun magik-session-send-command-at-point ()
-  "Send the command at point, copying to the end of the buffer if necessary and
-don't add extra dollars."
+  "Send the command at point.
+Copying to the end of the buffer if necessary and don't add extra dollars."
   (interactive "*")
   (or (get-buffer-process (current-buffer))
       (error "There is no process running in this buffer"))
@@ -1215,7 +1218,7 @@ whether cursor point is placed at end of command.  Compare with
   (magik-session-recall "" -1 magik-session-recall-cmd-move-to-end))
 
 (defun magik-session-recall-next-cmd ()
-  "Recall the later magik session commands
+  "Recall the later Magik session commands.
 
 The variable \\[magik-session-recall-cmd-move-to-end\\] decides
 whether cursor point is placed at end of command.  Compare with
@@ -1224,8 +1227,8 @@ whether cursor point is placed at end of command.  Compare with
   (magik-session-recall "" 1 magik-session-recall-cmd-move-to-end))
 
 (defun magik-session-recall-prev-matching-cmd ()
-  "Recall the earlier and earlier gis commands that match the part of
-the command before the cursor."
+  "Recall the earlier and earlier GIS commands that match the part of the command.
+Recalls before the cursor."
   (interactive "*")
   (magik-session-recall (buffer-substring
                          (process-mark (get-buffer-process (current-buffer)))
@@ -1234,8 +1237,8 @@ the command before the cursor."
                         nil))
 
 (defun magik-session-recall-next-matching-cmd ()
-  "Recall the earlier and earlier gis commands that match the part of
-the command before the cursor."
+  "Recall the earlier and earlier GIS commands that match the part of the command.
+Recalls before the cursor."
   (interactive "*")
   (magik-session-recall (buffer-substring
                          (process-mark (get-buffer-process (current-buffer)))
@@ -1318,12 +1321,12 @@ If ARG is null, use a default of `magik-session-history-length'."
       (set-buffer b))))
 
 (defun magik-session-goto-process-mark ()
-  "(goto-char (process-mark (get-buffer-process (current-buffer))))"
+  "(goto-char (process-mark (get-buffer-process (current-buffer))))."
   (interactive)
   (goto-char (process-mark (get-buffer-process (current-buffer)))))
 
 (defun magik-session-set-process-mark-to-eob ()
-  "(set-marker (process-mark (get-buffer-process (current-buffer))) (point-max))"
+  "(set-marker (process-mark (get-buffer-process (current-buffer))) (point-max))."
   (interactive)
   (set-marker (process-mark (get-buffer-process (current-buffer))) (point-max)))
 ;;;
@@ -1332,7 +1335,7 @@ If ARG is null, use a default of `magik-session-history-length'."
 
 ;; support for `gis-traceback-print()'
 (defun magik-session-print-region-and-fold (start end switches)
-  "like `print-region-1()' but with long lines folded first."
+  "Like `print-region-1()' but with long lines folded first."
   (let ((name (concat (buffer-name) " Emacs buffer"))
         (width tab-width))
     (save-excursion
@@ -1361,7 +1364,7 @@ If ARG is null, use a default of `magik-session-history-length'."
       (message "Printing... Done"))))
 
 (defun magik-session-error-narrow-region ()
-  "Narrow region between the current Magik prompts."
+  "Narrow region between the current Magik prompt."
   (narrow-to-region (save-excursion (re-search-backward magik-session-prompt))
                     (save-excursion
                       (or (re-search-forward magik-session-prompt nil t) (goto-char (point-max)))
@@ -1382,7 +1385,7 @@ If ARG is null, use a default of `magik-session-history-length'."
     (cons line col)))
 
 (defun magik-session-error-goto ()
-  "Goto file that contains the Magik error."
+  "Goto file that contain the Magik error."
   (interactive)
   (let ((case-fold-search nil) ;case-sensitive searching required for "Loading"
         (line-adjust 0)
@@ -1417,14 +1420,14 @@ If ARG is null, use a default of `magik-session-history-length'."
     (move-to-column (cdr line-col))))
 
 (defun magik-session-error-goto-mouse (click)
-  "Goto error at mouse point."
+  "Goto error at mouse point CLICK."
   (interactive "e")
   (mouse-set-point click)
   (magik-session-error-goto))
 
 (defun magik-session-traceback-print ()
-  "Send the text from the most recent \"**** Error\" to the end of
-the buffer to the printer.  Query first."
+  "Send the text from the most recent error to the end of the buffer to the print.
+Query first for \"**** Error\"."
   (interactive)
   (save-excursion
     (goto-char (point-max))
@@ -1529,7 +1532,7 @@ where MODE is the name of the major mode with the '-mode' postfix."
 
 ;;MSB configuration
 (defun magik-session-msb-configuration ()
-  "Adds GIS buffers to MSB menu, supposes that MSB is already loaded."
+  "Add GIS buffers to MSB menu, supposes that MSB is already loaded."
   (let* ((l (length msb-menu-cond))
          (last (nth (1- l) msb-menu-cond))
          (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
