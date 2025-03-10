@@ -523,7 +523,7 @@ Do a no-op if already in the cb."
                  gis    (magik-cb-gis-buffer buffer))))
 
     (setq buffer   (or buffer (concat "*cb*" gis))
-          smallworld-gis (buffer-local-value 'magik-smallworld-gis (get-buffer gis))
+          smallworld-gis (buffer-local-value 'magik-smallworld-gis (get-buffer buffer))
           gis-proc (and gis (get-buffer-process gis)))
 
     (cond ((magik-cb-is-running buffer)
