@@ -228,9 +228,6 @@ this variable buffer-local by putting the following in your .emacs
   "The Class browser buffer associated with the GIS process.")
 
 (defvar magik-session-no-of-cmds nil
-  "No. of commands we have sent to this buffer's gis including the
-null one at the end, but excluding commands that have been spotted as
-being degenerate.")
   "Number of commands we have sent to this buffer's gis.
 Including the null one at the end, but excluding commands that have been spotted
 as being degenerate.")

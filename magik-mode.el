@@ -1000,9 +1000,9 @@ you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recal
       (error "Can't find method, '%s', in class, '%s'" method class)))))
 
 (defun magik-goto-class-method-loop (search-str arg)
-  "Loop over subsequent definitions.
+  "Loop over subsequent definitions of ARG.
 Add SEARCH-STR to `regexp-search-ring'.
-After quiting this loop, you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recall this search."
+After quitting this loop, you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recall this search."
   ;;I would like to use the isearch functionality but I can't work out
   ;;how to control isearch programmatically.
   (let ((continue-p t)
