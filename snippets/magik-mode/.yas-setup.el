@@ -118,22 +118,28 @@ If the buffer is not visiting a file, return an empty string."
             (setq result (concat result "\n"))))))
     result))
 
-(defun magik-yassnippet-module-name ()
+(defun magik-yasnippet-module-name ()
   "Recursively search for the module.def and return the module name."
-  (let ((current-dir (file-name-directory (buffer-file-name))))
-    (catch 'module-found
-      (while current-dir
-        (let ((module-file (expand-file-name "module.def" current-dir)))
-          (when (file-exists-p module-file)
-            (throw 'module-found
-                   (with-temp-buffer
-                     (insert-file-contents module-file)
-                     (goto-char (point-min))
-                     (current-word)))))
-        ;; Move to the parent directory
-        (setq current-dir (if (equal current-dir "/")
-                              nil
-                            (file-name-directory (directory-file-name current-dir)))))
-      nil))) ;; Return nil if no module.def is found
+  (let ((buffer-file (buffer-file-name)))
+    ;; Return nil if the current buffer has no file name
+    (if (not buffer-file)
+        nil
+      (let ((current-dir (file-name-directory (buffer-file-name))))
+        (catch 'module-found
+          (while current-dir
+            (let ((module-file (expand-file-name "module.def" current-dir)))
+              (when (file-exists-p module-file)
+                (throw 'module-found
+                       (with-temp-buffer
+                         (insert-file-contents module-file)
+                         (goto-char (point-min))
+                         (current-word)))))
+            ;; Move to the parent directory
+            (let ((parent-dir (file-name-directory (directory-file-name current-dir))))
+              ;; Stop if we reach the root directory (when current-dir == parent-dir)
+              (setq current-dir (if (equal current-dir parent-dir)
+                                    nil
+                                  parent-dir))))
+          nil))))) ;; Return nil if no module.def is found
 
 ;;; .yas-setup.el ends here
