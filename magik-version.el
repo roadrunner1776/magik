@@ -46,12 +46,13 @@ This provides an alternative interface to a gis_version program."
                   (const nil)))
 
 (defcustom magik-version-match "^[* ] \\(\\S-+\\)\\s-*\\(\\S-+\\)\\s-*\\(.*\\)"
-  "*Regexp matching valid versions listed by `gis-version-program' or `gis-version-file'."
+  "*Regexp matching valid versions.
+Listed by `magik-version' or `magik-version-file'."
   :group 'magik-version
   :type  'regexp)
 
 (defcustom magik-version-invalid-string "(invalid)"
-  "*The string marking an invalid gis version entry."
+  "*The string marking an invalid gis_version entry."
   :group 'magik-version
   :type  'string)
 
