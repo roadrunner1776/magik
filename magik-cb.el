@@ -985,7 +985,7 @@ in \"*cb2*\" and note that \"*cb2*\" is now in family mode."
     (insert-file-contents (magik-cb-temp-file-name p) nil nil nil t)
     (if (search-forward "\C-l" nil t)
         (progn
-          (backward-delete-char 1)
+          (delete-char -1)
           (insert "\n\n\n")))
     (goto-char (point-min))
     (if (re-search-forward "^[^ ]" nil t)
@@ -1357,7 +1357,7 @@ Don't ask for a response, though."
           (goto-char (point-min))
           (search-forward (concat " " str " "))
           (backward-char (+ 2 (length str)))
-          (backward-delete-char 1)
+          (delete-char -1)
           (insert
            (cond ((and term-p on-p)       "*")
                  ((and term-p (not on-p)) ".")
@@ -1629,52 +1629,52 @@ We also save some state for a clean exit."
       (magik-cb-set-buffer-m) (backward-char)))
   (magik-cb-redraw-modeline))
 
-(defun magik-cb-insert-command (arg)
-  "Do a self-insert-command into the mode-line and refresh the method display."
+(defun magik-cb-insert-command (char)
+  "Insert CHAR into the mode-line and refresh the method display."
   (interactive "p")
   (with-current-buffer (magik-cb-buffer)
     (save-excursion
       (if (eq magik-cb-cursor-pos 'method-name)
           (progn
             (magik-cb-set-buffer-m)
-            (self-insert-command arg))
+            (self-insert-command char))
         (magik-cb-set-buffer-c)
-        (self-insert-command arg)))
+        (self-insert-command char)))
     (magik-cb-send-modeline-and-pr)))
 
-(defun magik-cb-backward-delete-char (arg &optional killflag)
-  "Do a delete-char in the mode-line and refresh the method display."
+(defun magik-cb-backward-delete-char (n &optional killflag)
+  "Delete N characters backward in the mode-line and refresh the method display."
   (interactive "p\nP")
   (with-current-buffer (magik-cb-buffer)
     (save-excursion
       (if (eq magik-cb-cursor-pos 'method-name)
           (progn
             (magik-cb-set-buffer-m)
-            (backward-delete-char arg killflag))
+            (delete-char (- n) killflag))
         (magik-cb-set-buffer-c)
         (if (bobp)
             (progn (magik-cb-set-buffer-m)
                    (goto-char (point-max))
-                   (backward-delete-char arg killflag))
-          (backward-delete-char arg killflag))))
+                   (delete-char (- n) killflag))
+          (delete-char (- n) killflag))))
     (magik-cb-send-modeline-and-pr)))
 
-(defun magik-cb-delete-char (arg &optional killflag)
-  "Do a delete-char in the mode-line and refresh the method display."
+(defun magik-cb-delete-char (n &optional killflag)
+  "Delete N characters in the mode-line and refresh the method display."
   (interactive "p\nP")
   (with-current-buffer (magik-cb-buffer)
     (save-excursion
       (if (eq magik-cb-cursor-pos 'class-name)
           (progn
             (magik-cb-set-buffer-c)
-            (delete-char arg killflag))
+            (delete-char n killflag))
         (magik-cb-set-buffer-m)
         (if (eobp)
             (progn
               (magik-cb-set-buffer-c)
               (goto-char (point-min))
-              (delete-char arg killflag))
-          (delete-char arg killflag))))
+              (delete-char n killflag))
+          (delete-char n killflag))))
     (magik-cb-send-modeline-and-pr)))
 
 (defun magik-cb-kill-line (arg)

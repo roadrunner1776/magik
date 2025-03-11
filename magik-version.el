@@ -324,7 +324,7 @@ Will set `gis-version-file' to FILE."
       (while (re-search-forward magik-version-match nil t)
         (beginning-of-line)
         (forward-char 1)
-        (backward-delete-char 1)
+        (delete-char -1)
         (insert " ")
         (cond ((string-match magik-version-invalid-string (match-string-no-properties 3))
                nil)

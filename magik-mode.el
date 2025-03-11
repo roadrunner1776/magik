@@ -2056,7 +2056,7 @@ Translate it and the closing bracket into the new \"{...}\" notation."
   (delete-char 3)
   (save-excursion
     (forward-sexp)
-    (backward-delete-char 1)
+    (delete-char -1)
     (insert "\}"))
   (delete-char 1)
   (insert "\{"))
