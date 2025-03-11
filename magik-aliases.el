@@ -116,12 +116,6 @@ If any function returns t, then the buffer is displayed."
   :group 'magik-aliases
   :type 'sexp)
 
-(defvar magik-aliases-exec-path nil
-  "Stored `exec-path' for executing GIS command.")
-
-(defvar magik-aliases-process-environment nil
-  "Stored `process-environment' for executing GIS command.")
-
 (defun magik-aliases-customize ()
   "Open Customization buffer for Aliases Mode."
   (interactive)
@@ -243,12 +237,12 @@ when the buffer is displayed:
 
 (defun magik-aliases-program (smallworld-gis)
   "Return the program to use to operate on a gis_aliases file using SMALLWORLD-GIS."
-  (let* ((gis-path (concat smallworld-gis "/config/"))
+  (let* ((gis-path (file-name-as-directory (file-name-concat smallworld-gis "config")))
          (path (append magik-aliases-program-path
                        (mapcar (lambda (p)
                                  (expand-file-name
-                                  (concat gis-path
-                                          (file-name-as-directory p))))
+                                  (file-name-concat gis-path
+                                                    (file-name-as-directory p))))
                                magik-aliases-program-path))))
     (locate-file magik-aliases-program path)))
 
@@ -277,9 +271,7 @@ With a prefix arg, ask user for current directory to use."
          (file    (or file (buffer-file-name)))
          (buf     "gis")
          (version (if (boundp 'magik-version-current)
-                      (symbol-value 'magik-version-current)))
-         (process-environment-aliases magik-aliases-process-environment)
-         (exec-path-aliases magik-aliases-exec-path))
+                      (symbol-value 'magik-version-current))))
     (save-excursion
       (cond (alias nil)
             ((re-search-backward magik-aliases-definition-regexp nil t)
@@ -305,11 +297,10 @@ With a prefix arg, ask user for current directory to use."
       (setq default-directory dir
             args (append (list program) args))
       (compat-call setq-local
-            magik-session-exec-path (cl-copy-list (or exec-path-aliases exec-path))
-            magik-session-process-environment (cl-copy-list (or process-environment-aliases process-environment))
-            magik-session-current-command (mapconcat 'identity args " "))
-      (if (stringp version)
-          (set 'magik-version-current version))
+                   magik-session-current-command (mapconcat #'identity args " "))
+      (and (stringp version)
+           (boundp 'magik-version-current)
+           (set 'magik-version-current version))
 
       (insert (format "\nCwd is: %s\n\n" default-directory))
       (magik-session-start-process args))

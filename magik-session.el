@@ -216,12 +216,6 @@ this variable buffer-local by putting the following in your .emacs
 (defvar magik-session-current-command nil
   "The current `magik-session-command' in the current buffer.")
 
-(defvar-local magik-session-exec-path nil
-  "Stored value of variable `exec-path' when the GIS process was started.")
-
-(defvar-local magik-session-process-environment nil
-  "Stored value of `process-environment' when the GIS process was started.")
-
 (defvar magik-session-cb-buffer nil
   "The Class browser buffer associated with the GIS process.")
 
@@ -336,9 +330,7 @@ queried irrespective of default value of `magik-session-prompt'"
   "Start a command shell with the same environment as the current GIS process."
   (interactive)
   (require 'shell)
-  (let ((process-environment (cl-copy-list magik-session-process-environment))
-        (exec-path (cl-copy-list magik-session-exec-path))
-        (buffer (concat "*shell*" (buffer-name)))
+  (let ((buffer (concat "*shell*" (buffer-name)))
         (version (and (boundp 'magik-session-version-current) (symbol-value 'magik-session-version-current))))
     (make-comint-in-buffer "magik-session-shell"
                            buffer
@@ -531,8 +523,6 @@ Entry to this mode runs `magik-session-mode-hook`.
                                     magik-ac-object-source
                                     magik-ac-raise-condition-source)
                                   ac-sources)
-               magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
-               magik-session-process-environment (cl-copy-list (or magik-session-process-environment process-environment))
                mode-line-process '(": %s")
                local-abbrev-table magik-base-mode-abbrev-table)
 
@@ -553,12 +543,6 @@ Entry to this mode runs `magik-session-mode-hook`.
       (if (assq n magik-session-buffer-alist)
           (setcdr (assq n magik-session-buffer-alist) (buffer-name))
         (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
-
-  ;; Special handling for *gis* buffer
-  (if (equal (buffer-name) "*gis*")
-      (compat-call setq-local
-                   magik-session-exec-path (cl-copy-list exec-path)
-                   magik-session-process-environment (cl-copy-list process-environment)))
 
   (abbrev-mode 1)
 

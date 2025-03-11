@@ -783,13 +783,16 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
    (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis)
    smallworld-gis))
 
+(defun magik-cb--executable-find (command smallworld-gis)
+  "Like `executable-find', find COMMAND in SMALLWORLD-GIS ACP paths."
+  (locate-file command (magik-cb--acp-paths smallworld-gis) exec-suffixes 'file-executable-p))
+
 (defun magik-cb-start-process (buffer smallworld-gis command &rest args)
   "Start a COMMAND process in BUFFER using SMALLWORLD-GIS.
 Returns process object.
 BUFFER may be nil, in which case only the process is started."
-  (let* ((exec-path (append (magik-cb--acp-paths smallworld-gis) exec-path))
-         magik-cb-process)
-    (compat-call setq-local magik-cb-process (apply 'start-process "cb" buffer command args))
+  (let* ((program (magik-cb--executable-find command smallworld-gis)))
+    (compat-call setq-local magik-cb-process (apply 'start-process "cb" buffer program args))
     (set-process-filter        magik-cb-process 'magik-cb-filter)
     (set-process-sentinel      magik-cb-process 'magik-cb-sentinel)
     (set-process-coding-system magik-cb-process magik-cb-coding-system magik-cb-coding-system)
@@ -805,15 +808,8 @@ If FILTER is given then it is set on the process."
   (setq buffer (get-buffer-create buffer)) ; get a real buffer object.
   (if (get-buffer-process buffer)
       (get-buffer-process buffer) ;returns running process
-    (let* ((process-environment (cl-copy-list (save-excursion
-                                                (and gis (get-buffer gis) (set-buffer gis))
-                                                (or (symbol-value 'magik-session-process-environment)
-                                                    process-environment))))
-           (exec-path (cl-copy-list (save-excursion
-                                      (and gis (get-buffer gis) (set-buffer gis))
-                                      (or (symbol-value 'magik-session-exec-path) exec-path))))
-           (gis-proc (and gis (get-buffer-process gis)))
-           magik-cb-process)
+    (let ((gis-proc (and gis (get-buffer-process gis)))
+          magik-cb-process)
 
       (cond (gis-proc
              ;; then ask Magik to start a method_finder.  Magik will
@@ -848,23 +844,22 @@ If FILTER is given then it is set on the process."
             (t
              (error "Cannot start CB")))
 
-      (if magik-cb-process
-          (progn
-            (save-excursion
-              (let ((version (magik-cb-method-finder-version smallworld-gis)))
-                (set-buffer (get-buffer-create buffer))
-                (unless (eq major-mode 'magik-cb-mode)
-                  (magik-cb-mode))
-                (compat-call setq-local
-                             magik-cb-quote-file-name   (string< "5.2.0" version)
-                             magik-cb-mf-extended-flags (string< "6.0.0" version)
-                             magik-cb-filename cb-file)))
-            ;; Note that magik-cb-start-process uses magik-cb-filter when the process starts.
-            ;; This is so that it can handle the topic information that the method finder
-            ;; process sends back. At the moment magik-cb-ac-filter (the only other filter in use)
-            ;; does not include that code. A future rework may tidy this up.
-            (if filter
-                (set-process-filter magik-cb-process filter))))
+      (when magik-cb-process
+        (save-excursion
+          (let ((version (magik-cb-method-finder-version smallworld-gis)))
+            (set-buffer (get-buffer-create buffer))
+            (unless (derived-mode-p 'magik-cb-mode)
+              (magik-cb-mode))
+            (compat-call setq-local
+                         magik-cb-quote-file-name   (string< "5.2.0" version)
+                         magik-cb-mf-extended-flags (string< "6.0.0" version)
+                         magik-cb-filename cb-file)))
+        ;; Note that magik-cb-start-process uses magik-cb-filter when the process starts.
+        ;; This is so that it can handle the topic information that the method finder
+        ;; process sends back. At the moment magik-cb-ac-filter (the only other filter in use)
+        ;; does not include that code. A future rework may tidy this up.
+        (when filter
+          (set-process-filter magik-cb-process filter)))
       magik-cb-process)))
 
 (defun magik-cb-interactive-buffer ()
@@ -2362,11 +2357,10 @@ comments etc."
 
 (defun magik-cb-method-finder-version (smallworld-gis)
   "Return as a string the version of the method_finder using SMALLWORLD-GIS."
-  (let* ((exec-path (append (magik-cb--acp-paths smallworld-gis) exec-path))
-         magik-cb-process)
+  (let ((program (magik-cb--executable-find "method_finder" smallworld-gis)))
     (with-current-buffer (get-buffer-create " *method finder version*")
       (erase-buffer)
-      (call-process "method_finder" nil t nil "-v")
+      (call-process program nil t nil "-v")
       (goto-char (point-min))
       (prog1
           (if (re-search-forward "[0-9.]+" nil t)
