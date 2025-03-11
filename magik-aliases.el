@@ -110,10 +110,10 @@ If any function returns t, then the buffer is displayed."
   :type 'sexp)
 
 (defvar magik-aliases-exec-path nil
-  "Stored variable `exec-path' for executing GIS command.")
+  "Stored variable `exec-path' for executing Magik session command.")
 
 (defvar magik-aliases-process-environment nil
-  "Stored `process-environment' for executing GIS command.")
+  "Stored variable `process-environment' for executing Magik session command.")
 
 (defun magik-aliases-customize ()
   "Open Customization buffer for Aliases Mode."
@@ -215,7 +215,7 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
 
 (defun magik-aliases-switch-to-buffer (alias)
   "Return t, to switch to the buffer that the Magik process is running in.
-Since some entries in the aliases file do not start a Smallworld Magik GIS
+Since some entries in the aliases file do not start a Smallworld Magik
 process we do not necessarily want to switch to the buffer running the
 process all the time.  These are the following methods by which we control
 when the buffer is displayed:

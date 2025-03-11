@@ -274,7 +274,7 @@ This will stop the \"Loading documentation...\" message from hanging around.")
 (put 'magik-cb-pending-message 'permanent-local t)
 
 (defvar magik-cb-dynamic t
-  "*Non-nil if the cb is connected to a live gis, rather than a static file.")
+  "*If t, the CB is connected to a live Magik session, rather than a static file.")
 
 (defvar magik-cb--mf-socket-synchronised nil
   "Variable for controlling Class Browser processes started from Magik processes.
@@ -403,7 +403,7 @@ Not used yet.")
 (defun magik-cb (&optional gis method class)
   "Start or resume a Smallworld Class Browser.
 
-With a prefix arg, ask user for GIS buffer to associate with.
+With a prefix arg, ask user for Magik session buffer to associate with.
 
 Main top level entry to the cb.
 
@@ -468,7 +468,7 @@ Set METHOD and CLASS if given."
           ((and
             visible-bufs
             (setq buffer
-                  ;;Find visible CB buffer in other frame, allowing for a visible GIS buffer too.
+                  ;;Find visible CB buffer in other frame, allowing for a visible Magik session buffer too.
                   (cond ((= (length visible-bufs) 1)
                          (caar visible-bufs))
                         ((and (= (length visible-bufs) 2)
@@ -674,7 +674,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
   (let (buf)
     (cond ((zerop arg) (set buf nil))
           ((> arg 0)
-           ;; Look for GIS buffers
+           ;; Look for Magik session buffers
            (setq buf (cdr (assq arg (symbol-value 'magik-session-buffer-alist))))
            (unless (and buf
                         (with-current-buffer buf
@@ -725,23 +725,23 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
                           (list "No Processes")
                         cb-list))))
 
-(defun magik-cb-gis-get-mf-socketname (gis-process)
-  "Returns from a GIS process its method_finder socketname interface."
+(defun magik-cb-gis-get-mf-socketname (process)
+  "Return method_finder socketname interface from a Magik session PROCESS."
   ;; The gis-filter will set magik-cb--mf-socket-synchronised, which we trap here.
   (setq magik-cb--mf-socket-synchronised nil)
-  (let ((buffer (buffer-name (process-buffer gis-process)))
+  (let ((buffer (buffer-name (process-buffer process)))
         (i 1)
         magik-cb--mf-socket-synchronised)
-    (process-send-string gis-process
+    (process-send-string process
                          "method_finder.send_socket_to_emacs()\n$\n")
     (while (and (null magik-cb--mf-socket-synchronised) (not (zerop i)))
       (if (= i 100)
           (progn
-            (message "The GIS process in buffer %s is busy... Please wait for CB to start" buffer)
+            (message "The Magik session process in buffer %s is busy... Please wait for CB to start" buffer)
             (sleep-for 0.01)))
 
       (if (or (not (zerop (% i 1000)))
-              (not (y-or-n-p (format "The CB can't start yet because the GIS process in %s is busy... Abort CB?" buffer))))
+              (not (y-or-n-p (format "The CB can't start yet because the Magik session process in %s is busy... Abort CB?" buffer))))
           (progn
             ;; either count i has not reached a multiple of 1000
             ;;     or conunt i is a multiple of 1000 but user has chosen to continue
@@ -766,8 +766,8 @@ BUFFER may be nil, in which case only the process is started."
 
 (defun magik-cb-get-process-create (buffer filter &optional gis cb-file)
   "Return a method finder process in BUFFER.
-Creating one using GIS buffer or CB_FILE if needed.
-Either starts a method_finder process or if a GIS session is running
+Creating one using Magik session buffer or CB_FILE if needed.
+Either starts a method_finder process or if a Magik session is running
 it starts a mf_connector process to communicate with the method_finder in GIS.
 If FILTER is given then it is set on the process."
   (setq buffer (get-buffer-create buffer)) ; get a real buffer object.
@@ -793,7 +793,7 @@ If FILTER is given then it is set on the process."
                      (with-current-buffer buffer
                        (let ((buffer-read-only nil))
                          (goto-char (point-max))
-                         (insert "\n\n*** Can't start the Class Browser. ***\n The gis hasn't started a method_finder.\n Perhaps there was no '.mf' file next to your image file.\n")
+                         (insert "\n\n*** Can't start the Class Browser. ***\n The Magik session hasn't started a method_finder.\n Perhaps there was no '.mf' file next to your image file.\n")
                          (ding) (ding) (ding)
                          (error "Can't start CB using mf_connector")))))))
             (cb-file
@@ -850,7 +850,7 @@ If FILTER is given then it is set on the process."
   (message "")
 
   ;; Update magik-cb-buffer-alist using negative numbers if loading from a file,
-  ;; positive numbers are used by magik-session-buffer-alist for loading from GIS
+  ;; positive numbers are used by magik-session-buffer-alist for loading from Magik session
   (if (and magik-cb-filename
            (not (rassoc (buffer-name) magik-cb-buffer-alist)))
       (let ((n -1))

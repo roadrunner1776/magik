@@ -55,8 +55,8 @@
     [,"Transmit Buffer"      magik-trn-transmit-buffer         (magik-utils-buffer-mode-list 'magik-session-mode)]))
 
 (defun magik-trn-transmit-buffer (&optional gis)
-  "Send the buffer to the GIS process.
-The GIS process used is either that given by BUF or
+  "Send the buffer to the Magik session process.
+The Magik session process used is either that given by GIS or
 the variable `magik-session-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis

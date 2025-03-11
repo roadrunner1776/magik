@@ -200,7 +200,7 @@ option is set."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
-                                           "Enter Gis process buffer:"
+                                           "Enter Magik session process buffer:"
                                            magik-session-buffer
                                            'magik-session-buffer-alist-prefix-function))
          (module (intern (concat "|" (magik-module-name) "|")))
@@ -219,7 +219,7 @@ option is set."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
-                                           "Enter Gis process buffer:"
+                                           "Enter Magik session process buffer:"
                                            magik-session-buffer
                                            'magik-session-buffer-alist-prefix-function))
          (module (intern (concat "|" (magik-module-name) "|")))
@@ -247,7 +247,7 @@ a standalone module."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
-                                           "Enter Gis process buffer:"
+                                           "Enter Magik session process buffer:"
                                            magik-session-buffer
                                            'magik-session-buffer-alist-prefix-function))
          (module (intern (concat "|" (magik-module-name) "|")))
@@ -284,7 +284,7 @@ a standalone module."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
-                                           "Enter Gis process buffer:"
+                                           "Enter Magik session process buffer:"
                                            magik-session-buffer
                                            'magik-session-buffer-alist-prefix-function))
          (process (barf-if-no-gis gis))

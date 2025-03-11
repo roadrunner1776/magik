@@ -54,7 +54,7 @@ FUNCTION takes one argument, the string after the action character."
                        (function :tag "Action function"))))
 
 (defun magik-session-filter-get-state (buf)
-  "Displays the state of the GIS filter."
+  "Displays the state of the Magik session filter for BUF."
   (with-current-buffer buf
     magik-session-filter-state))
 
@@ -143,9 +143,9 @@ If N is nil insert the whole of STR.  We insert before all markers except the
                                        'local-map magik-session-mode-error-map))))))))
 
 (defun magik-session-filter-toggle-filter (&optional buffer)
-  "Toggle the filter on the GIS buffer.
+  "Toggle the filter on the Magik session BUFFER.
 
-With a prefix arg, ask user for GIS buffer to use."
+With a prefix arg, ask user for Magik session buffer to use."
   (interactive)
   (setq buffer (magik-utils-get-buffer-mode buffer
                                             'magik-session-mode
@@ -188,7 +188,7 @@ With a prefix arg, ask user for GIS buffer to use."
       (error "No filter defined for character %s" s))))
 
 (defun magik-session-filter-register-action (string function &optional replace)
-  "Registers the GIS filter STRING with execution of FUNCTION.
+  "Registers the Magik session filter STRING with execution of FUNCTION.
 STRING is normally a single character.
 If STRING has already been registered then an error is raised unless
 REPLACE is t. If REPLACE is t then the FUNCTION will replace the old
@@ -205,9 +205,9 @@ action's function setting."
 
 ;;; generic magik-session-filter code ends here.
 
-;;; Set up filter action functions for the gis process
+;;; Set up filter action functions for the Magik session process
 (defun magik-session-filter-action-completion (proc str)
-  "Gis Filter Action interface for a Magik symbol completion.
+  "Magik sessions Filter Action interface for a Magik symbol completion.
 According to STR returned from Magik."
   (let ((ans (read str))
         (curr-word-len (length (magik-utils-curr-word))))
@@ -245,7 +245,7 @@ According to STR returned from Magik."
 
 
 (defun magik-session-filter-action-deep-print (proc str)
-  "Gis Filter Action interface for a deep print action.
+  "Magik session Filter Action interface for a deep print action.
 According to the STR returned from Magik."
   (let ((buffer (concat "*deep print*" (buffer-name (process-buffer proc)))))
     (pop-to-buffer buffer) ;;Buffer should always exist since the only User interface is via deep-print.
@@ -258,7 +258,7 @@ According to the STR returned from Magik."
     (insert str)))
 
 (defun magik-session-filter-action-find-file (proc str)
-  "(Deprecated) Gis Filter Action interface for `find-file'.
+  "(Deprecated) Magik session Filter Action interface for `find-file'.
 Find a file and goto a particular line number
 STR is of the form 42:/bla/bla/foo.magik or
 :/bla/bla/foo.magik which means don't jump to any
@@ -272,7 +272,7 @@ particular line number."
           (goto-line (string-to-number str))))))
 
 (defun magik-session-filter-action-file-open (proc str)
-  "Gis Filter Action interface for opening files in Emacs.
+  "Magik session Filter Action interface for opening files in Emacs.
 STR consists of newline separated KEY=VALUE pairs.
 Recognised KEYs are:
   file        Name of file to open
@@ -325,17 +325,17 @@ The behaviour is undefined if any search key and line or column are used."
   (setq magik-cb--mf-socket-synchronised socketname))
 
 (defun magik-session-filter-action-cb-goto-method (proc str)
-  "GIS Filter Action interface for cb-goto-method."
+  "Magik session Filter Action interface for cb-goto-method."
   (magik-cb-goto-method str nil))
 
 (defun magik-session-filter-action-magik-session-prompt-set (proc str)
-  "Gis Filter Action for setting `magik-session-prompt' variable."
+  "Magik session Filter Action for setting `magik-session-prompt' variable."
   (with-current-buffer (buffer-name (process-buffer proc))
     (setq magik-session-prompt str)
     (magik-session-prompt-update-font-lock)))
 
 (defun magik-session-filter-action-eval-elisp (proc str)
-  "Gis Filter Action that enables Magik to send Elisp code for Emacs to evaluate."
+  "Magik session Filter Action that let Magik send Elisp code for Emacs evaluation."
   (with-current-buffer (get-buffer-create
                         (generate-new-buffer-name ; Be ultra careful to avoid multiple sessions eval'ing Elisp code!!!
                          (concat "*Magik Elisp eval*" (buffer-name (process-buffer proc)))))
