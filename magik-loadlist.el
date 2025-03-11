@@ -208,9 +208,10 @@ With a prefix ARG accept all changes without prompting."
       (magik-function "load_file_list" dir 'unset file)
       "$\n"))))
 
-(defun magik-loadlist-gis-drag-n-drop-load (gis filename)
+(defun magik-loadlist-drag-n-drop-load (gis filename)
   "Interface to Drag and Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a load_list.txt FILENAME is dropped."
+Called by `magik-session-drag-n-drop-load' when a load_list.txt FILENAME
+is dropped."
   (let ((process (barf-if-no-gis gis))
         (dir  (file-name-directory filename))
         (file (file-name-nondirectory filename)))

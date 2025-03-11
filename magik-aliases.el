@@ -94,8 +94,7 @@ If any function returns t, then the buffer is displayed."
 ;; Imenu configuration
 (defvar magik-aliases-imenu-generic-expression
   (list
-   (list nil magik-aliases-definition-regexp 1)
-   )
+   (list nil magik-aliases-definition-regexp 1))
   "Imenu generic expression for Aliases mode.  See `imenu-generic-expression'.")
 
 ;; Font-lock configuration
@@ -105,8 +104,7 @@ If any function returns t, then the buffer is displayed."
    '("^\\s-+\\([A-Z_]+\\)\\s-*:=" 1 font-lock-type-face)
    '("^\\s-+\\([A-Z_0-9]+\\)\\s-*=" 1 font-lock-variable-name-face)
    '("^\\s-+\\(\\sw+\\)\\s-*=" 1 font-lock-builtin-face)
-   '("\\s$\\sw+\\s$" . font-lock-constant-face)
-   )
+   '("\\s$\\sw+\\s$" . font-lock-constant-face))
   "Default fontification of Aliases buffers."
   :group 'magik-aliases
   :type 'sexp)
@@ -216,7 +214,7 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
     list))
 
 (defun magik-aliases-switch-to-buffer (alias)
-  "Return t, to switch to the buffer that the GIS.exe process is running in.
+  "Return t, to switch to the buffer that the Magik process is running in.
 Since some entries in the aliases file do not start a Smallworld Magik GIS
 process we do not necessarily want to switch to the buffer running the
 process all the time.  These are the following methods by which we control

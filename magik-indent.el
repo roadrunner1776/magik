@@ -27,22 +27,23 @@
 ;;; Code:
 
 (require 'compat)
+(eval-when-compile
+  (defvar magik-electric-templates-methods))
 
-;;also defined in sw-electric.el
 (defcustom magik-indent-level 8
   "*How much to indent each nested level."
   :group 'magik
   :safe 'integerp
   :type 'integer)
 
-(defvar magik-electric-templates-methods) ;keep compiler happy
-(defvar magik-stack)        ; a dynamic var.
+(defvar magik-stack nil
+  "A dynamic var.")
 
 (defvar magik-state-table nil
   "An alist of symbol and 256-vectors describing the lexical transitions.
 Used when parsing Magik.
 
-This is compiled by `init-magik-state-table()' from the
+This is compiled by `magik--init-state-table' from the
 global constant, `magik-transitions'.")
 
 (defconst magik-operator-precedences
@@ -166,7 +167,7 @@ Return t if we succeed."
 
 (defun magik-calc-indent-normal ()
   "Return the appropriate indentation for the current line.
-Assuming it is reasonably normal.  i.e. there is some previous non-blank line
+Assuming it is reasonably normal, i.e. there is some previous non-blank line
 and this line doesn't start with something like \"_endif\" or \"}\" or \"_then\"."
   (magik--skip-blank-lines-backward)
   (let*
@@ -356,7 +357,7 @@ Endfoo and right brackets are pushed; begin and left brackets are popped."
 
 (defun magik--forward-token ()
   "Move point forward to the beginning of the next Magik token.
-End of line tokens don't count."
+Skips EOL tokens."
   (let
       ((toks (magik-tokenise-region-no-eol (point) (line-end-position))))
 
@@ -443,7 +444,8 @@ Add a newline token unless the last token is an operator."
       ans)))
 
 (defun magik-tokenise-region-no-eol (start end)
-  "Like `magik-tokenise-region()' but with EOL tokens chopped off."
+  "Like `magik-tokenise-region()' but with EOL tokens chopped off.
+START and END specify the region."
   (let
       ((reverse_ans (reverse (magik-tokenise-region start end))))
 
@@ -452,7 +454,8 @@ Add a newline token unless the last token is an operator."
     (reverse reverse_ans)))
 
 (defun magik-tokenise-region-no-eol-nor-point-min (start end)
-  "Like `magik-tokenise-region()' but with EOL/point min tokens taken out."
+  "Like `magik-tokenise-region()' but with EOL/BOB tokens taken out.
+START and END specify the region."
   (let
       ((ans (magik-tokenise-region-no-eol start end)))
     (if (equal (car (car ans)) "point-min")
@@ -460,7 +463,7 @@ Add a newline token unless the last token is an operator."
     ans))
 
 (defun magik-tokenise-line-no-eol-nor-point-min ()
-  "Like `magik-tokenise-line()' but with EOL and BOL tokens taken out."
+  "Like `magik-tokenise-line()' but with EOL and BOB tokens taken out."
   (magik-tokenise-region-no-eol-nor-point-min (line-beginning-position) (line-end-position)))
 
 (defconst magik-transitions
@@ -520,7 +523,7 @@ Add a newline token unless the last token is an operator."
     (string-finish t neutral)
     (comment t stay))
   "A description of the lexical state transitions in Magik.
-This gets compiled into a more efficient form by `init-magik-state-table()'.")
+This gets compiled into a more efficient form by `magik--init-state-table'.")
 
 (defun magik--init-state-table ()
   "Initialise the global variable `magik-state-table'.

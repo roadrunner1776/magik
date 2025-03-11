@@ -248,7 +248,7 @@ According to STR returned from Magik."
   "Gis Filter Action interface for a deep print action.
 According to the STR returned from Magik."
   (let ((buffer (concat "*deep print*" (buffer-name (process-buffer proc)))))
-    (pop-to-buffer buffer) ;;Buffer should always exist since the only USer interface is via deep-print.
+    (pop-to-buffer buffer) ;;Buffer should always exist since the only User interface is via deep-print.
     (if (eq (string-to-char str) ?\n)     ; then this is a sub-structure
         (progn
           (forward-line)

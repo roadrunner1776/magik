@@ -279,12 +279,12 @@ concrete implementations."
 
 (defface magik-argument-face
   '((t (:inherit font-lock-variable-use-face)))
-  "Font-lock Face to use when displaying arguments for methods."
+  "Font Lock mode face used to display arguments for methods."
   :group 'magik-faces)
 
 (defface magik-boolean-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying boolean and kleenean references."
+  "Font Lock mode face used to display boolean and kleenean references."
   :group 'magik-faces)
 
 ;; font-lock-punctuation-face was introduced in Emacs 29.1.
@@ -297,27 +297,27 @@ concrete implementations."
 
 (defface magik-bracket-face
   '((t (:inherit font-lock-bracket-face)))
-  "Font-lock Face to use when displaying brackets and parens."
+  "Font Lock mode face used to display brackets and parens."
   :group 'magik-faces)
 
 (defface magik-character-face
   '((t (:inherit font-lock-constant-face)))
-  "Font-lock Face to use when displaying characters."
+  "Font Lock mode face used to display characters."
   :group 'magik-faces)
 
 (defface magik-class-face
   '((t (:inherit font-lock-type-face)))
-  "Font-lock Face to use when displaying exemplars."
+  "Font Lock mode face used to display exemplars."
   :group 'magik-faces)
 
 (defface magik-comment-face
   '((t (:inherit font-lock-comment-face)))
-  "Font-lock Face to use when displaying comments."
+  "Font Lock mode face used to display comments."
   :group 'magik-faces)
 
 (defface magik-constant-face
   '((t (:inherit font-lock-constant-face)))
-  "Font-lock Face to use when displaying constants."
+  "Font Lock mode face used to display constants."
   :group 'magik-faces)
 
 ;; font-lock-delimiter-face was introduced in Emacs 29.1.
@@ -326,67 +326,67 @@ concrete implementations."
 
 (defface magik-delimiter-face
   '((t (:inherit font-lock-delimiter-face)))
-  "Font-lock Face to use when displaying delimiters."
+  "Font Lock mode face used to display delimiters."
   :group 'magik-faces)
 
 (defface magik-doc-face
   '((t (:inherit font-lock-doc-face)))
-  "Font-lock Face to use when displaying documentation."
+  "Font Lock mode face used to display documentation."
   :group 'magik-faces)
 
 (defface magik-keyword-operators-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik operator keywords."
+  "Font Lock mode face used to display Magik operator keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-statements-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik statement keywords."
+  "Font Lock mode face used to display Magik statement keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-loop-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik loop keywords."
+  "Font Lock mode face used to display Magik loop keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-arguments-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik argument keywords."
+  "Font Lock mode face used to display Magik argument keywords."
   :group 'magik-faces)
 
 (defface magik-dynamic-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying dynamic variables."
+  "Font Lock mode face used to display dynamic variables."
   :group 'magik-faces)
 
 (defface magik-global-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying global variables."
+  "Font Lock mode face used to display global variables."
   :group 'magik-faces)
 
 (defface magik-global-reference-face
   '((t (:inherit font-lock-constant-face)))
-  "Font-lock Face to use when displaying global references."
+  "Font Lock mode face used to display global references."
   :group 'magik-faces)
 
 (defface magik-keyword-variable-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying Magik variable keywords."
+  "Font Lock mode face used to display Magik variable keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-obsolete-face
   '((t (:inherit font-lock-warning-face)))
-  "Font-lock Face to use when displaying obsolete Magik keywords."
+  "Font Lock mode face used to display obsolete Magik keywords."
   :group 'magik-faces)
 
 (defface magik-method-face
   '((t (:inherit font-lock-function-name-face)))
-  "Font-lock Face to use when displaying method names & method/procedure keywords."
+  "Font Lock mode face used to display method names & method/procedure keywords."
   :group 'magik-faces)
 
 (defface magik-label-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying labels for loops."
+  "Font Lock mode face used to display labels for loops."
   :group 'magik-faces)
 
 ;; font-lock-number-face was introduced in Emacs 29.1 as new face without any inheritance.
@@ -395,7 +395,7 @@ concrete implementations."
 
 (defface magik-number-face
   '((t (:inherit font-lock-number-face)))
-  "Font-lock Face to use when displaying numbers."
+  "Font Lock mode face used to display numbers."
   :group 'magik-faces)
 
 ;; font-lock-operator-face was introduced in Emacs 29.1.
@@ -404,47 +404,47 @@ concrete implementations."
 
 (defface magik-operator-face
   '((t (:inherit font-lock-operator-face)))
-  "Font-lock Face to use when displaying operators."
+  "Font Lock mode face used to display operators."
   :group 'magik-faces)
 
 (defface magik-pragma-face
   '((t (:inherit font-lock-builtin-face)))
-  "Font-lock Face to use when displaying pragma directives."
+  "Font Lock mode face used to display pragma directives."
   :group 'magik-faces)
 
 (defface magik-procedure-face
   '((t (:inherit font-lock-function-name-face)))
-  "Font-lock Face to use when displaying procedure calls."
+  "Font Lock mode face used to display procedure calls."
   :group 'magik-faces)
 
 (defface magik-slot-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying slots."
+  "Font Lock mode face used to display slots."
   :group 'magik-faces)
 
 (defface magik-symbol-face
   '((t (:inherit font-lock-constant-face)))
-  "Font-lock Face to use when displaying symbols."
+  "Font Lock mode face used to display symbols."
   :group 'magik-faces)
 
 (defface magik-string-face
   '((t (:inherit font-lock-string-face)))
-  "Font-lock Face to use when displaying strings."
+  "Font Lock mode face used to display strings."
   :group 'magik-faces)
 
 (defface magik-variable-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying variables."
+  "Font Lock mode face used to display variables."
   :group 'magik-faces)
 
 (defface magik-warning-face
   '((t (:inherit font-lock-warning-face)))
-  "Font-lock Face to use when displaying warning statements."
+  "Font Lock mode face used to display warning statements."
   :group 'magik-faces)
 
 (defface magik-write-face
   '((t (:inherit font-lock-warning-face)))
-  "Font-lock Face to use when displaying write() statements."
+  "Font Lock mode face used to display write() statements."
   :group 'magik-faces)
 
 (defconst magik-regexp
@@ -603,7 +603,7 @@ See `magik-font-lock-keywords-1' and `magik-font-lock-keywords-2'."
     ))
   "Font lock setting for 4th level of Magik fontification.
 As 1st level but also fontifies all Magik keywords according their
-different classifications.  e.g. loop keywords are fontified in the same face."
+different classifications, e.g. loop keywords are fontified in the same face."
   :group 'magik
   :type 'sexp)
 
@@ -1126,7 +1126,7 @@ If the last command was \\[magik-mark-method] then that region will be copied in
 
 (defun magik-function (cmd &rest args)
   "Generate Magik code from the supplied arguments.
-e.g. (magik-function \"system.test\" \"file\" \='unset 4) returns the string
+e.g. (magik-function \"system.test\" \"file\" \\='unset 4) returns the string
      system.test(\\\"file\\\", _unset, 4)
 Argument CMD ...
 Optional argument ARGS ..."
@@ -1175,8 +1175,8 @@ Also without `query' or `delimited' flags."
 (defun magik-transmit-method-eom-mode (arg)
   "Toggle whether to move the cursor to the end of the method after transmitting.
 If nil, leave point where it is,
-If t or \='end, move point to end of method,
-If \='repeat, move point to end of method on 2nd and later uses of the command.
+If t or \\='end, move point to end of method,
+If \\='repeat, move point to end of method on 2nd and later uses of the command.
 Argument ARG ..."
   (interactive
    (list
@@ -1208,7 +1208,7 @@ See `magik-mark-method-exchange' for more details."
      "Cursor will be placed at start of marked region.")))
 
 (defun magik-transmit-buffer ()
-  "Send the buffer to the process running in the buffer in the var, `gis-buffer'."
+  "Send the buffer to the process running in the buffer in `magik-session-buffer'."
   (interactive)
   (magik-transmit-region (point-min) (point-max))
   (message "Code loaded from %s" (or (buffer-file-name) (buffer-name))))
@@ -1277,10 +1277,10 @@ The rule is that the thing must start against the left margin."
   "Send the current method to magik.
 The location of point is determined by
 variable `magik-transmit-method-eom-mode'.
-If \='repeat, then repeated calls to this function behaves like this:
+If \\='repeat, then repeated calls to this function behaves like this:
   First use of command will leave point where it is,
   Repeat use will move point to the end of last transmitted method.
-If \='end, then point is left at the end of the method.
+If \\='end, then point is left at the end of the method.
 Otherwise, point is left where it is."
   (interactive)
   ;;DEBUG (message "this %s, last %s" this-command last-command)
@@ -1308,7 +1308,8 @@ Otherwise, point is left where it is."
 (defalias 'transmit-method-to-magik 'magik-transmit-method)
 
 (defun magik-transmit-region (beg end)
-  "Send current region via a temp file to Magik in a shell, using load_file.
+  "Send region from BEG to END via a temp file to Magik in a shell.
+Uses load_file to send the temp file.
 If this command is repeated before the previous file has been processed by
 Magik, another file shall be written."
   (interactive "r")
@@ -1389,9 +1390,9 @@ Magik, another file shall be written."
       "$\n"))
     gis))
 
-(defun magik-gis-drag-n-drop-load (gis filename)
+(defun magik-drag-n-drop-load (gis filename)
   "Interface to Drag and Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a Magik FILENAME is dropped.
+Called by `magik-session-drag-n-drop-load' when a Magik FILENAME is dropped.
 Argument FILENAME ..."
   (let ((process (barf-if-no-gis gis)))
     (message "Transmitting to %s" gis)
@@ -1641,7 +1642,7 @@ If PT is given, goto that char position."
 (defun magik-symbol-complete (&optional buffer)
   "Perform completion on Magik symbol preceding point.
 The symbol is compared against the symbols that exist in the Magik
-process running in the BUFFER named in the variable, `gis-buffer'.
+process running in the BUFFER named in the variable, `magik-session-buffer'.
 
 With a prefix arg, ask user for GIS buffer to use."
   (interactive "*")

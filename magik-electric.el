@@ -115,8 +115,8 @@
 (defalias 'magik-electric-toggle 'magik-electric-mode) ;compatibility
 
 (defun magik-electric-hash (char)
-  "Insert the CHAR, `#'.
-If it's the first `#' and the previous line starts with `#', align with it."
+  "Insert the CHAR, '#'.
+If it's the first '#' and the previous line starts with '#', align with it."
   (interactive "*p")
   (self-insert-command char)
   (if (save-excursion

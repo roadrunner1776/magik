@@ -119,7 +119,7 @@ a key in magik-template-alist.")
 
 (defvar magik-template-file-type-alist nil
   "Alist of valid Magik file types.
-This is used to give the User a choice of template to use when they do \\[find-file-at-point]
+This is used to give the User a choice of template to use when they do \\[find-file]
 with a Magik file name but when the file does not exist yet.
   (LABEL . (FUNCTION . ((OPTION . KEY) ... )))
 where
@@ -140,12 +140,12 @@ where SYMBOL is the list symbol representing this type,
       LABEL  is the User visible label for when the user selects this type,
       FILE   is the file name for this template found in magik-template-dir.
 
-The optional argument REPLACE-OR-APPEND is either nil, \='replace or \='append.
+The optional argument REPLACE-OR-APPEND is either nil, \\='replace or \\='append.
 If nil, then OPTIONS are prepended to the LABEL entry
 of `magik-template-file-type-alist';
-  \='append  appended
-  \='replace replace  any existing OPTIONS of the LABEL entry in
-                      `magik-template-file-type-alist'."
+  \\='append  appended
+  \\='replace replace  any existing OPTIONS of the LABEL entry in
+                       `magik-template-file-type-alist'."
 
   ;;Add each template file to the alist of template file names. Avoids duplication
   (mapc #'(lambda (x) (add-to-list 'magik-template-alist (cons (elt x 0) (elt x 2)))) options)

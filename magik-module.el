@@ -294,9 +294,9 @@ a standalone module."
     (magik-module-transmit-load-module filename process)
     gis))
 
-(defun magik-module-gis-drag-n-drop-load (gis filename)
+(defun magik-module-drag-n-drop-load (gis filename)
   "Interface to Drag and Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a Module FILENAME is dropped."
+Called by `magik-session-drag-n-drop-load' when a Module FILENAME is dropped."
   (let ((process (barf-if-no-gis gis)))
     (magik-module-transmit-load-module filename process)
     gis))

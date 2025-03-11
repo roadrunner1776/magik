@@ -102,61 +102,42 @@
   :group 'magik-cb)
 
 (defface magik-cb-font-lock-optional-face
-  '((((type tty) (class color)) (:foreground "yellow" :weight light))
-    (((class grayscale) (background light))
-     (:foreground "Gray90" :bold t))
-    (((class grayscale) (background dark))
-     (:foreground "DimGray" :bold t))
-    (((class color) (background light)) (:bold t :foreground "DarkGoldenrod"))
-    (((class color) (background dark)) (:bold t :foreground "LightGoldenrod"))
-    (t (:bold t)))
-  "Font-lock Face to use when displaying _optional variables.
+  '((t (:inherit font-lock-variable-name-face)))
+  "Font Lock mode face used to display _optional variables."
+  :group 'magik-cb-faces)
 
-Based upon `font-lock-variable-name-face'"
+(defface magik-cb-font-lock-gather-face
+  '((t (:inherit font-lock-variable-name-face)))
+  "Font Lock mode face used to display _gather variables."
   :group 'magik-cb-faces)
 
 (defface magik-cb-cursor-face
   '((t (:inverse-video t)))
-  "Face to use for the Mode line cursor."
+  "Font Lock mode face to use for the Mode line cursor."
   :group 'magik-cb-faces)
-
-;; Originally just italic, but due to GDI object leak, made bold too - see magik.el for more details.
-(defface magik-cb-font-lock-gather-face
-  '((((type tty) (class color)) (:foreground "yellow" :weight light))
-    (((class grayscale) (background light))
-     (:foreground "Gray90" :italic t))
-    (((class grayscale) (background dark))
-     (:foreground "DimGray" :italic t))
-    (((class color) (background light)) (:italic t :foreground "DarkGoldenrod" :bold t))
-    (((class color) (background dark)) (:italic t :foreground "LightGoldenrod" :bold t))
-    (t (:italic t)))
-  "Font-lock Face to use when displaying _gather variables.
-
-Based upon `font-lock-variable-name-face'"
-  :group 'magik-cb-faces)
-
-(defcustom magik-cb-font-lock-class-face 'font-lock-type-face
-  "*Font-lock Face to use when displaying the class."
-  :group 'magik-cb
-  :type 'face)
-
-(defcustom magik-cb-font-lock-method-face 'font-lock-function-name-face
-  "*Font-lock Face to use when displaying the method name."
-  :group 'magik-cb
-  :type 'face)
 
 (defcustom magik-cb-font-lock-optional-face 'magik-cb-font-lock-optional-face
-  "*Font-lock Face to use when displaying the _optional variables."
+  "*Face name used to display the _optional variables."
   :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb-font-lock-gather-face 'magik-cb-font-lock-gather-face
-  "*Font-lock Face to use when displaying the _gather variable."
+  "*Face name used to display the _gather variable."
   :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb-cursor-face 'magik-cb-cursor-face
-  "*Face to use for the Mode line cursor."
+  "*Face name to use for the Mode line cursor."
+  :group 'magik-cb
+  :type 'face)
+
+(defcustom magik-cb-font-lock-class-face 'font-lock-type-face
+  "*Face name used to display the class."
+  :group 'magik-cb
+  :type 'face)
+
+(defcustom magik-cb-font-lock-method-face 'font-lock-function-name-face
+  "*Face name used to display the method name."
   :group 'magik-cb
   :type 'face)
 
@@ -187,7 +168,7 @@ Based upon `font-lock-variable-name-face'"
 (defcustom magik-cb-jump-replaces-cb-buffer nil
   "*If t, when jumping to a source file the file buffer replaces the *cb* buffer.
 If nil, the file displays in another window and keeps the *cb* buffer visible.
-Jumping is done via \\[cb-jump-to-source].
+Jumping is done via \\[magik-cb-jump-to-source].
 
 The situation where it is useful to set this to t is as follows:
 you have two buffers, one with a magik file, the other with
@@ -284,7 +265,7 @@ We don't rely on the state of the \"*cb2*\" buffer because it is only temporary.
 
 (defvar magik-cb-cursor-pos nil
   "Whether the CB modeline cursor is in the method or class part of the modeline.
-Takes the values \='method-name and \='class-name.")
+Takes the values \\='method-name and \\='class-name.")
 (put 'magik-cb-cursor-pos 'permanent-local t)
 
 (defvar magik-cb-pending-message nil
@@ -296,10 +277,10 @@ This will stop the \"Loading documentation...\" message from hanging around.")
   "*Non-nil if the cb is connected to a live gis, rather than a static file.")
 
 (defvar magik-cb--mf-socket-synchronised nil
-  "Variable for controlling Class Browser processes started from GIS processes.
+  "Variable for controlling Class Browser processes started from Magik processes.
 This is an internal variable.
-Set to the socketname returned by `gis-filter-action-cb-mf' when starting CB
-from Gis process via \\[cb].")
+Set to the socketname returned by `magik-session-filter-action' when starting CB
+from Magik process via \\[magik-cb].")
 
 ;; T O P I C   A N D   F L A G   D A T A
 ;; _____________________________________
@@ -361,22 +342,22 @@ Not used yet.")
   "Class Browser process object to use for auto-complete-mode.")
 
 (defcustom magik-cb2-font-lock-on-face 'font-lock-function-name-face
-  "*Font-lock Face to use when displaying the variable."
+  "*Face name used to display the variable."
   :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb2-font-lock-off-face 'font-lock-variable-name-face
-  "*Font-lock Face to use when displaying the variable."
+  "*Face name used to display the variable."
   :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb2-font-lock-thermometer-on-face 'font-lock-type-face
-  "*Font-lock Face to use when displaying a thermometer variable that is on."
+  "*Face name used to display a thermometer variable that is on."
   :group 'magik-cb
   :type 'face)
 
 (defcustom magik-cb2-font-lock-thermometer-off-face 'font-lock-constant-face
-  "*Font-lock Face to use when displaying a thermometer variable that is off."
+  "*Face name used to display a thermometer variable that is off."
   :group 'magik-cb
   :type 'face)
 
@@ -386,8 +367,7 @@ Not used yet.")
     ("[-] \\(\\sw+\\)" 1 magik-cb2-font-lock-off-face)
     ("[*] \\(\\sw+\\)" 1 magik-cb2-font-lock-thermometer-on-face)
     ("[.] \\(\\sw+\\)" 1 magik-cb2-font-lock-thermometer-off-face)
-    ("^    .*$" . font-lock-doc-face)
-    )
+    ("^    .*$" . font-lock-doc-face))
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)
@@ -396,7 +376,7 @@ Not used yet.")
 ;;; _________
 
 (defun magik-cb-gis ()
-  "Start/goto GIS with the same environment as the current CB process."
+  "Goto Magik session buffer with the same environment as the current CB process."
   (interactive)
   (let ((buf (magik-cb-gis-buffer)))
     (if (one-window-p t)
@@ -428,7 +408,9 @@ With a prefix arg, ask user for GIS buffer to associate with.
 Main top level entry to the cb.
 
 Create the buffer and/or start the process if necessary.
-Do a no-op if already in the cb."
+Do a no-op if already in the cb.
+
+Set METHOD and CLASS if given."
   (interactive)
   (let (magik-cb-file running-p buffer gis-proc visible-bufs bufs)
     (cond ((and (integerp current-prefix-arg) (> current-prefix-arg 0))
@@ -644,7 +626,7 @@ To view the help on these variables type \\[describe-variable] and enter the var
     ))
 
 (defun magik-cb-gis-buffer (&optional buffer)
-  "Return the GIS process buffer associated with this Class Browser."
+  "Return the Magik session process BUFFER associated with this Class Browser."
   (setq buffer (if (bufferp buffer) (buffer-name buffer) (or buffer (buffer-name))))
   (let ((magik-cb-bit (substring buffer 0 5)))
     (if (equal magik-cb-bit "*cb2*")
@@ -652,7 +634,7 @@ To view the help on these variables type \\[describe-variable] and enter the var
       (substring buffer 4))))
 
 (defun magik-cb-buffer (&optional buffer)
-  "Name of the CB buffer."
+  "Name of the CB BUFFER."
   (get-buffer-create (concat "*cb*" (magik-cb-gis-buffer buffer))))
 
 (defun magik-cb-process (&optional buffer)
@@ -661,21 +643,21 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
   (or magik-cb-process (get-buffer-process (magik-cb-buffer buffer))))
 
 (defun magik-cb-topics (&optional newval buffer)
-  "Get/Set `cb-topics' variable from the CB buffer."
+  "Get/Set `cb-topics' variable from the CB BUFFER."
   (with-current-buffer (magik-cb-buffer buffer)
     (if newval
         (compat-call setq-local magik-cb-topics newval)
       magik-cb-topics)))
 
 (defun magik-cb-cursor-pos (&optional newval buffer)
-  "Get/Set `cb-cursor-pos' variable from the CB buffer."
+  "Get/Set `cb-cursor-pos' variable from the CB BUFFER."
   (with-current-buffer (magik-cb-buffer buffer)
     (if newval
         (compat-call setq-local magik-cb-cursor-pos newval)
       magik-cb-cursor-pos)))
 
 (defun magik-cb-mf-extended-flags (&optional buffer)
-  "Get `cb-mf-extended-flags' variable from the CB buffer."
+  "Get `cb-mf-extended-flags' variable from the CB BUFFER."
   (with-current-buffer (magik-cb-buffer buffer)
     magik-cb-mf-extended-flags))
 
@@ -688,7 +670,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
           (car c)))))
 
 (defun magik-cb-buffer-alist-prefix-function (arg mode predicate)
-  "Function to process prefix keys when used with \\[cb]."
+  "Function to process prefix keys when used with \\[magik-cb]."
   (let (buf)
     (cond ((zerop arg) (set buf nil))
           ((> arg 0)
@@ -955,11 +937,11 @@ If FILTER is given then it is set on the process."
             (magik-cb-goto-method jump-str (eq major-mode 'magik-cb-mode)))))))
 
 (defun magik-cb-read-methods (p)
-  "Deal with \\[magik-cb-end-of-line] or a \\[magik-cb-beginning-of-line] coming back from the C.
-This is done by loading from \"/tmp\" into the main cb buffer.
-Be careful to maintain the position in the listing.
-Also extract the number-of-methods from the last line of the file.
-Put it in the global `magik-cb-n-methods-str'."
+  "Deal with control characters coming back from buffer P.
+This is done by loading from variable `temporary-file-directory' into
+the main magik-cb buffer.  Be careful to maintain the position in
+the listing.  Also extract the number-of-methods from the last line of
+the file.  Put it in the global `magik-cb-n-methods-str'."
   (let ((buf (process-buffer p))
         (buffer-read-only nil)
         (coding-system-for-read magik-cb-coding-system)
@@ -1864,7 +1846,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 ;; clicked.
 
 (defun magik-cb-mouse (click)
-  "Either toggle a class browser flag or show a class hierarchy."
+  "Either toggle a class browser flag or show a class hierarchy using CLICK."
   (interactive "e")
   (mouse-set-point click)
   (cond ((eq major-mode 'magik-cb-mode)
@@ -1877,7 +1859,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
          (magik-cb-family (magik-utils-find-tag-default)))))
 
 (defun magik-cb-mode-line-click (event)
-  "Move the cb modeline cursor."
+  "Move the `magik-cb` modeline cursor using EVENT."
   (interactive "@e")
   (let*
       ((b (window-buffer (posn-window (event-start event))))
@@ -2114,7 +2096,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
   "Current position in the magik-cb-jump-history alist.")
 
 (defun magik-cb-jump-to-source-from-cb ()
-  "Jump to source for the method under the cursor in a CB buffer."
+  "Jump to source for the method under the cursor in a `magik-cb' buffer."
   (let ((regexp (concat "^\\(\\S-+\\)" magik-cb-in-keyword "\\(\\S-+\\)"))
         (buffer (current-buffer)))
     (or (magik-cb-is-running buffer)
@@ -2135,56 +2117,48 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
         (error "Can't find a line like: 'my_method  IN  my_class'")))))
 
 (defun magik-cb-jump-history-remove (jump-name)
-  "Remove the given JUMP-NAME from the magik-cb-jump-history list."
-  (remove (assoc jump-name magik-cb-jump-history) magik-cb-jump-history)
-  )
+  "Remove the given JUMP-NAME from the `magik-cb-jump-history' list."
+  (remove (assoc jump-name magik-cb-jump-history) magik-cb-jump-history))
 
 (defun magik-cb-jump-previous ()
   "Jumps to the method definition of the method jump before the method jump.
-Defined in magik-cb-current-jump."
+Defined in `magik-cb-current-jump'."
   (interactive)
   (let (
         (current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
     (if (not (eq (length magik-cb-jump-history) current-pos))
         (progn (magik-cb-send-string (nth 1 (nth (+ current-pos 1) magik-cb-jump-history)))
                (setq magik-cb-current-jump (nth 0 (nth (+ current-pos 1) magik-cb-jump-history))))
-      (message "Already at the most historiant method jump!"))
-    )
-  )
+      (message "Already at the most historiant method jump!"))))
 
 (defun magik-cb-jump-next ()
   "Jumps to the method definition of the method jump after the method jump.
-Defined in magik-cb-current-jump."
+Defined in `magik-cb-current-jump'."
   (interactive)
   (let (
         (current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
     (if (not (eq 0 current-pos))
         (progn (magik-cb-send-string (nth 1 (nth (- current-pos 1) magik-cb-jump-history)))
                (setq magik-cb-current-jump (nth 0 (nth (- current-pos 1) magik-cb-jump-history))))
-      (message "Already at the most recent method jump!"))
-    )
-  )
+      (message "Already at the most recent method jump!"))))
 
 (defun magik-cb-jump-select (arg)
   "Jumps to the method definition of the selected method jump."
   (interactive (list (completing-read "Jump to: " magik-cb-jump-history)))
   (magik-cb-send-string (nth 1 (assoc arg magik-cb-jump-history)))
-  (setq magik-cb-current-jump arg)
-  )
+  (setq magik-cb-current-jump arg))
 
 (defun magik-cb-ido-jump-select (arg)
   "Ido version the magik-cb-jump-select function."
   (interactive (list (ido-completing-read "Jump to: " magik-cb-jump-history)))
   (magik-cb-send-string (nth 1 (assoc arg magik-cb-jump-history)))
-  (setq magik-cb-current-jump arg)
-  )
+  (setq magik-cb-current-jump arg))
 
 (defun magik-cb-jump-clear-history ()
   "Clears `magik-cb-jump-history' and `magik-cb-current-jump' to the initial state."
   (interactive)
   (setq magik-cb-jump-history (list '("" "")))
-  (setq magik-cb-current-jump "")
-  )
+  (setq magik-cb-current-jump ""))
 
 (defun magik-cb-jump-to-source ()
   "Jump to the source for the method under the cursor."
@@ -2247,14 +2221,14 @@ compression or lazy re-draw or something."
 ;; to be sent.
 
 (defun magik-cb-send-tmp-file-name (file)
-  "Send tmp_FILE_name command to the method finder."
+  "Send \\='tmp_FILE_name FILE' command to the method finder."
   (setq file (if magik-cb-quote-file-name
                  (concat "'" file "'")
                file))
   (magik-cb-send-string "tmp_file_name " file "\n"))
 
 (defun magik-cb-send-load (file)
-  "Send load FILE command to the method finder."
+  "Send \\='load FILE' command to the method finder."
   (setq file (if magik-cb-quote-file-name
                  (concat "'" file "'")
                file))
@@ -2281,8 +2255,7 @@ compression or lazy re-draw or something."
   (process-send-string (magik-cb-process) (apply 'concat strings)))
 
 (defun magik-cb-find-latest-<= (target-str beg end)
-  "Return the position of the start of the latest line in the range BEG to END.
-That is <= to TARGET-STR."
+  "Return the start position of the latest line in TARGET-STR from BEG to END."
   (if (= beg end)
       beg
     (let
@@ -2366,7 +2339,7 @@ Cut out trailing comments etc."
 (defun magik-cb-temp-file-name (p)
   "The filename the method_finder uses to pass data back to the class browser."
   (let ((file (concat "mfm" (number-to-string (process-id p)))))
-    (concat (getenv "TEMP") "\\" file)))
+    (expand-file-name file temporary-file-directory)))
 
 (defun magik-cb-generalise-file-name (f)
   "Translate F into a filename appropriate for Unix or Windows-NT:

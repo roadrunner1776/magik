@@ -340,7 +340,7 @@ In which case we toggle through the various pragma options."
 (defun magik-pragma-electric-toggle (direction)
   "Toggle the values for the different fields used in the pragma line.
 
-DIRECTION indicates whether the values should change \='forward or \='backward
+DIRECTION indicates whether the values should change \\='forward or \\='backward
 relative the current setting and available values."
   ;;Handle the case where the pragma line is completely empty separately.
   (if (save-excursion (beginning-of-line) (looking-at "_pragma()"))

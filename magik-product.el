@@ -136,9 +136,9 @@ You can customize Product Mode with the `magik-product-mode-hook`.
     (magik-product-transmit-add-product filename process)
     gis))
 
-(defun magik-product-gis-drag-n-drop-load (gis filename)
+(defun magik-product-drag-n-drop-load (gis filename)
   "Interface to Drag and Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a Product FILENAME is dropped."
+Called by `magik-session-drag-n-drop-load' when a Product FILENAME is dropped."
   (let ((process (barf-if-no-gis gis)))
     (magik-product-transmit-add-product filename process)
     gis))

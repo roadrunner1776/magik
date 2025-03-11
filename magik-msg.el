@@ -129,7 +129,8 @@ You can customize msg-mode with the `magik-msg-mode-hook`.
 
 (defun magik-msg-transmit-buffer (&optional gis)
   "Send the buffer to the GIS process.
-The GIS process used is either that given by BUF or the variable `gis-buffer'."
+The GIS process used is either that given by BUF or
+the variable `magik-session-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
                                           'magik-session-mode
@@ -156,7 +157,8 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
 (defun magik-msg-compile-module-messages (&optional gis)
   "Compile all messages for a specific module.
 Only compile with the module this buffer is assocaiated with in a GIS process.
-The GIS process used is either that given by BUF or the variable `gis-buffer'."
+The GIS process used is either that given by BUF or
+the variable `magik-session-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
                                           'magik-session-mode
@@ -181,9 +183,9 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
       directory))
     gis))
 
-(defun magik-msg-gis-drag-n-drop-load (gis filename)
+(defun magik-msg-drag-n-drop-load (gis filename)
   "Interface to Drag and Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a Msg FILENAME is dropped."
+Called by `magik-session-drag-n-drop-load' when a Msg FILENAME is dropped."
   (let ((process (barf-if-no-gis gis)))
     (message "%s loaded in buffer %s." filename gis)
     (process-send-string

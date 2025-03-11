@@ -33,28 +33,17 @@ use the DEFAULT value that had been passed in."
   :type 'boolean
   :group 'magik)
 
-(defvar magik-utils-original-process-environment (cl-copy-list process-environment)
-  "Store the original `process-environment' at startup.
-This is used by \\[gis-version-reset-emacs-environment] to reset an
-Emacs session back to the original startup settings.
-Note that any user defined Environment variables set via \\[setenv]
-will be lost.")
-
-(defvar magik-utils-original-exec-path (cl-copy-list exec-path)
-  "Store the original variable `exec-path' at startup.
-This is used by \\[gis-version-reset-emacs-environment] to reset an
-Emacs session back to the original startup settings.")
-
 (defun barf-if-no-gis (&optional buffer process)
-  "Return process object of GIS PROCESS.
-Signal an error if no gis is running."
+  "Return process object of Magik PROCESS.
+Signal an error if no Magik process is running.
+Use BUFFER as `magik-session-buffer'."
   (setq buffer  (or buffer magik-session-buffer)
         process (or process (get-buffer-process buffer)))
   (or process
-      (error "There is no GIS process running in buffer '%s'" buffer)))
+      (error "There is no Magik process running in buffer '%s'" buffer)))
 
 (defun gsub (str from to)
-  "Return a string with any matches for the regexp, FROM, replaced by TO."
+  "Return a STR with any matches for the regexp, FROM, replaced by TO."
   (save-match-data
     (prog1
         (if (string-match from str)
