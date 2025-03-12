@@ -46,12 +46,13 @@ This provides an alternative interface to a gis_version program."
                   (const nil)))
 
 (defcustom magik-version-match "^[* ] \\(\\S-+\\)\\s-*\\(\\S-+\\)\\s-*\\(.*\\)"
-  "*Regexp matching valid versions listed by `gis-version-program' or `gis-version-file'."
+  "*Regexp matching valid versions.
+Listed by `magik-version' or `magik-version-file'."
   :group 'magik-version
   :type  'regexp)
 
 (defcustom magik-version-invalid-string "(invalid)"
-  "*The string marking an invalid gis version entry."
+  "*The string marking an invalid gis_version entry."
   :group 'magik-version
   :type  'string)
 
@@ -206,8 +207,42 @@ has more than one aliases file available."
 (add-hook 'magik-version-select-hook #'magik-aliases-update-menu)
 
 (defun magik-version-smallworld-gis-p (path)
-  "Return t if path points to a Smallworld installation."
+  "Return t if PATH points to a Smallworld installation."
   (file-directory-p (concat (file-name-directory path) "config")))
+
+(defun magik-version-read-smallworld-gis-completion (string predicate flag)
+  "Provide directory completion for finding Smallworld installations.
+Repeated TAB and \\[minibuffer-completion-help] still provide
+directory listing so users can navigate a directory structure looking
+for a Smallworld installation.  Only when `gis-version-smallworld-gis-p'
+returns t for a given path will the path be considered to be a real Smallworld
+installation directory suitable for selection."
+  (if (magik-version-smallworld-gis-p string)
+      (cond ((eq flag #'lambda) t)
+            ((null flag)       t)
+            (t            string))
+    ;;    (cl-letf (((symbol-function `read-smallworld-gis-predicate) (d) (equal d (file-name-directory d))))
+    (let ((root (file-name-directory string))
+          (completions (all-completions string
+                                        'read-file-name-internal)))
+      ;;            #'(lambda (d) (equal d (file-name-directory d))))))
+      ;;            'read-smallworld-gis-predicate)))
+      (cond ((or (eq this-command 'minibuffer-completion-help)
+                 (and flag (eq this-command 'minibuffer-complete)))
+             ;;Provide directory completions for user feedback ONLY
+             (mapcar (function (lambda (d) (concat root d))) completions))
+            (flag
+             ;; all-completions. Do not want to return anything here
+             ;; otherwise any directory is accepted after a Return
+             nil)
+            (t
+             ;;try-completion
+             (setq completions
+                   (try-completion (file-name-nondirectory string)
+                                   (mapcar 'list completions)))
+             (if (eq completions t)
+                 string
+               (concat (or root "") completions)))))))
 
 (defun magik-version-read-smallworld-gis ()
   "Prompt for a valid value for SMALLWORLD_GIS."
@@ -290,7 +325,7 @@ Will set `gis-version-file' to FILE."
       (while (re-search-forward magik-version-match nil t)
         (beginning-of-line)
         (forward-char 1)
-        (backward-delete-char 1)
+        (delete-char -1)
         (insert " ")
         (cond ((string-match magik-version-invalid-string (match-string-no-properties 3))
                nil)
@@ -337,7 +372,7 @@ Will set `gis-version-file' to FILE."
   (message "%s" (substitute-command-keys "Can't switch this buffer to edit. Use \\\[magik-version-file-open] if you want to edit this file.")))
 
 (defun magik-version-mouse-select (click)
-  "Choose product using mouse event."
+  "Choose product using mouse event CLICK."
   (interactive "e")
   (mouse-set-point click)
   (beginning-of-line)
@@ -392,8 +427,10 @@ no (valid) match is found."
 
 (defun magik-version-prepend-sw-paths (orig new)
   "Ensure Smallworld directories are prepended to PATH variable.
-For magik-version code to work the SMALLWORLD paths need to be prepended to PATH.
-On UNIX PATH is modified to have SMALLWORLD appended (on Windows it is prepended).
+For magik-version code to work, the SMALLWORLD paths need to be
+prepended to PATH.
+On UNIX, PATH is modified to have SMALLWORLD appended.
+On Windows it is prepended.
 
 Also sets `gis-version-sw-path-list' to be the list of directories added to PATH
 by the current Smallworld version."

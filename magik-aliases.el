@@ -99,8 +99,7 @@ If any function returns t, then the buffer is displayed."
 ;; Imenu configuration
 (defvar magik-aliases-imenu-generic-expression
   (list
-   (list nil magik-aliases-definition-regexp 1)
-   )
+   (list nil magik-aliases-definition-regexp 1))
   "Imenu generic expression for Aliases mode.  See `imenu-generic-expression'.")
 
 ;; Font-lock configuration
@@ -110,11 +109,16 @@ If any function returns t, then the buffer is displayed."
    '("^\\s-+\\([A-Z_]+\\)\\s-*:=" 1 font-lock-type-face)
    '("^\\s-+\\([A-Z_0-9]+\\)\\s-*=" 1 font-lock-variable-name-face)
    '("^\\s-+\\(\\sw+\\)\\s-*=" 1 font-lock-builtin-face)
-   '("\\s$\\sw+\\s$" . font-lock-constant-face)
-   )
+   '("\\s$\\sw+\\s$" . font-lock-constant-face))
   "Default fontification of Aliases buffers."
   :group 'magik-aliases
   :type 'sexp)
+
+(defvar magik-aliases-exec-path nil
+  "Stored variable `exec-path' for executing Magik session command.")
+
+(defvar magik-aliases-process-environment nil
+  "Stored variable `process-environment' for executing Magik session command.")
 
 (defun magik-aliases-customize ()
   "Open Customization buffer for Aliases Mode."
@@ -214,16 +218,16 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
     list))
 
 (defun magik-aliases-switch-to-buffer (alias)
-  "Return t, to switch to the buffer that the GIS.exe process is running in.
-Since some entries in the aliases file do not start a Smallworld Magik GIS
+  "Return t, to switch to the buffer that the Magik process is running in.
+Since some entries in the aliases file do not start a Smallworld Magik
 process we do not necessarily want to switch to the buffer running the
 process all the time.  These are the following methods by which we control
 when the buffer is displayed:
   Hook: `aliases-switch-to-buffer-hooks'
-       Each function in the hook is passed the name of the alias.
+       Each function in the hook is passed the name of the ALIAS.
        If any function returns t, then the buffer is displayed.
   Regexp: `aliases-switch-to-buffer-regexp'
-       If the alias name matches the given regular expression the buffer
+       If the ALIAS name matches the given regular expression the buffer
        is displayed.
   Variable: `aliases-switch-to-buffer'
        If this is t then the buffer is displayed."
@@ -247,7 +251,7 @@ when the buffer is displayed:
     (locate-file magik-aliases-program path)))
 
 (defun magik-aliases-run-program (&optional alias file dir)
-  "Run `runalias' on the aliases file.
+  "Run `runalias' on the ALIAS FILE in DIR.
 
 With a prefix arg, ask user for current directory to use."
   (interactive (if (not (magik-aliases-at-alias-definition))
@@ -277,7 +281,7 @@ With a prefix arg, ask user for current directory to use."
             ((re-search-backward magik-aliases-definition-regexp nil t)
              (setq alias (match-string-no-properties 1)))
             (t
-             (error "Cannot find any alias definitions")))
+             (error "Can't find any alias definitions")))
       (if (file-exists-p (concat (file-name-directory file) "environment.bat"))
           (setq args (append args (list "-e" (concat (file-name-directory file) "environment.bat")) nil)))
       (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last

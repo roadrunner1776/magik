@@ -282,12 +282,12 @@ concrete implementations."
 
 (defface magik-argument-face
   '((t (:inherit font-lock-variable-use-face)))
-  "Font-lock Face to use when displaying arguments for methods."
+  "Font Lock mode face used to display arguments for methods."
   :group 'magik-faces)
 
 (defface magik-boolean-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying boolean and kleenean references."
+  "Font Lock mode face used to display boolean and kleenean references."
   :group 'magik-faces)
 
 ;; font-lock-punctuation-face was introduced in Emacs 29.1.
@@ -300,27 +300,27 @@ concrete implementations."
 
 (defface magik-bracket-face
   '((t (:inherit font-lock-bracket-face)))
-  "Font-lock Face to use when displaying brackets and parens."
+  "Font Lock mode face used to display brackets and parens."
   :group 'magik-faces)
 
 (defface magik-character-face
   '((t (:inherit font-lock-constant-face)))
-  "Font-lock Face to use when displaying characters."
+  "Font Lock mode face used to display characters."
   :group 'magik-faces)
 
 (defface magik-class-face
   '((t (:inherit font-lock-type-face)))
-  "Font-lock Face to use when displaying exemplars."
+  "Font Lock mode face used to display exemplars."
   :group 'magik-faces)
 
 (defface magik-comment-face
   '((t (:inherit font-lock-comment-face)))
-  "Font-lock Face to use when displaying comments."
+  "Font Lock mode face used to display comments."
   :group 'magik-faces)
 
 (defface magik-constant-face
   '((t (:inherit font-lock-constant-face)))
-  "Font-lock Face to use when displaying constants."
+  "Font Lock mode face used to display constants."
   :group 'magik-faces)
 
 ;; font-lock-delimiter-face was introduced in Emacs 29.1.
@@ -329,67 +329,67 @@ concrete implementations."
 
 (defface magik-delimiter-face
   '((t (:inherit font-lock-delimiter-face)))
-  "Font-lock Face to use when displaying delimiters."
+  "Font Lock mode face used to display delimiters."
   :group 'magik-faces)
 
 (defface magik-doc-face
   '((t (:inherit font-lock-doc-face)))
-  "Font-lock Face to use when displaying documentation."
+  "Font Lock mode face used to display documentation."
   :group 'magik-faces)
 
 (defface magik-keyword-operators-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik operator keywords."
+  "Font Lock mode face used to display Magik operator keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-statements-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik statement keywords."
+  "Font Lock mode face used to display Magik statement keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-loop-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik loop keywords."
+  "Font Lock mode face used to display Magik loop keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-arguments-face
   '((t (:inherit font-lock-keyword-face)))
-  "Font-lock Face to use when displaying Magik argument keywords."
+  "Font Lock mode face used to display Magik argument keywords."
   :group 'magik-faces)
 
 (defface magik-dynamic-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying dynamic variables."
+  "Font Lock mode face used to display dynamic variables."
   :group 'magik-faces)
 
 (defface magik-global-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying global variables."
+  "Font Lock mode face used to display global variables."
   :group 'magik-faces)
 
 (defface magik-global-reference-face
   '((t (:inherit font-lock-constant-face)))
-  "Font-lock Face to use when displaying global references."
+  "Font Lock mode face used to display global references."
   :group 'magik-faces)
 
 (defface magik-keyword-variable-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying Magik variable keywords."
+  "Font Lock mode face used to display Magik variable keywords."
   :group 'magik-faces)
 
 (defface magik-keyword-obsolete-face
   '((t (:inherit font-lock-warning-face)))
-  "Font-lock Face to use when displaying obsolete Magik keywords."
+  "Font Lock mode face used to display obsolete Magik keywords."
   :group 'magik-faces)
 
 (defface magik-method-face
   '((t (:inherit font-lock-function-name-face)))
-  "Font-lock Face to use when displaying method names and method and procedure keywords."
+  "Font Lock mode face used to display method names & method/procedure keywords."
   :group 'magik-faces)
 
 (defface magik-label-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying labels for loops."
+  "Font Lock mode face used to display labels for loops."
   :group 'magik-faces)
 
 ;; font-lock-number-face was introduced in Emacs 29.1 as new face without any inheritance.
@@ -398,7 +398,7 @@ concrete implementations."
 
 (defface magik-number-face
   '((t (:inherit font-lock-number-face)))
-  "Font-lock Face to use when displaying numbers."
+  "Font Lock mode face used to display numbers."
   :group 'magik-faces)
 
 ;; font-lock-operator-face was introduced in Emacs 29.1.
@@ -407,47 +407,47 @@ concrete implementations."
 
 (defface magik-operator-face
   '((t (:inherit font-lock-operator-face)))
-  "Font-lock Face to use when displaying operators."
+  "Font Lock mode face used to display operators."
   :group 'magik-faces)
 
 (defface magik-pragma-face
   '((t (:inherit font-lock-builtin-face)))
-  "Font-lock Face to use when displaying pragma directives."
+  "Font Lock mode face used to display pragma directives."
   :group 'magik-faces)
 
 (defface magik-procedure-face
   '((t (:inherit font-lock-function-name-face)))
-  "Font-lock Face to use when displaying procedure calls."
+  "Font Lock mode face used to display procedure calls."
   :group 'magik-faces)
 
 (defface magik-slot-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying slots."
+  "Font Lock mode face used to display slots."
   :group 'magik-faces)
 
 (defface magik-symbol-face
   '((t (:inherit font-lock-constant-face)))
-  "Font-lock Face to use when displaying symbols."
+  "Font Lock mode face used to display symbols."
   :group 'magik-faces)
 
 (defface magik-string-face
   '((t (:inherit font-lock-string-face)))
-  "Font-lock Face to use when displaying strings."
+  "Font Lock mode face used to display strings."
   :group 'magik-faces)
 
 (defface magik-variable-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font-lock Face to use when displaying variables."
+  "Font Lock mode face used to display variables."
   :group 'magik-faces)
 
 (defface magik-warning-face
   '((t (:inherit font-lock-warning-face)))
-  "Font-lock Face to use when displaying warning statements."
+  "Font Lock mode face used to display warning statements."
   :group 'magik-faces)
 
 (defface magik-write-face
   '((t (:inherit font-lock-warning-face)))
-  "Font-lock Face to use when displaying write() statements."
+  "Font Lock mode face used to display write() statements."
   :group 'magik-faces)
 
 (defconst magik-regexp
@@ -466,7 +466,8 @@ concrete implementations."
     ("def_slotted_exemplar" .
      "^[sw:]?def_slotted_exemplar(.*")
     )
-  "List of regexp strings which can be used for searching for a magik-specific string in a buffer.")
+  "List of regexp strings which can be used for searching.
+In a buffer searching for a Magik-specific.")
 
 (defvar magik-keyword-kleenean
   '("false" "true" "maybe")
@@ -605,13 +606,14 @@ See `magik-font-lock-keywords-1' and `magik-font-lock-keywords-2'."
     ))
   "Font lock setting for 4th level of Magik fontification.
 As 1st level but also fontifies all Magik keywords according their
-different classifications.  ie. loop keywords are fontified in the same face."
+different classifications, e.g. loop keywords are fontified in the same face."
   :group 'magik
   :type 'sexp)
 
 (defcustom magik-font-lock-keywords-5
   (append magik-font-lock-keywords-4 nil)
-  "Provides an easy user configurable level for personal/site fontification of styles.  Based from `magik-font-lock-keywords-4'."
+  "Provides an easy user configurable level for personal fontification of styles.
+Based from `magik-font-lock-keywords-4'."
   :group 'magik
   :type 'sexp)
 
@@ -890,7 +892,7 @@ Optional argument ARG .."
   "Insert a newline and indent.  (To insert a newline and not indent, use \\[electric-newline-and-maybe-indent])."
   (interactive "*")
   (if (eq major-mode 'magik-session-mode)
-      (error "Your magik shell buffer has got into magik mode!  To recover, type `M-x magik-session-mode'.  Please report this bug."))
+      (error "Your Magik shell buffer has got into magik-mode! To recover, type `M-x magik-session-mode'.  Please report this bug"))
   (if abbrev-mode (save-excursion (expand-abbrev)))
   (if (save-excursion
         (back-to-indentation)
@@ -929,11 +931,11 @@ Optional argument ARG .."
   "Return cons cell describing the method name parts (NAME . TYPE).
 For normal methods:
   NAME is the method name root
-  TYPE is '^<<' or '<<' or '()' or '()<<' or '()^<<' or empty string.
+  TYPE is ^<< or << or () or ()<< or ()^<< or empty string.
 
 For array methods
   NAME is nil
-  TYPE is '[]' or '[]<<' or '[]^<<' or '[,]' or '[,]<<' or '[,]^<<' etc."
+  Type is [] or []<< or []^<< or [,] or [,]<< or [,]^<< etc."
   (if (eq (elt name 0) ?\[)
       (cons nil name)
     (save-match-data
@@ -946,7 +948,7 @@ For array methods
 If more than one definition is found in the buffer, you will be
 given the opportunity to visit each definition.
 Also the search string is added to isearch mode's regexp ring so that
-you can use \\[isearch-forward-regexp] and use M-p to recall the search."
+you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recall the search."
   (interactive
    (list
     (read-string "Method Name: " (current-word))
@@ -965,19 +967,19 @@ you can use \\[isearch-forward-regexp] and use M-p to recall the search."
       ;; look for _global definitions
       (if (re-search-forward (setq search-str (concat (regexp-quote method) "\\s-*<<")) nil t)
           (magik-goto-class-method-loop search-str method)
-        (error "Cannot find method '%s'" method)))
+        (error "Can't find method '%s'" method)))
      ((string-equal class "<condition>")
       ;; look for condition.define_condition
       (if (re-search-forward (setq search-str (concat "condition.define_condition(\\(\n\\|\\s-\\)*:" (regexp-quote method) "\\(\n\\|\\s-\\)*,")) nil t)
           (magik-goto-class-method-loop search-str method)
-        (error "Cannot find method '%s'" method)))
+        (error "Can't find method '%s'" method)))
      ((null method-root);(eq (elt method 0) ?\[)
       ;; look for array definitions: [] []<< []^<< [,] [,]<< [,]^<<
       (or (setq search-str (cdr (assoc method-type magik-goto-class-method-alist)))
-          (error "Cannot find method '%s'" method))
+          (error "Can't find method '%s'" method))
       (if (re-search-forward (setq search-str (concat class search-str)) nil t)
           (magik-goto-class-method-loop search-str method)
-        (error "Cannot find method '%s'" method)))
+        (error "Can't find method '%s'" method)))
      ((re-search-forward
        ;; look for an ordinary _method constructs.
        (setq search-str
@@ -1000,13 +1002,13 @@ you can use \\[isearch-forward-regexp] and use M-p to recall the search."
        nil t)
       (magik-goto-class-method-loop search-str (concat class "." method)))
      (t
-      (error "Cannot find method, '%s', in class, '%s'" method class)))))
+      (error "Can't find method, '%s', in class, '%s'" method class)))))
 
 (defun magik-goto-class-method-loop (search-str arg)
-  "Loop over subsequent definitions.
-Adds string to `regexp-search-ring'. After wuiting this loop
-you can use \\[isearch-forward-regexp] and use M-p to recall this search."
-  ;;I would like to use the isearch functionality but I cannot work out
+  "Loop over subsequent definitions of ARG.
+Add SEARCH-STR to `regexp-search-ring'.
+After quitting this loop, you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recall this search."
+  ;;I would like to use the isearch functionality but I can't work out
   ;;how to control isearch programmatically.
   (let ((continue-p t)
         (pt (point))
@@ -1126,8 +1128,8 @@ If the last command was \\[magik-mark-method] then that region will be copied in
          x)))
 
 (defun magik-function (cmd &rest args)
-  "This function generates magik code from the supplied arguments.
-e.g. (magik-function \"system.test\" \"file\" 'unset 4) returns the string
+  "Generate Magik code from the supplied arguments.
+e.g. (magik-function \"system.test\" \"file\" \\='unset 4) returns the string
      system.test(\\\"file\\\", _unset, 4)
 Argument CMD ...
 Optional argument ARGS ..."
@@ -1165,8 +1167,8 @@ Optional argument GIS ..."
           (magik-gis-error-goto)))))
 
 (defun magik-perform-replace-no-set-mark (from to regexp-flag)
-  "like `perform-replace' but without setting the mark and without
-`query' or `delimited' flags."
+  "Like `perform-replace' but without setting the mark.
+Also without `query' or `delimited' flags."
   (let ((literal (not regexp-flag))
         (search-function (if regexp-flag 're-search-forward 'search-forward)))
     (while (and (not (eobp))
@@ -1176,8 +1178,8 @@ Optional argument GIS ..."
 (defun magik-transmit-method-eom-mode (arg)
   "Toggle whether to move the cursor to the end of the method after transmitting.
 If nil, leave point where it is,
-If t or 'end, move point to end of method,
-If 'repeat, move point to end of method on 2nd and subsequent uses of the command.
+If t or \\='end, move point to end of method,
+If \\='repeat, move point to end of method on 2nd and later uses of the command.
 Argument ARG ..."
   (interactive
    (list
@@ -1196,7 +1198,7 @@ Argument ARG ..."
           "After transmit method, cursor will move to end of method when command is repeated."))))
 
 (defun magik-mark-method-exchange-mode (&optional arg)
-  "Toggle whether the cursor is placed at the beginning or end of the marked region.
+  "Toggle whether the cursor is placed at the begin or end of the marked region.
 See `magik-mark-method-exchange' for more details."
   (interactive "P")
   (setq magik-mark-method-exchange
@@ -1209,7 +1211,7 @@ See `magik-mark-method-exchange' for more details."
      "Cursor will be placed at start of marked region.")))
 
 (defun magik-transmit-buffer ()
-  "Send the buffer to the process running in the buffer in the var, `gis-buffer'."
+  "Send the buffer to the process running in the buffer in `magik-session-buffer'."
   (interactive)
   (magik-transmit-region (point-min) (point-max))
   (message "Code loaded from %s" (or (buffer-file-name) (buffer-name))))
@@ -1276,11 +1278,12 @@ The rule is that the thing must start against the left margin."
 
 (defun magik-transmit-method ()
   "Send the current method to magik.
-The location of point is determined by variable `magik-transmit-method-eom-mode'.
-If 'repeat, then repeated calls to this function behaves like this:
+The location of point is determined by
+variable `magik-transmit-method-eom-mode'.
+If \\='repeat, then repeated calls to this function behaves like this:
   First use of command will leave point where it is,
   Repeat use will move point to the end of last transmitted method.
-If 'end, then point is left at the end of the method.
+If \\='end, then point is left at the end of the method.
 Otherwise, point is left where it is."
   (interactive)
   ;;DEBUG (message "this %s, last %s" this-command last-command)
@@ -1308,9 +1311,10 @@ Otherwise, point is left where it is."
 (defalias 'transmit-method-to-magik 'magik-transmit-method)
 
 (defun magik-transmit-region (beg end)
-  "Send current region via a temp file to Magik in a shell, using load-file.
-If this command is repeated before the previous file has been processed by Magik,
-another file shall be written."
+  "Send region from BEG to END via a temp file to Magik in a shell.
+Uses load_file to send the temp file.
+If this command is repeated before the previous file has been processed by
+Magik, another file shall be written."
   (interactive "r")
   (magik-transmit-string (buffer-substring-no-properties beg end)
                          (save-excursion
@@ -1335,8 +1339,8 @@ another file shall be written."
 
 (defun magik-transmit-string (str package do-magik-command tidy-magik-command &optional start gis process)
   "Generalised function to send code to Magik via a temporary file.
-If this command is repeated before the previous file has been processed by Magik,
-another file shall be written."
+If this command is repeated before the previous file has been processed by
+Magik, another file shall be written."
   (let* ((gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
                                            "Enter Magik process buffer:"
@@ -1389,9 +1393,9 @@ another file shall be written."
       "$\n"))
     gis))
 
-(defun magik-gis-drag-n-drop-load (gis filename)
-  "Interface to Drag 'n' Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a Magik file is dropped.
+(defun magik-drag-n-drop-load (gis filename)
+  "Interface to Drag and Drop GIS mode.
+Called by `magik-session-drag-n-drop-load' when a Magik FILENAME is dropped.
 Argument FILENAME ..."
   (let ((process (barf-if-no-gis gis)))
     (message "Transmitting to %s" gis)
@@ -1480,7 +1484,7 @@ If PT is given, goto that char position."
             (t "")))))
 
 (defun magik-current-package-name ()
-  "Return the package name from the most recent _package line, or 'sw'."
+  "Return the package name from the most recent _package line, or \"sw\"."
   (save-excursion
     (save-match-data
       (if (re-search-backward "^\\s-*_package \\(\\w+\\)\\s-*$" nil t)
@@ -1641,7 +1645,7 @@ If PT is given, goto that char position."
 (defun magik-symbol-complete (&optional buffer)
   "Perform completion on Magik symbol preceding point.
 The symbol is compared against the symbols that exist in the Magik
-process running in the BUFFER named in the variable, `gis-buffer'.
+process running in the BUFFER named in the variable, `magik-session-buffer'.
 
 With a prefix arg, ask user for GIS buffer to use."
   (interactive "*")
@@ -1722,7 +1726,7 @@ Argument BUFFER ..."
 (defun magik-copy-method-to-buffer (&optional buffer)
   "Copy method to BUFFER.
 If BUFFER is nil, use buffer name stored in variable `magik-work-buffer'.
-Otherwise create a sensibly named buffer based upon the class name of the method."
+Otherwise create a sensibly named buffer based on the class name of the method."
   (interactive)
   (save-excursion
     (save-match-data
@@ -1956,9 +1960,10 @@ provide extra control over the name that appears in the index."
 (defun magik-ac-class-method-source ()
   "List of methods on a class.
 Uses a cache variable `magik-ac-class-method-source-cache'.
-All the methods beginning with the first character are returned and stored in the cache.
-Thus subsequent characters refining the match are handled by auto-complete refining
-the list of all possible matches, without recourse to the class browser."
+All the methods beginning with the first character are returned and
+stored in the cache.  Thus subsequent characters refining the match are
+handled by auto-complete refining the list of all possible matches,
+without recourse to the class browser."
   (let ((exemplar (magik-ac-exemplar-near-point))
         (ac-prefix ac-prefix))
     (if exemplar
@@ -1972,7 +1977,8 @@ the list of all possible matches, without recourse to the class browser."
             (setq magik-ac-class-method-source-cache (magik-cb-ac-method-candidates)))))))
 
 (defun magik-ac-object-source-init ()
-  "Initialisation function for obtaining all Magik Objects for use in auto-complete-mode."
+  "Initialisation function for obtaining all Magik Objects.
+For use in auto-complete-mode."
   (if (magik-cb-ac-start-process)
       (let ((ac-prefix "sw:object"))
         (setq magik-ac-object-source-cache (magik-cb-ac-class-candidates)))))
@@ -1996,8 +2002,8 @@ the list of all possible matches, without recourse to the class browser."
       (match-beginning 2)))
 
 (defun magik-ac-raise-condition-source-init ()
-  "Initialisation function for obtaining all Magik Conditions for use in auto-complete-mode.
-Once initialised this variable is not refreshed."
+  "Initialisation function for obtaining all Magik Conditions.
+For use in auto-complete-mode.  Once initialised this variable is not refreshed."
   (if (magik-cb-ac-start-process)
       (let ((ac-prefix "<condition>."))
         (if magik-ac-raise-condition-source-cache
@@ -2011,8 +2017,8 @@ Once initialised this variable is not refreshed."
       (match-beginning 1)))
 
 (defun magik-ac-global-source-init ()
-  "Initialisation function for obtaining all Magik Conditions for use in auto-complete-mode.
-Once initialised this variable is not refreshed."
+  "Initialisation function for obtaining all Magik Conditions.
+For use in auto-complete-mode.  Once initialised this variable is not refreshed."
   (if (magik-cb-ac-start-process)
       (let ((ac-prefix "<global>."))
         (if magik-ac-global-source-cache
@@ -2045,15 +2051,15 @@ Once initialised this variable is not refreshed."
 (defalias 'magik-point-on-pragma-line-p 'pragma-line-p)
 
 (defun magik-translate-old-vec-notation ()
-  "Search for the next \"vec(\" in the current buffer and translate it and the
-closing bracket into the new \"{...}\" notation."
+  "Search for the next \"vec(\" in the current buffer.
+Translate it and the closing bracket into the new \"{...}\" notation."
   (interactive)
   (re-search-forward "\\<vec(")
   (backward-char 4)
   (delete-char 3)
   (save-excursion
     (forward-sexp)
-    (backward-delete-char 1)
+    (delete-char -1)
     (insert "\}"))
   (delete-char 1)
   (insert "\{"))
