@@ -120,26 +120,34 @@ If the buffer is not visiting a file, return an empty string."
 
 (defun magik-yasnippet-module-name ()
   "Recursively search for the module.def and return the module name."
+  (let ((module-file (magik-yasnippet--find-file "module.def")))
+    (if (not module-file)
+        nil
+      (magik-yasnippet--first-word-of-file module-file))))
+
+(defun magik-yasnippet-product-name ()
+  "Recursively search for the product.def and return the module name."
+  (let ((product-file (magik-yasnippet--find-file "product.def")))
+    (if (not product-file)
+        nil
+      (magik-yasnippet--first-word-of-file product-file))))
+
+(defun magik-yasnippet--find-file (file-name)
+  "Recursively search for the FILE-NAME."
   (let ((buffer-file (buffer-file-name)))
-    ;; Return nil if the current buffer has no file name
     (if (not buffer-file)
         nil
-      (let ((current-dir (file-name-directory (buffer-file-name))))
-        (catch 'module-found
-          (while current-dir
-            (let ((module-file (expand-file-name "module.def" current-dir)))
-              (when (file-exists-p module-file)
-                (throw 'module-found
-                       (with-temp-buffer
-                         (insert-file-contents module-file)
-                         (goto-char (point-min))
-                         (current-word)))))
-            ;; Move to the parent directory
-            (let ((parent-dir (file-name-directory (directory-file-name current-dir))))
-              ;; Stop if we reach the root directory (when current-dir == parent-dir)
-              (setq current-dir (if (equal current-dir parent-dir)
-                                    nil
-                                  parent-dir))))
-          nil))))) ;; Return nil if no module.def is found
+      (let ((directory (locate-dominating-file buffer-file file-name)))
+        (when directory
+          (let ((file (expand-file-name file-name directory)))
+            (when (file-exists-p file)
+              file)))))))
+
+(defun magik-yasnippet--first-word-of-file (file)
+  "Return the first word of a FILE."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (goto-char (point-min))
+    (current-word)))
 
 ;;; .yas-setup.el ends here
