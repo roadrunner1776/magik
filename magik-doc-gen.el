@@ -38,7 +38,7 @@
      "^_pragma(.*)")
     ("def_slotted_exemplar" .
      "^[sw:]?def_slotted_exemplar(.*"))
-  "List of regexp strings to search for a Magik-specific string in a buffer.")
+  "List of regexp strings to search for a Magik string in a buffer.")
 
 (defun magik-file-sw-method-doc ()
   "Search a file for missing parameters in the methods.
@@ -135,7 +135,8 @@ Argument METHOD-STRING ..."
         (documentation-found 0)
         (starting-point (+ 1 (line-number-at-pos))))
     (while (not (looking-at (cdr (assoc "endmethod" magik-regexp))))
-      (if (and (not (looking-at "^\t##$")) (looking-at "^\t##"))
+      (if (and (not (looking-at "^\t##$"))
+               (looking-at "^\t##"))
           (progn
             (setq documentation-found (+ 1 documentation-found)
                   documentation (split-string (string-trim (replace-regexp-in-string "## " "" (buffer-substring-no-properties (point) (line-end-position)))) " "))
@@ -248,7 +249,8 @@ Argument MISSING-SLOTS ...
 Argument STARTING-POINT ...
 Argument DOCUMENTATION-FOUND ..."
   (let ((comment-line (concat "##\n")))
-    (if (or (equal documentation-found 0) (equal documentation-found 1))
+    (if (or (equal documentation-found 0) 
+            (equal documentation-found 1))
         (progn
           (forward-line starting-point)
           (when (equal documentation-found 0)
@@ -268,7 +270,8 @@ Argument DOCUMENTATION-FOUND ...
 Argument WRITE-RETURN ..."
   (let ((comment-line (concat "\t##\n"))
         (return-line (concat "\t## @return {:}\n")))
-    (if (or (equal documentation-found 0) (equal documentation-found 1))
+    (if (or (equal documentation-found 0) 
+            (equal documentation-found 1))
         (progn
           (forward-line starting-point)
           (when (equal documentation-found 0)
@@ -286,8 +289,9 @@ Argument WRITE-RETURN ..."
   "Writer function for inserting sw-method-doc.
 Argument MISSING-PARAMETERS ...
 Argument STARTING-POINT ...
-Argument DOCUMENTATION-FOUND ..."
-  (if (or (equal documentation-found 0) (equal documentation-found 1))
+Argument COMMENTS-FOUND ..."
+  (if (or (equal comments-found 0)
+          (equal comments-found 1))
       (progn
         (forward-line starting-point)
         (when (equal documentation-found 0)
