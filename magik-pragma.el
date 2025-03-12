@@ -40,14 +40,14 @@ This command handles multiline _pragma statements."
         (search-forward "=" end-bracket t)))))
 
 (defun magik-electric-pragma-slash (arg)
-  "Insert the char, `/', unless the current line starts with `_pragma', in
-which case we toggle back through the various pragma options."
+  "Insert the char, `/', unless the current line starts with `_pragma'.
+In which case we toggle back through the various pragma options."
   (interactive "*p")
   (magik-pragma-electric-toggle-option arg 'forward))
 
 (defun magik-electric-pragma-backslash (arg)
-  "Insert the char, `\\', unless the current line starts with `_pragma', in
-which case we toggle back through the various pragma options."
+  "Insert the char, `\\', unless the current line starts with `_pragma'.
+In which case we toggle back through the various pragma options."
   (interactive "*p")
   (magik-pragma-electric-toggle-option arg 'backward))
 
@@ -78,21 +78,26 @@ Note that this command does handle a multiline _pragma statement."
              (cons start-bracket end-bracket))))))
 
 (defun magik-pragma-do-if-match (list &optional default-elem reverse)
-  "Given an list of elems (NAME MATCH FUNCTION [OTHER...]) execute each match until it returns t.
+  "Given an LIST of elems execute each match until it returns t.
+The list is in the format (NAME MATCH FUNCTION [OTHER...])
 If MATCH returns t eval the corresponding FUNCTION with the first arg being the
 elem of the matching element and the second arg being the next elem in the list.
 The optional arguments OTHER may be used by FUNCTION to modify its behaviour.
-E.g. pragma-if-match-replace-with-next uses the 4th arg to specify the subexpression to replace.
+E.g. pragma-if-match-replace-with-next uses the 4th arg to specify
+the subexpression to replace.
 
-Optional arg DEFAULT-ELEM (DEFAULT MATCH FUNCTION [OTHER...]) is used if no matches are obtained from the list.
-If this matches then the  default's function is called with next elem set to the first elem of the list.
-  (Or last if REVERSE is t).
+Optional arg DEFAULT-ELEM (DEFAULT MATCH FUNCTION [OTHER...])
+is used if no matches are obtained from the list.
+If this matches then the  default's function is called with next elem set to
+the first elem of the list, or last if REVERSE is t.
 Optional arg REVERSE reverses the given list.
 
-This can be thought to be equivalent to creating a cond construct using the MATCH in the list
-as the tests and the FUNCTION as the form to be evualated when MATCH is true.
-The extra bit this provides is that the called function knows what the next elem would be.
-Also being able to make up a data structure means that it is easy to add new things to test for.
+This can be thought to be equivalent to creating a cond construct using
+the MATCH in the list as the tests and the FUNCTION as the form to be
+evualated when MATCH is true.  The extra bit this provides is that
+the called function knows what the next elem would be.
+Also being able to make up a data structure means that it is easy to
+add new things to test for.
 
 Returns nil if no change or the list (CURRENT-ELEM NEXT-ELEM) elements."
   (if reverse
@@ -125,7 +130,7 @@ Returns nil if no change or the list (CURRENT-ELEM NEXT-ELEM) elements."
           (t nil))))
 
 (defun magik-pragma-if-match-replace-with-next (current next reverse)
-  "Removes the current match region and inserts the car of the NEXT element.
+  "Remove the current match region and insert the car of the NEXT element.
 The optional fourth item of CURRENT specifies a subexpression of the match.
 It says to replace just that subexpression instead of the whole match.
 The element follows that described in pragma-do-if-match."
@@ -181,11 +186,12 @@ This is used for searching for the end of a template.")
      (looking-at " *Remove at next release. *")       magik-pragma-if-match-replace-with-next)
     ("Restricted at next release."
      (looking-at " *Restricted at next release. *")   magik-pragma-if-match-replace-with-next))
-  "The list used to control behaviour for the Action field in the magik deprecated template.
+  "Used to control behaviour for the Action field in the Magik deprecated template.
 The format follows that described in pragma-do-if-match.")
 
 (defun magik-pragma-deprecated-action-toggle (direction)
-  "toggle the current deprecated action option"
+  "Toggle the current deprecated action option.
+Uses DIRECTION to determine if we need to go backwards."
   (goto-char (match-end 0))
   (magik-pragma-do-if-match magik-pragma-deprecated-action-list
                             '(default  (looking-at "<.*>") magik-pragma-if-match-replace-with-next)
@@ -217,7 +223,7 @@ The format follows that described in pragma-do-if-match.")
            t))))
 
 (defun magik-pragma-insert-deprecated-template ()
-  "Inserts the template for deprecated methods."
+  "Insert the template for deprecated methods."
   (save-excursion
     (save-match-data
       (search-forward ")") ; find end of _pragma statement
@@ -239,7 +245,7 @@ The format follows that described in pragma-do-if-match.")
              (message "Use toggle keys, \\\\ and /, on 'Action' line to choose action."))))))
 
 (defun magik-pragma-remove-magik-deprecated-template ()
-  "Removes the template for deprecated methods.
+  "Remove the template for deprecated methods.
 If the text to be removed has been modified then the user is asked whether they
 wish to remove it otherwise the template is removed silently."
   (save-excursion
@@ -299,8 +305,8 @@ The format follows that described in pragma-do-if-match.")
 The format follows that described in pragma-do-if-match.")
 
 (defun magik-pragma-electric-toggle-option (arg direction)
-  "Insert the char, `/', unless the current line starts with `_pragma', in
-which case we toggle through the various pragma options."
+  "Insert the char, `/', unless the current line starts with `_pragma'.
+In which case we toggle through the various pragma options."
   (save-match-data
     (let ((magik-pragma-brackets (magik-pragma-line-p)))
       (cond ((consp magik-pragma-brackets)
@@ -334,7 +340,7 @@ which case we toggle through the various pragma options."
 (defun magik-pragma-electric-toggle (direction)
   "Toggle the values for the different fields used in the pragma line.
 
-DIRECTION indicates whether the values should change 'forward or 'backward
+DIRECTION indicates whether the values should change \\='forward or \\='backward
 relative the current setting and available values."
   ;;Handle the case where the pragma line is completely empty separately.
   (if (save-excursion (beginning-of-line) (looking-at "_pragma()"))
@@ -347,11 +353,12 @@ relative the current setting and available values."
   (magik-pragma-do-if-match magik-pragma-electric-toggle-list nil (eq direction 'backward)))
 
 (defun magik-pragma-if-match-insert-classify_level (current next reverse)
-  "Insert the classify_level according to the current setting.
-Also adds a template in the comment section when the classify_level is set to deprecated.
-When the classify_level is changed from deprecrated then the template is removed.
-However, if data has been changed in the fields of the template then the user is asked
-if they wish to remove the contents of the deprecated template."
+  "Insert the classify_level according to the CURRENT setting.
+Also adds a template in the comment section if the classify_level is set
+to deprecated.  When the classify_level is changed from deprecrated then
+the template is removed.  However, if data has been changed in the fields of
+the template then the user is asked if they wish to remove the contents of
+the deprecated template."
   ;;Ensure point stays immediately after = by searching for = and doing the replace inside save-excursion
   (search-forward "=")
   (save-excursion
@@ -445,35 +452,35 @@ q      - quit
   :syntax-table nil)
 
 (defun magik-pragma-topic-select-mark ()
-  "Mark a line to indicate that the process should be run"
+  "Mark a line to indicate that the process should be run."
   (interactive "*")
   (magik-pragma-topic-replace-char ">"))
 
-(defun magik-pragma-topic-replace-char (ch)
-  "Add the one character string to the beginning of the
-current line and move down a line.
+(defun magik-pragma-topic-replace-char (character)
+  "Add the one CHARACTER string to the beginning of the current line.
+Also moves down a line.
 Beep if not looking at \"[ >] (\""
   (if
       (not (looking-at "[ >] "))
       (beep)
     (beginning-of-line)
-    (insert ch)
+    (insert character)
     (delete-char 1)
     (forward-line)))
 
 (defun magik-pragma-topic-select-unmark ()
-  "Remove the mark from the current line"
+  "Remove the mark from the current line."
   (interactive "*")
   (magik-pragma-topic-replace-char " "))
 
 (defun magik-pragma-topic-select-quit ()
-  "quit from topic selection by restoring the window configuration"
+  "Quit from topic selection by restoring the window configuration."
   (interactive)
   (kill-buffer (current-buffer))
   (set-window-configuration magik-pragma-window-configuration))
 
 (defun magik-pragma-topic-select-select ()
-  "put the selected topics back into the pragma"
+  "Put the selected topics back into the pragma."
   (interactive)
   (goto-char (point-min))
   (let

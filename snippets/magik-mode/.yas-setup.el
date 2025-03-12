@@ -118,22 +118,27 @@ If the buffer is not visiting a file, return an empty string."
             (setq result (concat result "\n"))))))
     result))
 
-(defun magik-yassnippet-module-name ()
+(defun magik-yasnippet-module-name ()
   "Recursively search for the module.def and return the module name."
-  (let ((current-dir (file-name-directory (buffer-file-name))))
-    (catch 'module-found
-      (while current-dir
-        (let ((module-file (expand-file-name "module.def" current-dir)))
-          (when (file-exists-p module-file)
-            (throw 'module-found
-                   (with-temp-buffer
-                     (insert-file-contents module-file)
-                     (goto-char (point-min))
-                     (current-word)))))
-        ;; Move to the parent directory
-        (setq current-dir (if (equal current-dir "/")
-                              nil
-                            (file-name-directory (directory-file-name current-dir)))))
-      nil))) ;; Return nil if no module.def is found
+  (when-let* ((module-file (magik-yasnippet--locate-dominating-file "module.def")))
+    (magik-yasnippet--first-word-of-file module-file)))
+
+(defun magik-yasnippet-product-name ()
+  "Recursively search for the product.def and return the product name."
+  (when-let* ((product-file (magik-yasnippet--locate-dominating-file "product.def")))
+    (magik-yasnippet--first-word-of-file product-file)))
+
+(defun magik-yasnippet--locate-dominating-file (file-name)
+  "Recursively search for the FILE-NAME."
+  (when-let* ((buffer-file (buffer-file-name))
+              (directory (locate-dominating-file buffer-file file-name)))
+    (expand-file-name file-name directory)))
+
+(defun magik-yasnippet--first-word-of-file (file)
+  "Return the first word of a FILE."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (goto-char (point-min))
+    (current-word)))
 
 ;;; .yas-setup.el ends here

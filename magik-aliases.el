@@ -40,7 +40,7 @@
   "*List of common gis_aliases files.
 This list is expected to be setup by the Emacs maintainer,
 a user can setup their personal gis_aliases file list using
-`aliases-user-file-list'.  Both these lists are concatenated to
+`magik-aliases-user-file-list'.  Both these lists are concatenated to
 form the top section of the SW->Alias Files submenu."
   :group 'magik-aliases
   :type  '(repeat file))
@@ -51,7 +51,7 @@ form the top section of the SW->Alias Files submenu."
   :type  'string)
 
 (defcustom magik-aliases-program-path '("../bin/x86" "../../product/bin/x86")
-  "*Path to `aliases-program'.
+  "*Path to `magik-aliases-program'.
 Setting this sets the default value.  When opening a gis_aliases file,
 the buffer local value of this variable will be set to the directory
 containing the `magik-aliases-program' if it is in a relative path to the file."
@@ -89,13 +89,12 @@ If any function returns t, then the buffer is displayed."
   :type  'hook)
 
 (defvar magik-aliases-definition-regexp "^\\([^#]\\S-+\\):\\s-*$"
-  "Regexp matching an alias definition")
+  "Regexp matching an alias definition.")
 
 ;; Imenu configuration
 (defvar magik-aliases-imenu-generic-expression
   (list
-   (list nil magik-aliases-definition-regexp 1)
-   )
+   (list nil magik-aliases-definition-regexp 1))
   "Imenu generic expression for Aliases mode.  See `imenu-generic-expression'.")
 
 ;; Font-lock configuration
@@ -105,17 +104,16 @@ If any function returns t, then the buffer is displayed."
    '("^\\s-+\\([A-Z_]+\\)\\s-*:=" 1 font-lock-type-face)
    '("^\\s-+\\([A-Z_0-9]+\\)\\s-*=" 1 font-lock-variable-name-face)
    '("^\\s-+\\(\\sw+\\)\\s-*=" 1 font-lock-builtin-face)
-   '("\\s$\\sw+\\s$" . font-lock-constant-face)
-   )
+   '("\\s$\\sw+\\s$" . font-lock-constant-face))
   "Default fontification of Aliases buffers."
   :group 'magik-aliases
   :type 'sexp)
 
 (defvar magik-aliases-exec-path nil
-  "Stored `exec-path' for executing GIS command.")
+  "Stored variable `exec-path' for executing Magik session command.")
 
 (defvar magik-aliases-process-environment nil
-  "Stored `process-environment' for executing GIS command.")
+  "Stored variable `process-environment' for executing Magik session command.")
 
 (defun magik-aliases-customize ()
   "Open Customization buffer for Aliases Mode."
@@ -216,20 +214,19 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
     list))
 
 (defun magik-aliases-switch-to-buffer (alias)
-  "Return t, to switch to the buffer that the GIS.exe process is running in.
-Since some entries in the aliases file do not start a Smallworld Magik GIS
+  "Return t, to switch to the buffer that the Magik process is running in.
+Since some entries in the aliases file do not start a Smallworld Magik
 process we do not necessarily want to switch to the buffer running the
-process all the time. These are the following methods by which we control
+process all the time.  These are the following methods by which we control
 when the buffer is displayed:
   Hook: `aliases-switch-to-buffer-hooks'
-       Each function in the hook is passed the name of the alias.
+       Each function in the hook is passed the name of the ALIAS.
        If any function returns t, then the buffer is displayed.
   Regexp: `aliases-switch-to-buffer-regexp'
-       If the alias name matches the given regular expression the buffer
+       If the ALIAS name matches the given regular expression the buffer
        is displayed.
   Variable: `aliases-switch-to-buffer'
-       If this is t then the buffer is displayed.
-"
+       If this is t then the buffer is displayed."
   (cond ((run-hook-with-args-until-success 'magik-aliases-switch-to-buffer-hooks alias)
          t)
         ((stringp magik-aliases-switch-to-buffer-regexp)
@@ -239,7 +236,8 @@ when the buffer is displayed:
          magik-aliases-switch-to-buffer)))
 
 (defun magik-aliases-program-set (&optional default)
-  "Return the program to use to operate on a gis_aliases file."
+  "Return the program to use to operate on a gis_aliases file.
+Optionally a DEFAULT program can be set."
   (let ((path magik-aliases-program-path)
         program)
     (while path
@@ -258,7 +256,7 @@ when the buffer is displayed:
     (or program default)))
 
 (defun magik-aliases-run-program (&optional alias file dir)
-  "Run `runalias' on the aliases file.
+  "Run `runalias' on the ALIAS FILE in DIR.
 
 With a prefix arg, ask user for current directory to use."
   (interactive (if (not (magik-aliases-at-alias-definition))
@@ -289,7 +287,7 @@ With a prefix arg, ask user for current directory to use."
             ((re-search-backward magik-aliases-definition-regexp nil t)
              (setq alias (match-string-no-properties 1)))
             (t
-             (error "Cannot find any alias definitions")))
+             (error "Can't find any alias definitions")))
       (if (file-exists-p (concat (file-name-directory file) "environment.bat"))
           (setq args (append args (list "-e" (concat (file-name-directory file) "environment.bat")) nil)))
       (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last
@@ -335,7 +333,7 @@ With a prefix arg, ask user for current directory to use."
 
 (defun magik-aliases-expand-file (file)
   "Expand FILE path including environment variables.
-Returns nil if FILE cannot be expanded."
+Returns nil if FILE can't be expanded."
   (condition-case nil
       (expand-file-name (substitute-in-file-name (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) file nil 'literal)))
     (error nil)))
@@ -379,7 +377,7 @@ Returns nil if FILE cannot be expanded."
   "Read LAYERED_PRODUCTS configuration file.
 
   Read contents of FILE with the format of LAYERED_PRODUCTS configuration file
-  and return paths to append to `exec-path'."
+  and return paths to append to the variable `exec-path'."
   (when (file-exists-p file)
     (with-current-buffer (get-buffer-create " *aliases LAYERED_PRODUCTS*")
       (insert-file-contents file nil nil nil 'replace)
@@ -483,7 +481,7 @@ Returns nil if FILE cannot be expanded."
 
 ;;MSB configuration
 (defun magik-aliases-msb-configuration ()
-  "Adds Aliases files to msb menu, supposes that msb is already loaded."
+  "Add Aliases files to msb menu, supposes that msb is already loaded."
   (let* ((l (length msb-menu-cond))
          (last (nth (1- l) msb-menu-cond))
          (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last

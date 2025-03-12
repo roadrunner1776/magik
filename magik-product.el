@@ -35,7 +35,8 @@
   '(
     (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
     )
-  "Imenu generic expression for Magik Message mode.  See `imenu-generic-expression'.")
+  "Imenu generic expression for Magik Message mode.
+See `imenu-generic-expression'.")
 
 ;; Font-lock configuration
 (defcustom magik-product-font-lock-keywords
@@ -114,7 +115,7 @@ You can customize Product Mode with the `magik-product-mode-hook`.
     gis))
 
 (defun magik-product-transmit-add-product (filename process)
-  "Add the product to the GIS process."
+  "Add the product FILENAME to the GIS PROCESS."
   (process-send-string
    process
    (concat
@@ -135,9 +136,9 @@ You can customize Product Mode with the `magik-product-mode-hook`.
     (magik-product-transmit-add-product filename process)
     gis))
 
-(defun magik-product-gis-drag-n-drop-load (gis filename)
-  "Interface to Drag 'n' Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a Product file is dropped."
+(defun magik-product-drag-n-drop-load (gis filename)
+  "Interface to Drag and Drop GIS mode.
+Called by `magik-session-drag-n-drop-load' when a Product FILENAME is dropped."
   (let ((process (barf-if-no-gis gis)))
     (magik-product-transmit-add-product filename process)
     gis))

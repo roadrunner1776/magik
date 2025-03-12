@@ -39,7 +39,8 @@
     (nil "^:\\s$\\(\\S$+\\)\\s$" 1) ;; | | Quoted messages
     ("Groups" "^+\\s-+\\(\\sw+\\)" 1)
     )
-  "Imenu generic expression for Magik Message mode.  See `imenu-generic-expression'.")
+  "Imenu generic expression for Magik Message mode.
+See `imenu-generic-expression'.")
 
 ;; Font-lock configuration
 (defcustom magik-msg-font-lock-keywords
@@ -128,7 +129,8 @@ You can customize msg-mode with the `magik-msg-mode-hook`.
 
 (defun magik-msg-transmit-buffer (&optional gis)
   "Send the buffer to the GIS process.
-The GIS process used is either that given by BUF or the variable `gis-buffer'."
+The GIS process used is either that given by BUF or
+the variable `magik-session-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
                                           'magik-session-mode
@@ -153,8 +155,10 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
     gis))
 
 (defun magik-msg-compile-module-messages (&optional gis)
-  "Compile all messages associated with the module this buffer is assocaiated with in a GIS process.
-The GIS process used is either that given by BUF or the variable `gis-buffer'."
+  "Compile all messages for a specific module.
+Only compile with the module this buffer is assocaiated with in a GIS process.
+The GIS process used is either that given by BUF or
+the variable `magik-session-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
                                           'magik-session-mode
@@ -179,9 +183,9 @@ The GIS process used is either that given by BUF or the variable `gis-buffer'."
       directory))
     gis))
 
-(defun magik-msg-gis-drag-n-drop-load (gis filename)
-  "Interface to Drag 'n' Drop GIS mode.
-Called by `gis-drag-n-drop-load' when a Msg file is dropped."
+(defun magik-msg-drag-n-drop-load (gis filename)
+  "Interface to Drag and Drop GIS mode.
+Called by `magik-session-drag-n-drop-load' when a Msg FILENAME is dropped."
   (let ((process (barf-if-no-gis gis)))
     (message "%s loaded in buffer %s." filename gis)
     (process-send-string
@@ -218,7 +222,7 @@ Called by `gis-drag-n-drop-load' when a Msg file is dropped."
 
 ;;MSB configuration
 (defun magik-msg-msb-configuration ()
-  "Adds Msg files to msb menu, supposes that msb is already loaded."
+  "Add Msg files to msb menu, supposes that msb is already loaded."
   (let* ((l (length msb-menu-cond))
          (last (nth (1- l) msb-menu-cond))
          (precdr (nthcdr (- l 2) msb-menu-cond)) ; cdr of this is last
