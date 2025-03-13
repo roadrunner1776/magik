@@ -784,7 +784,7 @@ BUFFER may be nil, in which case only the process is started."
 (defun magik-cb-get-process-create (buffer filter smallworld-gis &optional gis cb-file)
   "Return a method finder process in BUFFER using SMALLWORLD-GIS.
 Creating one using GIS buffer or CB_FILE if needed.
-Either starts a method_finder process or if a GIS session is running
+Either starts a method_finder process or if a Magik session is running
 it starts a mf_connector process to communicate with the method_finder in GIS.
 If FILTER is given then it is set on the process."
   (setq buffer (get-buffer-create buffer)) ; get a real buffer object.
@@ -824,7 +824,7 @@ If FILTER is given then it is set on the process."
                                                                                       (number-to-string (point-max)))))
              (magik-cb-send-load cb-file))
             (t
-             (error "Cannot start CB")))
+             (error "Can't start CB")))
 
       (when magik-cb-process
         (save-excursion

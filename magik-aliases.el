@@ -327,7 +327,7 @@ With a prefix arg, ask user for current directory to use."
 
 (defun magik-aliases-expand-file (file smallworld-gis)
   "Expand FILE path including environment variables using SMALLWORLD-GIS.
-Returns nil if FILE cannot be expanded."
+Returns nil if FILE can't be expanded."
   (condition-case nil
       (with-environment-variables (("SMALLWORLD_GIS" smallworld-gis))
         (expand-file-name
