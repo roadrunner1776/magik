@@ -1347,20 +1347,10 @@ Magik, another file shall be written."
          (orig-buf  (buffer-name))
          (orig-file (or (buffer-file-name) ""))
          (position  (if start (number-to-string start) "1"))
-         (filename (concat (expand-file-name "t" temporary-file-directory)
-                           (user-login-name)
-                           (number-to-string (process-id process))))
-         (package (or package "\n")) ;need a newline to ensure fixed number of lines for gis-goto-error
+         (filename (make-temp-file "magik-transmit-"))
+         (package (or package "\n"))  ; Need a newline to ensure fixed number of lines for `gis-goto-error'
          (coding-system buffer-file-coding-system))
 
-    (setq filename (cl-loop
-                    with queue = 0
-                    with file  = nil
-                    do (setq file (concat filename "q" (number-to-string queue)))
-                    if (file-exists-p file)
-                    do (setq queue (1+ queue))
-                    else
-                    return file))
     (with-current-buffer (get-buffer-create " *transmit magik debug*")
       (erase-buffer)
       (setq buffer-file-coding-system coding-system)
