@@ -726,9 +726,9 @@ there is not, prompt for a command to run, and then run it."
       (with-current-buffer (get-buffer-create alias-buffer)
 
         (erase-buffer)
-        (if (and (equal (getenv "SHELL") "/bin/csh")
-                 (file-readable-p "~/.alias"))
-            (insert-file-contents "~/.alias"))
+        (when (and (string-equal shell-file-name "/bin/csh")
+                   (file-readable-p "~/.alias"))
+          (insert-file-contents "~/.alias"))
 
         (while keepgoing
           (setq keepgoing nil)
