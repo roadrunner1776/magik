@@ -1350,7 +1350,7 @@ Magik, another file shall be written."
          (filename (make-temp-file (concat "magik-transmit-"
                                            (user-login-name)
                                            (number-to-string (process-id process)))))
-         (package (or package "\n"))  ; Need a newline to ensure fixed number of lines for `gis-goto-error'
+         (package (or package "\n")) ;; Need a newline to ensure fixed number of lines for `gis-goto-error'
          (coding-system buffer-file-coding-system))
 
     (with-current-buffer (get-buffer-create " *transmit magik debug*")
