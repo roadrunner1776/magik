@@ -1347,7 +1347,9 @@ Magik, another file shall be written."
          (orig-buf  (buffer-name))
          (orig-file (or (buffer-file-name) ""))
          (position  (if start (number-to-string start) "1"))
-         (filename (make-temp-file "magik-transmit-"))
+         (filename (make-temp-file (concat "magik-transmit-"
+                                           (user-login-name)
+                                           (number-to-string (process-id process)))))
          (package (or package "\n"))  ; Need a newline to ensure fixed number of lines for `gis-goto-error'
          (coding-system buffer-file-coding-system))
 
