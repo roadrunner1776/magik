@@ -1347,9 +1347,7 @@ Magik, another file shall be written."
          (orig-buf  (buffer-name))
          (orig-file (or (buffer-file-name) ""))
          (position  (if start (number-to-string start) "1"))
-         (filename (concat (if (eq system-type 'windows-nt)
-                               (concat (getenv "TEMP") "\\T")
-                             "/tmp/t")
+         (filename (concat (expand-file-name "t" temporary-file-directory)
                            (user-login-name)
                            (number-to-string (process-id process))))
          (package (or package "\n")) ;need a newline to ensure fixed number of lines for gis-goto-error
@@ -1373,11 +1371,9 @@ Magik, another file shall be written."
               package
               str)
       (goto-char (point-min))
-      (if magik-transmit-debug-p
-          (magik-perform-replace-no-set-mark "#DEBUG" "" nil))
-      (write-region (point-min) (point-max) filename nil 'xxx)
-                                        ;(kill-buffer (current-buffer))
-      )
+      (when magik-transmit-debug-p
+        (magik-perform-replace-no-set-mark "#DEBUG" "" nil))
+      (write-region (point-min) (point-max) filename nil 'xxx))
     (message "Transmitting to %s" gis)
     (process-send-string
      process
