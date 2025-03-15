@@ -31,6 +31,11 @@
   :type '(choice (file)
                  (const nil)))
 
+(defcustom magik-pragma-default-topics-filename "pragma_topics"
+  "Default name of the pragma-topics file."
+  :group 'magik-pragma
+  :type 'string)
+
 ;;;;;;;;;;;;;;;;;;;; User interface ;;;;;;;;;;;;;;;;;;;
 
 (defun magik-electric-pragma-tab (pragma-brackets)
@@ -396,7 +401,7 @@ the deprecated template."
 (defun magik-pragma-if-match-do-the-electric-pragma-topics (current next reverse)
   "Select pragma topics from a menu."
   (let* ((buffer-dir (if buffer-file-name (file-name-directory buffer-file-name) default-directory))
-         (magik-pragma-files (if buffer-dir (magik-utils-find-files-up buffer-dir "data/doc/pragma_topics")))
+         (magik-pragma-files (when buffer-dir (magik-utils-locate-all-dominating-file buffer-dir magik-pragma-default-topics-filename)))
          (product-pragma-file (when magik-pragma-topics-file (expand-file-name magik-pragma-topics-file)))
          topics pos)
     (re-search-forward "= *")
@@ -462,8 +467,7 @@ q      - quit
   "Add the one CHARACTER string to the beginning of the current line.
 Also moves down a line.
 Beep if not looking at \"[ >] (\""
-  (if
-      (not (looking-at "[ >] "))
+  (if (not (looking-at "[ >] "))
       (beep)
     (beginning-of-line)
     (insert character)
@@ -506,9 +510,9 @@ Beep if not looking at \"[ >] (\""
   "Edit the pragma_topics file."
   (interactive)
   (let* ((buffer-dir (if buffer-file-name (file-name-directory buffer-file-name) default-directory))
-         (magik-pragma-file (if buffer-dir (magik-utils-find-files-up buffer-dir "data/doc/pragma_topics" t))))
+         (magik-pragma-file (when buffer-dir (locate-dominating-file buffer-dir magik-pragma-default-topics-filename))))
     (cond (magik-pragma-file
-           (find-file (car magik-pragma-file)))
+           (find-file magik-pragma-file))
           (magik-pragma-topics-file
            (find-file (expand-file-name magik-pragma-topics-file)))
           (t
