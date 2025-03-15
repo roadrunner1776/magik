@@ -97,7 +97,7 @@ Used for switching to the first Smallworld session."
   :type '(choice string (const nil)))
 
 (defcustom magik-session-buffer-default-name "*gis*"
-  "*The default name of a Magik process buffer when creating new Magik sessions."
+  "*The default name of a Magik Session buffer when creating new Magik sessions."
   :group 'magik
   :type 'string)
 
@@ -706,7 +706,7 @@ there is not, prompt for a command to run, and then run it."
                                                    ((eq major-mode 'magik-session-mode) (buffer-name))
                                                    (t nil))
                                              'magik-session-mode
-                                             "Enter Magik process buffer:"
+                                             "Enter Magik Session buffer:"
                                              (or magik-session-buffer magik-session-buffer-default-name)
                                              'magik-session-buffer-alist-prefix-function
                                              (generate-new-buffer-name magik-session-buffer-default-name)))

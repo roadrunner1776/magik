@@ -416,14 +416,14 @@ Set METHOD and CLASS if given."
     (cond ((and (integerp current-prefix-arg) (> current-prefix-arg 0))
            (setq gis (magik-utils-get-buffer-mode gis
                                                   'magik-session-mode
-                                                  "Enter Magik process buffer: "
+                                                  "Enter Magik Session buffer:"
                                                   (cond ((eq major-mode 'magik-cb-mode) (magik-cb-gis-buffer))
                                                         ((eq major-mode 'magik-session-mode) (buffer-name))
                                                         (t magik-session-buffer))
                                                   'magik-session-buffer-alist-prefix-function))
            (unless (get-buffer-process gis)
              (pop-to-buffer gis)
-             (error "There is no process running in this buffer"))
+             (error "There is no Magik Session running in this buffer"))
            (unless (get-buffer gis)
              (pop-to-buffer gis)
              (error "No Class Browser is running")))
@@ -458,7 +458,7 @@ Set METHOD and CLASS if given."
                   (if (= (length bufs) 1)
                       (caar bufs)
                     (completing-read
-                     "Enter Class Browser or Magik process buffer: "
+                     "Enter Class Browser or Magik Session buffer:"
                      visible-bufs 'cdr t)))
             (not (equal buffer "")))
            (if (equal (substring buffer 0 4) "*cb*")
@@ -479,7 +479,7 @@ Set METHOD and CLASS if given."
                          (caadr visible-bufs))
                         (t
                          (completing-read
-                          "Enter Class Browser or Magik process buffer: "
+                          "Enter Class Browser or Magik Session buffer:"
                           visible-bufs nil t))))
             (not (equal buffer "")))
            (select-frame-set-input-focus
@@ -490,7 +490,7 @@ Set METHOD and CLASS if given."
                    buffer (concat "*cb*"  buffer))))
           ((setq buffer (magik-utils-get-buffer-mode nil
                                                      'magik-cb-mode
-                                                     "Enter Class Browser buffer: "
+                                                     "Enter Class Browser buffer:"
                                                      (let ((magik-cb (concat "*cb*" magik-session-buffer)))
                                                        (if (get-buffer magik-cb) magik-cb))))
            t)

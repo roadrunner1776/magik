@@ -40,7 +40,7 @@ Use BUFFER as `magik-session-buffer'."
   (setq buffer  (or buffer magik-session-buffer)
         process (or process (get-buffer-process buffer)))
   (or process
-      (error "There is no Magik process running in buffer '%s'" buffer)))
+      (error "There is no Magik Session running in buffer '%s'" buffer)))
 
 (defun gsub (str from to)
   "Return a STR with any matches for the regexp, FROM, replaced by TO."

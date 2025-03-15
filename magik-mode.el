@@ -1142,7 +1142,7 @@ Optional argument GIS ..."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
                                           'magik-session-mode
-                                          "Enter Magik process buffer:"
+                                          "Enter Magik Session buffer:"
                                           magik-session-buffer
                                           'magik-session-buffer-alist-prefix-function))
         pt)
@@ -1340,7 +1340,7 @@ If this command is repeated before the previous file has been processed by
 Magik, another file shall be written."
   (let* ((gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
-                                           "Enter Magik process buffer:"
+                                           "Enter Magik Session buffer:"
                                            magik-session-buffer
                                            'magik-session-buffer-alist-prefix-function))
          (process (barf-if-no-gis gis process))
@@ -1649,7 +1649,7 @@ With a prefix arg, ask user for GIS buffer to use."
   ;; the actual completion is done by the process filter: gis-filter-completion-action
   (setq buffer (magik-utils-get-buffer-mode buffer
                                             'magik-session-mode
-                                            "Enter Magik process buffer:"
+                                            "Enter Magik Session buffer:"
                                             magik-session-buffer
                                             'magik-session-buffer-alist-prefix-function))
   (barf-if-no-gis buffer)
