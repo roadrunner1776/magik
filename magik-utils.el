@@ -70,22 +70,16 @@ Use BUFFER as `magik-session-buffer'."
         (re-search-forward regexp nil t)
       (replace-match to-string nil nil))))
 
-(defun magik-utils-find-files-up (path file &optional first)
-  "Return list of FILEs found by looking up the directory PATH.
-FILE may even be a relative path!
-If FIRST is true just return the first one found."
-  (let ((dir (file-name-as-directory path))
-        parent
-        dirs)
-    (while dir
-      (if (file-exists-p (concat dir file))
-          (setq dirs (cons (concat dir file) dirs)))
-      (setq parent (file-name-directory (directory-file-name dir))
-            dir    (cond ((and first dirs) nil)
-                         ((equal parent dir) nil)
-                         ((equal parent "//") nil) ;; protect against UNC paths
-                         (t parent))))
-    dirs))
+(defun magik-utils-locate-all-dominating-file (path file-name)
+  "Find all ancestor paths of PATH containing FILE-NAME.
+Uses `locate-dominating-file` repeatedly.
+Returns a list of paths, or nil if none are found."
+  (let ((paths '())
+        (directory path))
+    (while (setq directory (locate-dominating-file directory file-name))
+      (push (expand-file-name file-name directory) paths)
+      (setq directory (file-name-directory (directory-file-name directory))))
+    (nreverse paths)))
 
 (defun magik-utils-curr-word ()
   "Return the word (or part-word) before point as a string."
