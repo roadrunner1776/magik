@@ -334,13 +334,17 @@ queried irrespective of default value of `magik-session-prompt'"
   (interactive)
   (require 'shell)
   (let ((buffer (concat "*shell*" (buffer-name)))
-        (version (and (boundp 'magik-session-version-current) (symbol-value 'magik-session-version-current))))
+        (version (and (boundp 'magik-version-current)
+                      (symbol-value 'magik-version-current)))
+        (smallworld-gis magik-smallworld-gis))
     (make-comint-in-buffer "magik-session-shell"
                            buffer
                            (executable-find "cmd") nil "/k"
-                           (concat (getenv "SMALLWORLD_GIS") "\\config\\environment.bat"))
+                           (expand-file-name "environment.bat" (file-name-concat smallworld-gis "config")))
     (with-current-buffer buffer
-      (if (stringp version) (set 'magik-session-version-current version)))
+      (when (stringp version)
+        (set 'magik-version-current version))
+      (set 'magik-smallworld-gis smallworld-gis))
     (display-buffer buffer)))
 
 (defun magik-session-parse-gis-command (command)
@@ -485,7 +489,7 @@ Return a list of all the components of the COMMAND."
 (defun magik-session-update-tools-magik-shell-menu ()
   "Update External Shell Processes submenu in Tools -> Magik pulldown menu."
   (let ((shell-bufs (magik-utils-buffer-mode-list 'shell-mode
-                                                  (function (lambda () (getenv "SMALLWORLD_GIS")))))
+                                                  (function (lambda () (symbol-value 'magik-smallworld-gis)))))
         shell-list)
     (cl-loop for buf in shell-bufs
              do (push (vector buf (list 'display-buffer buf) t) shell-list))
