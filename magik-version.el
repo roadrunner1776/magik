@@ -350,8 +350,8 @@ Will set `gis-version-file' to FILE."
   (setq buffer-read-only nil)
   (erase-buffer)
   (insert magik-version-help)
-  (if (and magik-version-file magik-version-help-file-add)
-      (insert "\n" magik-version-help-file-add "\n"))
+  (when (and magik-version-file magik-version-help-file-add)
+    (insert "\n" magik-version-help-file-add "\n"))
 
   (save-excursion
     (save-match-data

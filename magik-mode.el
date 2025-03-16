@@ -876,12 +876,12 @@ you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recal
   (interactive
    (list
     (read-string "Method Name: " (current-word))
-    (if current-prefix-arg
-        (read-string "Class Name: "
-                     (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
+    (when current-prefix-arg
+      (read-string "Class Name: "
+                   (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
 
-  (if class nil
-    (setq class (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
+  (when class nil
+        (setq class (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
   (let* ((method-cons (magik-method-name-type method))
          (method-root (car method-cons))
          (method-type (cdr method-cons))
@@ -1216,7 +1216,8 @@ If \\='end, then point is left at the end of the method.
 Otherwise, point is left where it is."
   (interactive)
   ;;DEBUG (message "this %s, last %s" this-command last-command)
-  (if (eq last-command 'magik-transmit-method-first) (magik-forward-endmethod))
+  (when (eq last-command 'magik-transmit-method-first)
+    (magik-forward-endmethod))
   (let ((magik-mark-method-exchange nil)
         mark)
     (save-excursion
@@ -1881,8 +1882,8 @@ Prevents expansion inside strings and comments."
   "Abbrev table for Magik mode."
   :regexp "\\<\\([+[:word:]]+\\)")
 
-(if magik-under-as-char
-    (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
+(when magik-under-as-char
+  (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
 (modify-syntax-entry ?\\ "." magik-base-mode-syntax-table) ;; \ is not an escape character in magik mode.
 (modify-syntax-entry ?? "w" magik-base-mode-syntax-table)
 (modify-syntax-entry ?! "w" magik-base-mode-syntax-table)

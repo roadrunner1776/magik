@@ -527,16 +527,16 @@ session already holds PRIORITY, the two swap numbers."
                  (list ':help (purecopy command)))
                 command-list)))
 
-      (if (get-buffer-process (buffer-name))
-          (setq command-list
-                (append command-list
-                        (list "---"
-                              (apply 'vector (magik-session-command-display magik-session-current-command)
-                                     'ignore ':active nil (list ':key-sequence nil
-                                                                ':help (purecopy magik-session-current-command)))
-                              (apply 'vector "Start New Magik Session" 'magik-session-new-buffer
-                                     ':active t
-                                     ':keys '("C-u f2 z"))))))
+      (when (get-buffer-process (buffer-name))
+        (setq command-list
+              (append command-list
+                      (list "---"
+                            (apply 'vector (magik-session-command-display magik-session-current-command)
+                                   'ignore ':active nil (list ':key-sequence nil
+                                                              ':help (purecopy magik-session-current-command)))
+                            (apply 'vector "Start New Magik Session" 'magik-session-new-buffer
+                                   ':active t
+                                   ':keys '("C-u f2 z"))))))
 
       (easy-menu-change (list "Magik Session")
                         "Magik Session Command History"
@@ -789,33 +789,33 @@ there is not, prompt for a command to run, and then run it."
                                  (car command-history)
                                  'command-history)))
           (when (string-match rev-1920-regexp magik-session-command)
-                (setq keepgoing t
-                      magik-session-command (sub magik-session-command rev-1920-regexp " "))))
-          (or (eq (string-match "\\[" magik-session-command) 0)
-              (setq magik-session-command (concat "[" default-directory "] " magik-session-command)))
-          (string-match "\\[\\([^\]]*\\)\\] *\\([^ ]*\\) *\\(.*\\)" magik-session-command)
-          (setq dir  (substring magik-session-command (match-beginning 1) (match-end 1))
-                cmd  (substring magik-session-command (match-beginning 2) (match-end 2))
-                args (substring magik-session-command (match-beginning 3) (match-end 3)))
-
-          (goto-char (point-min))
-          (when (re-search-forward (concat "^alias[ \t]+" (regexp-quote cmd) "[ \t]+") nil t)
             (setq keepgoing t
-                  alias-beg (match-end 0))
-            (goto-char alias-beg)
-            (if (looking-at "['\"]")
-                (progn
-                  (cl-incf alias-beg)
-                  (end-of-line)
-                  (re-search-backward "['\"]"))
-              (end-of-line))
-            (setq alias-expansion (buffer-substring alias-beg (point)))
-            (or (string-match alias-subst-regexp alias-expansion)
-                (setq alias-expansion (concat alias-expansion " \\!*")))
-            (setq alias-expansion (sub alias-expansion alias-subst-regexp args)
-                  magik-session-command (concat "[" dir "] " alias-expansion)))
+                  magik-session-command (sub magik-session-command rev-1920-regexp " "))))
+        (or (eq (string-match "\\[" magik-session-command) 0)
+            (setq magik-session-command (concat "[" default-directory "] " magik-session-command)))
+        (string-match "\\[\\([^\]]*\\)\\] *\\([^ ]*\\) *\\(.*\\)" magik-session-command)
+        (setq dir  (substring magik-session-command (match-beginning 1) (match-end 1)))
+        (setq cmd  (substring magik-session-command (match-beginning 2) (match-end 2)))
+        (setq args (substring magik-session-command (match-beginning 3) (match-end 3)))
 
-          (kill-buffer alias-buffer))
+        (goto-char (point-min))
+        (when (re-search-forward (concat "^alias[ \t]+" (regexp-quote cmd) "[ \t]+") nil t)
+          (setq keepgoing t
+                alias-beg (match-end 0))
+          (goto-char alias-beg)
+          (if (looking-at "['\"]")
+              (progn
+                (cl-incf alias-beg)
+                (end-of-line)
+                (re-search-backward "['\"]"))
+            (end-of-line))
+          (setq alias-expansion (buffer-substring alias-beg (point)))
+          (or (string-match alias-subst-regexp alias-expansion)
+              (setq alias-expansion (concat alias-expansion " \\!*")))
+          (setq alias-expansion (sub alias-expansion alias-subst-regexp args)
+                magik-session-command (concat "[" dir "] " alias-expansion)))
+
+        (kill-buffer alias-buffer))
 
       (pop-to-buffer (get-buffer-create buffer))
       (unless (derived-mode-p 'magik-session-mode)
