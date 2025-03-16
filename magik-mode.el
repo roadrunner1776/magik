@@ -1622,21 +1622,24 @@ If PT is given, goto that char position."
     (cl-decf nlines)
     (beginning-of-line 1)
     (skip-chars-forward "\t")
-    (if (char-equal (char-after (point)) ?# ) (delete-char 1))
+    (if (char-equal (char-after (point)) ?# )
+        (delete-char 1))
     (forward-line 1)))
 
 (defun magik-comment-region()
   "Puts # in first column of each line in the region."
   (interactive "*")
   (save-excursion
-    (if (> (point) (mark t)) (exchange-point-and-mark))
+    (if (> (point) (mark t))
+        (exchange-point-and-mark))
     (magik-comment (count-lines (point) (mark t)))))
 
 (defun magik-uncomment-region()
   "Remove # in first column of each line in the region."
   (interactive "*")
   (save-excursion
-    (if (> (point) (mark t)) (exchange-point-and-mark))
+    (if (> (point) (mark t))
+        (exchange-point-and-mark))
     (magik-un-comment (count-lines (point) (mark t)))))
 
 (defun magik-symbol-complete (&optional buffer)
