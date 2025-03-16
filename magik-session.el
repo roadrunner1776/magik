@@ -207,15 +207,13 @@ Used for prefix key switching.")
 (defvar magik-session-current-command nil
   "The current `magik-session-command' in the current buffer.")
 
-(defvar magik-session-exec-path nil
+(defvar-local magik-session-exec-path nil
   "Stored value of variable `exec-path'.
 It holds the value from when the Magik session process was started.")
-(make-variable-buffer-local 'magik-session-exec-path)
 
-(defvar magik-session-process-environment nil
+(defvar-local magik-session-process-environment nil
   "Stored value of variable `process-environment'.
 It holds the value from when the Magik session process was started.")
-(make-variable-buffer-local 'magik-session-process-environment)
 
 (defvar magik-session-cb-buffer nil
   "The Class browser buffer associated with the Magik session process.")
