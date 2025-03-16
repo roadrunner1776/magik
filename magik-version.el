@@ -320,7 +320,8 @@ Will set `gis-version-file' to FILE."
       (insert-file-contents magik-version-file)
       (goto-char (point-min))
 
-      (if (search-forward "-------" nil t) (forward-line 1)) ;skip a header
+      (when (search-forward "-------" nil t)
+        (forward-line 1)) ;; Skip a header
       (while (re-search-forward magik-version-match nil t)
         (beginning-of-line)
         (forward-char 1)
@@ -334,18 +335,18 @@ Will set `gis-version-file' to FILE."
                (goto-char (match-beginning 3))
                (insert magik-version-invalid-string " "))))))
 
-  (if (stringp magik-version-current)
-      (save-excursion
-        (save-match-data
-          (if (re-search-forward (concat "^. " magik-version-current " ") nil t)
-              (progn
-                (beginning-of-line)
-                (delete-char 1)
-                (insert "*"))))))
+  (when (stringp magik-version-current)
+    (save-excursion
+      (save-match-data
+        (when (re-search-forward (concat "^. " magik-version-current " ") nil t)
+          (beginning-of-line)
+          (delete-char 1)
+          (insert "*")))))
 
   (compat-call setq-local magik-version-position (point))
   (save-match-data
-    (if (search-forward "-------" nil t) (setq magik-version-position (point)))) ;skip a header
+    (when (search-forward "-------" nil t)
+      (setq magik-version-position (point)))) ;; Skip a header
 
   (setq buffer-read-only t)
   (set-buffer-modified-p nil)
@@ -360,10 +361,10 @@ Will set `gis-version-file' to FILE."
 (defun magik-version-display-title ()
   "Modify the Frame and Icon titles according to the Environment."
   (interactive)
-  (if magik-version-frame-title-format
-      (setq frame-title-format magik-version-frame-title-format))
-  (if magik-version-icon-title-format
-      (setq icon-title-format  magik-version-icon-title-format)))
+  (when magik-version-frame-title-format
+    (setq frame-title-format magik-version-frame-title-format))
+  (when magik-version-icon-title-format
+    (setq icon-title-format  magik-version-icon-title-format)))
 
 (defun magik-version-disable-read-only-mode ()
   "Like `read-only-mode', but does nothing in magik-version-mode."

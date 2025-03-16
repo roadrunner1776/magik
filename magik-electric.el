@@ -134,10 +134,10 @@ If it's the first '#' and the previous line starts with '#', align with it."
   (let ((blank-linep (looking-at "^\\s-*$"))
         (end-of-bufferp (save-excursion (end-of-line) (eq (point) (point-max)))))
     (and blank-linep (delete-horizontal-space))
-    (if (or (not blank-linep) end-of-bufferp)
-        (progn
-          (insert "\n")
-          (forward-line -1))))
+    (when (or (not blank-linep)
+              end-of-bufferp)
+      (insert "\n")
+      (forward-line -1)))
   ;;Insert the default pragma statement
   (insert "prag")
   (magik-explicit-electric-space))

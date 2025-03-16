@@ -299,10 +299,10 @@ Uses current `magik-session-prompt' setting as value."
     (if (member entry magik-session-font-lock-keywords)
         nil ;; Already entered
       (setq magik-session-font-lock-keywords (append magik-session-font-lock-keywords (list entry)))
-      (if (fboundp 'font-lock-set-defaults)
-          (progn  ;; Emacs 20 and later font-lock mode post-process its variables
-            (set 'font-lock-set-defaults nil)
-            (funcall 'font-lock-set-defaults))))))
+      (when (fboundp 'font-lock-set-defaults)
+        ;; Emacs 20 and later font-lock mode post-process its variables
+        (set 'font-lock-set-defaults nil)
+        (funcall 'font-lock-set-defaults)))))
 
 (defun magik-session-prompt-get (&optional force-query-p)
   "If `magik-session-prompt' is nil, get the Magik session's command line prompt.
@@ -396,10 +396,9 @@ Return a list of all the components of the COMMAND."
 (defun magik-session-buffer-alist-remove ()
   "Remove current buffer from `magik-session-buffer-alist'."
   (let ((c (rassoc (buffer-name) magik-session-buffer-alist)))
-    (if c
-        (progn
-          (setcdr c nil)
-          (car c)))))
+    (when c
+      (setcdr c nil)
+      (car c))))
 
 (defun magik-session-buffer-alist-prefix-function (arg mode predicate)
   "Function to process prefix keys when used with \\[magik-session]."
@@ -726,9 +725,9 @@ there is not, prompt for a command to run, and then run it."
       (with-current-buffer (get-buffer-create alias-buffer)
 
         (erase-buffer)
-        (if (and (equal (getenv "SHELL") "/bin/csh")
-                 (file-readable-p "~/.alias"))
-            (insert-file-contents "~/.alias"))
+        (when (and (equal (getenv "SHELL") "/bin/csh")
+                   (file-readable-p "~/.alias"))
+          (insert-file-contents "~/.alias"))
 
         (while keepgoing
           (setq keepgoing nil)
@@ -740,10 +739,9 @@ there is not, prompt for a command to run, and then run it."
                     (read-string "Magik command: "
                                  (car command-history)
                                  'command-history)))
-          (if (string-match rev-1920-regexp magik-session-command)
-              (progn
-                (setq keepgoing t)
-                (setq magik-session-command (sub magik-session-command rev-1920-regexp " "))))
+          (when (string-match rev-1920-regexp magik-session-command)
+                (setq keepgoing t
+                      magik-session-command (sub magik-session-command rev-1920-regexp " "))))
           (or (eq (string-match "\\[" magik-session-command) 0)
               (setq magik-session-command (concat "[" default-directory "] " magik-session-command)))
           (string-match "\\[\\([^\]]*\\)\\] *\\([^ ]*\\) *\\(.*\\)" magik-session-command)
@@ -752,24 +750,23 @@ there is not, prompt for a command to run, and then run it."
           (setq args (substring magik-session-command (match-beginning 3) (match-end 3)))
 
           (goto-char (point-min))
-          (if (re-search-forward (concat "^alias[ \t]+" (regexp-quote cmd) "[ \t]+") nil t)
-              (progn
-                (setq keepgoing t)
-                (setq alias-beg (match-end 0))
-                (goto-char alias-beg)
-                (if (looking-at "['\"]")
-                    (progn
-                      (cl-incf alias-beg)
-                      (end-of-line)
-                      (re-search-backward "['\"]"))
-                  (end-of-line))
-                (setq alias-expansion (buffer-substring alias-beg (point)))
-                (or (string-match alias-subst-regexp alias-expansion)
-                    (setq alias-expansion (concat alias-expansion " \\!*")))
-                (setq alias-expansion (sub alias-expansion alias-subst-regexp args))
-                (setq magik-session-command (concat "[" dir "] " alias-expansion)))))
+          (when (re-search-forward (concat "^alias[ \t]+" (regexp-quote cmd) "[ \t]+") nil t)
+            (setq keepgoing t
+                  alias-beg (match-end 0))
+            (goto-char alias-beg)
+            (if (looking-at "['\"]")
+                (progn
+                  (cl-incf alias-beg)
+                  (end-of-line)
+                  (re-search-backward "['\"]"))
+              (end-of-line))
+            (setq alias-expansion (buffer-substring alias-beg (point)))
+            (or (string-match alias-subst-regexp alias-expansion)
+                (setq alias-expansion (concat alias-expansion " \\!*")))
+            (setq alias-expansion (sub alias-expansion alias-subst-regexp args)
+                  magik-session-command (concat "[" dir "] " alias-expansion)))
 
-        (kill-buffer alias-buffer))
+          (kill-buffer alias-buffer))
 
       (pop-to-buffer (get-buffer-create buffer))
       (unless (eq major-mode 'magik-session-mode)
@@ -898,12 +895,11 @@ Copies the non-degenerate commands into it."
         (< i len)
       (let
           ((x (aref magik-session-prev-cmds i)))
-        (if (and (marker-buffer (car x))
-                 (marker-buffer (cdr x))
-                 (> (cdr x) (car x)))
-            (progn
-              (aset v v_i x)
-              (cl-incf v_i))))
+        (when (and (marker-buffer (car x))
+                   (marker-buffer (cdr x))
+                   (> (cdr x) (car x)))
+          (aset v v_i x)
+          (cl-incf v_i)))
       (cl-incf i))
     (let
         ((m (copy-marker (point-min))))
@@ -952,7 +948,9 @@ Else (not in any cmd) recall line."
                                  (car (aref magik-session-prev-cmds n)))))
 
      ((>= (point) p)
-      (if abbrev-mode (save-excursion (expand-abbrev)))
+      (if abbrev-mode
+          (save-excursion
+            (expand-abbrev)))
       (cond
        ((looking-at "[ \t\n]*\\'")  ; at end of curr. cmd.
         (newline arg)
@@ -1003,7 +1001,8 @@ Also write a message saying why the magik is not complete."
           (progn
             (let
                 ((toks (magik-tokenise-region-no-eol-nor-point-min (point) (min (line-end-position) end))))
-              (if toks (setq last-tok (car (last toks))))
+              (when toks
+                (setq last-tok (car (last toks))))
               (dolist (tok toks)
                 (cond
                  ((or (and (equal (car stack) "_for")    (equal (car tok) "_over"))
@@ -1184,23 +1183,22 @@ An internal function that deals with 4 cases."
         (progn
           (cl-incf n step)
           (not (magik-session--matching-cmd-p n str))))
-    (if (= n -1)
-        (if (equal str "")
-            (error "No previous command")
-          (error "No previous command matching '%s'" str)))
+    (when (= n -1)
+      (if (equal str "")
+          (error "No previous command")
+        (error "No previous command matching '%s'" str)))
     (setq mark (process-mark (get-buffer-process (current-buffer))))
-    (if (= n magik-session-no-of-cmds)
-        (cl-decf n))
+    (when (= n magik-session-no-of-cmds)
+      (cl-decf n))
     (magik-session-copy-cmd n
                             (if (equal str "")
                                 (- (point) mark)
                               (length str)))
     (compat-call setq-local magik-session-cmd-num n)
-    (if end-of-command-p
-        (progn
-          (goto-char (point-max))
-          ;; skip back past \n$\n and whitespace
-          (skip-chars-backward " \t\n$" mark)))))
+    (when end-of-command-p
+      (goto-char (point-max))
+      ;; skip back past \n$\n and whitespace
+      (skip-chars-backward " \t\n$" mark))))
 
 (defun magik-session-recall-prev-cmd ()
   "Recall the earlier Magik session commands.
@@ -1269,16 +1267,14 @@ If ARG is null, use a default of `magik-session-history-length'."
       (while
           (< j (1- magik-session-no-of-cmds))
         (goto-char (car (aref magik-session-prev-cmds j)))
-        (if (re-search-backward "[\r\n]" nil t)
-            (progn
-              (insert ?\n)
-              (delete-char 1)))
+        (when (re-search-backward "[\r\n]" nil t)
+          (insert ?\n)
+          (delete-char 1))
         (cl-incf j))
       (goto-char (point-max))
-      (if (search-backward "\r" nil t)
-          (progn
-            (insert ?\n)
-            (delete-char 1)))
+      (when (search-backward "\r" nil t)
+        (insert ?\n)
+        (delete-char 1))
       (message "Folding the last %s commands...Done" (number-to-string arg))
       (goto-char p)
       (set-buffer b))))
@@ -1389,18 +1385,17 @@ If ARG is null, use a default of `magik-session-history-length'."
         (magik-session-error-narrow-region)
         (save-excursion
           (beginning-of-line)
-          (if (looking-at (concat "^\\*\\*\\*\\*.*" "on line" " \\([0-9]+\\)$"))
-              (progn
-                (setq line-col (magik-session-error-line-col (string-to-number (match-string-no-properties 1)))
-                      file (and (save-excursion (re-search-backward "Loading \\(.*\\)" nil t))
-                                (match-string-no-properties 1)))
-                (if (file-exists-p file)
-                    (setq buf (or (find-buffer-visiting file) (find-file-noselect file)))
-                  (if (re-search-backward "^\\*\\*\\*\\* Emacs: buffer=\\(.*\\) file=\\(.*\\) position=\\([0-9]+\\)" nil t)
-                      (setq buf  (match-string-no-properties 1)
-                            file (match-string-no-properties 2)
-                            pos  (string-to-number (match-string-no-properties 3))
-                            line-adjust -4))))))))
+          (when (looking-at (concat "^\\*\\*\\*\\*.*" "on line" " \\([0-9]+\\)$"))
+            (setq line-col (magik-session-error-line-col (string-to-number (match-string-no-properties 1)))
+                  file (and (save-excursion (re-search-backward "Loading \\(.*\\)" nil t))
+                            (match-string-no-properties 1)))
+            (if (file-exists-p file)
+                (setq buf (or (find-buffer-visiting file) (find-file-noselect file)))
+              (when (re-search-backward "^\\*\\*\\*\\* Emacs: buffer=\\(.*\\) file=\\(.*\\) position=\\([0-9]+\\)" nil t)
+                (setq buf  (match-string-no-properties 1)
+                      file (match-string-no-properties 2)
+                      pos  (string-to-number (match-string-no-properties 3))
+                      line-adjust -4)))))))
     (or file
         (error "No Error on this line to go to"))
     (pop-to-buffer buf)

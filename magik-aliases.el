@@ -158,10 +158,9 @@ You can customise magik-aliases-mode with the magik-aliases-mode-hook.
 
 (defun magik-aliases-kill-buffer ()
   "Function to run when an Aliases mode buffer is run."
-  (if (eq major-mode 'magik-aliases-mode)
-      (progn
-        (setq major-mode 'fundamental-mode) ; prevent current buffer being listed.
-        (magik-aliases-update-sw-menu))))
+  (when (derived-mode-p 'magik-aliases-mode)
+    (setq major-mode 'fundamental-mode) ; prevent current buffer being listed.
+    (magik-aliases-update-sw-menu)))
 
 (defun magik-aliases-n ()
   "If buffer is read-only goto next alias, else insert SPC."
@@ -359,8 +358,7 @@ Returns nil if FILE can't be expanded."
         (goto-char (point-min))
         (while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
           (setq lp (match-string-no-properties 1))
-          (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
-              (progn
+          (when (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
                 (setq pt (point))
                 (end-of-line)
                 (skip-syntax-backward "-")
@@ -396,35 +394,34 @@ Returns nil if FILE can't be expanded."
       (let (paths pt dir etc-dir)
         (goto-char (point-min))
         (while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
-          (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
-              (progn
-                (setq pt (point))
-                (end-of-line)
-                (skip-syntax-backward "-")
-                (skip-chars-backward "/\\") ;avoid trailing directory character.
-                (setq dir
-                      (magik-aliases-expand-file
-                       (buffer-substring-no-properties pt (point)))
-                      etc-dir (concat dir (if (eq system-type 'windows-nt)
-                                              "/etc/x86"
-                                            "/etc/Linux.x86")))
-                (if (file-directory-p etc-dir)
-                    (push etc-dir paths)))))
+          (when (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
+            (setq pt (point))
+            (end-of-line)
+            (skip-syntax-backward "-")
+            (skip-chars-backward "/\\") ;avoid trailing directory character.
+            (setq dir
+                  (magik-aliases-expand-file
+                   (buffer-substring-no-properties pt (point)))
+                  etc-dir (concat dir (if (eq system-type 'windows-nt)
+                                          "/etc/x86"
+                                        "/etc/Linux.x86")))
+            (when (file-directory-p etc-dir)
+              (push etc-dir paths))))
         paths))))
 
 (defun magik-aliases-update-menu ()
   "Update the dynamic Aliases submenu."
   (interactive)
-  (if (eq major-mode 'magik-aliases-mode)
-      (let ((aliases (magik-aliases-list))
-            entries def)
-        (while aliases
-          (setq def (car aliases)
-                aliases (cdr aliases)
-                entries (nconc entries (list (vector def (list 'magik-aliases-run-program def) t)))))
-        (easy-menu-change (list "Aliases")
-                          "Definitions"
-                          (or entries (list "No Aliases found"))))))
+  (when (derived-mode-p 'magik-aliases-mode)
+    (let ((aliases (magik-aliases-list))
+          entries def)
+      (while aliases
+        (setq def (car aliases)
+              aliases (cdr aliases)
+              entries (nconc entries (list (vector def (list 'magik-aliases-run-program def) t)))))
+      (easy-menu-change (list "Aliases")
+                        "Definitions"
+                        (or entries (list "No Aliases found"))))))
 
 (defun magik-aliases-update-sw-menu ()
   "Update `Alias Files' submenu in SW menu bar."

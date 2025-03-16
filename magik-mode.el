@@ -1157,11 +1157,10 @@ Optional argument GIS ..."
             (t ;no "on line" errors found.
              nil)))
 
-    (if pt
-        (progn
-          (pop-to-buffer gis)
-          (goto-char pt)
-          (magik-gis-error-goto)))))
+    (when pt
+      (pop-to-buffer gis)
+      (goto-char pt)
+      (magik-gis-error-goto))))
 
 (defun magik-perform-replace-no-set-mark (from to regexp-flag)
   "Like `perform-replace' but without setting the mark.
@@ -1223,37 +1222,36 @@ The rule is that the thing must start against the left margin."
       ((original-point (point))
        (beg (point))
        (stack nil))
-    (if (re-search-backward "^\\w" nil t)
-        (progn
-          (setq beg (point))
-          (forward-line -1)
-          (while
-              (and (not (bobp))
-                   (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
-            (setq beg (point))
-            (forward-line -1))
-          (goto-char beg)
-          (while
-              (and (not (eq (point) (point-max)))
-                   (or (< (point) original-point)
-                       stack))
-            (dolist (tok (magik-tokenise-line))
-              (cond
-               ((assoc (car tok) magik-begins-and-ends)
-                (push (car tok) stack))
-               ((assoc (car tok) magik-ends-and-begins)
-                (if (equal (cdr (assoc (car stack) magik-begins-and-ends)) (car tok))
-                    (pop stack)
-                  (goto-char (cdr tok))
-                  (error "Found '%s' when expecting '%s'"
-                         (car tok)
-                         (cdr (assoc (car stack) magik-begins-and-ends)))))))
-            (forward-line))
-          (if (< (point) original-point)
-              (progn
-                (goto-char original-point)
-                (error "Don't know what to transmit"))
-            (magik-transmit-region beg (point)))))
+    (when (re-search-backward "^\\w" nil t)
+      (setq beg (point))
+      (forward-line -1)
+      (while
+          (and (not (bobp))
+               (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
+        (setq beg (point))
+        (forward-line -1))
+      (goto-char beg)
+      (while
+          (and (not (eq (point) (point-max)))
+               (or (< (point) original-point)
+                   stack))
+        (dolist (tok (magik-tokenise-line))
+          (cond
+           ((assoc (car tok) magik-begins-and-ends)
+            (push (car tok) stack))
+           ((assoc (car tok) magik-ends-and-begins)
+            (if (equal (cdr (assoc (car stack) magik-begins-and-ends)) (car tok))
+                (pop stack)
+              (goto-char (cdr tok))
+              (error "Found '%s' when expecting '%s'"
+                     (car tok)
+                     (cdr (assoc (car stack) magik-begins-and-ends)))))))
+        (forward-line))
+      (if (< (point) original-point)
+          (progn
+            (goto-char original-point)
+            (error "Don't know what to transmit"))
+        (magik-transmit-region beg (point))))
     (goto-char original-point)))
 (defalias 'transmit-thing-to-magik 'magik-transmit-thing)
 
@@ -1596,8 +1594,8 @@ If PT is given, goto that char position."
           (while
               (and (looking-at regexp-str)
                    (zerop (forward-line -1))))
-          (if (not (looking-at regexp-str))
-              (forward-line 1))
+          (unless (looking-at regexp-str)
+            (forward-line 1))
           (setq beg (point))
           (while
               (and (looking-at regexp-str)
@@ -1963,22 +1961,21 @@ handled by auto-complete refining the list of all possible matches,
 without recourse to the class browser."
   (let ((exemplar (magik-ac-exemplar-near-point))
         (ac-prefix ac-prefix))
-    (if exemplar
-        (progn
-          (setq ac-prefix (concat exemplar  "." (if (> (length ac-prefix) 0) (substring ac-prefix 0 1))))
-          (if (and magik-ac-class-method-source-cache
-                   (equal (concat " " ac-prefix) (car magik-ac-class-method-source-cache)))
-              ;; Reuse cache.
-              magik-ac-class-method-source-cache
-            ;; reset cache
-            (setq magik-ac-class-method-source-cache (magik-cb-ac-method-candidates)))))))
+    (when exemplar
+      (setq ac-prefix (concat exemplar  "." (if (> (length ac-prefix) 0) (substring ac-prefix 0 1))))
+      (if (and magik-ac-class-method-source-cache
+               (equal (concat " " ac-prefix) (car magik-ac-class-method-source-cache)))
+          ;; Reuse cache.
+          magik-ac-class-method-source-cache
+        ;; reset cache
+        (setq magik-ac-class-method-source-cache (magik-cb-ac-method-candidates))))))
 
 (defun magik-ac-object-source-init ()
   "Initialisation function for obtaining all Magik Objects.
 For use in auto-complete-mode."
-  (if (magik-cb-ac-start-process)
-      (let ((ac-prefix "sw:object"))
-        (setq magik-ac-object-source-cache (magik-cb-ac-class-candidates)))))
+  (when (magik-cb-ac-start-process)
+    (let ((ac-prefix "sw:object"))
+      (setq magik-ac-object-source-cache (magik-cb-ac-class-candidates)))))
 
 (defun magik-ac-object-prefix ()
   "Detect if point is at a possible object, allowing for a package: prefix."

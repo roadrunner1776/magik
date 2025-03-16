@@ -41,10 +41,9 @@ Using S as the filter string."
                            (t
                             nil))))
           (setq magik-cb-filter-str ""
-                magik-cb--ac-candidates (if fn
-                                            (progn
-                                              (insert-file-contents (magik-cb-temp-file-name p) nil nil nil t)
-                                              (funcall fn)))))
+                magik-cb--ac-candidates (when fn
+                                          (insert-file-contents (magik-cb-temp-file-name p) nil nil nil t)
+                                          (funcall fn))))
       (setq magik-cb-filter-str ""
             magik-cb--ac-candidates (if (eq magik-cb--ac-candidates 'unset) nil magik-cb--ac-candidates)))))
 
