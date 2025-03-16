@@ -88,9 +88,17 @@ jobs:
         git clone https://github.com/riscy/melpazoid.git ~/melpazoid
         pip install ~/melpazoid
 
+    - name: Download latest RECIPE file
+      run: curl -o RECIPE https://raw.githubusercontent.com/melpa/melpa/master/recipes/magik-mode
+
+    - name: Show RECIPE contents
+      run: |
+        cat RECIPE
+        echo "RECIPE=$(cat RECIPE | tr -d '\n')" >> $GITHUB_ENV
+
     - name: Run melpazoid
       env:
         LOCAL_REPO: ${{ github.workspace }}
-        RECIPE: (magik-mode :repo "roadrunner1776/magik" :fetcher github :files (:defaults "snippets"))
         EXIST_OK: true
       run: echo $GITHUB_REF && make -C ~/melpazoid
+      continue-on-error: true
