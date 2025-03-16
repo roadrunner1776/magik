@@ -888,8 +888,8 @@ Optional argument ARG .."
 (defun magik-newline ()
   "Insert a newline and indent.  (To insert a newline and not indent, use \\[electric-newline-and-maybe-indent])."
   (interactive "*")
-  (if (eq major-mode 'magik-session-mode)
-      (error "Your Magik shell buffer has got into magik-mode! To recover, type `M-x magik-session-mode'.  Please report this bug"))
+  (when (derived-mode-p 'magik-session-mode)
+    (error "Your Magik shell buffer has got into magik-mode! To recover, type `M-x magik-session-mode'.  Please report this bug"))
   (if abbrev-mode (save-excursion (expand-abbrev)))
   (if (save-excursion
         (back-to-indentation)
@@ -949,12 +949,12 @@ you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recal
   (interactive
    (list
     (read-string "Method Name: " (current-word))
-    (if current-prefix-arg
-        (read-string "Class Name: "
-                     (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
+    (when current-prefix-arg
+      (read-string "Class Name: "
+                   (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
 
-  (if class nil
-    (setq class (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
+  (when class nil
+        (setq class (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
   (let* ((method-cons (magik-method-name-type method))
          (method-root (car method-cons))
          (method-type (cdr method-cons))
@@ -1282,7 +1282,8 @@ If \\='end, then point is left at the end of the method.
 Otherwise, point is left where it is."
   (interactive)
   ;;DEBUG (message "this %s, last %s" this-command last-command)
-  (if (eq last-command 'magik-transmit-method-first) (magik-forward-endmethod))
+  (when (eq last-command 'magik-transmit-method-first)
+    (magik-forward-endmethod))
   (let ((magik-mark-method-exchange nil)
         mark)
     (save-excursion
@@ -1938,18 +1939,18 @@ provide extra control over the name that appears in the index."
             exemplar)
         (goto-char pt)
         ;; Usefully skip over various syntax types:
-        (if (not (zerop (skip-syntax-backward "w_().")))
-            (setq variable (buffer-substring-no-properties (point) pt)))
-        (if variable
-            (setq exemplar (cond ((equal variable "_self")
-                                  (or (cadr (magik-current-method-name))
-                                      (file-name-sans-extension (buffer-name))))
-                                 ((member variable magik-ac-object-source-cache)
-                                  variable)
-                                 ((re-search-backward (concat (regexp-quote variable) "\\s-*^?<<[ \t\n]*\\(\\S-+\\)\\.new") nil t)
-                                  (buffer-substring-no-properties (match-beginning 1) (match-end 1)))
-                                 (t
-                                  nil))))
+        (unless (zerop (skip-syntax-backward "w_()."))
+          (setq variable (buffer-substring-no-properties (point) pt)))
+        (when variable
+          (setq exemplar (cond ((equal variable "_self")
+                                (or (cadr (magik-current-method-name))
+                                    (file-name-sans-extension (buffer-name))))
+                               ((member variable magik-ac-object-source-cache)
+                                variable)
+                               ((re-search-backward (concat (regexp-quote variable) "\\s-*^?<<[ \t\n]*\\(\\S-+\\)\\.new") nil t)
+                                (buffer-substring-no-properties (match-beginning 1) (match-end 1)))
+                               (t
+                                nil))))
         exemplar))))
 
 (defun magik-ac-class-method-source ()
@@ -2007,8 +2008,8 @@ For use in auto-complete-mode.  Once initialised this variable is not refreshed.
 
 (defun magik-ac-raise-condition-prefix ()
   "Detect if point is at a condition.raise."
-  (if (re-search-backward "condition\\.raise(\\s-*:\\(\\sw+\\)\\=" nil t)
-      (match-beginning 1)))
+  (when (re-search-backward "condition\\.raise(\\s-*:\\(\\sw+\\)\\=" nil t)
+    (match-beginning 1)))
 
 (defun magik-ac-global-source-init ()
   "Initialisation function for obtaining all Magik Conditions.
@@ -2023,11 +2024,11 @@ For use in auto-complete-mode.  Once initialised this variable is not refreshed.
 (defun magik-ac-dynamic-prefix ()
   "Detect if point is at !..! dynamic point."
   (let (pt)
-    (if (and (re-search-backward "\\Sw\\(!\\sw*\\)\\=" nil t)
-             (not (eq (following-char) ?.))
-             (setq pt (match-beginning 1))
-             (not (equal ":" (buffer-substring-no-properties pt (1+ pt)))))
-        pt)))
+    (when (and (re-search-backward "\\Sw\\(!\\sw*\\)\\=" nil t)
+               (not (eq (following-char) ?.))
+               (setq pt (match-beginning 1))
+               (not (equal ":" (buffer-substring-no-properties pt (1+ pt)))))
+      pt)))
 
 (defun magik-ac-complete ()
   "Auto-complete command for Magik entities."
@@ -2067,9 +2068,9 @@ Translate it and the closing bracket into the new \"{...}\" notation."
   "Expand `yasnippet` if possible, otherwise insert a space.
 Prevents expansion inside strings and comments."
   (interactive)
-  (if (or (magik--in-string-or-comment-p)
-          (not (yas-expand)))
-      (self-insert-command 1)))
+  (when (or (magik--in-string-or-comment-p)
+            (not (yas-expand)))
+    (self-insert-command 1)))
 
 ;;; Package initialisation
 (define-abbrev-table 'magik-base-mode-abbrev-table
@@ -2083,8 +2084,8 @@ Prevents expansion inside strings and comments."
   "Abbrev table for Magik mode."
   :regexp "\\<\\([+[:word:]]+\\)")
 
-(if magik-under-as-char
-    (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
+(when magik-under-as-char
+  (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
 (modify-syntax-entry ?\\ "." magik-base-mode-syntax-table) ;; \ is not an escape character in magik mode.
 (modify-syntax-entry ?? "w" magik-base-mode-syntax-table)
 (modify-syntax-entry ?! "w" magik-base-mode-syntax-table)
@@ -2178,7 +2179,7 @@ Prevents expansion inside strings and comments."
 (defun magik--snippets-initialize ()
   "Initialize the Magik snippets."
   (let ((snip-dir (expand-file-name "snippets" (file-name-directory (or load-file-name (buffer-file-name))))))
-   (when (boundp 'yas-snippet-dirs)
+    (when (boundp 'yas-snippet-dirs)
       (add-to-list 'yas-snippet-dirs snip-dir t))
     (yas-load-directory snip-dir)))
 

@@ -279,8 +279,8 @@ installation directory suitable for selection."
     (let ((inhibit-read-only t))
       (insert (format magik-version-file-format name version root))
       (save-buffer)))
-  (if (eq major-mode 'magik-version-mode)
-      (magik-version-selection)))
+  (when (derived-mode-p 'magik-version-mode)
+    (magik-version-selection)))
 
 (defun magik-version-file-open ()
   "Open the magik-version-file to edit."
@@ -312,8 +312,8 @@ Will set `gis-version-file' to FILE."
   (setq buffer-read-only nil)
   (erase-buffer)
   (insert magik-version-help)
-  (if (and magik-version-file magik-version-help-file-add)
-      (insert "\n" magik-version-help-file-add "\n"))
+  (when (and magik-version-file magik-version-help-file-add)
+    (insert "\n" magik-version-help-file-add "\n"))
 
   (save-excursion
     (save-match-data
@@ -501,16 +501,16 @@ Used before running a GIS process."
 (defun magik-versions-update-menu ()
   "Update the dynamic Versions submenu."
   (interactive)
-  (if (eq major-mode 'magik-version-mode)
-      (let ((versions (magik-versions-list))
-            entries def)
-        (while versions
-          (setq def (car versions)
-                versions (cdr versions)
-                entries (nconc entries (list (vector def (list 'magik-version-select def) t)))))
-        (easy-menu-change (list "Environment")
-                          "Definitions"
-                          (or entries (list "No Versions found"))))))
+  (when (derived-mode-p 'magik-version-mode)
+    (let ((versions (magik-versions-list))
+          entries def)
+      (while versions
+        (setq def (car versions)
+              versions (cdr versions)
+              entries (nconc entries (list (vector def (list 'magik-version-select def) t)))))
+      (easy-menu-change (list "Environment")
+                        "Definitions"
+                        (or entries (list "No Versions found"))))))
 
 ;;; Package initialisation
 (modify-syntax-entry ?_  "w"  magik-version-mode-syntax-table)
