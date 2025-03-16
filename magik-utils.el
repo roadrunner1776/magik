@@ -115,12 +115,14 @@ If FIRST is true just return the first one found."
     (while (looking-at "\\sw\\|\\s_")
       (forward-char 1))
     (if (re-search-backward "\\sw\\|\\s_" nil t)
-        (progn (forward-char 1)
-               (buffer-substring (point)
-                                 (progn (forward-sexp -1)
-                                        (while (looking-at "\\s'")
-                                          (forward-char 1))
-                                        (point))))
+        (progn
+          (forward-char 1)
+          (buffer-substring (point)
+                            (progn
+                              (forward-sexp -1)
+                              (while (looking-at "\\s'")
+                                (forward-char 1))
+                              (point))))
       nil)))
 
 (defun magik-utils-substitute-in-string (string)

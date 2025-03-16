@@ -1313,14 +1313,15 @@ Uses load_file to send the temp file.
 If this command is repeated before the previous file has been processed by
 Magik, another file shall be written."
   (interactive "r")
-  (magik-transmit-string (buffer-substring-no-properties beg end)
-                         (save-excursion
-                           (goto-char beg)
-                           (beginning-of-line)
-                           (magik-package-line))
-                         (lambda (f) (magik-function "load_file" f 'unset (or (buffer-file-name) 'unset)))
-                         (lambda (f) (magik-function "system.unlink" f 'false 'true))
-                         beg))
+  (magik-transmit-string
+   (buffer-substring-no-properties beg end)
+   (save-excursion
+     (goto-char beg)
+     (beginning-of-line)
+     (magik-package-line))
+   (lambda (f) (magik-function "load_file" f 'unset (or (buffer-file-name) 'unset)))
+   (lambda (f) (magik-function "system.unlink" f 'false 'true))
+   beg))
 (defalias 'transmit-region-to-magik 'magik-transmit-region)
 
 (defun magik-package-line ()
@@ -1599,9 +1600,8 @@ If PT is given, goto that char position."
           (if (not (looking-at regexp-str))
               (forward-line 1))
           (setq beg (point))
-          (while
-              (and (looking-at regexp-str)
-                   (zerop (forward-line 1))))
+          (while (and (looking-at regexp-str)
+                      (zerop (forward-line 1))))
           (fill-region-as-paragraph beg (point))))))
 
 ;;; Mods to do commenting and uncommenting in magik code (Sarfaraz).
