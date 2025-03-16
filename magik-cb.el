@@ -2157,8 +2157,8 @@ Defined in `magik-cb-current-jump'."
 (defun magik-cb-jump-clear-history ()
   "Clears `magik-cb-jump-history' and `magik-cb-current-jump' to the initial state."
   (interactive)
-  (setq magik-cb-jump-history (list '("" "")))
-  (setq magik-cb-current-jump ""))
+  (setq magik-cb-jump-history (list '("" ""))
+        magik-cb-current-jump ""))
 
 (defun magik-cb-jump-to-source ()
   "Jump to the source for the method under the cursor."

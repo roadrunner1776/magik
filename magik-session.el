@@ -747,9 +747,9 @@ there is not, prompt for a command to run, and then run it."
           (or (eq (string-match "\\[" magik-session-command) 0)
               (setq magik-session-command (concat "[" default-directory "] " magik-session-command)))
           (string-match "\\[\\([^\]]*\\)\\] *\\([^ ]*\\) *\\(.*\\)" magik-session-command)
-          (setq dir  (substring magik-session-command (match-beginning 1) (match-end 1)))
-          (setq cmd  (substring magik-session-command (match-beginning 2) (match-end 2)))
-          (setq args (substring magik-session-command (match-beginning 3) (match-end 3)))
+          (setq dir  (substring magik-session-command (match-beginning 1) (match-end 1))
+                cmd  (substring magik-session-command (match-beginning 2) (match-end 2))
+                args (substring magik-session-command (match-beginning 3) (match-end 3)))
 
           (goto-char (point-min))
           (if (re-search-forward (concat "^alias[ \t]+" (regexp-quote cmd) "[ \t]+") nil t)
