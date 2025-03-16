@@ -1179,7 +1179,7 @@ An internal function that deals with 4 cases."
   (or (get-buffer-process (current-buffer))
       (error "There is no process running in this buffer"))
   (let ((n magik-session-cmd-num)
-        mark )
+        mark)
     (while
         (progn
           (cl-incf n step)
