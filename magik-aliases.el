@@ -371,7 +371,7 @@ Returns nil if FILE can't be expanded."
                 (if (file-exists-p (concat dir "/config/gis_aliases"))
                     (let ((lp-dir (cons lp dir)))
                       (or (member lp-dir alist) (push lp-dir alist))))))
-        alist))))
+        alist)))))
 
 (defun magik-aliases-layered-products-acp-path (file)
   "Read LAYERED_PRODUCTS configuration file.
