@@ -378,16 +378,15 @@ LAYERED_PRODUCTS configuration file."
         (goto-char (point-min))
         (while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
           (setq lp (match-string-no-properties 1))
-          (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
-              (progn
-                (setq pt (point))
-                (end-of-line)
-                (skip-syntax-backward "-")
-                (skip-chars-backward "/\\") ;avoid trailing directory character.
-                (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)) smallworld-gis))
-                (when (file-exists-p (file-name-concat dir "config" "gis_aliases"))
-                  (let ((lp-dir (cons lp dir)))
-                    (or (member lp-dir alist) (push lp-dir alist)))))))
+          (when (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
+            (setq pt (point))
+            (end-of-line)
+            (skip-syntax-backward "-")
+            (skip-chars-backward "/\\") ;avoid trailing directory character.
+            (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)) smallworld-gis))
+            (when (file-exists-p (file-name-concat dir "config" "gis_aliases"))
+              (let ((lp-dir (cons lp dir)))
+                (or (member lp-dir alist) (push lp-dir alist))))))
         (nreverse alist)))))
 
 (defun magik-aliases-all-layered-products (smallworld-gis)
@@ -422,18 +421,17 @@ configuration file and return paths to append to variable `exec-path'."
       (let (paths pt dir etc-dir)
         (goto-char (point-min))
         (while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
-          (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
-              (progn
-                (setq pt (point))
-                (end-of-line)
-                (skip-syntax-backward "-")
-                (skip-chars-backward "/\\") ;avoid trailing directory character.
-                (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)) smallworld-gis)
-                      etc-dir (file-name-concat dir "etc" (if (eq system-type 'windows-nt)
-                                                              "x86"
-                                                            "Linux.x86")))
-                (if (file-directory-p etc-dir)
-                    (push etc-dir paths)))))
+          (when (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
+            (setq pt (point))
+            (end-of-line)
+            (skip-syntax-backward "-")
+            (skip-chars-backward "/\\") ;avoid trailing directory character.
+            (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)) smallworld-gis)
+                  etc-dir (file-name-concat dir "etc" (if (eq system-type 'windows-nt)
+                                                          "x86"
+                                                        "Linux.x86")))
+            (when (file-directory-p etc-dir)
+              (push etc-dir paths))))
         paths))))
 
 (defun magik-aliases--update-show-trailing-whitespace ()

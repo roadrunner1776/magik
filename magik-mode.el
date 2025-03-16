@@ -1094,11 +1094,10 @@ Optional argument GIS ..."
             (t ;no "on line" errors found.
              nil)))
 
-    (if pt
-        (progn
-          (pop-to-buffer gis)
-          (goto-char pt)
-          (magik-gis-error-goto)))))
+    (when pt
+      (pop-to-buffer gis)
+      (goto-char pt)
+      (magik-gis-error-goto))))
 
 (defun magik-perform-replace-no-set-mark (from to regexp-flag)
   "Like `perform-replace' but without setting the mark.
@@ -1520,8 +1519,8 @@ If PT is given, goto that char position."
           (while
               (and (looking-at regexp-str)
                    (zerop (forward-line -1))))
-          (if (not (looking-at regexp-str))
-              (forward-line 1))
+          (unless (looking-at regexp-str)
+            (forward-line 1))
           (setq beg (point))
           (while (and (looking-at regexp-str)
                       (zerop (forward-line 1))))
