@@ -110,8 +110,7 @@ concrete implementations."
                                     magik-ac-dynamic-source
                                     magik-ac-global-source
                                     magik-ac-object-source
-                                    magik-ac-raise-condition-source
-                                    )
+                                    magik-ac-raise-condition-source)
                                   (and (boundp 'ac-sources)
                                        ac-sources))
 
@@ -461,8 +460,7 @@ concrete implementations."
     ("pragma" .
      "^_pragma(.*)")
     ("def_slotted_exemplar" .
-     "^[sw:]?def_slotted_exemplar(.*")
-    )
+     "^[sw:]?def_slotted_exemplar(.*"))
   "List of regexp strings which can be used for searching.
 In a buffer searching for a Magik-specific.")
 
@@ -559,8 +557,7 @@ constants which use the `font-lock-constant-face' face."
                  (mapconcat 'identity magik-warnings "\\|")
                  "\\)")
          0 ''magik-warning-face t)
-   '("^\\s-*##.*$" 0 'magik-doc-face t)
-   )
+   '("^\\s-*##.*$" 0 'magik-doc-face t))
   "Font lock setting for 2nd level of Magik fontification.
 Fontifies certain Magik language features like symbols, dynamics but does
 NOT fontify ANY Magik Keywords."
@@ -599,8 +596,7 @@ See `magik-font-lock-keywords-1' and `magik-font-lock-keywords-2'."
     '("\\<\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\?\\>" 0 'magik-boolean-face t)
     '("_for\\s-+\\(\\sw+\\)" 1 'magik-variable-face) ;; _for loop variable
     '("@\\s-*\\sw+" 0 'magik-global-reference-face t)
-    '(">>" 0 'magik-keyword-arguments-face t)
-    ))
+    '(">>" 0 'magik-keyword-arguments-face t)))
   "Font lock setting for 4th level of Magik fontification.
 As 1st level but also fontifies all Magik keywords according their
 different classifications, e.g. loop keywords are fontified in the same face."
@@ -637,8 +633,7 @@ Based from `magik-font-lock-keywords-4'."
     ("()"      . "(")
     ("()<<"    . "([^\)]*)\\s-*<<")
     ("()^<<"   . "([^\)]*)\\s-*^<<")
-    (""        . "\r?\n")
-    )
+    (""        . "\r?\n"))
   "Alist to help searching for method types.")
 
 (defvar magik-transmit-method-eom-alist
