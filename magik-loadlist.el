@@ -142,7 +142,8 @@ With a prefix ARG accept all changes without prompting."
   (unless dir
     (setq dir (file-name-directory (buffer-file-name))))
   ;;Do not bother prompting if buffer is empty.
-  (if (zerop (buffer-size)) (setq arg t))
+  (when (zerop (buffer-size))
+    (setq arg t))
 
   (let ((buflist (magik-loadlist-buffer-list))
         updated

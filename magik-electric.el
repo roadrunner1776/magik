@@ -292,16 +292,16 @@ If it's the first '#' and the previous line starts with '#', align with it."
                 ((re-search-backward "def_mixin\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
                  (setq class (match-string 2)))
                 (t nil)))
-        (if (and class
-                 (eq line 'prev_class_name))
-            (insert class "."))
-        (if (and class
-                 (eq line 'prev_class_name_as_symbol))
-            (insert ":" class))))
+        (when (and class
+                   (eq line 'prev_class_name))
+          (insert class "."))
+        (when (and class
+                   (eq line 'prev_class_name_as_symbol))
+          (insert ":" class))))
      ((eq line 'filename_as_symbol)
       (let ((name (if (not (buffer-file-name)) "" (file-name-nondirectory (buffer-file-name)))))
-        (if (string-match "\\.magik$" name)
-            (setq name (substring name 0 (- (length name) 6))))
+        (when (string-match "\\.magik$" name)
+          (setq name (substring name 0 (- (length name) 6))))
         (insert ":" name)))
      ((eq (string-to-char line) ?\t)
       (indent-to (+ col magik-indent-level))

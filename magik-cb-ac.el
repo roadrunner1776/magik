@@ -149,18 +149,19 @@ Stores process object in `magik-cb-ac-process'."
            nil))
 
     ;; Handle << assignment like signatures - take first required argument
-    (if (and signature-p (equal (substring signature -1) "<"))
-        (setq assignment (car required)
-              required (cdr required)))
-    (if documentation
-        (while (string-match "^ +## " documentation)
-          (setq documentation (replace-match "" nil nil documentation))))
-    (if gather
-        ;; prefix rest args with _gather and convert to a list.
-        (setq gather (list (concat "_gather " gather))))
-    (if optional
-        ;; prefix first optional arg with _optional
-        (setcar optional (concat "_optional " (car optional))))
+    (when (and signature-p
+               (equal (substring signature -1) "<"))
+      (setq assignment (car required)
+            required (cdr required)))
+    (when documentation
+      (while (string-match "^ +## " documentation)
+        (setq documentation (replace-match "" nil nil documentation))))
+    (when gather
+      ;; prefix rest args with _gather and convert to a list.
+      (setq gather (list (concat "_gather " gather))))
+    (when optional
+      ;; prefix first optional arg with _optional
+      (setcar optional (concat "_optional " (car optional))))
     ;; TODO handle arrays [], []<< etc.
     (concat
      (cond ((equal class "<condition>")

@@ -65,7 +65,7 @@ Right now apropos() and print_local_methods()."
   :version "28.1"
   (when (bound-and-true-p magik-session-extras)
     (magik-session-extras--activate))
-  (when (not (bound-and-true-p magik-session-extras))
+  (unless (bound-and-true-p magik-session-extras)
     (magik-session-extras--deactivate)))
 
 (defun magik-session-extras-newline (fn &rest args)
