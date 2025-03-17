@@ -772,6 +772,8 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
 Returns process object.
 BUFFER may be nil, in which case only the process is started."
   (let* ((program (magik-cb--executable-find command smallworld-gis)))
+    (unless program
+      (error "The '%s' executable couldn't be found" command))
     (compat-call setq-local magik-cb-process (apply 'start-process "cb" buffer program args))
     (set-process-filter        magik-cb-process 'magik-cb-filter)
     (set-process-sentinel      magik-cb-process 'magik-cb-sentinel)
@@ -2327,17 +2329,16 @@ Cut out trailing comments etc."
   (save-excursion (magik-cb-set-buffer-c) (buffer-string)))
 
 (defun magik-cb-method-finder-version (smallworld-gis)
-  "Return as a string the version of the method_finder using SMALLWORLD-GIS."
+  "Return the version of the method_finder as a string using SMALLWORLD-GIS."
   (let ((program (magik-cb--executable-find "method_finder" smallworld-gis)))
-    (with-current-buffer (get-buffer-create " *method finder version*")
-      (erase-buffer)
+    (unless program
+      (error "The 'method_finder' executable couldn't be found"))
+    (with-temp-buffer
       (call-process program nil t nil "-v")
       (goto-char (point-min))
-      (prog1
-          (if (re-search-forward "[0-9.]+" nil t)
-              (buffer-substring (match-beginning 0) (match-end 0))
-            "unknown - using call-process on the method_finder failed")
-        (kill-buffer (current-buffer))))))
+      (if (re-search-forward "[0-9.]+" nil t)
+          (buffer-substring (match-beginning 0) (match-end 0))
+        (error "Using call-process on the method_finder failed")))))
 
 (defun magik-cb-temp-file-name (p)
   "The filename the method_finder uses to pass data back to the class browser."
