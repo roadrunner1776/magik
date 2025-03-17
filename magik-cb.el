@@ -2138,17 +2138,17 @@ Defined in `magik-cb-current-jump'."
                (setq magik-cb-current-jump (nth 0 (nth (- current-pos 1) magik-cb-jump-history))))
       (message "Already at the most recent method jump!"))))
 
-(defun magik-cb-jump-select (arg)
-  "Jumps to the method definition of the selected method jump."
+(defun magik-cb-jump-select (jump)
+  "Jumps to the method definition of the selected method JUMP."
   (interactive (list (completing-read "Jump to: " magik-cb-jump-history)))
-  (magik-cb-send-string (nth 1 (assoc arg magik-cb-jump-history)))
-  (setq magik-cb-current-jump arg))
+  (magik-cb-send-string (nth 1 (assoc jump magik-cb-jump-history)))
+  (setq magik-cb-current-jump jump))
 
-(defun magik-cb-ido-jump-select (arg)
-  "Ido version the magik-cb-jump-select function."
+(defun magik-cb-ido-jump-select (jump)
+  "Ido version the magik-cb-jump-select function using JUMP."
   (interactive (list (ido-completing-read "Jump to: " magik-cb-jump-history)))
-  (magik-cb-send-string (nth 1 (assoc arg magik-cb-jump-history)))
-  (setq magik-cb-current-jump arg))
+  (magik-cb-send-string (nth 1 (assoc jump magik-cb-jump-history)))
+  (setq magik-cb-current-jump jump))
 
 (defun magik-cb-jump-clear-history ()
   "Clears `magik-cb-jump-history' and `magik-cb-current-jump' to the initial state."
