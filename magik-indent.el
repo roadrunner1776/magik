@@ -197,7 +197,8 @@ and this line doesn't start with something like \"_endif\" or \"}\" or \"_then\"
 
      ((and (equal last-str "\n")
            (equal penul-str "_then")
-           (or (equal (caar toks) "_if") (equal (caar toks) "_elif")))
+           (or (equal (caar toks) "_if")
+               (equal (caar toks) "_elif")))
       (goto-char (cdr (cl-first toks)))
       (+ (current-column) magik-indent-level))
 
@@ -286,16 +287,21 @@ the lowest level-operators."
              (t3 (car (cl-third toks)))
              (t4 (car (cl-fourth toks))))
           (cond
-           ((and (equal t4 "_abstract") (equal t3 "_private") (equal t2 "_iter"))
+           ((and (equal t4 "_abstract")
+                 (equal t3 "_private")
+                 (equal t2 "_iter"))
             (goto-char (cdr (cl-fourth toks)))
             (cl-fourth toks))
-           ((and (equal t3 "_private") (equal t2 "_iter"))
+           ((and (equal t3 "_private")
+                 (equal t2 "_iter"))
             (goto-char (cdr (cl-third toks)))
             (cl-third toks))
-           ((and (equal t3 "_abstract") (equal t2 "_iter"))
+           ((and (equal t3 "_abstract")
+                 (equal t2 "_iter"))
             (goto-char (cdr (cl-third toks)))
             (cl-third toks))
-           ((and (equal t3 "_abstract") (equal t2 "_private"))
+           ((and (equal t3 "_abstract")
+                 (equal t2 "_private"))
             (goto-char (cdr (cl-third toks)))
             (cl-third toks))
            ((member t2 '("_abstract" "_private" "_iter"))
@@ -416,8 +422,7 @@ Add a newline token unless the last token is an operator."
                       (number-to-string (point))))
               (t
                (setq new-state state)))
-        (if
-            (eq new-state 'stay)
+        (if (eq new-state 'stay)
             ()
           (cond
            ((eq new-state 'neutral)
