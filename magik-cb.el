@@ -2364,7 +2364,7 @@ See the variable `magik-cb-generalise-file-name-alist' for more customisation."
                                    (with-current-buffer buffer
                                      (substring default-directory 0 2))
                                  (substring default-directory 0 2))))
-              (concat drive-name f))))
+              (file-name-concat drive-name f))))
       (if (string-match "^[a-zA-Z]:" f)
           (setq f (substring f 2)))
       (subst-char-in-string ?\\ ?/ f t))))
