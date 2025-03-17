@@ -2122,8 +2122,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
   "Jumps to the method definition of the method jump before the method jump.
 Defined in `magik-cb-current-jump'."
   (interactive)
-  (let (
-        (current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
+  (let ((current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
     (if (not (eq (length magik-cb-jump-history) current-pos))
         (progn (magik-cb-send-string (nth 1 (nth (+ current-pos 1) magik-cb-jump-history)))
                (setq magik-cb-current-jump (nth 0 (nth (+ current-pos 1) magik-cb-jump-history))))
@@ -2133,8 +2132,7 @@ Defined in `magik-cb-current-jump'."
   "Jumps to the method definition of the method jump after the method jump.
 Defined in `magik-cb-current-jump'."
   (interactive)
-  (let (
-        (current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
+  (let ((current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
     (if (not (eq 0 current-pos))
         (progn (magik-cb-send-string (nth 1 (nth (- current-pos 1) magik-cb-jump-history)))
                (setq magik-cb-current-jump (nth 0 (nth (- current-pos 1) magik-cb-jump-history))))

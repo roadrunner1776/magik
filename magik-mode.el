@@ -1308,14 +1308,15 @@ Uses load_file to send the temp file.
 If this command is repeated before the previous file has been processed by
 Magik, another file shall be written."
   (interactive "r")
-  (magik-transmit-string (buffer-substring-no-properties beg end)
-                         (save-excursion
-                           (goto-char beg)
-                           (beginning-of-line)
-                           (magik-package-line))
-                         (lambda (f) (magik-function "load_file" f 'unset (or (buffer-file-name) 'unset)))
-                         (lambda (f) (magik-function "system.unlink" f 'false 'true))
-                         beg))
+  (magik-transmit-string
+   (buffer-substring-no-properties beg end)
+   (save-excursion
+     (goto-char beg)
+     (beginning-of-line)
+     (magik-package-line))
+   (lambda (f) (magik-function "load_file" f 'unset (or (buffer-file-name) 'unset)))
+   (lambda (f) (magik-function "system.unlink" f 'false 'true))
+   beg))
 (defalias 'transmit-region-to-magik 'magik-transmit-region)
 
 (defun magik-package-line ()
@@ -1582,9 +1583,8 @@ If PT is given, goto that char position."
           (if (not (looking-at regexp-str))
               (forward-line 1))
           (setq beg (point))
-          (while
-              (and (looking-at regexp-str)
-                   (zerop (forward-line 1))))
+          (while (and (looking-at regexp-str)
+                      (zerop (forward-line 1))))
           (fill-region-as-paragraph beg (point))))))
 
 ;;; Mods to do commenting and uncommenting in magik code (Sarfaraz).
@@ -1605,21 +1605,24 @@ If PT is given, goto that char position."
     (cl-decf nlines)
     (beginning-of-line 1)
     (skip-chars-forward "\t")
-    (if (char-equal (char-after (point)) ?# ) (delete-char 1))
+    (if (char-equal (char-after (point)) ?# )
+        (delete-char 1))
     (forward-line 1)))
 
 (defun magik-comment-region()
   "Puts # in first column of each line in the region."
   (interactive "*")
   (save-excursion
-    (if (> (point) (mark t)) (exchange-point-and-mark))
+    (if (> (point) (mark t))
+        (exchange-point-and-mark))
     (magik-comment (count-lines (point) (mark t)))))
 
 (defun magik-uncomment-region()
   "Remove # in first column of each line in the region."
   (interactive "*")
   (save-excursion
-    (if (> (point) (mark t)) (exchange-point-and-mark))
+    (if (> (point) (mark t))
+        (exchange-point-and-mark))
     (magik-un-comment (count-lines (point) (mark t)))))
 
 (defun magik-symbol-complete (&optional buffer)
