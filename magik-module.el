@@ -44,9 +44,7 @@
 
 ;; Imenu configuration
 (defvar magik-module-imenu-generic-expression
-  '(
-    (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
-    )
+  '((nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1))
   "Imenu generic expression for Magik Message mode.
 See `imenu-generic-expression'.")
 
@@ -61,8 +59,7 @@ See `imenu-generic-expression'.")
    '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
    '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
      (1 font-lock-function-name-face)
-     (2 font-lock-constant-face))
-   )
+     (2 font-lock-constant-face)))
   "Default fontification of module.def files."
   :group 'module
   :type 'sexp)
@@ -138,9 +135,7 @@ You can customize Module Mode with the `magik-module-mode-hook`.
 
 ;; Imenu configuration
 (defvar magik-module-imenu-generic-expression
-  '(
-    (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
-    )
+  '((nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1))
   "Imenu generic expression for Magik Message mode.
 See `imenu-generic-expression'.")
 
@@ -155,8 +150,7 @@ See `imenu-generic-expression'.")
    '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
    '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
      (1 font-lock-function-name-face)
-     (2 font-lock-constant-face))
-   )
+     (2 font-lock-constant-face)))
   "Default fontification of module.def files."
   :group 'module
   :type 'sexp)

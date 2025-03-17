@@ -158,8 +158,7 @@
     ("^\\s-+\\(.*\\)\\(OPT.+\\)"
      (1 font-lock-variable-name-face)
      (2 magik-cb-font-lock-optional-face))
-    ("^\\s-+.*$" . font-lock-variable-name-face)
-    )
+    ("^\\s-+.*$" . font-lock-variable-name-face))
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)
@@ -528,8 +527,7 @@ Set METHOD and CLASS if given."
           (magik-cb-send-modeline-and-pr)
         (magik-cb-redraw-modeline))
 
-      (magik-cb-set-windows))
-    ))
+      (magik-cb-set-windows))))
 
 (defun magik-cb-new-buffer ()
   "Start a new Class Browser session."
@@ -813,7 +811,7 @@ If FILTER is given then it is set on the process."
                                                                                       (number-to-string (point-max)))))
              (magik-cb-send-load cb-file))
             (t
-             (error "cannot start CB")))
+             (error "Can't start CB")))
 
       (if magik-cb-process
           (progn
