@@ -458,7 +458,8 @@ Returns nil if FILE can't be expanded."
              do (push (vector (buffer-file-name (get-buffer buf))
                               (list 'display-buffer buf)
                               t) buffers))
-    (or (eq (length buffers) 0) (push "---" buffers))
+    (or (eq (length buffers) 0)
+        (push "---" buffers))
 
     (easy-menu-change (list "Tools" "Magik")
                       "Alias Files"
