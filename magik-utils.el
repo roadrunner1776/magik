@@ -148,7 +148,7 @@ If ERR string is given, output as an error.  %s will be replaced with FILENAME."
         file)
     (while (and path
                 (not (file-exists-p
-                      (setq file (concat (file-name-as-directory (car path)) filename)))))
+                      (setq file (file-name-concat (file-name-as-directory (car path)) filename)))))
       (setq path (cdr path)))
     (cond (path file)
           (err  (error err filename))

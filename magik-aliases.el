@@ -242,15 +242,15 @@ Optionally a DEFAULT program can be set."
         program)
     (while path
       (setq program (expand-file-name
-                     (concat (file-name-as-directory (car path)) default))
+                     (file-name-concat (file-name-as-directory (car path)) default))
             path (cdr path))
       (if (file-executable-p program)
           (setq path nil)
         (setq program nil)))
     (unless program
       (setq program (expand-file-name
-                     (concat (getenv "SMALLWORLD_GIS") "/config/"
-                             (file-name-as-directory (car magik-aliases-program-path)) magik-aliases-program)))
+                     (file-name-concat (getenv "SMALLWORLD_GIS") "config"
+                                       (file-name-as-directory (car magik-aliases-program-path)) magik-aliases-program)))
       (unless (file-executable-p program)
         (setq program nil)))
     (or program default)))
@@ -288,8 +288,9 @@ With a prefix arg, ask user for current directory to use."
              (setq alias (match-string-no-properties 1)))
             (t
              (error "Can't find any alias definitions")))
-      (if (file-exists-p (concat (file-name-directory file) "environment.bat"))
-          (setq args (append args (list "-e" (concat (file-name-directory file) "environment.bat")) nil)))
+      (let ((env-file (file-name-concat (file-name-directory file) "environment.bat")))
+        (when (file-exists-p env-file)
+          (setq args (append args (list "-e" env-file) nil))))
       (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last
 
       (if (stringp version)
@@ -368,9 +369,9 @@ Returns nil if FILE can't be expanded."
                 (setq dir
                       (magik-aliases-expand-file
                        (buffer-substring-no-properties pt (point))))
-                (if (file-exists-p (concat dir "/config/gis_aliases"))
-                    (let ((lp-dir (cons lp dir)))
-                      (or (member lp-dir alist) (push lp-dir alist)))))))
+                (when (file-exists-p (file-name-concat dir "config" "gis_aliases"))
+                  (let ((lp-dir (cons lp dir)))
+                    (or (member lp-dir alist) (push lp-dir alist)))))))
         alist))))
 
 (defun magik-aliases-layered-products-acp-path (file)
@@ -402,12 +403,10 @@ Returns nil if FILE can't be expanded."
                 (end-of-line)
                 (skip-syntax-backward "-")
                 (skip-chars-backward "/\\") ;avoid trailing directory character.
-                (setq dir
-                      (magik-aliases-expand-file
-                       (buffer-substring-no-properties pt (point)))
-                      etc-dir (concat dir (if (eq system-type 'windows-nt)
-                                              "/etc/x86"
-                                            "/etc/Linux.x86")))
+                (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)))
+                      etc-dir (file-name-concat dir "etc" (if (eq system-type 'windows-nt)
+                                                              "x86"
+                                                            "Linux.x86")))
                 (if (file-directory-p etc-dir)
                     (push etc-dir paths)))))
         paths))))
@@ -447,7 +446,7 @@ Returns nil if FILE can't be expanded."
                    (magik-aliases-expand-file magik-aliases-layered-products-file)))
         (push `[,(format "%s: %s" (car lp) (cdr lp))
                 (progn
-                  (find-file ,(concat (cdr lp) "/config/gis_aliases"))
+                  (find-file ,(file-name-concat (cdr lp) "config" "gis_aliases"))
                   (magik-aliases-mode))
                 ,(cdr lp)
                 ]
@@ -458,7 +457,8 @@ Returns nil if FILE can't be expanded."
              do (push (vector (buffer-file-name (get-buffer buf))
                               (list 'display-buffer buf)
                               t) buffers))
-    (or (eq (length buffers) 0) (push "---" buffers))
+    (or (eq (length buffers) 0)
+        (push "---" buffers))
 
     (easy-menu-change (list "Tools" "Magik")
                       "Alias Files"
