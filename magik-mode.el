@@ -110,8 +110,7 @@ concrete implementations."
                                     magik-ac-dynamic-source
                                     magik-ac-global-source
                                     magik-ac-object-source
-                                    magik-ac-raise-condition-source
-                                    )
+                                    magik-ac-raise-condition-source)
                                   (and (boundp 'ac-sources)
                                        ac-sources))
 
@@ -461,8 +460,7 @@ concrete implementations."
     ("pragma" .
      "^_pragma(.*)")
     ("def_slotted_exemplar" .
-     "^[sw:]?def_slotted_exemplar(.*")
-    )
+     "^[sw:]?def_slotted_exemplar(.*"))
   "List of regexp strings which can be used for searching.
 In a buffer searching for a Magik-specific.")
 
@@ -559,8 +557,7 @@ constants which use the `font-lock-constant-face' face."
                  (mapconcat 'identity magik-warnings "\\|")
                  "\\)")
          0 ''magik-warning-face t)
-   '("^\\s-*##.*$" 0 'magik-doc-face t)
-   )
+   '("^\\s-*##.*$" 0 'magik-doc-face t))
   "Font lock setting for 2nd level of Magik fontification.
 Fontifies certain Magik language features like symbols, dynamics but does
 NOT fontify ANY Magik Keywords."
@@ -599,8 +596,7 @@ See `magik-font-lock-keywords-1' and `magik-font-lock-keywords-2'."
     '("\\<\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\?\\>" 0 'magik-boolean-face t)
     '("_for\\s-+\\(\\sw+\\)" 1 'magik-variable-face) ;; _for loop variable
     '("@\\s-*\\sw+" 0 'magik-global-reference-face t)
-    '(">>" 0 'magik-keyword-arguments-face t)
-    ))
+    '(">>" 0 'magik-keyword-arguments-face t)))
   "Font lock setting for 4th level of Magik fontification.
 As 1st level but also fontifies all Magik keywords according their
 different classifications, e.g. loop keywords are fontified in the same face."
@@ -637,8 +633,7 @@ Based from `magik-font-lock-keywords-4'."
     ("()"      . "(")
     ("()<<"    . "([^\)]*)\\s-*<<")
     ("()^<<"   . "([^\)]*)\\s-*^<<")
-    (""        . "\r?\n")
-    )
+    (""        . "\r?\n"))
   "Alist to help searching for method types.")
 
 (defvar magik-transmit-method-eom-alist
@@ -1142,7 +1137,7 @@ Optional argument GIS ..."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
                                           'magik-session-mode
-                                          "Enter Magik process buffer:"
+                                          "Enter Magik Session buffer:"
                                           magik-session-buffer
                                           'magik-session-buffer-alist-prefix-function))
         pt)
@@ -1313,14 +1308,15 @@ Uses load_file to send the temp file.
 If this command is repeated before the previous file has been processed by
 Magik, another file shall be written."
   (interactive "r")
-  (magik-transmit-string (buffer-substring-no-properties beg end)
-                         (save-excursion
-                           (goto-char beg)
-                           (beginning-of-line)
-                           (magik-package-line))
-                         (lambda (f) (magik-function "load_file" f 'unset (or (buffer-file-name) 'unset)))
-                         (lambda (f) (magik-function "system.unlink" f 'false 'true))
-                         beg))
+  (magik-transmit-string
+   (buffer-substring-no-properties beg end)
+   (save-excursion
+     (goto-char beg)
+     (beginning-of-line)
+     (magik-package-line))
+   (lambda (f) (magik-function "load_file" f 'unset (or (buffer-file-name) 'unset)))
+   (lambda (f) (magik-function "system.unlink" f 'false 'true))
+   beg))
 (defalias 'transmit-region-to-magik 'magik-transmit-region)
 
 (defun magik-package-line ()
@@ -1340,29 +1336,19 @@ If this command is repeated before the previous file has been processed by
 Magik, another file shall be written."
   (let* ((gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
-                                           "Enter Magik process buffer:"
+                                           "Enter Magik Session buffer:"
                                            magik-session-buffer
                                            'magik-session-buffer-alist-prefix-function))
          (process (barf-if-no-gis gis process))
          (orig-buf  (buffer-name))
          (orig-file (or (buffer-file-name) ""))
          (position  (if start (number-to-string start) "1"))
-         (filename (concat (if (eq system-type 'windows-nt)
-                               (concat (getenv "TEMP") "\\T")
-                             "/tmp/t")
-                           (user-login-name)
-                           (number-to-string (process-id process))))
-         (package (or package "\n")) ;need a newline to ensure fixed number of lines for gis-goto-error
+         (filename (make-temp-file (concat "magik-transmit-"
+                                           (user-login-name)
+                                           (number-to-string (process-id process)))))
+         (package (or package "\n")) ;; Need a newline to ensure fixed number of lines for `gis-goto-error'
          (coding-system buffer-file-coding-system))
 
-    (setq filename (cl-loop
-                    with queue = 0
-                    with file  = nil
-                    do (setq file (concat filename "q" (number-to-string queue)))
-                    if (file-exists-p file)
-                    do (setq queue (1+ queue))
-                    else
-                    return file))
     (with-current-buffer (get-buffer-create " *transmit magik debug*")
       (erase-buffer)
       (setq buffer-file-coding-system coding-system)
@@ -1373,11 +1359,9 @@ Magik, another file shall be written."
               package
               str)
       (goto-char (point-min))
-      (if magik-transmit-debug-p
-          (magik-perform-replace-no-set-mark "#DEBUG" "" nil))
-      (write-region (point-min) (point-max) filename nil 'xxx)
-                                        ;(kill-buffer (current-buffer))
-      )
+      (when magik-transmit-debug-p
+        (magik-perform-replace-no-set-mark "#DEBUG" "" nil))
+      (write-region (point-min) (point-max) filename nil 'xxx))
     (message "Transmitting to %s" gis)
     (process-send-string
      process
@@ -1599,9 +1583,8 @@ If PT is given, goto that char position."
           (if (not (looking-at regexp-str))
               (forward-line 1))
           (setq beg (point))
-          (while
-              (and (looking-at regexp-str)
-                   (zerop (forward-line 1))))
+          (while (and (looking-at regexp-str)
+                      (zerop (forward-line 1))))
           (fill-region-as-paragraph beg (point))))))
 
 ;;; Mods to do commenting and uncommenting in magik code (Sarfaraz).
@@ -1622,21 +1605,24 @@ If PT is given, goto that char position."
     (cl-decf nlines)
     (beginning-of-line 1)
     (skip-chars-forward "\t")
-    (if (char-equal (char-after (point)) ?# ) (delete-char 1))
+    (if (char-equal (char-after (point)) ?# )
+        (delete-char 1))
     (forward-line 1)))
 
 (defun magik-comment-region()
   "Puts # in first column of each line in the region."
   (interactive "*")
   (save-excursion
-    (if (> (point) (mark t)) (exchange-point-and-mark))
+    (if (> (point) (mark t))
+        (exchange-point-and-mark))
     (magik-comment (count-lines (point) (mark t)))))
 
 (defun magik-uncomment-region()
   "Remove # in first column of each line in the region."
   (interactive "*")
   (save-excursion
-    (if (> (point) (mark t)) (exchange-point-and-mark))
+    (if (> (point) (mark t))
+        (exchange-point-and-mark))
     (magik-un-comment (count-lines (point) (mark t)))))
 
 (defun magik-symbol-complete (&optional buffer)
@@ -1649,7 +1635,7 @@ With a prefix arg, ask user for GIS buffer to use."
   ;; the actual completion is done by the process filter: gis-filter-completion-action
   (setq buffer (magik-utils-get-buffer-mode buffer
                                             'magik-session-mode
-                                            "Enter Magik process buffer:"
+                                            "Enter Magik Session buffer:"
                                             magik-session-buffer
                                             'magik-session-buffer-alist-prefix-function))
   (barf-if-no-gis buffer)

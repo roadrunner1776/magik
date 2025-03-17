@@ -158,8 +158,7 @@
     ("^\\s-+\\(.*\\)\\(OPT.+\\)"
      (1 font-lock-variable-name-face)
      (2 magik-cb-font-lock-optional-face))
-    ("^\\s-+.*$" . font-lock-variable-name-face)
-    )
+    ("^\\s-+.*$" . font-lock-variable-name-face))
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)
@@ -416,14 +415,14 @@ Set METHOD and CLASS if given."
     (cond ((and (integerp current-prefix-arg) (> current-prefix-arg 0))
            (setq gis (magik-utils-get-buffer-mode gis
                                                   'magik-session-mode
-                                                  "Enter Magik process buffer: "
+                                                  "Enter Magik Session buffer:"
                                                   (cond ((eq major-mode 'magik-cb-mode) (magik-cb-gis-buffer))
                                                         ((eq major-mode 'magik-session-mode) (buffer-name))
                                                         (t magik-session-buffer))
                                                   'magik-session-buffer-alist-prefix-function))
            (unless (get-buffer-process gis)
              (pop-to-buffer gis)
-             (error "There is no process running in this buffer"))
+             (error "There is no Magik Session running in this buffer"))
            (unless (get-buffer gis)
              (pop-to-buffer gis)
              (error "No Class Browser is running")))
@@ -458,7 +457,7 @@ Set METHOD and CLASS if given."
                   (if (= (length bufs) 1)
                       (caar bufs)
                     (completing-read
-                     "Enter Class Browser or Magik process buffer: "
+                     "Enter Class Browser or Magik Session buffer:"
                      visible-bufs 'cdr t)))
             (not (equal buffer "")))
            (if (equal (substring buffer 0 4) "*cb*")
@@ -479,7 +478,7 @@ Set METHOD and CLASS if given."
                          (caadr visible-bufs))
                         (t
                          (completing-read
-                          "Enter Class Browser or Magik process buffer: "
+                          "Enter Class Browser or Magik Session buffer:"
                           visible-bufs nil t))))
             (not (equal buffer "")))
            (select-frame-set-input-focus
@@ -490,7 +489,7 @@ Set METHOD and CLASS if given."
                    buffer (concat "*cb*"  buffer))))
           ((setq buffer (magik-utils-get-buffer-mode nil
                                                      'magik-cb-mode
-                                                     "Enter Class Browser buffer: "
+                                                     "Enter Class Browser buffer:"
                                                      (let ((magik-cb (concat "*cb*" magik-session-buffer)))
                                                        (if (get-buffer magik-cb) magik-cb))))
            t)
@@ -528,8 +527,7 @@ Set METHOD and CLASS if given."
           (magik-cb-send-modeline-and-pr)
         (magik-cb-redraw-modeline))
 
-      (magik-cb-set-windows))
-    ))
+      (magik-cb-set-windows))))
 
 (defun magik-cb-new-buffer ()
   "Start a new Class Browser session."
@@ -813,7 +811,7 @@ If FILTER is given then it is set on the process."
                                                                                       (number-to-string (point-max)))))
              (magik-cb-send-load cb-file))
             (t
-             (error "cannot start CB")))
+             (error "Can't start CB")))
 
       (if magik-cb-process
           (progn
@@ -2124,8 +2122,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
   "Jumps to the method definition of the method jump before the method jump.
 Defined in `magik-cb-current-jump'."
   (interactive)
-  (let (
-        (current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
+  (let ((current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
     (if (not (eq (length magik-cb-jump-history) current-pos))
         (progn (magik-cb-send-string (nth 1 (nth (+ current-pos 1) magik-cb-jump-history)))
                (setq magik-cb-current-jump (nth 0 (nth (+ current-pos 1) magik-cb-jump-history))))
@@ -2135,8 +2132,7 @@ Defined in `magik-cb-current-jump'."
   "Jumps to the method definition of the method jump after the method jump.
 Defined in `magik-cb-current-jump'."
   (interactive)
-  (let (
-        (current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
+  (let ((current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
     (if (not (eq 0 current-pos))
         (progn (magik-cb-send-string (nth 1 (nth (- current-pos 1) magik-cb-jump-history)))
                (setq magik-cb-current-jump (nth 0 (nth (- current-pos 1) magik-cb-jump-history))))
@@ -2157,8 +2153,8 @@ Defined in `magik-cb-current-jump'."
 (defun magik-cb-jump-clear-history ()
   "Clears `magik-cb-jump-history' and `magik-cb-current-jump' to the initial state."
   (interactive)
-  (setq magik-cb-jump-history (list '("" "")))
-  (setq magik-cb-current-jump ""))
+  (setq magik-cb-jump-history (list '("" ""))
+        magik-cb-current-jump ""))
 
 (defun magik-cb-jump-to-source ()
   "Jump to the source for the method under the cursor."

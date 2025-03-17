@@ -124,7 +124,7 @@ If any function returns t, then the buffer is displayed."
 (define-derived-mode magik-aliases-mode nil "Aliases"
   "Major mode for editing Magik aliases files.
 
-You can customise magik-aliases-mode with the magik-aliases-mode-hook.
+You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
 
 \\{magik-aliases-mode-map}"
   :group 'magik
@@ -370,8 +370,8 @@ Returns nil if FILE can't be expanded."
                        (buffer-substring-no-properties pt (point))))
                 (if (file-exists-p (concat dir "/config/gis_aliases"))
                     (let ((lp-dir (cons lp dir)))
-                      (or (member lp-dir alist) (push lp-dir alist))) ))))
-        alist))))
+                      (or (member lp-dir alist) (push lp-dir alist))))))
+        alist)))))
 
 (defun magik-aliases-layered-products-acp-path (file)
   "Read LAYERED_PRODUCTS configuration file.

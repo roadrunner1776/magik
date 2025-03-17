@@ -97,7 +97,7 @@ Used for switching to the first Smallworld session."
   :type '(choice string (const nil)))
 
 (defcustom magik-session-buffer-default-name "*gis*"
-  "*The default name of a Magik process buffer when creating new Magik sessions."
+  "*The default name of a Magik Session buffer when creating new Magik sessions."
   :group 'magik
   :type 'string)
 
@@ -207,15 +207,13 @@ Used for prefix key switching.")
 (defvar magik-session-current-command nil
   "The current `magik-session-command' in the current buffer.")
 
-(defvar magik-session-exec-path nil
+(defvar-local magik-session-exec-path nil
   "Stored value of variable `exec-path'.
 It holds the value from when the Magik session process was started.")
-(make-variable-buffer-local 'magik-session-exec-path)
 
-(defvar magik-session-process-environment nil
+(defvar-local magik-session-process-environment nil
   "Stored value of variable `process-environment'.
 It holds the value from when the Magik session process was started.")
-(make-variable-buffer-local 'magik-session-process-environment)
 
 (defvar magik-session-cb-buffer nil
   "The Class browser buffer associated with the Magik session process.")
@@ -706,7 +704,7 @@ there is not, prompt for a command to run, and then run it."
                                                    ((eq major-mode 'magik-session-mode) (buffer-name))
                                                    (t nil))
                                              'magik-session-mode
-                                             "Enter Magik process buffer:"
+                                             "Enter Magik Session buffer:"
                                              (or magik-session-buffer magik-session-buffer-default-name)
                                              'magik-session-buffer-alist-prefix-function
                                              (generate-new-buffer-name magik-session-buffer-default-name)))
@@ -726,9 +724,9 @@ there is not, prompt for a command to run, and then run it."
       (with-current-buffer (get-buffer-create alias-buffer)
 
         (erase-buffer)
-        (if (and (equal (getenv "SHELL") "/bin/csh")
-                 (file-readable-p "~/.alias"))
-            (insert-file-contents "~/.alias"))
+        (when (and (string-equal shell-file-name "/bin/csh")
+                   (file-readable-p "~/.alias"))
+          (insert-file-contents "~/.alias"))
 
         (while keepgoing
           (setq keepgoing nil)
@@ -747,9 +745,9 @@ there is not, prompt for a command to run, and then run it."
           (or (eq (string-match "\\[" magik-session-command) 0)
               (setq magik-session-command (concat "[" default-directory "] " magik-session-command)))
           (string-match "\\[\\([^\]]*\\)\\] *\\([^ ]*\\) *\\(.*\\)" magik-session-command)
-          (setq dir  (substring magik-session-command (match-beginning 1) (match-end 1)))
-          (setq cmd  (substring magik-session-command (match-beginning 2) (match-end 2)))
-          (setq args (substring magik-session-command (match-beginning 3) (match-end 3)))
+          (setq dir  (substring magik-session-command (match-beginning 1) (match-end 1))
+                cmd  (substring magik-session-command (match-beginning 2) (match-end 2))
+                args (substring magik-session-command (match-beginning 3) (match-end 3)))
 
           (goto-char (point-min))
           (if (re-search-forward (concat "^alias[ \t]+" (regexp-quote cmd) "[ \t]+") nil t)
@@ -1179,7 +1177,7 @@ An internal function that deals with 4 cases."
   (or (get-buffer-process (current-buffer))
       (error "There is no process running in this buffer"))
   (let ((n magik-session-cmd-num)
-        mark )
+        mark)
     (while
         (progn
           (cl-incf n step)

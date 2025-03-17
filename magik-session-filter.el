@@ -149,7 +149,7 @@ With a prefix arg, ask user for Magik session buffer to use."
   (interactive)
   (setq buffer (magik-utils-get-buffer-mode buffer
                                             'magik-session-mode
-                                            "Enter Gis process buffer: "
+                                            "Enter Magik Session buffer: "
                                             magik-session-buffer
                                             'magik-session-buffer-alist-prefix-function))
   (barf-if-no-gis buffer)

@@ -40,7 +40,7 @@ Use BUFFER as `magik-session-buffer'."
   (setq buffer  (or buffer magik-session-buffer)
         process (or process (get-buffer-process buffer)))
   (or process
-      (error "There is no Magik process running in buffer '%s'" buffer)))
+      (error "There is no Magik Session running in buffer '%s'" buffer)))
 
 (defun gsub (str from to)
   "Return a STR with any matches for the regexp, FROM, replaced by TO."
@@ -115,12 +115,14 @@ If FIRST is true just return the first one found."
     (while (looking-at "\\sw\\|\\s_")
       (forward-char 1))
     (if (re-search-backward "\\sw\\|\\s_" nil t)
-        (progn (forward-char 1)
-               (buffer-substring (point)
-                                 (progn (forward-sexp -1)
-                                        (while (looking-at "\\s'")
-                                          (forward-char 1))
-                                        (point))))
+        (progn
+          (forward-char 1)
+          (buffer-substring (point)
+                            (progn
+                              (forward-sexp -1)
+                              (while (looking-at "\\s'")
+                                (forward-char 1))
+                              (point))))
       nil)))
 
 (defun magik-utils-substitute-in-string (string)

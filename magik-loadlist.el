@@ -36,8 +36,7 @@ Initial ^ and final $ is automatically added in `loadlist-ignore'."
 (defcustom magik-loadlist-font-lock-keywords
   (list
    '("^.+\\([\\/]\\)" 0 font-lock-keyword-face)
-   '("^.+"            0 font-lock-variable-name-face)
-   )
+   '("^.+"            0 font-lock-variable-name-face))
   "Default fontification of load_list.txt files."
   :group 'magik-loadlist
   :type 'sexp)
@@ -197,7 +196,7 @@ With a prefix ARG accept all changes without prompting."
          (file (file-name-nondirectory buffer-file-name))
          (gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
-                                           "Enter Magik process buffer:"
+                                           "Enter Magik Session buffer:"
                                            magik-session-buffer
                                            'magik-session-buffer-alist-prefix-function))
          (process (barf-if-no-gis gis)))
