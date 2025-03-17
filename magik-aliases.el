@@ -282,8 +282,9 @@ With a prefix arg, ask user for current directory to use."
              (setq alias (match-string-no-properties 1)))
             (t
              (error "Can't find any alias definitions")))
-      (if (file-exists-p (concat (file-name-directory file) "environment.bat"))
-          (setq args (append args (list "-e" (concat (file-name-directory file) "environment.bat")) nil)))
+      (let ((env-file (file-name-concat (file-name-directory file) "environment.bat")))
+        (when (file-exists-p env-file)
+          (setq args (append args (list "-e" env-file) nil))))
       (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last
 
       (if (stringp version)
@@ -368,12 +369,10 @@ LAYERED_PRODUCTS configuration file."
                 (end-of-line)
                 (skip-syntax-backward "-")
                 (skip-chars-backward "/\\") ;avoid trailing directory character.
-                (setq dir
-                      (magik-aliases-expand-file
-                       (buffer-substring-no-properties pt (point)) smallworld-gis))
-                (if (file-exists-p (concat dir "/config/gis_aliases"))
-                    (let ((lp-dir (cons lp dir)))
-                      (or (member lp-dir alist) (push lp-dir alist)))))))
+                (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)) smallworld-gis))
+                (when (file-exists-p (file-name-concat dir "config" "gis_aliases"))
+                  (let ((lp-dir (cons lp dir)))
+                    (or (member lp-dir alist) (push lp-dir alist)))))))
         alist))))
 
 (defun magik-aliases-layered-products-acp-path (file smallworld-gis)
@@ -400,12 +399,10 @@ configuration file and return paths to append to variable `exec-path'."
                 (end-of-line)
                 (skip-syntax-backward "-")
                 (skip-chars-backward "/\\") ;avoid trailing directory character.
-                (setq dir
-                      (magik-aliases-expand-file
-                       (buffer-substring-no-properties pt (point)) smallworld-gis)
-                      etc-dir (concat dir (if (eq system-type 'windows-nt)
-                                              "/etc/x86"
-                                            "/etc/Linux.x86")))
+                (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)) smallworld-gis)
+                      etc-dir (file-name-concat dir "etc" (if (eq system-type 'windows-nt)
+                                                              "x86"
+                                                            "Linux.x86")))
                 (if (file-directory-p etc-dir)
                     (push etc-dir paths)))))
         paths))))
@@ -445,7 +442,7 @@ configuration file and return paths to append to variable `exec-path'."
                    (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
         (push `[,(format "%s: %s" (car lp) (cdr lp))
                 (progn
-                  (find-file ,(concat (cdr lp) "/config/gis_aliases"))
+                  (find-file ,(file-name-concat (cdr lp) "config" "gis_aliases"))
                   (magik-aliases-mode))
                 ,(cdr lp)
                 ]
@@ -455,9 +452,9 @@ configuration file and return paths to append to variable `exec-path'."
     (cl-loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)
              do (push (vector (buffer-file-name (get-buffer buf))
                               (list 'display-buffer buf)
-                              t)
-                      buffers))
-    (or (eq (length buffers) 0) (push "---" buffers))
+                              t) buffers))
+    (or (eq (length buffers) 0)
+        (push "---" buffers))
 
     (easy-menu-change (list "Tools" "Magik")
                       "Alias Files"

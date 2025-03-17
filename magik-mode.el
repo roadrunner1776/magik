@@ -1608,7 +1608,7 @@ If PT is given, goto that char position."
     (cl-decf nlines)
     (beginning-of-line 1)
     (skip-chars-forward "\t")
-    (if (char-equal (char-after (point)) ?# )
+    (if (char-equal (char-after (point)) ?#)
         (delete-char 1))
     (forward-line 1)))
 

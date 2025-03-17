@@ -186,7 +186,7 @@ to use for magik-patch-file-type.")
 Use optional DIR to search for the template"
   (let ((file (cdr (assoc type magik-template-alist)))
         (template-dir (or dir magik-template-dir)))
-    (and file template-dir (concat (file-name-as-directory template-dir) file))))
+    (and file template-dir (file-name-concat (file-name-as-directory template-dir) file))))
 
 (defun magik-template-file-type ()
   "Return the file type according to the contents of the buffer."
