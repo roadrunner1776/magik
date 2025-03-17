@@ -1342,22 +1342,12 @@ Magik, another file shall be written."
          (orig-buf  (buffer-name))
          (orig-file (or (buffer-file-name) ""))
          (position  (if start (number-to-string start) "1"))
-         (filename (concat (if (eq system-type 'windows-nt)
-                               (concat (getenv "TEMP") "\\T")
-                             "/tmp/t")
-                           (user-login-name)
-                           (number-to-string (process-id process))))
-         (package (or package "\n")) ;need a newline to ensure fixed number of lines for gis-goto-error
+         (filename (make-temp-file (concat "magik-transmit-"
+                                           (user-login-name)
+                                           (number-to-string (process-id process)))))
+         (package (or package "\n")) ;; Need a newline to ensure fixed number of lines for `gis-goto-error'
          (coding-system buffer-file-coding-system))
 
-    (setq filename (cl-loop
-                    with queue = 0
-                    with file  = nil
-                    do (setq file (concat filename "q" (number-to-string queue)))
-                    if (file-exists-p file)
-                    do (setq queue (1+ queue))
-                    else
-                    return file))
     (with-current-buffer (get-buffer-create " *transmit magik debug*")
       (erase-buffer)
       (setq buffer-file-coding-system coding-system)
@@ -1368,11 +1358,9 @@ Magik, another file shall be written."
               package
               str)
       (goto-char (point-min))
-      (if magik-transmit-debug-p
-          (magik-perform-replace-no-set-mark "#DEBUG" "" nil))
-      (write-region (point-min) (point-max) filename nil 'xxx)
-                                        ;(kill-buffer (current-buffer))
-      )
+      (when magik-transmit-debug-p
+        (magik-perform-replace-no-set-mark "#DEBUG" "" nil))
+      (write-region (point-min) (point-max) filename nil 'xxx))
     (message "Transmitting to %s" gis)
     (process-send-string
      process
