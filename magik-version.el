@@ -131,7 +131,7 @@ has more than one aliases file available."
                       (magik-aliases-expand-file magik-aliases-layered-products-file)))
       (cond ((null lp-alist) nil)
             ((eq (length lp-alist) 1)
-             (setq alias-file (concat (cdar lp-alist) "/config/gis_aliases")))
+             (setq alias-file (file-name-concat (cdar lp-alist) "config" "gis_aliases")))
             (t
              (let* ((lp   (completing-read "Select a Layered Product with gis_aliases file: " lp-alist nil t))
                     (path (cdr (assoc lp lp-alist))))
@@ -205,7 +205,7 @@ has more than one aliases file available."
 
 (defun magik-version-smallworld-gis-p (path)
   "Return t if PATH points to a Smallworld installation."
-  (file-directory-p (concat (file-name-directory path) "config")))
+  (file-directory-p (file-name-concat (file-name-directory path) "config")))
 
 (defun magik-version-read-smallworld-gis-completion (string predicate flag)
   "Provide directory completion for finding Smallworld installations.
@@ -256,8 +256,7 @@ installation directory suitable for selection."
    (let* ((ok (or magik-version-file
                   (error "File interface is not being used")))
           (root (magik-version-read-smallworld-gis))
-          (product-version-file (concat (file-name-as-directory root)
-                                        "config/PRODUCT_VERSION"))
+          (product-version-file (file-name-concat (file-name-as-directory root) "config" "PRODUCT_VERSION"))
           name version)
      (when (file-exists-p product-version-file)
        (with-current-buffer (get-buffer-create " *product_version*")

@@ -412,7 +412,8 @@ Do a no-op if already in the cb.
 Set METHOD and CLASS if given."
   (interactive)
   (let (magik-cb-file running-p buffer gis-proc visible-bufs bufs)
-    (cond ((and (integerp current-prefix-arg) (> current-prefix-arg 0))
+    (cond ((and (integerp current-prefix-arg)
+                (> current-prefix-arg 0))
            (setq gis (magik-utils-get-buffer-mode gis
                                                   'magik-session-mode
                                                   "Enter Magik Session buffer:"
@@ -426,7 +427,8 @@ Set METHOD and CLASS if given."
            (unless (get-buffer gis)
              (pop-to-buffer gis)
              (error "No Class Browser is running")))
-          ((and (integerp current-prefix-arg) (< current-prefix-arg 0))
+          ((and (integerp current-prefix-arg)
+                (< current-prefix-arg 0))
            (setq buffer (magik-utils-get-buffer-mode nil
                                                      'magik-cb-mode
                                                      "Enter Class Browser buffer:"
@@ -451,9 +453,9 @@ Set METHOD and CLASS if given."
                   (delete nil
                           (mapcar (function (lambda (b) (if (cdr b) b)))
                                   (setq visible-bufs
-                                        (magik-utils-buffer-visible-list '(magik-cb-mode magik-session-mode))))))
-            ;;restrict list to those whose cdr is t.
-            (setq buffer
+                                        (magik-utils-buffer-visible-list '(magik-cb-mode magik-session-mode)))))
+                  ;;restrict list to those whose cdr is t.
+                  buffer
                   (if (= (length bufs) 1)
                       (caar bufs)
                     (completing-read
@@ -497,11 +499,10 @@ Set METHOD and CLASS if given."
            (setq gis magik-session-buffer))
           (t
            (setq magik-cb-file (magik-cb-set-filename)
-                 buffer (generate-new-buffer-name
-                         (concat "*cb*" "*" (file-name-nondirectory magik-cb-file) "*"))
+                 buffer (generate-new-buffer-name (concat "*cb*" "*" (file-name-nondirectory magik-cb-file) "*"))
                  gis    (magik-cb-gis-buffer buffer))))
 
-    (setq buffer   (or buffer (concat "*cb*" gis))
+    (setq buffer (or buffer (concat "*cb*" gis))
           gis-proc (and gis (get-buffer-process gis)))
 
     (cond ((magik-cb-is-running buffer)
@@ -818,8 +819,8 @@ If FILTER is given then it is set on the process."
             (unless (eq major-mode 'magik-cb-mode)
               (magik-cb-mode))
             (compat-call setq-local
-                         magik-cb-quote-file-name   (string< "5.2.0" version)
-                         magik-cb-mf-extended-flags (string< "6.0.0" version)
+                         magik-cb-quote-file-name   (version< "5.2.0" version)
+                         magik-cb-mf-extended-flags (version< "6.0.0" version)
                          magik-cb-filename cb-file)))
         ;; Note that magik-cb-start-process uses magik-cb-filter when the process starts.
         ;; This is so that it can handle the topic information that the method finder
@@ -943,7 +944,8 @@ the file.  Put it in the global `magik-cb-n-methods-str'."
         (buffer-read-only nil)
         (coding-system-for-read magik-cb-coding-system)
         method-str)
-    (or (looking-at "^[^ \n]") (re-search-backward "^[^ \n]" nil 1))
+    (or (looking-at "^[^ \n]")
+        (re-search-backward "^[^ \n]" nil 1))
 
     (setq method-str (buffer-substring (line-beginning-position) (line-end-position)))
     (erase-buffer)
@@ -1651,9 +1653,10 @@ We also save some state for a clean exit."
             (delete-char (- n) killflag))
         (magik-cb-set-buffer-c)
         (if (bobp)
-            (progn (magik-cb-set-buffer-m)
-                   (goto-char (point-max))
-                   (delete-char (- n) killflag))
+            (progn
+              (magik-cb-set-buffer-m)
+              (goto-char (point-max))
+              (delete-char (- n) killflag))
           (delete-char (- n) killflag))))
     (magik-cb-send-modeline-and-pr)))
 
@@ -1680,7 +1683,9 @@ We also save some state for a clean exit."
   (interactive "p")
   (with-current-buffer  (magik-cb-buffer)
     (save-excursion
-      (if (eq magik-cb-cursor-pos 'class-name) (magik-cb-set-buffer-c) (magik-cb-set-buffer-m))
+      (if (eq magik-cb-cursor-pos 'class-name)
+          (magik-cb-set-buffer-c)
+        (magik-cb-set-buffer-m))
       (kill-line arg))
     (magik-cb-send-modeline-and-pr)))
 
@@ -1689,7 +1694,9 @@ We also save some state for a clean exit."
   (interactive "P")
   (with-current-buffer  (magik-cb-buffer)
     (save-excursion
-      (if (eq magik-cb-cursor-pos 'class-name) (magik-cb-set-buffer-c) (magik-cb-set-buffer-m))
+      (if (eq magik-cb-cursor-pos 'class-name)
+          (magik-cb-set-buffer-c)
+        (magik-cb-set-buffer-m))
       (yank arg)
       (magik-cb-delete-lines)
       (set-text-properties (point-min) (point-max) nil) ;remove text properties
@@ -1701,7 +1708,9 @@ We also save some state for a clean exit."
   (interactive "p")
   (with-current-buffer  (magik-cb-buffer)
     (save-excursion
-      (if (eq magik-cb-cursor-pos 'class-name) (magik-cb-set-buffer-c) (magik-cb-set-buffer-m))
+      (if (eq magik-cb-cursor-pos 'class-name)
+          (magik-cb-set-buffer-c)
+        (magik-cb-set-buffer-m))
       (yank-pop arg)
       (magik-cb-delete-lines)
       (set-text-properties (point-min) (point-max) nil) ;remove text properties
@@ -1860,20 +1869,19 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb-mode-line-click (event)
   "Move the `magik-cb` modeline cursor using EVENT."
   (interactive "@e")
-  (let*
-      ((b (window-buffer (posn-window (event-start event))))
-       (p (get-buffer-process b))
-       (x (car (posn-col-row (event-start event))))
-       (effective-len-cb-n-methods-str 1)
-       (cursor-pos (with-current-buffer b magik-cb-cursor-pos))
-       (offset1 (- x (length "    ") effective-len-cb-n-methods-str (length "    ")))
-       (len1 (save-excursion (magik-cb-set-buffer-m) (1- (point-max))))
-       (len2 (save-excursion (magik-cb-set-buffer-c) (1- (point-max))))
-       (offset2 (- offset1 (+ len1 (length magik-cb-in-keyword)))))
+  (let* ((b (window-buffer (posn-window (event-start event))))
+         (p (get-buffer-process b))
+         (x (car (posn-col-row (event-start event))))
+         (effective-len-cb-n-methods-str 1)
+         (cursor-pos (with-current-buffer b magik-cb-cursor-pos))
+         (offset1 (- x (length "    ") effective-len-cb-n-methods-str (length "    ")))
+         (len1 (save-excursion (magik-cb-set-buffer-m) (1- (point-max))))
+         (len2 (save-excursion (magik-cb-set-buffer-c) (1- (point-max))))
+         (offset2 (- offset1 (+ len1 (length magik-cb-in-keyword)))))
 
     (cond
-
-     ((and (>= offset1 -1) (<= offset1 (+ 2 len1)))
+     ((and (>= offset1 -1)
+           (<= offset1 (+ 2 len1)))
       (magik-cb-set-buffer-m)
       (if (and (eq cursor-pos 'method-name)
                (<= (point) offset1))
@@ -1884,7 +1892,8 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
         (goto-char (1+ offset1)))
       (set-buffer b)
       (compat-call setq-local magik-cb-cursor-pos 'method-name))
-     ((and (>= offset2 -1) (<= offset2 (+ 2 len2)))
+     ((and (>= offset2 -1)
+           (<= offset2 (+ 2 len2)))
       (magik-cb-set-buffer-c)
       (if (or (eq cursor-pos 'method-name)
               (<= (point) offset2))
@@ -1894,11 +1903,12 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
       (compat-call setq-local magik-cb-cursor-pos 'class-name))
      ((and (>= x (+ 25 len1 len2))
            (<  x (+ 25 15 len1 len2)))
-      (let
-          ((flag (nth (/ (- x (+ 25 len1 len2)) 3)
-                      '("basic" "advanced" "subclassable" "redefinable" "debug"))))
+      (let ((flag (nth (/ (- x (+ 25 len1 len2)) 3)
+                       '("basic" "advanced" "subclassable" "redefinable" "debug"))))
         (magik-cb-toggle flag)
-        (message (if (magik-cb-topic-on-p flag) "Turning '%s' flag on." "Turning '%s' flag off.")
+        (message (if (magik-cb-topic-on-p flag)
+                     "Turning '%s' flag on."
+                   "Turning '%s' flag off.")
                  flag)))
 
      ((and (>= x (+ 25 15 len1 len2))
@@ -1979,7 +1989,9 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
   "Clear the cb method-name or class-name."
   (interactive)
   (with-current-buffer (magik-cb-buffer)
-    (if (eq magik-cb-cursor-pos 'method-name) (magik-cb-set-buffer-m) (magik-cb-set-buffer-c))
+    (if (eq magik-cb-cursor-pos 'method-name)
+        (magik-cb-set-buffer-m)
+      (magik-cb-set-buffer-c))
     (let ((buffer-read-only nil))
       (erase-buffer)))
   (magik-cb-send-modeline-and-pr))
@@ -2126,8 +2138,9 @@ Defined in `magik-cb-current-jump'."
   (interactive)
   (let ((current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
     (if (not (eq (length magik-cb-jump-history) current-pos))
-        (progn (magik-cb-send-string (nth 1 (nth (+ current-pos 1) magik-cb-jump-history)))
-               (setq magik-cb-current-jump (nth 0 (nth (+ current-pos 1) magik-cb-jump-history))))
+        (progn
+          (magik-cb-send-string (nth 1 (nth (+ current-pos 1) magik-cb-jump-history)))
+          (setq magik-cb-current-jump (nth 0 (nth (+ current-pos 1) magik-cb-jump-history))))
       (message "Already at the most historiant method jump!"))))
 
 (defun magik-cb-jump-next ()
@@ -2136,21 +2149,22 @@ Defined in `magik-cb-current-jump'."
   (interactive)
   (let ((current-pos (cl-position (assoc magik-cb-current-jump magik-cb-jump-history) magik-cb-jump-history)))
     (if (not (eq 0 current-pos))
-        (progn (magik-cb-send-string (nth 1 (nth (- current-pos 1) magik-cb-jump-history)))
-               (setq magik-cb-current-jump (nth 0 (nth (- current-pos 1) magik-cb-jump-history))))
+        (progn
+          (magik-cb-send-string (nth 1 (nth (- current-pos 1) magik-cb-jump-history)))
+          (setq magik-cb-current-jump (nth 0 (nth (- current-pos 1) magik-cb-jump-history))))
       (message "Already at the most recent method jump!"))))
 
-(defun magik-cb-jump-select (arg)
-  "Jumps to the method definition of the selected method jump."
+(defun magik-cb-jump-select (jump)
+  "Jumps to the method definition of the selected method JUMP."
   (interactive (list (completing-read "Jump to: " magik-cb-jump-history)))
-  (magik-cb-send-string (nth 1 (assoc arg magik-cb-jump-history)))
-  (setq magik-cb-current-jump arg))
+  (magik-cb-send-string (nth 1 (assoc jump magik-cb-jump-history)))
+  (setq magik-cb-current-jump jump))
 
-(defun magik-cb-ido-jump-select (arg)
-  "Ido version the magik-cb-jump-select function."
+(defun magik-cb-ido-jump-select (jump)
+  "Ido version the magik-cb-jump-select function using JUMP."
   (interactive (list (ido-completing-read "Jump to: " magik-cb-jump-history)))
-  (magik-cb-send-string (nth 1 (assoc arg magik-cb-jump-history)))
-  (setq magik-cb-current-jump arg))
+  (magik-cb-send-string (nth 1 (assoc jump magik-cb-jump-history)))
+  (setq magik-cb-current-jump jump))
 
 (defun magik-cb-jump-clear-history ()
   "Clears `magik-cb-jump-history' and `magik-cb-current-jump' to the initial state."
@@ -2256,8 +2270,7 @@ compression or lazy re-draw or something."
   "Return the start position of the latest line in TARGET-STR from BEG to END."
   (if (= beg end)
       beg
-    (let
-        ((mid (/ (+ beg end 1) 2)))
+    (let ((mid (/ (+ beg end 1) 2)))
       (goto-char mid)
       (if (magik-cb-earlier-p target-str)
           (magik-cb-find-latest-<= target-str beg (1- mid))
@@ -2291,10 +2304,9 @@ Cut out trailing comments etc."
     (while (looking-at "\\sw\\|\\s_")
       (forward-char 1))
     (if (re-search-backward "\\sw\\|\\s_" nil t)
-        (let*
-            ((end (progn (forward-char 1) (point)))
-             (beg (progn (skip-chars-backward "a-zA-Z0-9_!?") (point)))
-             (name (buffer-substring-no-properties beg end)))
+        (let* ((end (progn (forward-char 1) (point)))
+               (beg (progn (skip-chars-backward "a-zA-Z0-9_!?") (point)))
+               (name (buffer-substring-no-properties beg end)))
           (goto-char end)
           (skip-chars-forward " \t")
           (concat name (magik-method-name-postfix)))
@@ -2365,7 +2377,7 @@ See the variable `magik-cb-generalise-file-name-alist' for more customisation."
                                    (with-current-buffer buffer
                                      (substring default-directory 0 2))
                                  (substring default-directory 0 2))))
-              (concat drive-name f))))
+              (file-name-concat concat drive-name f))))
       (when (string-match "^[a-zA-Z]:" f)
         (setq f (substring f 2)))
       (subst-char-in-string ?\\ ?/ f t))))
