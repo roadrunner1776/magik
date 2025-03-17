@@ -101,8 +101,8 @@ This variable is buffer local and is used to identify the type of Magik file
 it is, i.e. which Template file it came from.
 
 The default value of this variable is used for communicating the type of
-template the user wants when the buffer/file does not exist to the `file-not-found-hook'
-function \\[magik-template-maybe-insert].")
+template the user wants when the buffer/file does not exist
+to the `file-not-found-hook' function \\[magik-template-maybe-insert].")
 
 (defvar magik-template-file-type-templates-default '((default "Default" "template_default.magik"))
   "Default list for \\[magik-template-file-type-alist-add].

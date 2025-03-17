@@ -105,14 +105,12 @@ If the buffer is not visiting a file, return an empty string."
       (save-excursion
         (goto-char slotted_loc)
         (if (re-search-forward "{\\s-*:\\s-*\\(\\sw+\\)\\s-*,\\s-*\\(_unset\\)\\s-*}" dollar_loc t slot_count)
-            (progn
-              (setq
-               slot_count (1+ slot_count)
-               slot_name (match-string-no-properties 1)
-               result (concat result
-                              (if (= slot_count 2)
-                                  (concat "\t." slot_name " << ")
-                                (concat "\n\t." slot_name " << ")))))
+            (setq slot_count (1+ slot_count)
+                  slot_name (match-string-no-properties 1)
+                  result (concat result
+                                 (if (= slot_count 2)
+                                     (concat "\t." slot_name " << ")
+                                   (concat "\n\t." slot_name " << "))))
           (setq more_slots nil)
           (when (> slot_count 1)
             (setq result (concat result "\n"))))))
