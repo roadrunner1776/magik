@@ -32,9 +32,7 @@
 
 ;; Imenu configuration
 (defvar magik-product-imenu-generic-expression
-  '(
-    (nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1)
-    )
+  '((nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1))
   "Imenu generic expression for Magik Message mode.
 See `imenu-generic-expression'.")
 
@@ -49,8 +47,7 @@ See `imenu-generic-expression'.")
    '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
    '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
      (1 font-lock-function-name-face)
-     (2 font-lock-constant-face))
-   )
+     (2 font-lock-constant-face)))
   "Default fontification of product.def files."
   :group 'product
   :type 'sexp)
@@ -101,7 +98,7 @@ You can customize Product Mode with the `magik-product-mode-hook`.
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
-                                           "Enter Magik process buffer:"
+                                           "Enter Magik Session buffer:"
                                            magik-session-buffer
                                            'magik-session-buffer-alist-prefix-function))
          (process (barf-if-no-gis gis)))
@@ -127,7 +124,7 @@ You can customize Product Mode with the `magik-product-mode-hook`.
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
                                            'magik-session-mode
-                                           "Enter Magik process buffer:"
+                                           "Enter Magik Session buffer:"
                                            magik-session-buffer
                                            'magik-session-buffer-alist-prefix-function))
          (process (barf-if-no-gis gis))
