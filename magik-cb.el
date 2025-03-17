@@ -821,8 +821,8 @@ If FILTER is given then it is set on the process."
                 (unless (eq major-mode 'magik-cb-mode)
                   (magik-cb-mode))
                 (compat-call setq-local
-                             magik-cb-quote-file-name   (string< "5.2.0" version)
-                             magik-cb-mf-extended-flags (string< "6.0.0" version)
+                             magik-cb-quote-file-name   (version< "5.2.0" version)
+                             magik-cb-mf-extended-flags (version< "6.0.0" version)
                              magik-cb-filename cb-file)))
             ;; Note that magik-cb-start-process uses magik-cb-filter when the process starts.
             ;; This is so that it can handle the topic information that the method finder
