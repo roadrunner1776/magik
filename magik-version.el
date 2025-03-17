@@ -287,8 +287,8 @@ installation directory suitable for selection."
   (let ((path
          (file-truename (read-directory-name "Enter product directory for Core installation: "))))
     (setq path (directory-file-name path))
-    (if (eq system-type 'windows-nt)
-        (subst-char-in-string ?/ ?\\ path t))
+    (when (eq system-type 'windows-nt)
+      (subst-char-in-string ?/ ?\\ path t))
     path))
 
 (defun magik-version-file-add (root name version)
@@ -299,13 +299,13 @@ installation directory suitable for selection."
           (root (magik-version-read-smallworld-gis))
           (product-version-file (file-name-concat (file-name-as-directory root) "config" "PRODUCT_VERSION"))
           name version)
-     (if (file-exists-p product-version-file)
-         (with-current-buffer (get-buffer-create " *product_version*")
-           (erase-buffer)
-           (insert-file-contents product-version-file)
-           (goto-char (point-min))
-           (setq version (current-word)
-                 name    version)))
+     (when (file-exists-p product-version-file)
+       (with-current-buffer (get-buffer-create " *product_version*")
+         (erase-buffer)
+         (insert-file-contents product-version-file)
+         (goto-char (point-min))
+         (setq version (current-word)
+               name    version)))
      (list root
            (read-no-blanks-input "Enter name for this installation: " name)
            (read-no-blanks-input "Enter version number of this installation: " version))))
@@ -323,7 +323,7 @@ installation directory suitable for selection."
 (defun magik-version-file-open ()
   "Open the magik-version-file to edit."
   (interactive
-   (when (not (file-exists-p magik-version-file))
+   (unless (file-exists-p magik-version-file)
      (call-interactively 'magik-version-file-create)))
   (find-file magik-version-file))
 
@@ -333,7 +333,7 @@ Called if no magik-version program exists or `gis-version-file' is nil.
 Will set `gis-version-file' to FILE."
   (interactive)
   (find-file magik-version-file)
-  (when (not (file-exists-p magik-version-file))
+  (unless (file-exists-p magik-version-file)
     (insert magik-version-file-header)
     (call-interactively 'magik-version-file-add)
     (save-buffer))
@@ -342,7 +342,7 @@ Will set `gis-version-file' to FILE."
 (defun magik-version-selection ()
   "Display a list of possible gis products for the user to choose between."
   (interactive
-   (when (not (file-exists-p magik-version-file))
+   (unless (file-exists-p magik-version-file)
      (call-interactively 'magik-version-file-create)))
   (set-buffer (get-buffer-create (concat "*" magik-session-buffer-default-name " version selection*")))
   (magik-version-mode)

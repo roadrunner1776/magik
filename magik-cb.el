@@ -515,7 +515,7 @@ Set METHOD and CLASS if given."
         (sleep-for 0.1))
 
       (unless magik-cb-process
-          (error "The Class Browser, '%s', is not running" (current-buffer)))
+        (error "The Class Browser, '%s', is not running" (current-buffer)))
 
       (if (magik-cb-set-method-and-class method class)
           (magik-cb-send-modeline-and-pr)
@@ -839,15 +839,15 @@ If FILTER is given then it is set on the process."
 
   ;; Update magik-cb-buffer-alist using negative numbers if loading from a file,
   ;; positive numbers are used by magik-session-buffer-alist for loading from Magik session
-  (if (and magik-cb-filename
-           (not (rassoc (buffer-name) magik-cb-buffer-alist)))
-      (let ((n -1))
-        (while (cdr (assq n magik-cb-buffer-alist))
-          (setq n (1- n)))
-        (if (assq n magik-cb-buffer-alist)
-            (setcdr (assq n magik-cb-buffer-alist) (buffer-name))
-          (add-to-list 'magik-cb-buffer-alist (cons n (buffer-name))))
-        (assq n magik-cb-buffer-alist))))
+  (when (and magik-cb-filename
+             (not (rassoc (buffer-name) magik-cb-buffer-alist)))
+    (let ((n -1))
+      (while (cdr (assq n magik-cb-buffer-alist))
+        (setq n (1- n)))
+      (if (assq n magik-cb-buffer-alist)
+          (setcdr (assq n magik-cb-buffer-alist) (buffer-name))
+        (add-to-list 'magik-cb-buffer-alist (cons n (buffer-name))))
+      (assq n magik-cb-buffer-alist))))
 
 (defun magik-cb-set-windows (&optional buffer)
   "Set window to BUFFER."
@@ -868,8 +868,8 @@ If FILTER is given then it is set on the process."
             (read-file-name "Method Finder File: "
                             (concat (file-name-as-directory smallworld-gis) "images/")
                             nil t)))))
-    (if (file-directory-p ans)
-        (error "Please give a filename of an mf file"))
+    (when (file-directory-p ans)
+      (error "Please give a filename of an mf file"))
     (with-current-buffer (get-buffer-create " *mf header")
       (erase-buffer)
       (insert-file-contents ans nil 0 4)
@@ -902,9 +902,12 @@ If FILTER is given then it is set on the process."
 
       (compat-call setq-local magik-cb-filter-str (concat magik-cb-filter-str s))
 
-      (if (string-match "\C-e" magik-cb-filter-str) (magik-cb-read-methods p))
-      (if (string-match "\C-u" magik-cb-filter-str) (magik-cb-force-query  p))
-      (if (string-match "\C-c" magik-cb-filter-str) (magik-cb-read-classes p))
+      (when (string-match "\C-e" magik-cb-filter-str)
+        (magik-cb-read-methods p))
+      (when (string-match "\C-u" magik-cb-filter-str)
+        (magik-cb-force-query  p))
+      (when (string-match "\C-c" magik-cb-filter-str)
+        (magik-cb-read-classes p))
 
       (with-current-buffer b
         (while (string-match "[\C-t\C-f].*\n" magik-cb-filter-str)
@@ -942,8 +945,8 @@ the file.  Put it in the global `magik-cb-n-methods-str'."
     (compat-call setq-local magik-cb-n-methods-str (buffer-substring (point) (line-end-position)))
     (delete-region (point) (point-max))
     (goto-char (magik-cb-find-latest-<= method-str (point-min) (point-max)))
-    (if (get-buffer-window buf)
-        (set-window-point (get-buffer-window buf) (point)))
+    (when (get-buffer-window buf)
+      (set-window-point (get-buffer-window buf) (point)))
     (magik-cb-redraw-modeline)))  ; for the method count.
 
 (defun magik-cb-force-query (p)
@@ -973,8 +976,8 @@ in \"*cb2*\" and note that \"*cb2*\" is now in family mode."
       (backward-delete-char 1)
       (insert "\n\n\n"))
     (goto-char (point-min))
-    (if (re-search-forward "^[^ ]" nil t)
-        (backward-char))
+    (when (re-search-forward "^[^ ]" nil t)
+      (backward-char))
     (compat-call setq-local magik-cb2-mode 'family)
 
     (if (get-buffer-window (current-buffer))
@@ -1029,24 +1032,24 @@ separated by spaces."
     (let ((truncated-str str)
           (cb2 (magik-cb2-buffer))
           (topics (magik-cb-topics)))
-      (if (equal truncated-str "database_collections_and_records")
-          (setq truncated-str "db_colls_and_records"))
-      (if (equal truncated-str "database_version_management")
-          (setq truncated-str "db_version_mngmnt"))
-      (if (string-match "^database" truncated-str)
-          (setq truncated-str (concat "db" (substring truncated-str (length "database")))))
+      (when (equal truncated-str "database_collections_and_records")
+        (setq truncated-str "db_colls_and_records"))
+      (when (equal truncated-str "database_version_management")
+        (setq truncated-str "db_version_mngmnt"))
+      (when (string-match "^database" truncated-str)
+        (setq truncated-str (concat "db" (substring truncated-str (length "database")))))
       (push (list truncated-str
                   t
                   (concat "add topic ^" truncated-str "$")
                   (concat "unadd topic ^" truncated-str "$"))
             topics)
       (magik-cb-topics topics)
-      (if (and (get-buffer-window cb2)
-               (eq magik-cb2-mode 'topic))
-          (let ((buffer-read-only nil))
-            (set-buffer cb2)
-            (erase-buffer)
-            (magik-cb-insert-topics-and-flags))))))
+      (when (and (get-buffer-window cb2)
+                 (eq magik-cb2-mode 'topic))
+        (let ((buffer-read-only nil))
+          (set-buffer cb2)
+          (erase-buffer)
+          (magik-cb-insert-topics-and-flags))))))
 
 ;;; S E N T I N E L
 ;; function to run when process changes state.
@@ -1054,11 +1057,12 @@ separated by spaces."
 (defun magik-cb-sentinel (proc msg)
   (let ((status (process-status proc))
         (buf (process-buffer proc)))
-    (if (and (or (eq status 'exit) (eq status 'signal))
-             (buffer-live-p buf))
-        (with-current-buffer buf
-          (compat-call setq-local magik-cb-filename nil)
-          (magik-cb-redraw-modeline)))))
+    (when (and (or (eq status 'exit)
+                   (eq status 'signal))
+               (buffer-live-p buf))
+      (with-current-buffer buf
+        (compat-call setq-local magik-cb-filename nil)
+        (magik-cb-redraw-modeline)))))
 
 ;; E X I T I N G
 ;; _____________
@@ -1331,18 +1335,18 @@ Don't ask for a response, though."
                           (cl-fourth (magik-cb-topic-elt str)))
                         "\n"))
 
-(defun magik-cb-display-topic (str)
-  "Display topic called STR."
+(defun magik-cb-display-topic (topic)
+  "Display TOPIC."
   (let ((cb2 (magik-cb2-buffer)))
     (when (and (get-buffer cb2) (eq magik-cb2-mode 'topic))
-      (let ((on-p (magik-cb-topic-on-p str))
-            (term-p (member str magik-cb-thermometer-group))
+      (let ((on-p (magik-cb-topic-on-p topic))
+            (term-p (member topic magik-cb-thermometer-group))
             buffer-read-only
             case-fold-search)
         (set-buffer cb2)
         (goto-char (point-min))
-        (search-forward (concat " " str " "))
-        (backward-char (+ 2 (length str)))
+        (search-forward (concat " " topic " "))
+        (backward-char (+ 2 (length topic)))
         (delete-char -1)
         (insert
          (cond ((and term-p on-p)       "*")
@@ -1376,8 +1380,8 @@ the STR to the method_finder."
              (if found-the-topic
                  (magik-cb-set-topic topic nil)
                (magik-cb-set-topic topic t)
-               (if (equal topic str)
-                   (setq found-the-topic t)))
+               (when (equal topic str)
+                 (setq found-the-topic t)))
              (magik-cb-display-topic topic)))
   (magik-cb-send-topic str)
   (magik-cb-print-curr-methods))
@@ -1407,20 +1411,19 @@ If the one turned off is the first in the group, turn on the 2nd, else the 1st."
       nil
     (dolist
         (group magik-cb-flag-groups)
-      (if (member str group)
-          (let
-              ((something-is-set-p nil))
-            (dolist (f group) (if (magik-cb-topic-on-p f) (setq something-is-set-p t)))
-            (if something-is-set-p
-                ()
-              (magik-cb-toggle (if (equal str (cl-first group)) (cl-second group) (cl-first group)))))))))
+      (when (member str group)
+        (let ((something-is-set-p nil))
+          (dolist (f group) (if (magik-cb-topic-on-p f) (setq something-is-set-p t)))
+          (if something-is-set-p
+              ()
+            (magik-cb-toggle (if (equal str (cl-first group)) (cl-second group) (cl-first group)))))))))
 
 (defun magik-cb-set-all-topics (new-val)
   "Set all the topics to NEW-VAL."
   (dolist (x (magik-cb-topics))
     (let ((str (cl-first x)))
-      (if (magik-cb-is-a-topic str)
-          (magik-cb-set-topic str new-val)))))
+      (when (magik-cb-is-a-topic str)
+        (magik-cb-set-topic str new-val)))))
 
 (defun magik-cb-send-all-topics ()
   "Send the current values of all the topics and flags to the C."
@@ -1449,8 +1452,8 @@ Be careful to preserve the position in \"*cb2*\"."
   "Return the string under the cursor or after point."
   (save-excursion
     (let ((case-fold-search nil))
-      (if (looking-at "[-a-zA-Z0-9?#&_\"]")
-          (search-backward " " nil t))
+      (when (looking-at "[-a-zA-Z0-9?#&_\"]")
+        (search-backward " " nil t))
       (if (re-search-forward "[-a-zA-Z0-9?#&_\"]+" nil t)
           (match-string 0)
         (re-search-backward "[ \r\n]\\([-a-zA-Z0-9?#&_\"]+\\)" nil t)
@@ -1865,16 +1868,17 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb-family (class)
   "Draw an ancestry and hierarchy for CLASS."
   (interactive (magik-utils-find-tag-tag "class-name: "))
-  (if (and (stringp class) (not (equal class "")))
-      (let ((cb2 (get-buffer-create (magik-cb2-buffer))))
-        (set-buffer cb2)
-        (magik-cb2-mode)
-        (display-buffer cb2)
-        (magik-cb2-get-window 'family)
-        (compat-call setq-local
-                     magik-cb2-mode 'family
-                     font-lock-defaults nil) ;remove colourisation from family mode.
-        (magik-cb-send-string "pr_family " class "\n"))))
+  (when (and (stringp class)
+             (not (equal class "")))
+    (let ((cb2 (get-buffer-create (magik-cb2-buffer))))
+      (set-buffer cb2)
+      (magik-cb2-mode)
+      (display-buffer cb2)
+      (magik-cb2-get-window 'family)
+      (compat-call setq-local
+                   magik-cb2-mode 'family
+                   font-lock-defaults nil) ;remove colourisation from family mode.
+      (magik-cb-send-string "pr_family " class "\n"))))
 
 ;; M O U S E
 ;; _________
@@ -1954,7 +1958,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb-unfold ()
   "Add more detail to the listing, by `unfolding' it."
   (interactive)
-  (if (not (magik-cb-topic-on-p "show-methods")) (magik-cb-toggle "show-methods"))
+  (unless (magik-cb-topic-on-p "show-methods") (magik-cb-toggle "show-methods"))
   (cond
    ((not (magik-cb-topic-on-p "show-classes"))  (magik-cb-toggle "show-classes"))
    ((not (magik-cb-topic-on-p "show-args"))     (magik-cb-toggle "show-args"))
@@ -1967,7 +1971,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb-fold ()
   "Remove detail from the listing."
   (interactive)
-  (if (not (magik-cb-topic-on-p "show-methods")) (magik-cb-toggle "show-methods"))
+  (unlesss (magik-cb-topic-on-p "show-methods") (magik-cb-toggle "show-methods"))
   (cond
    ((magik-cb-topic-on-p "show-topics")   (magik-cb-toggle "show-topics"))
    ((magik-cb-topic-on-p "show-comments") (magik-cb-toggle "show-comments"))
@@ -2140,41 +2144,41 @@ Defined in `magik-cb-current-jump'."
 ;; _________
 
 (defun magik-cb-is-running (&optional buffer process)
-  "Return t is CB process is running."
+  "Return t, if CB PROCESS is running in BUFFER."
   (setq buffer  (or buffer (current-buffer))
         process (or process (get-buffer-process buffer)))
-  (if process
-      (eq (process-status process) 'run)))
+  (when process
+    (eq (process-status process) 'run)))
 
 (defun magik-cb-set-method-str (str)
   "Set Method string to STR.
 If STR is nil, this is a no-op."
-  (if str
-      (save-excursion
-        (magik-cb-set-buffer-m)
-        (let ((buffer-read-only nil))
-          (erase-buffer)
-          (insert str))
-        t)))
+  (when str
+    (save-excursion
+      (magik-cb-set-buffer-m)
+      (let ((buffer-read-only nil))
+        (erase-buffer)
+        (insert str))
+      t)))
 
 (defun magik-cb-set-class-str (str)
   "Set Class string to STR.
 If STR is nil, this is a no-op."
-  (if str
-      (save-excursion
-        (magik-cb-set-buffer-c)
-        (let ((buffer-read-only nil))
-          (erase-buffer)
-          (insert str))
-        t)))
+  (when str
+    (save-excursion
+      (magik-cb-set-buffer-c)
+      (let ((buffer-read-only nil))
+        (erase-buffer)
+        (insert str))
+      t)))
 
 (defun magik-cb-set-method-and-class (method class)
   "Set METHOD and CLASS, return t if either were updated."
   (let (updatep)
-    (if (magik-cb-set-method-str method)
-        (setq updatep t))
-    (if (magik-cb-set-class-str  class)
-        (setq updatep t))
+    (when (magik-cb-set-method-str method)
+      (setq updatep t))
+    (when (magik-cb-set-class-str  class)
+      (setq updatep t))
     updatep))
 
 (defun magik-cb-print-curr-methods ()
@@ -2265,8 +2269,8 @@ Cut out trailing comments etc."
   "Return the class-name under point."
   (save-excursion
     (let ((class (magik-utils-find-tag-default)))
-      (if (null class)
-          (error "No current word to use as a class-name"))
+      (unless class
+        (error "No current word to use as a class-name"))
       (save-match-data
         (if (string-match ":" class)
             (if (not (string-equal (substring-no-properties class 0 1) ":"))

@@ -270,14 +270,14 @@ when the buffer is displayed:
   "Run `runalias' on the ALIAS FILE in DIR.
 
 With a prefix arg, ask user for current directory to use."
-  (interactive (if (not (magik-aliases-at-alias-definition))
-                   (list
-                    (completing-read "Definition: "
-                                     (mapcar (function
-                                              (lambda (d) (cons d d)))
-                                             (magik-aliases-list))
-                                     nil t)
-                    nil nil)))
+  (interactive (unless (magik-aliases-at-alias-definition)
+                 (list
+                  (completing-read "Definition: "
+                                   (mapcar (function
+                                            (lambda (d) (cons d d)))
+                                           (magik-aliases-list))
+                                   nil t)
+                  nil nil)))
   (cond (current-prefix-arg
          (setq dir (file-name-as-directory
                     (expand-file-name
@@ -305,10 +305,10 @@ With a prefix arg, ask user for current directory to use."
           (setq args (append args (list "-e" env-file) nil))))
       (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last
 
-      (if (stringp version)
-          (setq buf (concat buf " " version)))
-      (if alias
-          (setq buf (concat buf " " alias)))
+      (when (stringp version)
+        (setq buf (concat buf " " version)))
+      (when alias
+        (setq buf (concat buf " " alias)))
       (setq buf (generate-new-buffer (concat "*" buf "*")))
       (kill-buffer (current-buffer))
       (set-buffer buf)
@@ -325,8 +325,8 @@ With a prefix arg, ask user for current directory to use."
       (insert (format "Startup time: %s\nCommand: [%s] %s\n" (current-time-string) dir magik-session-current-command))
 
       (magik-session-start-process args))
-    (if (magik-aliases-switch-to-buffer alias)
-        (display-buffer buf))))
+    (when (magik-aliases-switch-to-buffer alias)
+      (display-buffer buf))))
 
 (defun magik-aliases-at-alias-definition ()
   "Return definition, if point is in an alias definition."
