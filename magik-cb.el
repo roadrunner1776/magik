@@ -737,7 +737,8 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
             (setq i (1+ i)))
         ;; User aborted loop.
         (setq i 0)))
-    (when (and (stringp magik-cb--mf-socket-synchronised) (not (equal magik-cb--mf-socket-synchronised "")))
+    (when (and (stringp magik-cb--mf-socket-synchronised)
+               (not (equal magik-cb--mf-socket-synchronised "")))
       magik-cb--mf-socket-synchronised)))
 
 (defun magik-cb--acp-paths (smallworld-gis)
