@@ -95,7 +95,7 @@ you will also have to add an appropriate entry to
 magik-template-file-type-alist to make the user
 selection pick up the new template file.")
 
-(defvar magik-template-file-type nil
+(defvar-local magik-template-file-type nil
   "Type of Magik file being edited.
 This variable is buffer local and is used to identify the type of Magik file
 it is, i.e. which Template file it came from.
@@ -103,7 +103,6 @@ it is, i.e. which Template file it came from.
 The default value of this variable is used for communicating the type of
 template the user wants when the buffer/file does not exist
 to the `file-not-found-hook' function \\[magik-template-maybe-insert].")
-(make-variable-buffer-local 'magik-template-file-type)
 
 (defvar magik-template-file-type-templates-default '((default "Default" "template_default.magik"))
   "Default list for \\[magik-template-file-type-alist-add].

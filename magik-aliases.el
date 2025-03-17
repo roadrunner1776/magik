@@ -124,7 +124,7 @@ If any function returns t, then the buffer is displayed."
 (define-derived-mode magik-aliases-mode nil "Aliases"
   "Major mode for editing Magik aliases files.
 
-You can customise magik-aliases-mode with the magik-aliases-mode-hook.
+You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
 
 \\{magik-aliases-mode-map}"
   :group 'magik

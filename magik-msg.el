@@ -34,11 +34,9 @@
 
 ;; Imenu configuration
 (defvar magik-msg-imenu-generic-expression
-  '(
-    (nil "^:\\(\\sw+\\)" 1) ;;Normal messages
+  '((nil "^:\\(\\sw+\\)" 1) ;;Normal messages
     (nil "^:\\s$\\(\\S$+\\)\\s$" 1) ;; | | Quoted messages
-    ("Groups" "^+\\s-+\\(\\sw+\\)" 1)
-    )
+    ("Groups" "^+\\s-+\\(\\sw+\\)" 1))
   "Imenu generic expression for Magik Message mode.
 See `imenu-generic-expression'.")
 
@@ -54,8 +52,7 @@ See `imenu-generic-expression'.")
    '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . font-lock-function-name-face)
    '("^#%\\s-*text_encoding.*$" . font-lock-warning-face)
    '("#[0-9]+" . font-lock-variable-name-face)
-   '("#.*" . font-lock-comment-face)
-   )
+   '("#.*" . font-lock-comment-face))
   "Default fontification of Magik Messages."
   :group 'msg
   :type 'sexp)
@@ -134,7 +131,7 @@ the variable `magik-session-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
                                           'magik-session-mode
-                                          "Enter Magik process buffer:"
+                                          "Enter Magik Session buffer:"
                                           magik-session-buffer
                                           'magik-session-buffer-alist-prefix-function))
         (process (barf-if-no-gis gis))
@@ -162,7 +159,7 @@ the variable `magik-session-buffer'."
   (interactive)
   (let ((gis (magik-utils-get-buffer-mode gis
                                           'magik-session-mode
-                                          "Enter Magik process buffer:"
+                                          "Enter Magik Session buffer:"
                                           magik-session-buffer
                                           'magik-session-buffer-alist-prefix-function))
         (process (barf-if-no-gis gis))
