@@ -1029,7 +1029,7 @@ After quitting this loop, you can use \\[isearch-forward-regexp] and use \\[isea
           (setq next (re-search-forward search-str nil t))))
       (where-is 'isearch-forward-regexp))))
 
-(defun safe-magik-backward-method ()
+(defun magik-safe-backward-method ()
   "Put point at beginning of previous method without errors."
   (interactive)
   (magik-backward-method t))
@@ -1049,7 +1049,7 @@ Optional argument NOERROR ..."
       (forward-line 1))
     t))
 
-(defun safe-magik-forward-method ()
+(defun magik-safe-forward-method ()
   "Put point at beginning of next method without errors."
   (interactive)
   (magik-forward-method t))
@@ -2197,11 +2197,11 @@ Prevents expansion inside strings and comments."
   (define-key magik-base-mode-map "\\" 'magik-electric-pragma-backslash)
 
   (define-key magik-base-mode-map "\C-\M-h" 'magik-mark-method) ;standard key mapping
-  (define-key magik-base-mode-map [M-up] 'safe-magik-backward-method)
-  (define-key magik-base-mode-map [M-down] 'safe-magik-forward-method)
+  (define-key magik-base-mode-map [M-up] 'magik-safe-backward-method)
+  (define-key magik-base-mode-map [M-down] 'magik-safe-forward-method)
 
-  (define-key magik-base-mode-map (kbd "<f2> <up>") 'safe-magik-backward-method)
-  (define-key magik-base-mode-map (kbd "<f2> <down>") 'safe-magik-forward-method)
+  (define-key magik-base-mode-map (kbd "<f2> <up>") 'magik-safe-backward-method)
+  (define-key magik-base-mode-map (kbd "<f2> <down>") 'magik-safe-forward-method)
   (define-key magik-base-mode-map (kbd "<f2> $") 'magik-transmit-$-chunk)
   (define-key magik-base-mode-map (kbd "<f2> D") 'magik-file-sw-method-docs)
   (define-key magik-base-mode-map (kbd "<f2> d") 'magik-single-sw-method-docs)
