@@ -883,8 +883,8 @@ Optional argument ARG .."
 (defun magik-newline ()
   "Insert a newline and indent.  (To insert a newline and not indent, use \\[electric-newline-and-maybe-indent])."
   (interactive "*")
-  (if (eq major-mode 'magik-session-mode)
-      (error "Your Magik shell buffer has got into magik-mode! To recover, type `M-x magik-session-mode'.  Please report this bug"))
+  (when (derived-mode-p 'magik-session-mode)
+    (error "Your Magik shell buffer has got into magik-mode! To recover, type `M-x magik-session-mode'.  Please report this bug"))
   (if abbrev-mode (save-excursion (expand-abbrev)))
   (if (save-excursion
         (back-to-indentation)
@@ -1029,6 +1029,11 @@ After quitting this loop, you can use \\[isearch-forward-regexp] and use \\[isea
           (setq next (re-search-forward search-str nil t))))
       (where-is 'isearch-forward-regexp))))
 
+(defun magik-safe-backward-method ()
+  "Put point at beginning of previous method without errors."
+  (interactive)
+  (magik-backward-method t))
+
 (defun magik-backward-method (&optional noerror)
   "Put point at beginning of this method.
 Optional argument NOERROR ..."
@@ -1043,6 +1048,11 @@ Optional argument NOERROR ..."
     (while (not (looking-at "^\\s-*\\(_method\\|_iter\\|_private\\|_abstract\\|_pragma\\)"))
       (forward-line 1))
     t))
+
+(defun magik-safe-forward-method ()
+  "Put point at beginning of next method without errors."
+  (interactive)
+  (magik-forward-method t))
 
 (defun magik-forward-method (&optional noerror)
   "Put point at beginning of the next method.
@@ -2167,7 +2177,7 @@ Prevents expansion inside strings and comments."
 (defun magik--snippets-initialize ()
   "Initialize the Magik snippets."
   (let ((snip-dir (expand-file-name "snippets" (file-name-directory (or load-file-name (buffer-file-name))))))
-   (when (boundp 'yas-snippet-dirs)
+    (when (boundp 'yas-snippet-dirs)
       (add-to-list 'yas-snippet-dirs snip-dir t))
     (yas-load-directory snip-dir)))
 
@@ -2187,11 +2197,11 @@ Prevents expansion inside strings and comments."
   (define-key magik-base-mode-map "\\" 'magik-electric-pragma-backslash)
 
   (define-key magik-base-mode-map "\C-\M-h" 'magik-mark-method) ;standard key mapping
-  (define-key magik-base-mode-map [M-up] 'magik-backward-method)
-  (define-key magik-base-mode-map [M-down] 'magik-forward-method)
+  (define-key magik-base-mode-map [M-up] 'magik-safe-backward-method)
+  (define-key magik-base-mode-map [M-down] 'magik-safe-forward-method)
 
-  (define-key magik-base-mode-map (kbd "<f2> <up>") 'magik-backward-method)
-  (define-key magik-base-mode-map (kbd "<f2> <down>") 'magik-forward-method)
+  (define-key magik-base-mode-map (kbd "<f2> <up>") 'magik-safe-backward-method)
+  (define-key magik-base-mode-map (kbd "<f2> <down>") 'magik-safe-forward-method)
   (define-key magik-base-mode-map (kbd "<f2> $") 'magik-transmit-$-chunk)
   (define-key magik-base-mode-map (kbd "<f2> D") 'magik-file-sw-method-docs)
   (define-key magik-base-mode-map (kbd "<f2> d") 'magik-single-sw-method-docs)
