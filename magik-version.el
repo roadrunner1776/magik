@@ -278,8 +278,8 @@ installation directory suitable for selection."
     (let ((inhibit-read-only t))
       (insert (format magik-version-file-format name version root))
       (save-buffer)))
-  (if (eq major-mode 'magik-version-mode)
-      (magik-version-selection)))
+  (when (derived-mode-p 'magik-version-mode)
+    (magik-version-selection)))
 
 (defun magik-version-file-open ()
   "Open the magik-version-file to edit."
@@ -502,9 +502,7 @@ Used before running a GIS process."
       (while versions
         (setq def (car versions)
               versions (cdr versions)
-              entries (nconc entries (list (vector (car def)
-                                                   (list `(lambda () (interactive) (magik-version-select ',def)))
-                                                   t)))))
+              entries (nconc entries (list (vector def (list 'magik-version-select def) t)))))
       (easy-menu-change (list "Environment")
                         "Definitions"
                         (or entries (list "No Versions found"))))))
