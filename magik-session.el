@@ -1445,7 +1445,7 @@ An error is is searched using \"**** Error\"."
   (interactive)
   (if (re-search-backward "---- traceback: " nil t)
       (forward-line -1)
-    (error "No previous traceback found")))
+    (message "No previous traceback found")))
 
 (defun magik-session-traceback-down ()
   "Move down buffer to the next traceback."
@@ -1454,7 +1454,7 @@ An error is is searched using \"**** Error\"."
   (if (re-search-forward "---- traceback: " nil t)
       (forward-line -1)
     (forward-line -2)
-    (error "No next traceback found")))
+    (message "No next traceback found")))
 
 ;;; Drag 'n' Drop
 ;;
