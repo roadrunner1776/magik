@@ -1052,7 +1052,7 @@ Optional argument NOERROR ..."
 (defun safe-magik-forward-method ()
   "Put point at beginning of next method without errors."
   (interactive)
-  (magik-backward-method t))
+  (magik-forward-method t))
 
 (defun magik-forward-method (&optional noerror)
   "Put point at beginning of the next method.
