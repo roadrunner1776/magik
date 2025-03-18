@@ -700,7 +700,7 @@ there is not, prompt for a command to run, and then run it."
         (keepgoing t)
         (magik-session-start-process-pre-hook magik-session-start-process-pre-hook)
         (buffer (magik-utils-get-buffer-mode (cond (buffer buffer)
-                                                   ((eq major-mode 'magik-session-mode) (buffer-name))
+                                                   ((derived-mode-p 'magik-session-mode) (buffer-name))
                                                    (t nil))
                                              'magik-session-mode
                                              "Enter Magik Session buffer:"
@@ -1241,7 +1241,7 @@ If ARG is null, use a default of `magik-session-history-length'."
   (setq arg (if (null arg) magik-session-history-length (prefix-numeric-value arg)))
   (let
       ((b (current-buffer)))
-    (or (eq major-mode 'magik-session-mode)
+    (or (derived-mode-p 'magik-session-mode)
         (set-buffer magik-session-buffer))
     (compat-call setq-local selective-display t)
     (let
@@ -1284,7 +1284,7 @@ If ARG is null, use a default of `magik-session-history-length'."
   (setq arg (if (null arg) magik-session-history-length (prefix-numeric-value arg)))
   (let
       ((b (current-buffer)))
-    (or (eq major-mode 'magik-session-mode)
+    (or (derived-mode-p 'magik-session-mode)
         (set-buffer magik-session-buffer))
     (compat-call setq-local selective-display t)
     (let
@@ -1491,7 +1491,7 @@ where MODE is the name of the major mode with the '-mode' postfix."
              (with-current-buffer gis
 
                (and magik-session-drag-n-drop-mode
-                    (eq major-mode 'magik-session-mode))))
+                    (derived-mode-p 'magik-session-mode))))
         (funcall fn gis (buffer-file-name)))))
 
 (defun magik-session-disable-save ()
@@ -1526,7 +1526,7 @@ where MODE is the name of the major mode with the '-mode' postfix."
          (handle (1- (nth 1 last))))
     (setcdr precdr (list
                     (list
-                     '(eq major-mode 'magik-session-mode)
+                     '(derived-mode-p 'magik-session-mode)
                      handle
                      "Magik (%d)")
                     last))))

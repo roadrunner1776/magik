@@ -159,7 +159,7 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
 (defun magik-aliases-kill-buffer ()
   "Function to run when an Aliases mode buffer is run."
   (when (derived-mode-p 'magik-aliases-mode)
-    (setq major-mode 'fundamental-mode) ; prevent current buffer being listed.
+    (setq major-mode 'fundamental-mode) ;; prevent current buffer being listed.
     (magik-aliases-update-sw-menu)))
 
 (defun magik-aliases-n ()
@@ -486,7 +486,7 @@ Returns nil if FILE can't be expanded."
          (handle (1- (nth 1 last))))
     (setcdr precdr (list
                     (list
-                     '(eq major-mode 'magik-aliases-mode)
+                     '(derived-mode-p 'magik-aliases-mode)
                      handle
                      "Aliases Files (%d)")
                     last))))
