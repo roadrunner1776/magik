@@ -446,41 +446,41 @@ Return a list of all the components of the COMMAND."
 
 (defun magik-session-update-magik-session-menu ()
   "Update the Magik Session Command history in the Magik Session pulldown menu."
-  (if (eq major-mode 'magik-session-mode)
-      (let (command-list)
-        (save-match-data
-          ;;Delete duplicates from magik-session-command-history local and global values
-          ;;Note: delete-duplicates does not appear to work on localised variables.
-          (compat-call setq-local magik-session-command-history (cl-remove-duplicates magik-session-command-history :test 'equal))
-          (setq-default magik-session-command-history
-                        (cl-remove-duplicates (default-value 'magik-session-command-history)
-                                              :test 'equal))
+  (when (derived-mode-p 'magik-session-mode)
+    (let (command-list)
+      (save-match-data
+        ;;Delete duplicates from magik-session-command-history local and global values
+        ;;Note: delete-duplicates does not appear to work on localised variables.
+        (compat-call setq-local magik-session-command-history (cl-remove-duplicates magik-session-command-history :test 'equal))
+        (setq-default magik-session-command-history
+                      (cl-remove-duplicates (default-value 'magik-session-command-history)
+                                            :test 'equal))
 
-          (dolist (command magik-session-command-history)
-            (push (apply
-                   'vector
-                   (magik-session-command-display command)
-                   (list 'gis (buffer-name) (purecopy command))
-                   ':active
-                   '(not (get-buffer-process (buffer-name)))
-                   ;; ':key-sequence nil
-                   (list ':help (purecopy command)))
-                  command-list)))
+        (dolist (command magik-session-command-history)
+          (push (apply
+                 'vector
+                 (magik-session-command-display command)
+                 (list 'gis (buffer-name) (purecopy command))
+                 ':active
+                 '(not (get-buffer-process (buffer-name)))
+                 ;; ':key-sequence nil
+                 (list ':help (purecopy command)))
+                command-list)))
 
-        (if (get-buffer-process (buffer-name))
-            (setq command-list
-                  (append command-list
-                          (list "---"
-                                (apply 'vector (magik-session-command-display magik-session-current-command)
-                                       'ignore ':active nil (list ':key-sequence nil
-                                                                  ':help (purecopy magik-session-current-command)))
-                                (apply 'vector "Start New Magik Session" 'magik-session-new-buffer
-                                       ':active t
-                                       ':keys '("C-u f2 z"))))))
+      (if (get-buffer-process (buffer-name))
+          (setq command-list
+                (append command-list
+                        (list "---"
+                              (apply 'vector (magik-session-command-display magik-session-current-command)
+                                     'ignore ':active nil (list ':key-sequence nil
+                                                                ':help (purecopy magik-session-current-command)))
+                              (apply 'vector "Start New Magik Session" 'magik-session-new-buffer
+                                     ':active t
+                                     ':keys '("C-u f2 z"))))))
 
-        (easy-menu-change (list "Magik Session")
-                          "Magik Session Command History"
-                          (or command-list (list "No History"))))))
+      (easy-menu-change (list "Magik Session")
+                        "Magik Session Command History"
+                        (or command-list (list "No History"))))))
 
 (defun magik-session-update-tools-magik-shell-menu ()
   "Update External Shell Processes submenu in Tools -> Magik pulldown menu."
@@ -701,7 +701,7 @@ there is not, prompt for a command to run, and then run it."
         (keepgoing t)
         (magik-session-start-process-pre-hook magik-session-start-process-pre-hook)
         (buffer (magik-utils-get-buffer-mode (cond (buffer buffer)
-                                                   ((eq major-mode 'magik-session-mode) (buffer-name))
+                                                   ((derived-mode-p 'magik-session-mode) (buffer-name))
                                                    (t nil))
                                              'magik-session-mode
                                              "Enter Magik Session buffer:"
@@ -770,7 +770,7 @@ there is not, prompt for a command to run, and then run it."
         (kill-buffer alias-buffer))
 
       (pop-to-buffer (get-buffer-create buffer))
-      (unless (eq major-mode 'magik-session-mode)
+      (unless (derived-mode-p 'magik-session-mode)
         (magik-session-mode))
       (goto-char (point-max))
       (insert "\n" (current-time-string) "\n")
@@ -1243,7 +1243,7 @@ If ARG is null, use a default of `magik-session-history-length'."
   (setq arg (if (null arg) magik-session-history-length (prefix-numeric-value arg)))
   (let
       ((b (current-buffer)))
-    (or (eq major-mode 'magik-session-mode)
+    (or (derived-mode-p 'magik-session-mode)
         (set-buffer magik-session-buffer))
     (compat-call setq-local selective-display t)
     (let
@@ -1288,7 +1288,7 @@ If ARG is null, use a default of `magik-session-history-length'."
   (setq arg (if (null arg) magik-session-history-length (prefix-numeric-value arg)))
   (let
       ((b (current-buffer)))
-    (or (eq major-mode 'magik-session-mode)
+    (or (derived-mode-p 'magik-session-mode)
         (set-buffer magik-session-buffer))
     (compat-call setq-local selective-display t)
     (let
@@ -1496,7 +1496,7 @@ where MODE is the name of the major mode with the '-mode' postfix."
              (with-current-buffer gis
 
                (and magik-session-drag-n-drop-mode
-                    (eq major-mode 'magik-session-mode))))
+                    (derived-mode-p 'magik-session-mode))))
         (funcall fn gis (buffer-file-name)))))
 
 (defun magik-session-disable-save ()
@@ -1531,7 +1531,7 @@ where MODE is the name of the major mode with the '-mode' postfix."
          (handle (1- (nth 1 last))))
     (setcdr precdr (list
                     (list
-                     '(eq major-mode 'magik-session-mode)
+                     '(derived-mode-p 'magik-session-mode)
                      handle
                      "Magik (%d)")
                     last))))
