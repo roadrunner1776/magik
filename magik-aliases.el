@@ -158,10 +158,9 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
 
 (defun magik-aliases-kill-buffer ()
   "Function to run when an Aliases mode buffer is run."
-  (if (eq major-mode 'magik-aliases-mode)
-      (progn
-        (setq major-mode 'fundamental-mode) ; prevent current buffer being listed.
-        (magik-aliases-update-sw-menu))))
+  (when (derived-mode-p 'magik-aliases-mode)
+    (setq major-mode 'fundamental-mode) ;; prevent current buffer being listed.
+    (magik-aliases-update-sw-menu)))
 
 (defun magik-aliases-n ()
   "If buffer is read-only goto next alias, else insert SPC."
@@ -307,9 +306,9 @@ With a prefix arg, ask user for current directory to use."
       (setq default-directory dir
             args (append (list program) args))
       (compat-call setq-local
-            magik-session-exec-path (cl-copy-list (or exec-path-aliases exec-path))
-            magik-session-process-environment (cl-copy-list (or process-environment-aliases process-environment))
-            magik-session-current-command (mapconcat 'identity args " "))
+                   magik-session-exec-path (cl-copy-list (or exec-path-aliases exec-path))
+                   magik-session-process-environment (cl-copy-list (or process-environment-aliases process-environment))
+                   magik-session-current-command (mapconcat 'identity args " "))
       (if (stringp version)
           (set 'magik-version-current version))
 
@@ -414,16 +413,16 @@ Returns nil if FILE can't be expanded."
 (defun magik-aliases-update-menu ()
   "Update the dynamic Aliases submenu."
   (interactive)
-  (if (eq major-mode 'magik-aliases-mode)
-      (let ((aliases (magik-aliases-list))
-            entries def)
-        (while aliases
-          (setq def (car aliases)
-                aliases (cdr aliases)
-                entries (nconc entries (list (vector def (list 'magik-aliases-run-program def) t)))))
-        (easy-menu-change (list "Aliases")
-                          "Definitions"
-                          (or entries (list "No Aliases found"))))))
+  (when (derived-mode-p 'magik-aliases-mode)
+    (let ((aliases (magik-aliases-list))
+          entries def)
+      (while aliases
+        (setq def (car aliases)
+              aliases (cdr aliases)
+              entries (nconc entries (list (vector def (list 'magik-aliases-run-program def) t)))))
+      (easy-menu-change (list "Aliases")
+                        "Definitions"
+                        (or entries (list "No Aliases found"))))))
 
 (defun magik-aliases-update-sw-menu ()
   "Update `Alias Files' submenu in SW menu bar."
@@ -488,7 +487,7 @@ Returns nil if FILE can't be expanded."
          (handle (1- (nth 1 last))))
     (setcdr precdr (list
                     (list
-                     '(eq major-mode 'magik-aliases-mode)
+                     '(derived-mode-p 'magik-aliases-mode)
                      handle
                      "Aliases Files (%d)")
                     last))))

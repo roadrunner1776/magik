@@ -417,8 +417,8 @@ Set METHOD and CLASS if given."
            (setq gis (magik-utils-get-buffer-mode gis
                                                   'magik-session-mode
                                                   "Enter Magik Session buffer:"
-                                                  (cond ((eq major-mode 'magik-cb-mode) (magik-cb-gis-buffer))
-                                                        ((eq major-mode 'magik-session-mode) (buffer-name))
+                                                  (cond ((derived-mode-p 'magik-cb-mode) (magik-cb-gis-buffer))
+                                                        ((derived-mode-p 'magik-session-mode) (buffer-name))
                                                         (t magik-session-buffer))
                                                   'magik-session-buffer-alist-prefix-function))
            (unless (get-buffer-process gis)
@@ -444,9 +444,9 @@ Set METHOD and CLASS if given."
                  buffer (generate-new-buffer-name
                          (concat "*cb*" "*" (or buffer (file-name-nondirectory magik-cb-file)) "*"))
                  gis    (magik-cb-gis-buffer buffer)))
-          ((eq major-mode 'magik-cb-mode)
+          ((derived-mode-p 'magik-cb-mode)
            (setq gis (magik-cb-gis-buffer)))
-          ((eq major-mode 'magik-session-mode)
+          ((derived-mode-p 'magik-session-mode)
            (setq gis (buffer-name)))
           ((and ;List of *visible* cb-mode *and* magik-session-mode buffers.
             (setq bufs
@@ -819,7 +819,7 @@ If FILTER is given then it is set on the process."
             (save-excursion
               (let ((version (magik-cb-method-finder-version)))
                 (set-buffer (get-buffer-create buffer))
-                (unless (eq major-mode 'magik-cb-mode)
+                (unless (derived-mode-p 'magik-cb-mode)
                   (magik-cb-mode))
                 (compat-call setq-local
                              magik-cb-quote-file-name   (version< "5.2.0" version)
@@ -932,8 +932,8 @@ If FILTER is given then it is set on the process."
                                                         (substring magik-cb-filter-str (match-beginning 0))
                                                       ""))
 
-        (if jump-str
-            (magik-cb-goto-method jump-str (eq major-mode 'magik-cb-mode)))))))
+        (when jump-str
+          (magik-cb-goto-method jump-str (derived-mode-p 'magik-cb-mode)))))))
 
 (defun magik-cb-read-methods (p)
   "Deal with control characters coming back from buffer P.
@@ -2164,7 +2164,7 @@ Defined in `magik-cb-current-jump'."
 (defun magik-cb-jump-to-source ()
   "Jump to the source for the method under the cursor."
   (interactive)
-  (if (eq major-mode 'magik-cb-mode)
+  (if (derived-mode-p 'magik-cb-mode)
       (magik-cb-jump-to-source-from-cb)
     (setq magik-cb-temp-method-name (magik-cb-curr-method-name))
     (magik-cb nil magik-cb-temp-method-name "")))
@@ -2389,7 +2389,7 @@ See the variable `magik-cb-generalise-file-name-alist' for more customisation."
          (handle (1- (nth 1 last))))
     (setcdr precdr (list
                     (list
-                     '(eq major-mode 'magik-cb-mode)
+                     '(derived-mode-p 'magik-cb-mode)
                      handle
                      "CB (%d)")
                     last))))
