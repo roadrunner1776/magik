@@ -226,7 +226,7 @@ Called by `magik-session-drag-n-drop-load' when a Msg FILENAME is dropped."
          (handle (1- (nth 1 last))))
     (setcdr precdr (list
                     (list
-                     '(eq major-mode 'magik-msg-mode)
+                     '(derived-mode-p 'magik-msg-mode)
                      handle
                      "Msg Files (%d)")
                     last))))
