@@ -1441,20 +1441,20 @@ An error is is searched using \"**** Error\"."
       (error "Couldn't find a line starting with '**** Error' - nothing saved"))))
 
 (defun magik-session-traceback-up ()
-  "Move up buffer to next traceback."
+  "Move up buffer to the previous traceback."
   (interactive)
-  (save-match-data
-    (re-search-backward "---- traceback: "))
-  (forward-line -1))
+  (if (re-search-backward "---- traceback: " nil t)
+      (forward-line -1)
+    (user-error "No previous traceback found")))
 
 (defun magik-session-traceback-down ()
-  "Move down buffer to next traceback."
+  "Move down buffer to the next traceback."
   (interactive)
-  (forward-line 1)
-  (forward-line 1)
-  (save-match-data
-    (re-search-forward "---- traceback: "))
-  (forward-line -1))
+  (forward-line 2)
+  (if (re-search-forward "---- traceback: " nil t)
+      (forward-line -1)
+    (forward-line -2)
+    (user-error "No next traceback found")))
 
 ;;; Drag 'n' Drop
 ;;
