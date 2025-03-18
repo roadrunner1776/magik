@@ -248,19 +248,14 @@ Argument METHOD-STRING ..."
 Argument MISSING-SLOTS ...
 Argument STARTING-POINT ...
 Argument DOCUMENTATION-FOUND ..."
-  (let ((comment-line (concat "##\n")))
-    (if (or (equal documentation-found 0) 
-            (equal documentation-found 1))
-        (progn
-          (forward-line starting-point)
-          (when (equal documentation-found 0)
-            (insert comment-line))
-          (dolist (slot missing-slots)
-            (insert (concat "## @slot {:} " slot "\n"))))
-      (progn
-        (forward-line starting-point)
-        (dolist (slot missing-slots)
-          (insert (concat "## @slot {:} " slot "\n")))))))
+  (goto-char (point-min))
+  (forward-line (1- starting-point))
+
+  (when (equal documentation-found 0)
+    (insert "##\n"))
+
+  (dolist (slot missing-slots)
+    (insert (concat "## @slot {:} " slot "\n"))))
 
 (defun magik--write-method-type-doc (missing-parameters starting-point documentation-found write-return)
   "Writer function for inserting method type doc.
@@ -270,37 +265,40 @@ Argument DOCUMENTATION-FOUND ...
 Argument WRITE-RETURN ..."
   (let ((comment-line (concat "\t##\n"))
         (return-line (concat "\t## @return {:}\n")))
-    (if (or (equal documentation-found 0) 
+    (if (or (equal documentation-found 0)
             (equal documentation-found 1))
         (progn
-          (forward-line starting-point)
+          (goto-char (point-min))
+           (forward-line (1- starting-point))
           (when (equal documentation-found 0)
             (insert comment-line))
           (dolist (parameter missing-parameters)
             (insert (concat "\t## @param {:} " parameter "\n")))
           (when write-return (insert return-line)))
       (progn
-        (forward-line (- starting-point 1))
+        (goto-char (point-min))
+        (forward-line (- starting-point 2))
         (dolist (parameter missing-parameters)
-          (insert (concat "\t## @param {:} " parameter "\n")))))
-    ))
+          (insert (concat "\t## @param {:} " parameter "\n")))))))
 
 (defun magik--write-sw-method-doc (missing-parameters starting-point documentation-found)
   "Writer function for inserting sw-method-doc.
 Argument MISSING-PARAMETERS ...
 Argument STARTING-POINT ...
-Argument COMMENTS-FOUND ..."
-  (if (or (equal comments-found 0)
-          (equal comments-found 1))
+Argument DOCUMENTATION-FOUND ..."
+  (if (or (equal documentation-found 0)
+          (equal documentation-found 1))
       (progn
-        (forward-line starting-point)
+        (goto-char (point-min))
+        (forward-line (1- starting-point))
         (when (equal documentation-found 0)
           (insert "\t##\n"))
         (dolist (parameter missing-parameters)
           (insert (concat "\t## " (upcase parameter) "\n")))
         (insert "\t##\n"))
     (progn
-      (forward-line (- starting-point 1))
+      (goto-char (point-min))
+      (forward-line (- starting-point 2))
       (dolist (parameter missing-parameters)
         (insert (concat "\t## " (upcase parameter) "\n"))))))
 
