@@ -129,19 +129,14 @@ then complete with Typedocs format format"
 Argument MISSING-SLOTS ...
 Argument STARTING-POINT ...
 Argument COMMENTS-FOUND ..."
-  (let ((comment-line (concat "##\n")))
-    (if (or (equal comments-found 0)
-            (equal comments-found 1))
-        (progn
-          (goto-line starting-point)
-          (when (equal comments-found 0)
-            (insert comment-line))
-          (dolist (slot missing-slots)
-            (insert (concat "## @slot {:} " slot "\n"))))
-      (progn
-        (goto-line starting-point)
-        (dolist (slot missing-slots)
-          (insert (concat "## @slot {:} " slot "\n")))))))
+  (goto-char (point-min))
+  (forward-line (1- starting-point))
+
+  (when (equal comments-found 0)
+    (insert "##\n"))
+
+  (dolist (slot missing-slots)
+    (insert (concat "## @slot {:} " slot "\n"))))
 
 (defun magik-single-method-type-docs ()
   "Search for the closest method definition.
@@ -222,14 +217,16 @@ Argument WRITE-RETURN ..."
     (if (or (equal comments-found 0)
             (equal comments-found 1))
         (progn
-          (goto-line starting-point)
+          (goto-char (point-min))
+          (forward-line (1- starting-point))
           (when (equal comments-found 0)
             (insert comment-line))
           (dolist (parameter missing-parameters)
             (insert (concat "\t## @param {:} " parameter "\n")))
           (when write-return (insert return-line)))
       (progn
-        (goto-line (- starting-point 1))
+        (goto-char (point-min))
+        (forward-line (- starting-point 2))
         (dolist (parameter missing-parameters)
           (insert (concat "\t## @param {:} " parameter "\n")))))))
 
@@ -272,14 +269,16 @@ Argument COMMENTS-FOUND ..."
   (if (or (equal comments-found 0)
           (equal comments-found 1))
       (progn
-        (goto-line starting-point)
+        (goto-char (point-min))
+        (forward-line (1- starting-point))
         (when (equal comments-found 0)
           (insert "\t##\n"))
         (dolist (parameter missing-parameters)
           (insert (concat "\t## " (upcase parameter) "\n")))
         (insert "\t##\n"))
     (progn
-      (goto-line (- starting-point 1))
+      (goto-char (point-min))
+      (forward-line (- starting-point 2))
       (dolist (parameter missing-parameters)
         (insert (concat "\t## " (upcase parameter) "\n"))))))
 
