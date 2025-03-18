@@ -1106,11 +1106,12 @@ Then do an electric space using ARG."
   (magik-session--prepare-for-edit-cmd)
   (backward-kill-word word))
 
-(defun magik-session-backward-delete-char (n)
-  "Take a copy of a command before deleting the char N times."
+(defun magik-session-backward-delete-char (char)
+  "Take a copy of a command before deleting the CHAR."
   (interactive "*p")
   (magik-session--prepare-for-edit-cmd)
-  (delete-char (- n)))
+  ;; Avoid warning about delete-backward-char being for interactive use only
+  (with-no-warnings (backward-delete-char char)))
 
 (defun magik-session-kill-line (line)
   "Take a copy of a command before killing the LINE."
