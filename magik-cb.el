@@ -1187,25 +1187,21 @@ separated by spaces."
 (defun magik-cb-insert-topics-and-flags ()
   "Write the topics and flags and the current + signs into the current buffer."
   (let ((buffer-read-only nil))
-    (insert "    CLASS BROWSER CONTROL PANEL : up to 200 methods normally displayed\n    PRAGMA FLAGS        INHERITANCE                    LAYOUT\n")
-    ;;WARNING:
-    ;; each flag/topic must be surrounded by a single space.
-    ;; therefore the flag/topics printed here at the end of the lines
-    ;; have a white-space character
-    (insert "
-  + basic             * local-only                     show-methods
-    advanced          * inherit-not-\"object\"           show-classes
-    subclassable      * inherit-from-\"object\"          show-args
-    redefinable                                        show-comments
-  + debug                                              show-topics ")
-    (if (magik-cb-mf-extended-flags)
-        (insert "
-    deprecated
-    restricted
-    "))
-    (insert "\n    OVERRIDES : use these for temporary changes to the control panel\n")
-    (insert "\n    override-flags          override-topics            override-200-limit \n")
-    (insert "\n    TOPICS : use F3 t to turn all topics on/off\n\n\n")
+    (insert (substitute-command-keys
+             (concat
+              "\n  + basic             * local-only                     show-methods "
+              "\n    advanced          * inherit-not-\"object\"           show-classes "
+              "\n    subclassable      * inherit-from-\"object\"          show-args "
+              "\n    redefinable                                        show-comments "
+              "\n  + debug                                              show-topics "
+              "\n    deprecated "
+              "\n    restricted "
+              "\n"
+              "\n    OVERRIDES : use these for temporary changes to the control panel"
+              "\n"
+              "\n    override-flags          override-topics            override-200-limit "
+              "\n"
+              "\n    TOPICS : use \\[magik-cb-toggle-all-topics] to turn all topics on/off\n\n\n")))
     (magik-cb-insert-topics)
     (magik-cb-display-all-topics)))
 
@@ -1221,8 +1217,8 @@ separated by spaces."
        col-length
        (curr-col 0)
        (curr-row 0)
-                                        ;sort the topics alphabetically. sort has side-effects, so the alist, magik-cb-topics, is copied first
-       (magik-cb-sorted-topics (sort (copy-alist (magik-cb-topics)) #'(lambda (x y) (string< (car x) (car y)))))
+       ;; sort the topics alphabetically. sort has side-effects, so the alist, magik-cb-topics, is copied first
+       (magik-cb-sorted-topics (sort (copy-alist (magik-cb-topics)) (lambda (x y) (string< (car x) (car y)))))
        (last-char (string-to-char (caar magik-cb-sorted-topics))))
 
     ;; first pass for calculating the column widths etc.
@@ -1347,24 +1343,25 @@ Don't ask for a response, though."
                         "\n"))
 
 (defun magik-cb-display-topic (str)
+  "Display topic called STR."
   (let ((cb2 (magik-cb2-buffer)))
-    (if (and (get-buffer cb2) (eq magik-cb2-mode 'topic))
-        (let ((on-p (magik-cb-topic-on-p str))
-              (term-p (member str magik-cb-thermometer-group))
-              buffer-read-only
-              case-fold-search)
-          (set-buffer cb2)
-          (goto-char (point-min))
-          (search-forward (concat " " str " "))
-          (backward-char (+ 2 (length str)))
-          (delete-char -1)
-          (insert
-           (cond ((and term-p on-p)       "*")
-                 ((and term-p (not on-p)) ".")
-                 (on-p                    "+")
-                 ((not on-p)              "-")
-                 (t ;should never get here
-                  "?")))))))
+    (when (and (get-buffer cb2) (eq magik-cb2-mode 'topic))
+      (let ((on-p (magik-cb-topic-on-p str))
+            (term-p (member str magik-cb-thermometer-group))
+            buffer-read-only
+            case-fold-search)
+        (set-buffer cb2)
+        (goto-char (point-min))
+        (search-forward (concat " " str " "))
+        (backward-char (+ 2 (length str)))
+        (delete-char -1)
+        (insert
+         (cond ((and term-p on-p)       "*")
+               ((and term-p (not on-p)) ".")
+               (on-p                    "+")
+               ((not on-p)              "-")
+               (t ;should never get here
+                "?")))))))
 
 (defun magik-cb-toggle (str)
   "Toggle the topic or flag, STR.  Set, send and display it.
@@ -1495,6 +1492,8 @@ Be careful to preserve the position in \"*cb2*\"."
                show-trailing-whitespace nil
                font-lock-defaults '(magik-cb2-font-lock-keywords nil t ((?_ . "w"))))
 
+  (use-local-map magik-cb-mode-map)
+
   (magik-cb-redraw-modeline))
 
 ;;; Package initialisation
@@ -1511,15 +1510,9 @@ Return nil if \"*cb2*\" already had a window and was in the right MODE.
 If it didn't have a window, the buffer is refilled from the cb global variables.
 We also save some state for a clean exit."
   (let* ((cb2 (magik-cb2-buffer)) ;actually always called from *cb2* buffer.
-         (buf (magik-cb-buffer))
-         (win (get-buffer-window cb2)))
-                                        ;    (if (get-buffer-window cb2)
-                                        ; (progn
-                                        ;   (select-window (get-buffer-window cb2))
-                                        ;   (not (eq cb2-mode mode)))
-    ;; else the window doesn't exist.
-    (setq magik-cb2-was-one-window (one-window-p t))
-    (setq magik-cb2-direct-p (not (get-buffer-window buf)))
+         (buf (magik-cb-buffer)))
+    (setq magik-cb2-was-one-window (one-window-p t)
+          magik-cb2-direct-p (not (get-buffer-window buf)))
     (let ((magik-cb-win (get-buffer-window buf)))
       (cond
        ((and (fboundp 'ecb-toggle-compile-window-height)
@@ -1553,8 +1546,6 @@ We also save some state for a clean exit."
        (t
         (display-buffer cb2))))
     t))
-                                        ;)
-
 
 ;; M O D E L I N E
 ;; _______________
@@ -1856,7 +1847,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
   "Either toggle a class browser flag or show a class hierarchy using CLICK."
   (interactive "e")
   (mouse-set-point click)
-  (cond ((eq major-mode 'magik-cb-mode)
+  (cond ((derived-mode-p 'magik-cb-mode)
          (if (save-excursion (search-backward " " (line-beginning-position) t))
              (magik-cb-family (magik-utils-find-tag-default))
            (magik-cb-jump-to-source)))
