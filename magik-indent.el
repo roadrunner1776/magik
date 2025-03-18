@@ -434,7 +434,7 @@ Add a newline token unless the last token is an operator."
           (setq arr (cdr (assq state magik-state-table)))
           (if (eq state 'neutral)
               (backward-char)))
-        (if (eq (point) (point-max))
+        (if (eobp)
             (setq reached-the-end t)
           (forward-char)))
       (backward-char)  ; 'cos we over-stepped in order to the last token.
