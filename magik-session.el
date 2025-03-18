@@ -1173,23 +1173,25 @@ An internal function that deals with 4 cases."
         (progn
           (cl-incf n step)
           (not (magik-session--matching-cmd-p n str))))
-    (if (= n -1)
-        (if (equal str "")
-            (error "No previous command")
-          (error "No previous command matching '%s'" str)))
+    (when (= n -1)
+      (if (equal str "")
+          (user-error "No previous command")
+        (user-error "No previous command matching '%s'" str)))
+    (when (= n magik-session-no-of-cmds)
+      (cl-decf n)
+      (if (equal str "")
+          (user-error "No next command")
+        (user-error "No next command matching '%s'" str)))
     (setq mark (process-mark (get-buffer-process (current-buffer))))
-    (if (= n magik-session-no-of-cmds)
-        (cl-decf n))
     (magik-session-copy-cmd n
                             (if (equal str "")
                                 (- (point) mark)
                               (length str)))
     (compat-call setq-local magik-session-cmd-num n)
-    (if end-of-command-p
-        (progn
-          (goto-char (point-max))
-          ;; skip back past \n$\n and whitespace
-          (skip-chars-backward " \t\n$" mark)))))
+    (when end-of-command-p
+      (goto-char (point-max))
+      ;; skip back past \n$\n and whitespace
+      (skip-chars-backward " \t\n$" mark))))
 
 (defun magik-session-recall-prev-cmd ()
   "Recall the earlier Magik session commands.
