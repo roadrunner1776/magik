@@ -361,12 +361,11 @@ Not used yet.")
   :type 'face)
 
 (defcustom magik-cb2-font-lock-keywords
-  '(
-    ("[+] \\(\\sw+\\)" 1 magik-cb2-font-lock-on-face)
+  '(("[+] \\(\\sw+\\)" 1 magik-cb2-font-lock-on-face)
     ("[-] \\(\\sw+\\)" 1 magik-cb2-font-lock-off-face)
     ("[*] \\(\\sw+\\)" 1 magik-cb2-font-lock-thermometer-on-face)
     ("[.] \\(\\sw+\\)" 1 magik-cb2-font-lock-thermometer-off-face)
-    ("^    .*$" . font-lock-doc-face))
+    ("\\sw+" 0 font-lock-doc-face))
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)
@@ -1188,6 +1187,12 @@ separated by spaces."
   (let ((buffer-read-only nil))
     (insert (substitute-command-keys
              (concat
+              "\n    CLASS BROWSER CONTROL PANEL : up to 200 methods normally displayed"
+              "\n"
+              "\n    Use \\[magik-cb-mouse] to turn a setting on/off"
+              "\n"
+              "\n    PRAGMA FLAGS        INHERITANCE                    LAYOUT"
+              "\n"
               "\n  + basic             * local-only                     show-methods "
               "\n    advanced          * inherit-not-\"object\"           show-classes "
               "\n    subclassable      * inherit-from-\"object\"          show-args "
@@ -1200,47 +1205,44 @@ separated by spaces."
               "\n"
               "\n    override-flags          override-topics            override-200-limit "
               "\n"
-              "\n    TOPICS : use \\[magik-cb-toggle-all-topics] to turn all topics on/off\n\n\n")))
+              "\n    TOPICS : use \\[magik-cb-toggle-all-topics] to turn all topics on/off\n\n")))
     (magik-cb-insert-topics)
     (magik-cb-display-all-topics)))
 
 (defun magik-cb-insert-topics ()
   "Format all the topics in columns.  Don't bother with the + signs."
-  (let*
-      ((max-len 0)
-       n-cols
-       ans
-       (total-width (- (window-width (get-buffer-window (current-buffer))) 1))
-       (n-rows 0)
-       col-width
-       col-length
-       (curr-col 0)
-       (curr-row 0)
-       ;; sort the topics alphabetically. sort has side-effects, so the alist, magik-cb-topics, is copied first
-       (magik-cb-sorted-topics (sort (copy-alist (magik-cb-topics)) (lambda (x y) (string< (car x) (car y)))))
-       (last-char (string-to-char (caar magik-cb-sorted-topics))))
+  (let* ((max-len 0)
+         n-cols
+         ans
+         (total-width (- (window-width (get-buffer-window (current-buffer))) 1))
+         (n-rows 0)
+         col-width
+         col-length
+         (curr-col 0)
+         (curr-row 0)
+         ;; sort the topics alphabetically. sort has side-effects, so the alist, magik-cb-topics, is copied first
+         (magik-cb-sorted-topics (sort (copy-alist (magik-cb-topics)) (lambda (x y) (string< (car x) (car y)))))
+         (last-char (string-to-char (caar magik-cb-sorted-topics))))
 
     ;; first pass for calculating the column widths etc.
     (with-current-buffer (generate-new-buffer "*cbtemp*")
-      (dolist
-          (x magik-cb-sorted-topics)
-        (let*
-            ((topic (car x))
-             (this-char (string-to-char topic)))
+      (dolist (x magik-cb-sorted-topics)
+        (let* ((topic (car x))
+               (this-char (string-to-char topic)))
           (when (magik-cb-is-a-topic topic)
             (cl-incf n-rows)
             (or (eq last-char this-char) (cl-incf n-rows))
-            (setq last-char this-char)
-            (setq max-len (max max-len (length topic))))))
+            (setq last-char this-char
+                  max-len (max max-len (length topic))))))
 
-      (setq col-width (+ max-len 4))
-      (setq n-cols (/ total-width col-width))
-      (setq col-length (/ n-rows n-cols))
-
+      (setq col-width (+ max-len 4)
+            n-cols (/ total-width col-width)
+            col-length (/ n-rows n-cols)
+            last-char (string-to-char (caar magik-cb-sorted-topics)))
+      
       ;; second pass to put the topic names in the buffer.
-      (setq last-char (string-to-char (caar magik-cb-sorted-topics)))
-      (dolist
-          (x magik-cb-sorted-topics)
+      (insert "  ")
+      (dolist (x magik-cb-sorted-topics)
         (let*
             ((topic (car x))
              (this-char (string-to-char topic)))
@@ -1249,7 +1251,7 @@ separated by spaces."
               (unless (eq last-char this-char)
                 (cl-incf curr-row)
                 (if (eobp)
-                    (insert ?\n)
+                    (insert "\n  ")
                   (forward-line)))
               (when (> curr-row col-length)
                 (setq curr-row 0)
@@ -1260,9 +1262,10 @@ separated by spaces."
               (indent-to-column curr-col)
               (insert "  " topic " ")
               (cl-incf curr-row)
-              (when (eobp)
-                (insert ?\n)
+              (if (eobp)
+                  (insert "\n  ")
                 (forward-line))))))
+
       (setq ans (buffer-string))
       (kill-buffer (current-buffer)))
     (let ((buffer-read-only nil))
@@ -1271,20 +1274,20 @@ separated by spaces."
 (defun magik-cb-toggle-all-topics ()
   "Turn all the topics on or all the topics off."
   (interactive)
-  (let
-      ((all-on (magik-cb-all-topics-on-p)))
+  (let ((all-on (magik-cb-all-topics-on-p)))
     (magik-cb-set-all-topics (not all-on))
     (magik-cb-display-all-topics)
-    (magik-cb-send-string (if all-on "unadd topic\n" "add topic\n"))
+    (magik-cb-send-string (if all-on
+                              "unadd topic\n"
+                            "add topic\n"))
     (magik-cb-print-curr-methods)))
 
 (defun magik-cb-toggle-topic-or-flag ()
   "Toggle the topic or flag under the cursor."
   (interactive)
-  (let*
-      ((str (magik-cb-curr-topic)))
-    (if (magik-cb-topic-elt str)
-        (magik-cb-toggle str))))
+  (let* ((str (magik-cb-curr-topic)))
+    (when (magik-cb-topic-elt str)
+      (magik-cb-toggle str))))
 
 ;; T O P I C   A N D   F L A G   U T I L S
 ;; _______________________________________

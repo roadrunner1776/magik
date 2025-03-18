@@ -883,29 +883,23 @@ Also append the string to \" *history**gis*\"."
 (defun magik-session--make-new-cmds-vec ()
   "Create a new bigger vector for `magik-session-prev-cmds'.
 Copies the non-degenerate commands into it."
-  (message "Resizing the command history vector...")
-  (let*
-      ((len (length magik-session-prev-cmds))
-       (v (make-vector (+ len 100) nil))
-       (i 0)
-       (v_i 0))
-    (while
-        (< i len)
-      (let
-          ((x (aref magik-session-prev-cmds i)))
+  (let* ((len (length magik-session-prev-cmds))
+         (v (make-vector (+ len 100) nil))
+         (i 0)
+         (v_i 0))
+    (while (< i len)
+      (let ((x (aref magik-session-prev-cmds i)))
         (when (and (marker-buffer (car x))
                    (marker-buffer (cdr x))
                    (> (cdr x) (car x)))
           (aset v v_i x)
           (cl-incf v_i)))
       (cl-incf i))
-    (let
-        ((m (copy-marker (point-min))))
+    (let ((m (copy-marker (point-min))))
       (aset v v_i (cons m m)))
     (compat-call setq-local
                  magik-session-no-of-cmds (1+ v_i)
-                 magik-session-prev-cmds v)
-    (message "Re-sizing the command history vector... Done. (%s commands)." (number-to-string v_i))))
+                 magik-session-prev-cmds v)))
 
 (defun magik-session-beginning-of-line (&optional n)
   "Move point to beginning of Nth line or just after prompt.
@@ -923,11 +917,9 @@ If command is repeated then place point at beginning of prompt."
 
 (defun magik-session-toggle-dollar ()
   "Toggle auto-insertion of $ terminator."
-  (interactive )
+  (interactive)
   (setq magik-session-auto-insert-dollar (not magik-session-auto-insert-dollar))
-  (if magik-session-auto-insert-dollar
-      (message "Insert dollar now enabled")
-    (message "Insert dollar now disabled")))
+  (message "Insert dollar now %s" (if (symbol-value magik-session-auto-insert-dollar) "enabled" "disabled")))
 
 (defun magik-session-newline (arg)
   "If in a previous cmd, recall.
@@ -1183,11 +1175,14 @@ An internal function that deals with 4 cases."
           (not (magik-session--matching-cmd-p n str))))
     (when (= n -1)
       (if (equal str "")
-          (error "No previous command")
-        (error "No previous command matching '%s'" str)))
-    (setq mark (process-mark (get-buffer-process (current-buffer))))
+          (user-error "No previous command")
+        (user-error "No previous command matching '%s'" str)))
     (when (= n magik-session-no-of-cmds)
-      (cl-decf n))
+      (cl-decf n)
+      (if (equal str "")
+          (user-error "No next command")
+        (user-error "No next command matching '%s'" str)))
+    (setq mark (process-mark (get-buffer-process (current-buffer))))
     (magik-session-copy-cmd n
                             (if (equal str "")
                                 (- (point) mark)
@@ -1436,20 +1431,20 @@ An error is is searched using \"**** Error\"."
       (error "Couldn't find a line starting with '**** Error' - nothing saved"))))
 
 (defun magik-session-traceback-up ()
-  "Move up buffer to next traceback."
+  "Move up buffer to the previous traceback."
   (interactive)
-  (save-match-data
-    (re-search-backward "---- traceback: "))
-  (forward-line -1))
+  (if (re-search-backward "---- traceback: " nil t)
+      (forward-line -1)
+    (user-error "No previous traceback found")))
 
 (defun magik-session-traceback-down ()
-  "Move down buffer to next traceback."
+  "Move down buffer to the next traceback."
   (interactive)
-  (forward-line 1)
-  (forward-line 1)
-  (save-match-data
-    (re-search-forward "---- traceback: "))
-  (forward-line -1))
+  (forward-line 2)
+  (if (re-search-forward "---- traceback: " nil t)
+      (forward-line -1)
+    (forward-line -2)
+    (user-error "No next traceback found")))
 
 ;;; Drag 'n' Drop
 ;;

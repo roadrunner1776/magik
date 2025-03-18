@@ -1788,7 +1788,8 @@ Argument END ..."
             (method-point nil))
         (unless (equal (search-backward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t) nil)
           (setq exemplar-point (line-number-at-pos)))
-        (goto-line starting-point)
+        (goto-char (point-min))
+        (forward-line (1- starting-point))
         (unless (equal (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t) nil)
           (setq method-point (line-number-at-pos)))
         (when (or (not (equal exemplar-point nil))
@@ -1796,7 +1797,8 @@ Argument END ..."
           (when (or (and (not (equal exemplar-point nil))
                          (> exemplar-point (line-number-at-pos)))
                     (equal method-point nil))
-            (goto-line exemplar-point))
+            (goto-char (point-min))
+            (forward-line (1- exemplar-point)))
           (magik-parse-pragma)))))))
 
 (defun magik-parse-pragma ()
@@ -1817,7 +1819,8 @@ Argument END ..."
 (defun magik-write-pragma (ending-point)
   "Writer function for inserting pragma.
 Argument ENDING-POINT ..."
-  (goto-line ending-point)
+  (goto-char (point-min))
+  (forward-line (1- ending-point))
   (magik-insert-pragma))
 
 ;;; Imenu configuration functions
