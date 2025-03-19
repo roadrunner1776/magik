@@ -88,16 +88,15 @@ FUNCTION takes one argument, the string after the action character."
             (t
              nil))
       ;; else if in " " or "\C-f" state then do nothing.
-      (if n
-          (progn
-            (with-current-buffer buf
-              (setq magik-session-filter-state
-                    (cdr (assoc magik-session-filter-state
-                                '(("\C-a" . "\C-e")
-                                  ("\C-e" . " ")
-                                  ("\C-f" . "\C-a")
-                                  (" " . "\C-a"))))))
-            (magik-session-filter proc (substring str (1+ n))))))))
+      (when n
+        (with-current-buffer buf
+          (setq magik-session-filter-state
+                (cdr (assoc magik-session-filter-state
+                            '(("\C-a" . "\C-e")
+                              ("\C-e" . " ")
+                              ("\C-f" . "\C-a")
+                              (" " . "\C-a"))))))
+        (magik-session-filter proc (substring str (1+ n)))))))
 
 (defun magik-session-filter-insert (buf proc n str)
   "Insert into BUF at the `process-mark' of PROC, N chars from STR.
@@ -306,23 +305,22 @@ The behaviour is undefined if any search key and line or column are used."
       (set-buffer (funcall (intern (cdr (assq 'function alist))) (cdr (assq 'file alist))))
 
       ;;act on keys and values.
-      (if (setq val (assq 'method alist))
-          (progn
-            (widen)
-            (goto-char (point-min))
-            (magik-goto-class-method (cdr val) (cdr (assq 'class alist)))
-            (setq start-pt (point))))
-      (if (setq val (assq 'search alist))
-          (progn
-            (widen)
-            (goto-char (or start-pt (point-min))) ;;continue search from class.method?
-            (if (search-forward (cdr val) nil t)
-                (goto-char (match-beginning 0)))))
+      (when (setq val (assq 'method alist))
+        (widen)
+        (goto-char (point-min))
+        (magik-goto-class-method (cdr val) (cdr (assq 'class alist)))
+        (setq start-pt (point)))
+      (when (setq val (assq 'search alist))
+        (widen)
+        (goto-char (or start-pt (point-min))) ;;continue search from class.method?
+        (when (search-forward (cdr val) nil t)
+          (goto-char (match-beginning 0))))
       (if (setq val (assq 'line alist))
           (progn
             (goto-char (point-min))
             (forward-line (string-to-number (cdr val)))))
-      (if (setq val (assq 'column alist)) (move-to-column (string-to-number (cdr val)))))))
+      (if (setq val (assq 'column alist))
+          (move-to-column (string-to-number (cdr val)))))))
 
 (defun magik-session-filter-action-cb-mf (proc socketname)
   "Magik has started a method_finder PROC and tell Emacs what the SOCKETNAME is."
