@@ -1224,41 +1224,37 @@ See `magik-mark-method-exchange' for more details."
 The construct can be a method, a proc, a def_slotted_exemplar or whatever.
 The rule is that the thing must start against the left margin."
   (interactive)
-  (let
-      ((original-point (point))
-       (beg (point))
-       (stack nil))
-    (if (re-search-backward "^\\w" nil t)
-        (progn
-          (setq beg (point))
-          (forward-line -1)
-          (while
-              (and (not (bobp))
-                   (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
-            (setq beg (point))
-            (forward-line -1))
-          (goto-char beg)
-          (while
-              (and (not (eq (point) (point-max)))
-                   (or (< (point) original-point)
-                       stack))
-            (dolist (tok (magik-tokenise-line))
-              (cond
-               ((assoc (car tok) magik-begins-and-ends)
-                (push (car tok) stack))
-               ((assoc (car tok) magik-ends-and-begins)
-                (if (equal (cdr (assoc (car stack) magik-begins-and-ends)) (car tok))
-                    (pop stack)
-                  (goto-char (cdr tok))
-                  (error "Found '%s' when expecting '%s'"
-                         (car tok)
-                         (cdr (assoc (car stack) magik-begins-and-ends)))))))
-            (forward-line))
-          (if (< (point) original-point)
-              (progn
-                (goto-char original-point)
-                (error "Don't know what to transmit"))
-            (magik-transmit-region beg (point)))))
+  (let ((original-point (point))
+        (beg (point))
+        (stack nil))
+    (when (re-search-backward "^\\w" nil t)
+      (setq beg (point))
+      (forward-line -1)
+      (while (and (not (bobp))
+                  (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
+        (setq beg (point))
+        (forward-line -1))
+      (goto-char beg)
+      (while (and (not (eobp))
+                  (or (< (point) original-point)
+                      stack))
+        (dolist (tok (magik-tokenise-line))
+          (cond
+           ((assoc (car tok) magik-begins-and-ends)
+            (push (car tok) stack))
+           ((assoc (car tok) magik-ends-and-begins)
+            (if (equal (cdr (assoc (car stack) magik-begins-and-ends)) (car tok))
+                (pop stack)
+              (goto-char (cdr tok))
+              (error "Found '%s' when expecting '%s'"
+                     (car tok)
+                     (cdr (assoc (car stack) magik-begins-and-ends)))))))
+        (forward-line))
+      (if (< (point) original-point)
+          (progn
+            (goto-char original-point)
+            (error "Don't know what to transmit"))
+        (magik-transmit-region beg (point))))
     (goto-char original-point)))
 (defalias 'transmit-thing-to-magik 'magik-transmit-thing)
 

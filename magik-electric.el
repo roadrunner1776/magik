@@ -132,12 +132,12 @@ If it's the first '#' and the previous line starts with '#', align with it."
   ;;first prepare the line we are inserting on
   (beginning-of-line)
   (let ((blank-linep (looking-at "^\\s-*$"))
-        (end-of-bufferp (save-excursion (end-of-line) (eq (point) (point-max)))))
+        (end-of-bufferp (save-excursion (end-of-line) (eobp))))
     (and blank-linep (delete-horizontal-space))
-    (if (or (not blank-linep) end-of-bufferp)
-        (progn
-          (insert "\n")
-          (forward-line -1))))
+    (when (or (not blank-linep)
+              end-of-bufferp)
+      (insert "\n")
+      (forward-line -1)))
   ;;Insert the default pragma statement
   (insert "prag")
   (magik-explicit-electric-space))
@@ -186,22 +186,21 @@ If it's the first '#' and the previous line starts with '#', align with it."
    ((save-excursion
       (back-to-indentation)
       (looking-at "##?"))
-    (let*
-        ((match-str (match-string 0))
-         (auto-fill-function 'do-auto-fill)
-         (fill-prefix (concat
-                       (save-excursion
-                         (back-to-indentation)
-                         (buffer-substring (line-beginning-position) (point)))
-                       match-str
-                       " "));we want to make the next line indented with a space
-         (fill-column (save-excursion
-                        (back-to-indentation)
-                        (+ (current-column) 63))))
+    (let* ((match-str (match-string 0))
+           (auto-fill-function 'do-auto-fill)
+           (fill-prefix (concat
+                         (save-excursion
+                           (back-to-indentation)
+                           (buffer-substring (line-beginning-position) (point)))
+                         match-str
+                         " "));we want to make the next line indented with a space
+           (fill-column (save-excursion
+                          (back-to-indentation)
+                          (+ (current-column) 63))))
       (self-insert-command arg)))
    ((and (or doit
              (and magik-electric-mode
-                  (or (eq (point) (point-max))
+                  (or (eobp)
                       (looking-at "[ \t]*$"))
                   (save-excursion
                     (not (re-search-backward "[#\"]" (line-beginning-position) t)))))
