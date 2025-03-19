@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2025 Reinier Koffijberg
 
-;; Author:  <reinier.koffijberg@RDS>
+;; Author: Reinier Koffijberg <reinierkof@github>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -222,7 +222,7 @@ Argument METHOD-STRING ..."
         (documentation nil)
         (documentation-found 0))
     (while (and (not (looking-at (cdr (assoc "pragma" magik-regexp))))
-                (> (point) (point-min))
+                (not (bobp))
                 (not (looking-at "^\\s-*$")))
       (if (and (not (looking-at "^##$")) (looking-at "^##"))
           (progn
