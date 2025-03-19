@@ -228,7 +228,7 @@ Uses DIRECTION to determine if we need to go backwards."
     (save-match-data
       (search-forward ")") ; find end of _pragma statement
       (delete-horizontal-space)
-      (if (eq (point) (point-max)) ;protect against being at the end of the buffer
+      (if (eobp) ;protect against being at the end of the buffer
           (insert "\n")
         (forward-line 1))
       ;;Now search for a suitable place to insert the template
