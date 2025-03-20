@@ -1066,12 +1066,6 @@ Return nil if it isn't in the half-open range [MIN, MAX)."
          (t
           (error "Sorry... Confused command recall"))))))
 
-(defun magik-session-kill-region (beg end)
-  "Ask if they really want to kill the region from BEG to END, before killing it."
-  (interactive "*r")
-  (when (y-or-n-p "Cutting and pasting big regions can confuse the gis-mode markers... Kill anyway?")
-    (kill-region beg end)))
-
 (defun magik-session--prepare-for-edit-cmd (_beg _end)
   "If we're in a previous command, replace any current command with this one."
   (let ((n (magik-session--get-curr-cmd-num)))
@@ -1505,7 +1499,6 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (define-key magik-session-mode-map "\r"        'magik-session-newline)
   (define-key magik-session-mode-map " "         'magik-yas-maybe-expand)
   (define-key magik-session-mode-map "\C-a"      'magik-session-beginning-of-line)
-  (define-key magik-session-mode-map "\C-w"      'magik-session-kill-region)
   (define-key magik-session-mode-map [f8]        'magik-session-send-command-at-point)
   (define-key magik-session-mode-map "\C-c\C-c"  'magik-session-kill-process)
   (define-key magik-session-mode-map "\C-c\C-\\" 'magik-session-query-quit-shell-subjob)
