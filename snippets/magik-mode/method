@@ -6,9 +6,7 @@
 # --
 `(magik-yasnippet-prev-pragma)`
 _method `(magik-yasnippet-prev-class-name-with-dot)`${1:name}
-	## 
-	## 
-	## 
+`(magik-yasnippet-documentation)`
 	$0
 _endmethod
 $

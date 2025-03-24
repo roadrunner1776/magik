@@ -6,6 +6,9 @@
 
 (require 'yasnippet)
 
+;; Suppress the warnings about modifying the buffer via a snippet
+(add-to-list 'warning-suppress-types '(yasnippet backquote-change))
+
 (defgroup magik-yasnippet nil
   "Customise Magik YASnippet group."
   :tag   "Magik YASnippet"
@@ -16,7 +19,45 @@
   :group 'magik-yasnippet
   :type  'string)
 
-(defconst magik-yasnippet--class-name-regexp "\\(\\(\\sw\\|_\\)+\\)" "The regexp to use for the Magik class name.")
+(defcustom magik-yasnippet-documentation-style 'sw-method-docs
+  "Choose between \\'sw-method-docs\\', \\'type-docs\\', or nil.
+\\'sw-method-docs\\' for Smallworld method documentation style.
+\\'type-docs\\' for type-based documentation.
+nil to disable documentation."
+  :group 'magik-yasnippet
+  :type  '(choice (const :tag "Smallworld Method Docs" sw-method-docs)
+                  (const :tag "Type Docs" type-docs)
+                  (const :tag "No Documentation" nil)))
+
+(defcustom magik-yasnippet-default-documentation "\t## \n\t## \n\t## "
+  "Default documentation string to insert."
+  :group 'magik-yasnippet
+  :type  'string)
+
+(defcustom magik-yasnippet-sw-method-docs-documentation magik-yasnippet-default-documentation
+  "Default sw-method-docs documentation string to insert."
+  :group 'magik-yasnippet
+  :type  'string)
+
+(defcustom magik-yasnippet-type-docs-documentation magik-yasnippet-default-documentation
+  "Default type-docs documentation string to insert."
+  :group 'magik-yasnippet
+  :type  'string)
+
+(defconst magik-yasnippet--class-name-regexp "\\(\\(\\sw\\|_\\)+\\)"
+  "The regexp to use for the Magik class name.")
+
+(defun magik-yasnippet-documentation (&optional untabbed)
+  "Insert the documentation string based on `magik-yasnippet-documentation-style'.
+If UNTABBED is non-nil remove the tabs from the documentation string."
+  (if magik-yasnippet-documentation-style
+      (let ((documentation-string (pcase magik-yasnippet-documentation-style
+                                    ('sw-method-docs magik-yasnippet-sw-method-docs-documentation)
+                                    ('type-docs magik-yasnippet-type-docs-documentation))))
+        (if untabbed
+            (replace-regexp-in-string "\t" "" documentation-string)
+          documentation-string))
+    (kill-line)))
 
 (defun magik-yasnippet-prev-pragma ()
   "Search for the previous pragma in the buffer.
