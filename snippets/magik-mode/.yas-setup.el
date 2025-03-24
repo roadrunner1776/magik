@@ -34,26 +34,37 @@ nil to disable documentation."
   :group 'magik-yasnippet
   :type  'string)
 
-(defcustom magik-yasnippet-sw-method-doc-documentation magik-yasnippet-default-documentation
+(defcustom magik-yasnippet-sw-method-doc-documentation 'default
   "Default sw-method-doc documentation string to insert."
   :group 'magik-yasnippet
-  :type  'string)
+  :type  '(choice (const :tag "Use default documentation" default)
+                  (string :tag "Custom sw-method-doc")))
 
-(defcustom magik-yasnippet-type-doc-documentation magik-yasnippet-default-documentation
+(defcustom magik-yasnippet-type-doc-documentation 'default
   "Default type-doc documentation string to insert."
   :group 'magik-yasnippet
-  :type  'string)
+  :type  '(choice (const :tag "Use default documentation" default)
+                  (string :tag "Custom type-doc")))
 
 (defconst magik-yasnippet--class-name-regexp "\\(\\(\\sw\\|_\\)+\\)"
   "The regexp to use for the Magik class name.")
 
+(defun magik-yasnippet--documentation-string (value)
+  "Return the documentation string based on VALUE.
+If VALUE is \\'default, return `magik-yasnippet-default-documentation'.
+Otherwise, return VALUE."
+  (if (eq value 'default)
+      magik-yasnippet-default-documentation
+    value))
+
 (defun magik-yasnippet-documentation (&optional untabbed)
   "Insert the documentation string based on `magik-yasnippet-documentation-style'.
-If UNTABBED is non-nil remove the tabs from the documentation string."
+If UNTABBED is non-nil remove the tabs from the documentation string.
+When documentation style is nil (disabled), it kills the current line."
   (if magik-yasnippet-documentation-style
       (let ((documentation-string (pcase magik-yasnippet-documentation-style
-                                    ('sw-method-doc magik-yasnippet-sw-method-doc-documentation)
-                                    ('type-doc magik-yasnippet-type-doc-documentation))))
+                                    ('sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
+                                    ('type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation)))))
         (if untabbed
             (replace-regexp-in-string "\t" "" documentation-string)
           documentation-string))
