@@ -85,7 +85,6 @@
 
 (require 'yasnippet)
 (require 'magik-mode)
-(require 'magik-electric)
 (require 'magik-indent)
 (require 'magik-pragma)
 (or (boundp 'ac-sources) (setq ac-sources nil))
@@ -561,6 +560,7 @@ Entry to this mode runs `magik-session-mode-hook`.
   (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
     (erase-buffer))
 
+  (add-hook 'before-change-functions 'magik-session--prepare-for-edit-cmd nil t)
   (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu nil t)
   (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu nil t)
   (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu nil t)
@@ -1066,64 +1066,13 @@ Return nil if it isn't in the half-open range [MIN, MAX)."
          (t
           (error "Sorry... Confused command recall"))))))
 
-(defun magik-session-electric-magik-space (arg)
-  "Copy blocks to the bottom of the Magik buffer first.
-Then do an electric space using ARG."
-  (interactive "*p")
-  (magik-session--prepare-for-edit-cmd)
-  (magik-electric-space arg))
-
-(defun magik-session-insert-char (char)
-  "Take a copy of a command before inserting the CHAR."
-  (interactive "*p")
-  (magik-session--prepare-for-edit-cmd)
-  (self-insert-command char))
-
-(defun magik-session-delete-char (char)
-  "Take a copy of a command before deleting the CHAR."
-  (interactive "*p")
-  (magik-session--prepare-for-edit-cmd)
-  (delete-char char))
-
-(defun magik-session-kill-word (word)
-  "Take a copy of a command before killing the WORD."
-  (interactive "*p")
-  (magik-session--prepare-for-edit-cmd)
-  (kill-word word))
-
-(defun magik-session-backward-kill-word (word)
-  "Take a copy of a command before killing the WORD."
-  (interactive "*p")
-  (magik-session--prepare-for-edit-cmd)
-  (backward-kill-word word))
-
-(defun magik-session-backward-delete-char (char)
-  "Take a copy of a command before deleting the CHAR."
-  (interactive "*p")
-  (magik-session--prepare-for-edit-cmd)
-  ;; Avoid warning about delete-backward-char being for interactive use only
-  (with-no-warnings (backward-delete-char char)))
-
-(defun magik-session-kill-line (line)
-  "Take a copy of a command before killing the LINE."
-  (interactive "*P")
-  (magik-session--prepare-for-edit-cmd)
-  (kill-line line))
-
-(defun magik-session-kill-region (beg end)
-  "Ask if they really want to kill the region from BEG to END, before killing it."
-  (interactive "*r")
-  (if (y-or-n-p "Cutting and pasting big regions can confuse the gis-mode markers... Kill anyway?")
-      (kill-region beg end)))
-
-(defun magik-session--prepare-for-edit-cmd ()
+(defun magik-session--prepare-for-edit-cmd (_beg _end)
   "If we're in a previous command, replace any current command with this one."
-  (let
-      ((n (magik-session--get-curr-cmd-num)))
-    (if n
-        (magik-session-copy-cmd n
-                                (- (point)
-                                   (car (aref magik-session-prev-cmds n)))))))
+  (let ((n (magik-session--get-curr-cmd-num)))
+    (when n
+      (magik-session-copy-cmd n
+                              (- (point)
+                                 (car (aref magik-session-prev-cmds n)))))))
 
 (defun magik-session-send-command-at-point ()
   "Send the command at point.
@@ -1542,9 +1491,6 @@ where MODE is the name of the major mode with the '-mode' postfix."
 (progn
   ;; ------------------------ magik session mode ------------------------
 
-  (cl-loop for i from ?  to ?~ do
-           (define-key magik-session-mode-map (char-to-string i) 'magik-session-insert-char))
-
   (define-key magik-session-mode-error-map [mouse-2]  'magik-session-error-goto-mouse)
   (define-key magik-session-mode-error-map [C-return] 'magik-session-error-goto)
 
@@ -1552,13 +1498,7 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (define-key magik-session-mode-map "\en"       'magik-session-recall-next-cmd)
   (define-key magik-session-mode-map "\r"        'magik-session-newline)
   (define-key magik-session-mode-map " "         'magik-yas-maybe-expand)
-  (define-key magik-session-mode-map "\C-?"      'magik-session-backward-delete-char)
   (define-key magik-session-mode-map "\C-a"      'magik-session-beginning-of-line)
-  (define-key magik-session-mode-map "\C-d"      'magik-session-delete-char)
-  (define-key magik-session-mode-map "\ed"       'magik-session-kill-word)
-  (define-key magik-session-mode-map "\e\C-?"    'magik-session-backward-kill-word)
-  (define-key magik-session-mode-map "\C-k"      'magik-session-kill-line)
-  (define-key magik-session-mode-map "\C-w"      'magik-session-kill-region)
   (define-key magik-session-mode-map [f8]        'magik-session-send-command-at-point)
   (define-key magik-session-mode-map "\C-c\C-c"  'magik-session-kill-process)
   (define-key magik-session-mode-map "\C-c\C-\\" 'magik-session-query-quit-shell-subjob)
