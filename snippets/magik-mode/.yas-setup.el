@@ -19,28 +19,28 @@
   :group 'magik-yasnippet
   :type  'string)
 
-(defcustom magik-yasnippet-documentation-style 'sw-method-docs
-  "Choose between \\'sw-method-docs\\', \\'type-docs\\', or nil.
-\\'sw-method-docs\\' for Smallworld method documentation style.
-\\'type-docs\\' for type-based documentation.
+(defcustom magik-yasnippet-documentation-style 'sw-method-doc
+  "Choose between \\'sw-method-doc\\', \\'type-doc\\', or nil.
+\\'sw-method-doc\\' for Smallworld method documentation style.
+\\'type-doc\\' for type-based documentation.
 nil to disable documentation."
   :group 'magik-yasnippet
-  :type  '(choice (const :tag "Smallworld Method Docs" sw-method-docs)
-                  (const :tag "Type Docs" type-docs)
-                  (const :tag "No Documentation" nil)))
+  :type  '(choice (const :tag "Smallworld method documentation style" sw-method-doc)
+                  (const :tag "Type-based documentation" type-doc)
+                  (const :tag "No documentation" nil)))
 
 (defcustom magik-yasnippet-default-documentation "\t## \n\t## \n\t## "
   "Default documentation string to insert."
   :group 'magik-yasnippet
   :type  'string)
 
-(defcustom magik-yasnippet-sw-method-docs-documentation magik-yasnippet-default-documentation
-  "Default sw-method-docs documentation string to insert."
+(defcustom magik-yasnippet-sw-method-doc-documentation magik-yasnippet-default-documentation
+  "Default sw-method-doc documentation string to insert."
   :group 'magik-yasnippet
   :type  'string)
 
-(defcustom magik-yasnippet-type-docs-documentation magik-yasnippet-default-documentation
-  "Default type-docs documentation string to insert."
+(defcustom magik-yasnippet-type-doc-documentation magik-yasnippet-default-documentation
+  "Default type-doc documentation string to insert."
   :group 'magik-yasnippet
   :type  'string)
 
@@ -52,8 +52,8 @@ nil to disable documentation."
 If UNTABBED is non-nil remove the tabs from the documentation string."
   (if magik-yasnippet-documentation-style
       (let ((documentation-string (pcase magik-yasnippet-documentation-style
-                                    ('sw-method-docs magik-yasnippet-sw-method-docs-documentation)
-                                    ('type-docs magik-yasnippet-type-docs-documentation))))
+                                    ('sw-method-doc magik-yasnippet-sw-method-doc-documentation)
+                                    ('type-doc magik-yasnippet-type-doc-documentation))))
         (if untabbed
             (replace-regexp-in-string "\t" "" documentation-string)
           documentation-string))
