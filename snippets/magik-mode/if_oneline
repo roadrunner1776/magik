@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: if one-line
+# key: if_ol
+# group: control structure.if
+# --
+_if ${1:cond} _then $0 _endif
