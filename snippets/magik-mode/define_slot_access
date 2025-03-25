@@ -4,9 +4,7 @@
 # group: object oriented.slot
 # --
 `(magik-yasnippet-prev-pragma)`
-## 
-## 
-## 
+`(magik-yasnippet-documentation t)`
 `(magik-yasnippet-prev-class-name-with-dot)`define_slot_access(:${1:name}, ${2:$$(yas-completing-read
 "Flag?:
 ##  flag               flavour        get  set  boot
