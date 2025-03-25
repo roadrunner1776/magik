@@ -103,7 +103,7 @@ then complete with Typedocs format format"
         (comments nil)
         (comments-found 0))
     (while (and (not (looking-at (cdr (assoc "pragma" magik-regexp))))
-                (> (point) (point-min))
+                (not (bobp))
                 (not (looking-at "^\\s-*$")))
       (when (and (not (looking-at "^##$"))
                  (looking-at "^##"))

@@ -5,9 +5,7 @@
 # group: object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
-## 
-## 
-## 
+`(magik-yasnippet-documentation t)`
 def_slotted_exemplar(:${1:`(magik-yasnippet-filename)`},
 		     {
 			     $2

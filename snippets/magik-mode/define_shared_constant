@@ -4,9 +4,7 @@
 # group: define.object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
-## 
-## 
-## 
+`(magik-yasnippet-documentation t)`
 `(magik-yasnippet-prev-class-name-with-dot)`define_shared_constant(:${1:name}, ${2:value}, ${3:$$(yas-completing-read
 "Private?:
 ##  private?         get

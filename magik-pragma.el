@@ -431,15 +431,13 @@ q      - quit
     (goto-char
      (prog1
          (point)
-       (while (not (eq (point) (point-max)))
-         (let
-             ((topic
-               (and
-                (looking-at "\\s-*\\S-+\\s-+\\(\\S-+\\)")
-                (match-string 1))))
+       (while (not (eobp))
+         (let ((topic (and (looking-at "\\s-*\\S-+\\s-+\\(\\S-+\\)")
+                           (match-string 1))))
            (beginning-of-line)
-           (insert
-            (if (assoc topic topics) "> " "  "))
+           (insert (if (assoc topic topics)
+                       "> "
+                     "  "))
            (forward-line)))))))
 
 (define-derived-mode magik-pragma-topic-select-mode nil "Topic Select"
@@ -459,8 +457,7 @@ q      - quit
   "Add the one CHARACTER string to the beginning of the current line.
 Also moves down a line.
 Beep if not looking at \"[ >] (\""
-  (if
-      (not (looking-at "[ >] "))
+  (if (not (looking-at "[ >] "))
       (beep)
     (beginning-of-line)
     (insert character)
@@ -482,21 +479,17 @@ Beep if not looking at \"[ >] (\""
   "Put the selected topics back into the pragma."
   (interactive)
   (goto-char (point-min))
-  (let
-      ((str ""))
-    (while
-        (not (eq (point) (point-max)))
-      (if (looking-at ">\\s-*\\S-+\\s-+\\(\\S-+\\)")
-          (setq str (concat str (match-string 1) ", ")))
+  (let ((str ""))
+    (while (not (eobp))
+      (when (looking-at ">\\s-*\\S-+\\s-+\\(\\S-+\\)")
+        (setq str (concat str (match-string 1) ", ")))
       (forward-line))
-    (if (not (equal str ""))
-        (setq str (substring str 0 (- (length str) 2))))
+    (when (not (equal str ""))
+      (setq str (substring str 0 (- (length str) 2))))
     (kill-buffer (current-buffer))
     (set-window-configuration magik-pragma-window-configuration)
     (forward-char)
-    (delete-region
-     (point)
-     (progn (search-forward "}") (backward-char) (point)))
+    (delete-region (point) (progn (search-forward "}") (backward-char) (point)))
     (insert str)))
 
 (defun magik-pragma-topic-edit ()
