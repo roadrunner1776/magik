@@ -112,7 +112,7 @@ Complete the documentation using type-doc format."
                       match (match-string 1))))))
         (when match
           (goto-char match-point)
-          (magik--parse-method-type-doc match)))))))
+          (magik--exmethod-type-doc match)))))))
 
 (defun magik-single-exemplar-type-doc ()
   "Search for the closest exemplar for missing parameters.
