@@ -2005,7 +2005,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb-fold ()
   "Remove detail from the listing."
   (interactive)
-  (unlesss (magik-cb-topic-on-p "show-methods") (magik-cb-toggle "show-methods"))
+  (unless (magik-cb-topic-on-p "show-methods") (magik-cb-toggle "show-methods"))
   (cond
    ((magik-cb-topic-on-p "show-topics")   (magik-cb-toggle "show-topics"))
    ((magik-cb-topic-on-p "show-comments") (magik-cb-toggle "show-comments"))
