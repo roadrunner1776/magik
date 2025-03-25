@@ -960,7 +960,7 @@ the file.  Put it in the global `magik-cb-n-methods-str'."
     (magik-cb-redraw-modeline)))  ; for the method count.
 
 (defun magik-cb-force-query (p)
-  "Override the current modeline.
+  "Override the current modeline in buffer P.
 The class name pattern is cleared and the method name pattern is set to match
 the method name in cb-temp-method-name.  Then a suitable query is sent to
 the method finder process to return the list of methods.
@@ -971,8 +971,8 @@ None of the current topics or flags settings are overridden."
   (magik-cb-set-windows (process-buffer p)))
 
 (defun magik-cb-read-classes (p)
-  "Deal with a C-c character coming back from the C.
-This displays the classes in \"*cb2*\".
+  "Deal with a control characters coming back from the C.
+This displays the classes in \"*cb2*\ using buffer P.
 
 We assume that whatever Lisp requested this info has made sure the
 buffer is being displayed in some window.  We just dump the data
@@ -995,7 +995,7 @@ in \"*cb2*\" and note that \"*cb2*\" is now in family mode."
         (set-window-point (get-buffer-window (current-buffer)) (point)))))
 
 (defun magik-cb-goto-method (jump-str other-window-p) ;; ??? %env% ??? unix filenames on NT etc.
-  "Deal with a C-f character coming back from the C.
+  "Deal with a control character coming back from the C.
 Handled by finding the method described in the string, JUMP-STR.
 
 JUMP-STR contains the filename, the methodname and the classname
@@ -1573,8 +1573,8 @@ We also save some state for a clean exit."
           (magik-cb-set-buffer-m)
           (beginning-of-line))
       (magik-cb-set-buffer-c)
-      (beginning-of-line))
-    (message "Press `C-a' again to go right to the beginning."))
+      (beginning-of-line)))
+  (message (substitute-command-keys "Press \\[magik-cb-beginning-of-line] again to go right to the beginning."))
   (magik-cb-redraw-modeline))
 
 (defun magik-cb-end-of-line ()
@@ -1589,7 +1589,7 @@ We also save some state for a clean exit."
           (end-of-line))
       (magik-cb-set-buffer-m)
       (end-of-line)))
-  (message "Press `C-e' again to go right to the end.")
+  (message (substitute-command-keys "Press \\[magik-cb-end-of-line] again to go right to the end."))
   (magik-cb-redraw-modeline))
 
 (defun magik-cb-forward-char ()

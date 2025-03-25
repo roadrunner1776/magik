@@ -447,7 +447,9 @@ q      - quit
       (let ((topic (when (looking-at "\\s-*\\S-+\\s-+\\(\\S-+\\)")
                      (match-string 1))))
         (beginning-of-line)
-        (insert (if (assoc topic topics) "> " "  ")))
+        (insert (if (assoc topic topics) 
+                    "> "
+                  "  ")))
       (forward-line))))
 
 (define-derived-mode magik-pragma-topic-select-mode nil "Topic Select"
@@ -489,21 +491,17 @@ Beep if not looking at \"[ >] (\""
   "Put the selected topics back into the pragma."
   (interactive)
   (goto-char (point-min))
-  (let
-      ((str ""))
-    (while
-        (not (eq (point) (point-max)))
-      (if (looking-at ">\\s-*\\S-+\\s-+\\(\\S-+\\)")
-          (setq str (concat str (match-string 1) ", ")))
+  (let ((str ""))
+    (while (not (eobp))
+      (when (looking-at ">\\s-*\\S-+\\s-+\\(\\S-+\\)")
+        (setq str (concat str (match-string 1) ", ")))
       (forward-line))
-    (if (not (equal str ""))
-        (setq str (substring str 0 (- (length str) 2))))
+    (when (not (equal str ""))
+      (setq str (substring str 0 (- (length str) 2))))
     (kill-buffer (current-buffer))
     (set-window-configuration magik-pragma-window-configuration)
     (forward-char)
-    (delete-region
-     (point)
-     (progn (search-forward "}") (backward-char) (point)))
+    (delete-region (point) (progn (search-forward "}") (backward-char) (point)))
     (insert str)))
 
 (defun magik-pragma-topic-edit ()
