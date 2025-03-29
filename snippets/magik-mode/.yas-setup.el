@@ -113,12 +113,12 @@ Returns the class name as a string, or nil if no class name is found."
 
 (defun magik-yasnippet-prev-class-name-with-dot ()
   "Return the class name as a string (postfixed with a dot `.`)."
-  (when-let ((class-name (magik-yasnippet-prev-class-name)))
+  (when-let* ((class-name (magik-yasnippet-prev-class-name)))
     (concat class-name ".")))
 
 (defun magik-yasnippet-prev-class-name-as-symbol ()
   "Return the class name as a symbol (prefixed with a colon `:`)."
-  (when-let ((class-name (magik-yasnippet-prev-class-name)))
+  (when-let* ((class-name (magik-yasnippet-prev-class-name)))
     (concat ":" class-name)))
 
 (defun magik-yasnippet-filename ()
@@ -137,11 +137,11 @@ If the buffer is not visiting a file, return an empty string."
 (defun magik-yasnippet-prev-slotted-exemplar-slots ()
   "Search for the previous `def_slotted_exemplar` and return slot names."
   (save-excursion
-    (when-let ((slotted-loc (and (re-search-backward "def_slotted_exemplar" nil t)
-                                 (match-beginning 0))))
-      (goto-char slotted-loc)
-      (when-let ((dollar-loc (and (re-search-forward "\\$" nil t)
+    (when-let* ((slotted-loc (and (re-search-backward "def_slotted_exemplar" nil t)
                                   (match-beginning 0))))
+      (goto-char slotted-loc)
+      (when-let* ((dollar-loc (and (re-search-forward "\\$" nil t)
+                                   (match-beginning 0))))
         (let (slots)
           (goto-char slotted-loc)
           (while (re-search-forward "{\\s-*:\\s-*\\(\\sw+\\)\\s-*,\\s-*\\(_unset\\)\\s-*}" dollar-loc t)
