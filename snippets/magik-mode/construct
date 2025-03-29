@@ -7,18 +7,14 @@
 # --
 `(magik-yasnippet-prev-pragma)`
 _method `(magik-yasnippet-prev-class-name-with-dot)`new()
-	## 
-	## 
-	## 
+`(magik-yasnippet-documentation)`
 	>> _clone.init()
 _endmethod
 $
 
 `(magik-yasnippet-prev-pragma)`
 _private _method `(magik-yasnippet-prev-class-name-with-dot)`init()
-	## 
-	## 
-	## 
+`(magik-yasnippet-documentation)`
 `(magik-yasnippet-prev-slotted-exemplar-slots)`
 	>> _self
 _endmethod

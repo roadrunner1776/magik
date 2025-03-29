@@ -4,9 +4,7 @@
 # group: object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
-##
-##
-##
+`(magik-yasnippet-documentation t)`
 def_indexed_exemplar(:${1:`(magik-yasnippet-filename)`}, ${2:$$(yas-completing-read "Data type: " '(":pointer" ":signed8" ":unsigned8" ":char8" ":signed16" ":unsigned16" ":char16" ":signed32" ":unsigned32" ":char32" ":float32" ":signed64" ":unsigned64" ":float64"))})
 $
 
