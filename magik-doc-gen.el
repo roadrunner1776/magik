@@ -126,8 +126,8 @@ Complete the documentation using type-doc format."
         (message "No exemplar found in the current buffer.")))))
 
 (defun magik--parse-sw-method-doc (method-string)
-  "Helper function for inserting sw-method-doc.
-Argument METHOD-STRING ..."
+  "Helper function for inserting sw-method-doc for a single method.
+Argument METHOD-STRING is the string with the method contents."
   (let ((parameters (mapcar (lambda (x) (string-trim (replace-regexp-in-string (cdr (assoc "method-argument" magik-regexp)) "" x))) (split-string method-string "(\\|)\\|,")))
         (parameters-in-documentation '())
         (missing-parameters '())
@@ -159,7 +159,7 @@ Argument METHOD-STRING ..."
 
 (defun magik--slotted-exemplar-slots (exemplar-loc)
   "Retrieve the slots of the nearest exemplar.
-Argument EXEMPLAR-LOC ..."
+Argument EXEMPLAR-LOC is the buffer position of the exemplar definition."
   (let ((slot-count 1)
         (slot-name nil)
         (dollar-loc nil)
@@ -181,8 +181,8 @@ Argument EXEMPLAR-LOC ..."
     slots))
 
 (defun magik--parse-method-type-doc (method-string)
-  "Helper function for inserting method-type-doc.
-Argument METHOD-STRING ..."
+  "Helper function for inserting type-doc for a single method.
+Argument METHOD-STRING is the string with the method contents."
   (let ((parameters (mapcar (lambda (x) (string-trim (replace-regexp-in-string (cdr (assoc "method-argument" magik-regexp)) "" x))) (split-string method-string "(\\|)\\|,")))
         (parameters-in-documentation '())
         (missing-parameters '())
@@ -244,10 +244,10 @@ Argument METHOD-STRING ..."
     (magik--write-exemplar-type-doc missing-slots starting-point documentation-found)))
 
 (defun magik--write-exemplar-type-doc (missing-slots starting-point documentation-found)
-  "Writer function for inserting exemplar type-doc.
-Argument MISSING-SLOTS ...
-Argument STARTING-POINT ...
-Argument DOCUMENTATION-FOUND ..."
+  "Writer function for inserting type-doc for an exemplar.
+Argument MISSING-SLOTS is a list of slots that need documentation.
+Argument STARTING-POINT is the line number where it should be inserted.
+Argument DOCUMENTATION-FOUND is the count of existing documentation lines."
   (goto-char (point-min))
   (forward-line (1- starting-point))
 
@@ -257,11 +257,11 @@ Argument DOCUMENTATION-FOUND ..."
   (insert (mapconcat (lambda (slot) (format "## @slot {:} %s\n" slot)) missing-slots)))
 
 (defun magik--write-method-type-doc (missing-parameters starting-point documentation-found write-return)
-  "Writer function for inserting method type doc.
-Argument MISSING-PARAMETERS ...
-Argument STARTING-POINT ...
-Argument DOCUMENTATION-FOUND ...
-Argument WRITE-RETURN ..."
+  "Writer function for inserting type-doc for a single method.
+Argument MISSING-PARAMETERS is a list of parameters that need documentation.
+Argument STARTING-POINT is the line number where it should be inserted.
+Argument DOCUMENTATION-FOUND is the count of existing documentation lines.
+Argument WRITE-RETURN indicates whether to insert @return documentation."
   (let ((comment-line (concat "\t##\n"))
         (return-line (concat "\t## @return {:}\n")))
     (if (or (equal documentation-found 0)
@@ -279,10 +279,10 @@ Argument WRITE-RETURN ..."
       (insert (mapconcat (lambda (parameter) (format "\t## @param {:} %s\n" parameter)) missing-parameters)))))
 
 (defun magik--write-sw-method-doc (missing-parameters starting-point documentation-found)
-  "Writer function for inserting sw-method-doc.
-Argument MISSING-PARAMETERS ...
-Argument STARTING-POINT ...
-Argument DOCUMENTATION-FOUND ..."
+  "Writer function for inserting sw-method-doc for a single method.
+Argument MISSING-PARAMETERS is a list of parameters that need documentation.
+Argument STARTING-POINT is the line number where it should be inserted.
+Argument DOCUMENTATION-FOUND is the count of existing documentation lines."
   (if (or (equal documentation-found 0)
           (equal documentation-found 1))
       (progn
