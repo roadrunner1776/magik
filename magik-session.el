@@ -330,16 +330,18 @@ queried irrespective of default value of `magik-session-prompt'"
   "Start a command shell with the same environment as the current Magik process."
   (interactive)
   (require 'shell)
-  (let ((process-environment (cl-copy-list magik-session-process-environment))
-        (exec-path (cl-copy-list magik-session-exec-path))
-        (buffer (concat "*shell*" (buffer-name)))
-        (version (and (boundp 'magik-session-version-current) (symbol-value 'magik-session-version-current))))
+  (let ((buffer (concat "*shell*" (buffer-name)))
+        (version (and (boundp 'magik-version-current)
+                      (symbol-value 'magik-version-current)))
+        (smallworld-gis magik-smallworld-gis))
     (make-comint-in-buffer "magik-session-shell"
                            buffer
                            (executable-find "cmd") nil "/k"
-                           (concat (getenv "SMALLWORLD_GIS") "\\config\\environment.bat"))
+                           (expand-file-name "environment.bat" (file-name-concat smallworld-gis "config")))
     (with-current-buffer buffer
-      (if (stringp version) (set 'magik-session-version-current version)))
+      (when (stringp version)
+        (set 'magik-version-current version))
+      (set 'magik-smallworld-gis smallworld-gis))
     (display-buffer buffer)))
 
 (defun magik-session-parse-gis-command (command)
@@ -484,7 +486,7 @@ Return a list of all the components of the COMMAND."
 (defun magik-session-update-tools-magik-shell-menu ()
   "Update External Shell Processes submenu in Tools -> Magik pulldown menu."
   (let ((shell-bufs (magik-utils-buffer-mode-list 'shell-mode
-                                                  (function (lambda () (getenv "SMALLWORLD_GIS")))))
+                                                  (function (lambda () (symbol-value 'magik-smallworld-gis)))))
         shell-list)
     (cl-loop for buf in shell-bufs
              do (push (vector buf (list 'display-buffer buf) t) shell-list))
@@ -526,8 +528,6 @@ Entry to this mode runs `magik-session-mode-hook`.
                                     magik-ac-object-source
                                     magik-ac-raise-condition-source)
                                   ac-sources)
-               magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
-               magik-session-process-environment (cl-copy-list (or magik-session-process-environment process-environment))
                mode-line-process '(": %s")
                local-abbrev-table magik-base-mode-abbrev-table)
 
@@ -548,12 +548,6 @@ Entry to this mode runs `magik-session-mode-hook`.
       (if (assq n magik-session-buffer-alist)
           (setcdr (assq n magik-session-buffer-alist) (buffer-name))
         (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
-
-  ;; Special handling for *gis* buffer
-  (if (equal (buffer-name) "*gis*")
-      (compat-call setq-local
-                   magik-session-exec-path (cl-copy-list exec-path)
-                   magik-session-process-environment (cl-copy-list process-environment)))
 
   (abbrev-mode 1)
 
