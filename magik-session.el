@@ -1068,11 +1068,10 @@ Return nil if it isn't in the half-open range [MIN, MAX)."
 
 (defun magik-session--prepare-for-edit-cmd (_beg _end)
   "If we're in a previous command, replace any current command with this one."
-  (let ((n (magik-session--get-curr-cmd-num)))
-    (when n
-      (magik-session-copy-cmd n
-                              (- (point)
-                                 (car (aref magik-session-prev-cmds n)))))))
+  (when-let* ((n (magik-session--get-curr-cmd-num)))
+    (magik-session-copy-cmd n
+                            (- (point)
+                               (car (aref magik-session-prev-cmds n))))))
 
 (defun magik-session-send-command-at-point ()
   "Send the command at point.
