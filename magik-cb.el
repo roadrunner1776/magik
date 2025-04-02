@@ -452,9 +452,9 @@ Set METHOD and CLASS if given."
                   (delete nil
                           (mapcar (function (lambda (b) (if (cdr b) b)))
                                   (setq visible-bufs
-                                        (magik-utils-buffer-visible-list '(magik-cb-mode magik-session-mode)))))
-                  ;;restrict list to those whose cdr is t.
-                  buffer
+                                        (magik-utils-buffer-visible-list '(magik-cb-mode magik-session-mode))))))
+            ;;restrict list to those whose cdr is t.
+            (setq buffer
                   (if (= (length bufs) 1)
                       (caar bufs)
                     (completing-read

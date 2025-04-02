@@ -1068,11 +1068,10 @@ Return nil if it isn't in the half-open range [MIN, MAX)."
 
 (defun magik-session--prepare-for-edit-cmd (_beg _end)
   "If we're in a previous command, replace any current command with this one."
-  (let ((n (magik-session--get-curr-cmd-num)))
-    (when n
-      (magik-session-copy-cmd n
-                              (- (point)
-                                 (car (aref magik-session-prev-cmds n)))))))
+  (when-let* ((n (magik-session--get-curr-cmd-num)))
+    (magik-session-copy-cmd n
+                            (- (point)
+                               (car (aref magik-session-prev-cmds n))))))
 
 (defun magik-session-send-command-at-point ()
   "Send the command at point.
@@ -1401,17 +1400,16 @@ An error is is searched using \"**** Error\"."
 ;; When a file is dragged and dropped and the current buffer is
 ;; as Magik mode buffer, the file is loaded into the Magik session.
 
-(defun magik-session-drag-n-drop-mode (&optional arg)
-  "Toggle Drag and drop Magik loading functionality."
+(defun magik-session-drag-n-drop-mode (&optional value)
+  "Toggle Drag and drop Magik loading functionality using VALUE."
   (interactive "P")
   (setq magik-session-drag-n-drop-mode
-        (if (null arg)
+        (if (null value)
             (not magik-session-drag-n-drop-mode)
-          (> (prefix-numeric-value arg) 0)))
-  (add-hook 'find-file-hooks 'magik-session-drag-n-drop-load)
-  (if magik-session-drag-n-drop-mode
-      (message "Magik 'Drag and Drop' file mode is on")
-    (message "Magik 'Drag and Drop' file mode is off"))
+          (> (prefix-numeric-value value) 0)))
+  (add-hook 'find-file-hook 'magik-session-drag-n-drop-load)
+  (message "Magik 'Drag and Drop' file mode is %s"
+           (if magik-session-drag-n-drop-mode "on" "off"))
   (force-mode-line-update))
 
 (defun magik-session-drag-n-drop-load ()
