@@ -296,6 +296,7 @@ With a prefix arg, ask user for current directory to use."
       (magik-session-mode)
       (setq magik-smallworld-gis smallworld-gis)
 
+      (insert (current-time-string) "\n")
       (insert "Command: " program " ")
       (mapc (function (lambda (s) (insert s " "))) args)
       (setq default-directory dir
