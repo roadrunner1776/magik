@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: elif
+# key: elif
+# expand-env: ((yas-indent-line 'fixed))
+# group: control structure.elif
+# --
+_elif ${1:cond}
+_then
+	$0
