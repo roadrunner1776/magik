@@ -14,9 +14,7 @@
 (source "melpa")
 
 (depends-on "emacs" "24.4")
-(depends-on "auto-complete")
 (depends-on "compat")
-(depends-on "flycheck")
 (depends-on "yasnippet")
 
 ;; do not try to compile magik-ts-mode.el if we are below 29.1
