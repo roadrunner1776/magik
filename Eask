@@ -17,6 +17,9 @@
 (depends-on "compat")
 (depends-on "yasnippet")
 
+;; Exclude these files because they require extra package dependencies
+(test (:exclude "magik-lint.el" "magik-cb-ac.el"))
+
 ;; do not try to compile magik-ts-mode.el if we are below 29.1
 (when (version< emacs-version "29.1")
   (add-hook 'eask-before-compile-hook
