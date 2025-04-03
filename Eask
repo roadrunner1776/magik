@@ -17,14 +17,23 @@
 (depends-on "compat")
 (depends-on "yasnippet")
 
-;; Exclude these files because they require extra package dependencies
-(test (:exclude "magik-lint.el" "magik-cb-ac.el"))
-
 ;; do not try to compile magik-ts-mode.el if we are below 29.1
 (when (version< emacs-version "29.1")
   (add-hook 'eask-before-compile-hook
     (lambda ()
       (delete-file "magik-ts-mode.el")
       (eask-info "(Removed magik-ts-mode, since it would not compile in Emacs below 29.1)"))))
+
+(when (require 'auto-complete nil 'noerror)
+  (add-hook 'eask-before-compile-hook
+    (lambda ()
+      (delete-file "magik-cb-ac.el")
+      (eask-info "(Removed magik autocomplete classbrowser since the user doesn't have the autocomplete package)"))))
+
+(when (require 'flycheck nil 'noerror)
+  (add-hook 'eask-before-compile-hook
+    (lambda ()
+      (delete-file "magik-lint.el")
+      (eask-info "(Removed magik lint since the user doesn't have the flycheck package)"))))
 
 (setq network-security-level 'low)  ; see https://github.com/jcs090218/setup-emacs-windows/issues/156#issuecomment-932956432
