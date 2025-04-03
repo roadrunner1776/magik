@@ -1,7 +1,7 @@
 ;;; magik-mode.el --- Emacs major mode for Smallworld Magik files
 
 ;; Package-Version: 0.4.1
-;; Package-Requires: ((emacs "24.4") (compat "28.1") (yasnippet "0.14.0"))
+;; Package-Requires: ((emacs "24.4") (compat "28.1") (yasnippet "0.14.0") (flycheck) (auto-complete "1.5.1"))
 ;; URL: https://github.com/roadrunner1776/magik
 ;; Keywords: languages
 
