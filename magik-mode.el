@@ -948,8 +948,8 @@ you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recal
       (read-string "Class Name: "
                    (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
 
-  (when class nil
-        (setq class (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
+  (unless class
+    (setq class (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
   (let* ((method-cons (magik-method-name-type method))
          (method-root (car method-cons))
          (method-type (cdr method-cons))
