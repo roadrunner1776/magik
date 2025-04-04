@@ -509,9 +509,9 @@ Beep if not looking at \"[ >] (\""
   "Edit the pragma_topics file."
   (interactive)
   (let* ((buffer-dir (if buffer-file-name (file-name-directory buffer-file-name) default-directory))
-         (magik-pragma-file (when buffer-dir (locate-dominating-file buffer-dir magik-pragma-default-topics-filename))))
-    (cond (magik-pragma-file
-           (find-file magik-pragma-file))
+         (magik-pragma-dir (when buffer-dir (locate-dominating-file buffer-dir magik-pragma-default-topics-filename))))
+    (cond (magik-pragma-dir
+           (find-file (expand-file-name magik-pragma-default-topics-filename magik-pragma-dir)))
           (magik-pragma-topics-file
            (find-file (expand-file-name magik-pragma-topics-file)))
           (t
