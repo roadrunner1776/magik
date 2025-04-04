@@ -20,6 +20,7 @@
 ;;; Code:
 
 (require 'compat)
+(require 'magik-utils)
 
 (defgroup magik-pragma nil
   "Magik Pragma features."
@@ -447,7 +448,7 @@ q      - quit
       (let ((topic (when (looking-at "\\s-*\\S-+\\s-+\\(\\S-+\\)")
                      (match-string 1))))
         (beginning-of-line)
-        (insert (if (assoc topic topics) 
+        (insert (if (assoc topic topics)
                     "> "
                   "  ")))
       (forward-line))))
