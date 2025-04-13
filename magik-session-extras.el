@@ -151,7 +151,7 @@ Using the `magik-cb-process' in the background."
 
 (defun magik-session-extras-ensure-magik-code-loaded ()
   "Load the `magik-session-extras-load-magik-code' in the current Magik session."
-  (when (eq magik-session-extras-magik-code-loaded? nil)
+  (unless magik-session-extras-magik-code-loaded?
     (magik-session-extras-load-magik-code)
     (setq magik-session-extras-magik-code-loaded? t)))
 
