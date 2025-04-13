@@ -82,6 +82,9 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
   :group 'magik
   :type  'integer)
 
+(defvar-local magik-smallworld-gis nil
+  "Stores the current SMALLWORLD_GIS.")
+
 (define-derived-mode magik-base-mode prog-mode "Magik"
   "Generic major mode for editing Magik files.
 
