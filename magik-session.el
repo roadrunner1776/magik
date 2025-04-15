@@ -105,15 +105,12 @@ Used for switching to the first Smallworld session."
   :group 'magik-session
   :type 'string)
 
-(defcustom magik-session-prompt nil
+(defcustom magik-session-prompt "Magik\\(\\|SF\\)> "
   "String or Regular expression identifying the default Magik Prompt.
 If global value is nil, a Magik session will attempt to discover the current
 setting of the Magik Prompt by calling `magik-session-prompt-get'."
   :group 'magik-session
   :type '(choice regexp (const nil)))
-
-;; paulw - preset rather than allow discovery (which doesn't seem to work)
-(setq magik-session-prompt "Magik\\(\\|SF\\)> ")
 
 (defcustom magik-session-command-history-max-length 90
   "*The maximum length of the displayed `magik-session-command' in the submenu.
