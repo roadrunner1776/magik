@@ -44,15 +44,15 @@ See `imenu-generic-expression'.")
 (defcustom magik-msg-font-lock-keywords
   (list
    '("^\\(:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\s-+\\(:\\sw+\\)"
-     (1 font-lock-function-name-face)
-     (3 font-lock-constant-face))
+     (1 'font-lock-function-name-face)
+     (3 'font-lock-constant-face))
    '("^\\([+]\\)\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)"
-     (1 font-lock-type-face)
-     (2 font-lock-keyword-face))
-   '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . font-lock-function-name-face)
-   '("^#%\\s-*text_encoding.*$" . font-lock-warning-face)
-   '("#[0-9]+" . font-lock-variable-name-face)
-   '("#.*" . font-lock-comment-face))
+     (1 'font-lock-type-face)
+     (2 'font-lock-keyword-face))
+   '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . 'font-lock-function-name-face)
+   '("^#%\\s-*text_encoding.*$" . 'font-lock-warning-face)
+   '("#[0-9]+" . 'font-lock-variable-name-face)
+   '("#.*" . 'font-lock-comment-face))
   "Default fontification of Magik Messages."
   :group 'magik-msg
   :type 'sexp)

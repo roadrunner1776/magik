@@ -35,8 +35,8 @@ Initial ^ and final $ is automatically added in `loadlist-ignore'."
 ;; Font-lock configuration
 (defcustom magik-loadlist-font-lock-keywords
   (list
-   '("^.+\\([\\/]\\)" 0 font-lock-keyword-face)
-   '("^.+"            0 font-lock-variable-name-face))
+   '("^.+\\([\\/]\\)" 0 'font-lock-keyword-face)
+   '("^.+"            0 'font-lock-variable-name-face))
   "Default fontification of load_list.txt files."
   :group 'magik-loadlist
   :type 'sexp)

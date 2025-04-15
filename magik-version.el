@@ -68,14 +68,14 @@ Listed by `magik-version' or `magik-version-file'."
 
 (defcustom magik-version-font-lock-keywords
   (list
-   '("^.*(invalid).*$" . font-lock-warning-face)
+   '("^.*(invalid).*$" . 'font-lock-warning-face)
    '("^\\([*]\\s-+\\S-+\\)\\s-+\\(\\S-+\\)"
-     (1 font-lock-constant-face)
-     (2 font-lock-variable-name-face))
+     (1 'font-lock-constant-face)
+     (2 'font-lock-variable-name-face))
    '("^ \\s-+\\(\\S-+\\)\\s-+\\(\\S-+\\)"
-     (1 font-lock-function-name-face)
-     (2 font-lock-variable-name-face))
-   '("^\\S-.*" . font-lock-doc-face))
+     (1 'font-lock-function-name-face)
+     (2 'font-lock-variable-name-face))
+   '("^\\S-.*" . 'font-lock-doc-face))
   "Default fontification of gis_version."
   :group 'magik-version
   :type 'sexp)

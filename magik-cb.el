@@ -127,23 +127,23 @@
   :group 'magik-cb-faces)
 
 (defcustom magik-cb-font-lock-keywords
-  `(("\\*\\*\\*.*" . font-lock-comment-face)
-    ("##.*$" . font-lock-doc-face)
+  `(("\\*\\*\\*.*" . 'font-lock-comment-face)
+    ("##.*$" . 'font-lock-doc-face)
     (,(concat "\\(.*\\)" magik-cb-in-keyword "\\(\\S-+\\)")
-     (1 magik-cb-font-lock-method-face)
-     (2 magik-cb-font-lock-class-face))
-    ("^\\(\\S-+\\)$" . magik-cb-font-lock-method-face)
+     (1 'magik-cb-font-lock-method-face)
+     (2 'magik-cb-font-lock-class-face))
+    ("^\\(\\S-+\\)$" . 'magik-cb-font-lock-method-face)
     ("^\\s-+\\(.*\\)\\(OPT.+\\)\\(GATH.+\\)"
-     (1 font-lock-variable-name-face)
-     (2 magik-cb-font-lock-optional-face)
-     (3 magik-cb-font-lock-gather-face))
+     (1 'font-lock-variable-name-face)
+     (2 'magik-cb-font-lock-optional-face)
+     (3 'magik-cb-font-lock-gather-face))
     ("^\\s-+\\(.*\\)\\(GATH.+\\)"
-     (1 font-lock-variable-name-face)
-     (2 magik-cb-font-lock-gather-face))
+     (1 'font-lock-variable-name-face)
+     (2 'magik-cb-font-lock-gather-face))
     ("^\\s-+\\(.*\\)\\(OPT.+\\)"
-     (1 font-lock-variable-name-face)
-     (2 magik-cb-font-lock-optional-face))
-    ("^\\s-+.*$" . font-lock-variable-name-face))
+     (1 'font-lock-variable-name-face)
+     (2 'magik-cb-font-lock-optional-face))
+    ("^\\s-+.*$" . 'font-lock-variable-name-face))
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)
@@ -346,11 +346,11 @@ Not used yet.")
   :group 'magik-cb-faces)
 
 (defcustom magik-cb2-font-lock-keywords
-  '(("[+] \\(\\sw+\\)" 1 magik-cb2-font-lock-on-face)
-    ("[-] \\(\\sw+\\)" 1 magik-cb2-font-lock-off-face)
-    ("[*] \\(\\sw+\\)" 1 magik-cb2-font-lock-thermometer-on-face)
-    ("[.] \\(\\sw+\\)" 1 magik-cb2-font-lock-thermometer-off-face)
-    ("\\sw+" 0 font-lock-doc-face))
+  '(("[+] \\(\\sw+\\)" 1 'magik-cb2-font-lock-on-face)
+    ("[-] \\(\\sw+\\)" 1 'magik-cb2-font-lock-off-face)
+    ("[*] \\(\\sw+\\)" 1 'magik-cb2-font-lock-thermometer-on-face)
+    ("[.] \\(\\sw+\\)" 1 'magik-cb2-font-lock-thermometer-off-face)
+    ("\\sw+" 0 'font-lock-doc-face))
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)

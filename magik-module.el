@@ -51,15 +51,15 @@ See `imenu-generic-expression'.")
 ;; Font-lock configuration
 (defcustom magik-module-font-lock-keywords
   (list
-   '("^end\\s-*$" . font-lock-keyword-face)
-   '("^hidden$" . font-lock-keyword-face)
+   '("^end\\s-*$" . 'font-lock-keyword-face)
+   '("^hidden$" . 'font-lock-keyword-face)
    '("^\\(language\\)\\s-+\\(\\sw+\\)"
-     (1 font-lock-keyword-face)
-     (2 font-lock-type-face))
-   '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
+     (1 'font-lock-keyword-face)
+     (2 'font-lock-type-face))
+   '("^\\(\\sw+\\)\\s-*$" . 'font-lock-variable-name-face)
    '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
-     (1 font-lock-function-name-face)
-     (2 font-lock-constant-face)))
+     (1 'font-lock-function-name-face)
+     (2 'font-lock-constant-face)))
   "Default fontification of module.def files."
   :group 'magik-module
   :type 'sexp)
@@ -142,15 +142,15 @@ See `imenu-generic-expression'.")
 ;; Font-lock configuration
 (defcustom magik-module-font-lock-keywords
   (list
-   '("^end\\s-*$" . font-lock-keyword-face)
-   '("^hidden$" . font-lock-keyword-face)
+   '("^end\\s-*$" . 'font-lock-keyword-face)
+   '("^hidden$" . 'font-lock-keyword-face)
    '("^\\(language\\)\\s-+\\(\\sw+\\)"
-     (1 font-lock-keyword-face)
-     (2 font-lock-type-face))
-   '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
+     (1 'font-lock-keyword-face)
+     (2 'font-lock-type-face))
+   '("^\\(\\sw+\\)\\s-*$" . 'font-lock-variable-name-face)
    '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
-     (1 font-lock-function-name-face)
-     (2 font-lock-constant-face)))
+     (1 'font-lock-function-name-face)
+     (2 'font-lock-constant-face)))
   "Default fontification of module.def files."
   :group 'magik-module
   :type 'sexp)

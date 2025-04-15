@@ -106,10 +106,10 @@ If any function returns t, then the buffer is displayed."
 (defcustom magik-aliases-font-lock-keywords
   (list
    (cons magik-aliases-definition-regexp 'font-lock-function-name-face)
-   '("^\\s-+\\([A-Z_]+\\)\\s-*:=" 1 font-lock-type-face)
-   '("^\\s-+\\([A-Z_0-9]+\\)\\s-*=" 1 font-lock-variable-name-face)
-   '("^\\s-+\\(\\sw+\\)\\s-*=" 1 font-lock-builtin-face)
-   '("\\s$\\sw+\\s$" . font-lock-constant-face))
+   '("^\\s-+\\([A-Z_]+\\)\\s-*:=" 1 'font-lock-type-face)
+   '("^\\s-+\\([A-Z_0-9]+\\)\\s-*=" 1 'font-lock-variable-name-face)
+   '("^\\s-+\\(\\sw+\\)\\s-*=" 1 'font-lock-builtin-face)
+   '("\\s$\\sw+\\s$" . 'font-lock-constant-face))
   "Default fontification of Aliases buffers."
   :group 'magik-aliases
   :type 'sexp)
