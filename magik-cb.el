@@ -103,12 +103,12 @@
 
 (defface magik-cb-font-lock-optional-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font Lock mode face used to display _optional variables."
+  "Font Lock mode face used to display _optional parameters."
   :group 'magik-cb-faces)
 
 (defface magik-cb-font-lock-gather-face
   '((t (:inherit font-lock-variable-name-face)))
-  "Font Lock mode face used to display _gather variables."
+  "Font Lock mode face used to display _gather parameters."
   :group 'magik-cb-faces)
 
 (defface magik-cb-cursor-face
