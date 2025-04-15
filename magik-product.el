@@ -148,8 +148,7 @@ Called by `magik-session-drag-n-drop-load' when a Product FILENAME is dropped."
 ;;; Package registration
 
 ;;;###autoload
-(or (assoc "product\\.def$" auto-mode-alist)
-    (push '("product\\.def$" . magik-product-mode) auto-mode-alist))
+(add-to-list 'auto-mode-alist '("product.def\\'" . magik-product-mode))
 
 (defvar magik-product-f2-map (make-sparse-keymap)
   "Keymap for the F2 function key in Magik product.def buffers.")

@@ -303,8 +303,7 @@ Called by `magik-session-drag-n-drop-load' when a Module FILENAME is dropped."
 ;;; Package registration
 
 ;;;###autoload
-(or (assoc "module\\.def$" auto-mode-alist)
-    (push '("module\\.def$" . magik-module-mode) auto-mode-alist))
+(add-to-list 'auto-mode-alist '("module.def\\'" . magik-module-mode))
 
 (defvar magik-module-f2-map (make-sparse-keymap)
   "Keymap for the F2 function key in Magik module.def buffers.")
