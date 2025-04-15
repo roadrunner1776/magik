@@ -133,14 +133,14 @@
      (1 'magik-cb-font-lock-method-face)
      (2 'magik-cb-font-lock-class-face))
     ("^\\(\\S-+\\)$" . 'magik-cb-font-lock-method-face)
-    ("^\\s-+\\(.*\\)\\(OPT.+\\)\\(GATH.+\\)"
+    ("^\\s-+\\(.*?\\)\\(OPT\\(?:.*?\\)\\)\\(GATH.*\\)"
      (1 'font-lock-variable-name-face)
      (2 'magik-cb-font-lock-optional-face)
      (3 'magik-cb-font-lock-gather-face))
-    ("^\\s-+\\(.*\\)\\(GATH.+\\)"
+    ("^\\s-+\\(.*\\)\\(GATH.*\\)"
      (1 'font-lock-variable-name-face)
      (2 'magik-cb-font-lock-gather-face))
-    ("^\\s-+\\(.*\\)\\(OPT.+\\)"
+    ("^\\s-+\\(.*?\\)\\(OPT.*\\)"
      (1 'font-lock-variable-name-face)
      (2 'magik-cb-font-lock-optional-face))
     ("^\\s-+.*$" . 'font-lock-variable-name-face))
