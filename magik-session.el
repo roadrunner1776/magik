@@ -301,14 +301,10 @@ It is offered as the default string for next time.")
 (defun magik-session-prompt-update-font-lock ()
   "Update the Font-lock variable `magik-session-font-lock-keywords'.
 Uses current `magik-session-prompt' setting as value."
-  (let ((entry (list (concat "^" magik-session-prompt) 0 'magik-session-font-lock-prompt-face t)))
-    (if (member entry magik-session-font-lock-keywords)
-        nil ;; Already entered
-      (setq magik-session-font-lock-keywords (append magik-session-font-lock-keywords (list entry)))
-      (if (fboundp 'font-lock-set-defaults)
-          (progn  ;; Emacs 20 and later font-lock mode post-process its variables
-            (set 'font-lock-set-defaults nil)
-            (funcall 'font-lock-set-defaults))))))
+  (let ((entry (list (concat "^" magik-session-prompt) 0 ''magik-session-font-lock-prompt-face t)))
+    (unless (member entry magik-session-font-lock-keywords)
+      (add-to-list 'magik-session-font-lock-keywords entry)
+      (font-lock-refresh-defaults))))
 
 (defun magik-session-prompt-get (&optional force-query-p)
   "If `magik-session-prompt' is nil, get the Magik session's command line prompt.
