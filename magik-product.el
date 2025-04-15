@@ -49,13 +49,13 @@ See `imenu-generic-expression'.")
      (1 font-lock-function-name-face)
      (2 font-lock-constant-face)))
   "Default fontification of product.def files."
-  :group 'product
+  :group 'magik-product
   :type 'sexp)
 
 (defun magik-product-customize ()
   "Open Customization buffer for Product Mode."
   (interactive)
-  (customize-group 'product))
+  (customize-group 'magik-product))
 
 ;;;###autoload
 (define-derived-mode magik-product-mode nil "Product"

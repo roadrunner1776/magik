@@ -34,12 +34,12 @@
 
 (defcustom magik-module-option-save-magikc t
   "*If t, save .magikc files when loading module."
-  :group 'smallworld
+  :group 'magik-module
   :type  'boolean)
 
 (defcustom magik-module-option-force-reload t
   "*If t, save .magikc files when loading module."
-  :group 'smallworld
+  :group 'magik-module
   :type  'boolean)
 
 ;; Imenu configuration
@@ -61,7 +61,7 @@ See `imenu-generic-expression'.")
      (1 font-lock-function-name-face)
      (2 font-lock-constant-face)))
   "Default fontification of module.def files."
-  :group 'module
+  :group 'magik-module
   :type 'sexp)
 
 (defun magik-module-customize ()
@@ -152,7 +152,7 @@ See `imenu-generic-expression'.")
      (1 font-lock-function-name-face)
      (2 font-lock-constant-face)))
   "Default fontification of module.def files."
-  :group 'module
+  :group 'magik-module
   :type 'sexp)
 
 (defun magik-module-toggle-save-magikc (boolean)

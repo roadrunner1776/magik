@@ -65,12 +65,12 @@ containing the `magik-aliases-program' if it is in a relative path to the file."
 
 (defcustom magik-aliases-layered-products-file "$SMALLWORLD_GIS/../smallworld_registry/LAYERED_PRODUCTS"
   "*The default location of the LAYERED_PRODUCTS file."
-  :group 'magik
+  :group 'magik-aliases
   :type 'string)
 
 (defcustom magik-aliases-default-product-path "sw_core:\n path    = %SMALLWORLD_GIS%\n"
   "*The default product path for sw_core."
-  :group 'magik
+  :group 'magik-aliases
   :type 'string)
 
 (defcustom magik-aliases-switch-to-buffer t

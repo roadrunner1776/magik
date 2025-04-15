@@ -116,30 +116,15 @@
   "Font Lock mode face to use for the Mode line cursor."
   :group 'magik-cb-faces)
 
-(defcustom magik-cb-font-lock-optional-face 'magik-cb-font-lock-optional-face
-  "*Face name used to display the _optional variables."
-  :group 'magik-cb
-  :type 'face)
+(defface magik-cb-font-lock-class-face
+  '((t (:inherit font-lock-type-face)))
+  "Font Lock mode face used to display _gather variables."
+  :group 'magik-cb-faces)
 
-(defcustom magik-cb-font-lock-gather-face 'magik-cb-font-lock-gather-face
-  "*Face name used to display the _gather variable."
-  :group 'magik-cb
-  :type 'face)
-
-(defcustom magik-cb-cursor-face 'magik-cb-cursor-face
-  "*Face name to use for the Mode line cursor."
-  :group 'magik-cb
-  :type 'face)
-
-(defcustom magik-cb-font-lock-class-face 'font-lock-type-face
-  "*Face name used to display the class."
-  :group 'magik-cb
-  :type 'face)
-
-(defcustom magik-cb-font-lock-method-face 'font-lock-function-name-face
-  "*Face name used to display the method name."
-  :group 'magik-cb
-  :type 'face)
+(defface magik-cb-font-lock-method-face
+  '((t (:inherit font-lock-function-name-face)))
+  "Font Lock mode face used to display _gather variables."
+  :group 'magik-cb-faces)
 
 (defcustom magik-cb-font-lock-keywords
   `(("\\*\\*\\*.*" . font-lock-comment-face)
@@ -340,25 +325,25 @@ Not used yet.")
 (defvar magik-cb-ac-process nil
   "Class Browser process object to use for auto-complete-mode.")
 
-(defcustom magik-cb2-font-lock-on-face 'font-lock-function-name-face
-  "*Face name used to display the variable."
-  :group 'magik-cb
-  :type 'face)
+(defface magik-cb2-font-lock-on-face
+  '((t :inherit font-lock-function-name-face))
+  "Font Lock mode face used to display the variable."
+  :group 'magik-cb-faces)
 
-(defcustom magik-cb2-font-lock-off-face 'font-lock-variable-name-face
-  "*Face name used to display the variable."
-  :group 'magik-cb
-  :type 'face)
+(defface magik-cb2-font-lock-off-face
+  '((t :inherit font-lock-variable-name-face))
+  "Font Lock mode face used to display the variable."
+  :group 'magik-cb-faces)
 
-(defcustom magik-cb2-font-lock-thermometer-on-face 'font-lock-type-face
-  "*Face name used to display a thermometer variable that is on."
-  :group 'magik-cb
-  :type 'face)
+(defface magik-cb2-font-lock-thermometer-on-face
+  '((t :inherit font-lock-type-face))
+  "Font Lock mode face used to display a thermometer variable that is on."
+  :group 'magik-cb-faces)
 
-(defcustom magik-cb2-font-lock-thermometer-off-face 'font-lock-constant-face
-  "*Face name used to display a thermometer variable that is off."
-  :group 'magik-cb
-  :type 'face)
+(defface magik-cb2-font-lock-thermometer-off-face
+  '((t :inherit font-lock-constant-face))
+  "Font Lock mode face used to display a thermometer variable that is off."
+  :group 'magik-cb-faces)
 
 (defcustom magik-cb2-font-lock-keywords
   '(("[+] \\(\\sw+\\)" 1 magik-cb2-font-lock-on-face)
@@ -1486,7 +1471,7 @@ Be careful to preserve the position in \"*cb2*\"."
   (setq magik-cb-mode-line-cursor (if (stringp cursor) cursor (char-to-string cursor)))
   (add-text-properties 0
                        (length magik-cb-mode-line-cursor)
-                       (list 'face magik-cb-cursor-face
+                       (list 'face 'magik-cb-cursor-face
                              'help-echo (purecopy "TAB: switch between class and method name"))
                        magik-cb-mode-line-cursor))
 

@@ -21,6 +21,10 @@
 
 (require 'flycheck)
 
+(defgroup magik-lint nil
+  "Customise Magik lint group."
+  :group 'magik)
+
 (defun magik-lint--latest-version ()
   "Return latest version of the magik linter."
   (ignore-errors
@@ -34,12 +38,12 @@
 (defcustom magik-lint-jar-file-version
   (or (magik-lint--latest-version) "0.10.1")
   "Version of magik-lint to use."
-  :group 'magik
+  :group 'magik-lint
   :type 'string)
 
 (defcustom magik-lint-jar-file "magik-lint/magik-lint-%s.jar"
   "Location of the magik-lint jar file."
-  :group 'magik
+  :group 'magik-lint
   :type  '(choice (file)
                   (const nil)))
 
