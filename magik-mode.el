@@ -264,14 +264,12 @@ concrete implementations."
 
 ;;; Font-lock configuration
 ;;
-;; Do not use :inherit because we want Emacs 20 support.
-;;
 ;; On Windows Emacsen 21 and earlier, there is a GDI Object based memory leak.
 ;; This has been tracked down to creating italic forms of the font.
 ;; However, bold italic forms do not appear affected,
 ;; so all color based italic fonts are also made bold too.
 (defgroup magik-faces nil
-  "Fontification colours for Magik."
+  "Faces for highlighting text in Magik."
   :group 'magik)
 
 ;; font-lock-variable-use-face was introduced in Emacs 29.1.

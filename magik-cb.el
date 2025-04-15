@@ -98,7 +98,7 @@
   "The method \"IN\" class keyword.")
 
 (defgroup magik-cb-faces nil
-  "Fontification colours for Class Browser."
+  "Faces for highlighting text in the Class Browser."
   :group 'magik-cb)
 
 (defface magik-cb-font-lock-optional-face
@@ -113,17 +113,17 @@
 
 (defface magik-cb-cursor-face
   '((t (:inverse-video t)))
-  "Font Lock mode face to use for the Mode line cursor."
+  "Font Lock mode face used to display the Mode line cursor."
   :group 'magik-cb-faces)
 
 (defface magik-cb-font-lock-class-face
   '((t (:inherit font-lock-type-face)))
-  "Font Lock mode face used to display _gather variables."
+  "Font Lock mode face used to display the class name."
   :group 'magik-cb-faces)
 
 (defface magik-cb-font-lock-method-face
   '((t (:inherit font-lock-function-name-face)))
-  "Font Lock mode face used to display _gather variables."
+  "Font Lock mode face used to display the method name."
   :group 'magik-cb-faces)
 
 (defcustom magik-cb-font-lock-keywords
@@ -327,12 +327,12 @@ Not used yet.")
 
 (defface magik-cb2-font-lock-on-face
   '((t :inherit font-lock-function-name-face))
-  "Font Lock mode face used to display the variable."
+  "Font Lock mode face used to display something is on."
   :group 'magik-cb-faces)
 
 (defface magik-cb2-font-lock-off-face
   '((t :inherit font-lock-variable-name-face))
-  "Font Lock mode face used to display the variable."
+  "Font Lock mode face used to display something is off."
   :group 'magik-cb-faces)
 
 (defface magik-cb2-font-lock-thermometer-on-face
