@@ -228,8 +228,7 @@ is dropped."
 
 ;;; Package registration
 ;;;###autoload
-(or (assoc "load_list\\.txt$" auto-mode-alist)
-    (push '("load_list\\.txt$" . magik-loadlist-mode) auto-mode-alist))
+(add-to-list 'auto-mode-alist '("load_list.txt\\'" . magik-loadlist-mode))
 
 (progn
   ;; ------------------------ magik loadlist mode  ------------------------

@@ -2132,9 +2132,7 @@ Prevents expansion inside strings and comments."
 ;;; Package registration
 
 ;;;###autoload
-(or (assoc "\\.magik\\'" auto-mode-alist)
-    (push '("\\.magik\\'" . magik-mode) auto-mode-alist))
-
+(add-to-list 'auto-mode-alist '("\\.magik\\'" . magik-mode))
 (or (assq 'magik-transmit-debug-p minor-mode-alist)
     (push '(magik-transmit-debug-p magik-transmit-debug-mode-line-string) minor-mode-alist))
 

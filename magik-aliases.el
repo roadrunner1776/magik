@@ -470,10 +470,8 @@ configuration file and return paths to append to variable `exec-path'."
 (modify-syntax-entry ?\n ">" magik-aliases-mode-syntax-table)
 
 ;;; Package registration
-(or (assoc "aliases$" auto-mode-alist)
-    (push '("aliases$" . magik-aliases-mode) auto-mode-alist))
-(or (assoc "aliases.txt$" auto-mode-alist)
-    (push '("aliases.txt$" . magik-aliases-mode) auto-mode-alist))
+(add-to-list 'auto-mode-alist '("aliases\\'" . magik-aliases-mode))
+(add-to-list 'auto-mode-alist '("aliases.txt\\'" . magik-aliases-mode))
 
 ;;MSB configuration
 (defun magik-aliases-msb-configuration ()
