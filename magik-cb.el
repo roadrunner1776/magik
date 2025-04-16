@@ -98,17 +98,12 @@
   "The method \"IN\" class keyword.")
 
 (defgroup magik-cb-faces nil
-  "Faces for highlighting text in the Class Browser."
+  "Faces for displaying text in the Class Browser."
   :group 'magik-cb)
 
-(defface magik-cb-font-lock-optional-face
-  '((t (:inherit font-lock-variable-name-face)))
-  "Font Lock mode face used to display _optional parameters."
-  :group 'magik-cb-faces)
-
-(defface magik-cb-font-lock-gather-face
-  '((t (:inherit font-lock-variable-name-face)))
-  "Font Lock mode face used to display _gather parameters."
+(defface magik-cb-class-face
+  '((t (:inherit magik-class-face)))
+  "Font Lock mode face used to display the class name."
   :group 'magik-cb-faces)
 
 (defface magik-cb-cursor-face
@@ -116,34 +111,44 @@
   "Font Lock mode face used to display the Mode line cursor."
   :group 'magik-cb-faces)
 
-(defface magik-cb-font-lock-class-face
-  '((t (:inherit font-lock-type-face)))
-  "Font Lock mode face used to display the class name."
+(defface magik-cb-gather-parameters-face
+  '((t (:inherit magik-argument-face)))
+  "Font Lock mode face used to display _gather parameters."
   :group 'magik-cb-faces)
 
-(defface magik-cb-font-lock-method-face
-  '((t (:inherit font-lock-function-name-face)))
+(defface magik-cb-method-face
+  '((t (:inherit magik-method-face)))
   "Font Lock mode face used to display the method name."
   :group 'magik-cb-faces)
 
+(defface magik-cb-optional-parameters-face
+  '((t (:inherit magik-argument-face)))
+  "Font Lock mode face used to display _optional parameters."
+  :group 'magik-cb-faces)
+
+(defface magik-cb-parameters-face
+  '((t (:inherit magik-argument-face)))
+  "Font Lock mode face used to display parameters."
+  :group 'magik-cb-faces)
+
 (defcustom magik-cb-font-lock-keywords
-  `(("\\*\\*\\*.*" . 'font-lock-comment-face)
-    ("##.*$" . 'font-lock-doc-face)
+  `(("\\*\\*\\*.*" . 'magik-comment-face)
+    ("##.*$" . 'magik-doc-face)
     (,(concat "\\(.*\\)" magik-cb-in-keyword "\\(\\S-+\\)")
-     (1 'magik-cb-font-lock-method-face)
-     (2 'magik-cb-font-lock-class-face))
-    ("^\\(\\S-+\\)$" . 'magik-cb-font-lock-method-face)
+     (1 'magik-cb-method-face)
+     (2 'magik-cb-class-face))
+    ("^\\(\\S-+\\)$" . 'magik-cb-method-face)
     ("^\\s-+\\(.*?\\)\\(OPT\\(?:.*?\\)\\)\\(GATH.*\\)"
-     (1 'font-lock-variable-name-face)
-     (2 'magik-cb-font-lock-optional-face)
-     (3 'magik-cb-font-lock-gather-face))
+     (1 'magik-cb-parameters-face)
+     (2 'magik-cb-optional-parameters-face)
+     (3 'magik-cb-gather-parameters-face))
     ("^\\s-+\\(.*\\)\\(GATH.*\\)"
-     (1 'font-lock-variable-name-face)
-     (2 'magik-cb-font-lock-gather-face))
+     (1 'magik-cb-parameters-face)
+     (2 'magik-cb-gather-parameters-face))
     ("^\\s-+\\(.*?\\)\\(OPT.*\\)"
-     (1 'font-lock-variable-name-face)
-     (2 'magik-cb-font-lock-optional-face))
-    ("^\\s-+.*$" . 'font-lock-variable-name-face))
+     (1 'magik-cb-parameters-face)
+     (2 'magik-cb-optional-parameters-face))
+    ("^\\s-+.*$" . 'font-lock-variable-name-face)) ;; TODO: To what does this apply?
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)
@@ -325,32 +330,32 @@ Not used yet.")
 (defvar magik-cb-ac-process nil
   "Class Browser process object to use for auto-complete-mode.")
 
-(defface magik-cb2-font-lock-on-face
-  '((t :inherit font-lock-function-name-face))
+(defface magik-cb2-on-face
+  '((t :inherit magik-method-face))
   "Font Lock mode face used to display something is on."
   :group 'magik-cb-faces)
 
-(defface magik-cb2-font-lock-off-face
-  '((t :inherit font-lock-variable-name-face))
+(defface magik-cb2-off-face
+  '((t :inherit magik-variable-face))
   "Font Lock mode face used to display something is off."
   :group 'magik-cb-faces)
 
-(defface magik-cb2-font-lock-thermometer-on-face
-  '((t :inherit font-lock-type-face))
+(defface magik-cb2-thermometer-on-face
+  '((t :inherit font-lock-type-face)) ;; TODO: Switch to a Magik-specific face?
   "Font Lock mode face used to display a thermometer variable that is on."
   :group 'magik-cb-faces)
 
-(defface magik-cb2-font-lock-thermometer-off-face
-  '((t :inherit font-lock-constant-face))
+(defface magik-cb2-thermometer-off-face
+  '((t :inherit font-lock-constant-face)) ;; TODO: Switch to a Magik-specific face?
   "Font Lock mode face used to display a thermometer variable that is off."
   :group 'magik-cb-faces)
 
 (defcustom magik-cb2-font-lock-keywords
-  '(("[+] \\(\\sw+\\)" 1 'magik-cb2-font-lock-on-face)
-    ("[-] \\(\\sw+\\)" 1 'magik-cb2-font-lock-off-face)
-    ("[*] \\(\\sw+\\)" 1 'magik-cb2-font-lock-thermometer-on-face)
-    ("[.] \\(\\sw+\\)" 1 'magik-cb2-font-lock-thermometer-off-face)
-    ("\\sw+" 0 'font-lock-doc-face))
+  '(("[+] \\(\\sw+\\)" 1 'magik-cb2-on-face)
+    ("[-] \\(\\sw+\\)" 1 'magik-cb2-off-face)
+    ("[*] \\(\\sw+\\)" 1 'magik-cb2-thermometer-on-face)
+    ("[.] \\(\\sw+\\)" 1 'magik-cb2-thermometer-off-face)
+    ("\\sw+" 0 'magik-doc-face))
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)

@@ -137,22 +137,22 @@ that use command string matching are not affected by this setting."
   :type 'boolean)
 
 (defgroup magik-session-faces nil
-  "Faces for highlighting text in the Magik session."
+  "Faces for displaying text in the Magik session."
   :group 'magik-session)
-
-(defface magik-session-prompt-face
-  '((t :inherit font-lock-type-face))
-  "Font Lock mode face used to display the Magik Prompt."
-  :group 'magik-session-faces)
 
 (defface magik-session-error-face
   '((t :inherit magik-warning-face))
   "Font Lock mode face used to display Error lines."
   :group 'magik-session-faces)
 
-(defface magik-session-warning-face
-  '((t :inherit magik-warning-face))
-  "Font Lock mode face used to display Warning lines."
+(defface magik-session-prompt-face
+  '((t :inherit font-lock-type-face)) ;; TODO: Switch to a Magik-specific face?
+  "Font Lock mode face used to display the Magik Prompt."
+  :group 'magik-session-faces)
+
+(defface magik-session-reference-face
+  '((t :inherit magik-global-reference-face))
+  "Font Lock mode face used to display global references."
   :group 'magik-session-faces)
 
 (defface magik-session-traceback-face
@@ -160,9 +160,9 @@ that use command string matching are not affected by this setting."
   "Font Lock mode face used to display Traceback lines."
   :group 'magik-session-faces)
 
-(defface magik-session-reference-face
-  '((t :inherit font-lock-reference-face))
-  "Font Lock mode face used to display globals."
+(defface magik-session-warning-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display Warning lines."
   :group 'magik-session-faces)
 
 (defcustom magik-session-font-lock-keywords

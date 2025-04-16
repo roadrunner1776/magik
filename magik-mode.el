@@ -269,7 +269,7 @@ concrete implementations."
 ;; However, bold italic forms do not appear affected,
 ;; so all color based italic fonts are also made bold too.
 (defgroup magik-faces nil
-  "Faces for highlighting text in Magik."
+  "Faces for displaying text in Magik."
   :group 'magik)
 
 ;; font-lock-variable-use-face was introduced in Emacs 29.1.

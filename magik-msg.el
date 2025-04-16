@@ -41,12 +41,22 @@
 See `imenu-generic-expression'.")
 
 (defgroup magik-msg-faces nil
-  "Faces for highlighting text in a Magik messages file."
+  "Faces for displaying text in a Magik messages file."
   :group 'magik-msg)
 
-(defface magik-msg-text-encoding-face
-  '((t :inherit magik-warning-face))
-  "Font Lock mode face used to display the text encoding."
+(defface magik-msg-comment-face
+  '((t :inherit magik-comment-face))
+  "Font Lock mode face used to display comments."
+  :group 'magik-msg-faces)
+
+(defface magik-msg-language-id-face
+  '((t :inherit font-lock-constant-face)) ;; TODO: Switch to a Magik-specific face?
+  "Font Lock mode face used to display the language id."
+  :group 'magik-msg-faces)
+
+(defface magik-msg-message-id-face
+  '((t :inherit font-lock-function-name-face)) ;; TODO: Switch to a Magik-specific face?
+  "Font Lock mode face used to display the message id."
   :group 'magik-msg-faces)
 
 (defface magik-msg-placeholder-face
@@ -54,21 +64,21 @@ See `imenu-generic-expression'.")
   "Font Lock mode face used to display placeholders inside a message."
   :group 'magik-msg-faces)
 
-(defface magik-msg-comment-face
-  '((t :inherit magik-comment-face))
-  "Font Lock mode face used to display comments."
+(defface magik-msg-text-encoding-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display the text encoding."
   :group 'magik-msg-faces)
 
 ;; Font-lock configuration
 (defcustom magik-msg-font-lock-keywords
   (list
    '("^\\(:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\s-+\\(:\\sw+\\)"
-     (1 'font-lock-function-name-face)
-     (3 'font-lock-constant-face))
-   '("^\\([+]\\)\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)"
-     (1 'font-lock-type-face)
+     (1 'magik-msg-message-id-face)
+     (3 'magik-msg-language-id-face))
+   '("^\\([+]\\)\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" ;; TODO: To what does this apply?
+     (1 'magik-operator-face)
      (2 'font-lock-keyword-face))
-   '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . 'font-lock-function-name-face)
+   '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . 'magik-msg-message-id-face)
    '("^#%\\s-*text_encoding.*$" . 'magik-msg-text-encoding-face)
    '("#[0-9]+" . 'magik-msg-placeholder-face)
    '("#.*" . 'magik-msg-comment-face))
