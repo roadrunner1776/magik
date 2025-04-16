@@ -40,6 +40,25 @@
   "Imenu generic expression for Magik Message mode.
 See `imenu-generic-expression'.")
 
+(defgroup magik-msg-faces nil
+  "Faces for highlighting text in a Magik messages file."
+  :group 'magik-msg)
+
+(defface magik-msg-text-encoding-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display the text encoding."
+  :group 'magik-msg-faces)
+
+(defface magik-msg-placeholder-face
+  '((t :inherit magik-variable-face))
+  "Font Lock mode face used to display placeholders inside a message."
+  :group 'magik-msg-faces)
+
+(defface magik-msg-comment-face
+  '((t :inherit magik-comment-face))
+  "Font Lock mode face used to display comments."
+  :group 'magik-msg-faces)
+
 ;; Font-lock configuration
 (defcustom magik-msg-font-lock-keywords
   (list
@@ -50,9 +69,9 @@ See `imenu-generic-expression'.")
      (1 'font-lock-type-face)
      (2 'font-lock-keyword-face))
    '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . 'font-lock-function-name-face)
-   '("^#%\\s-*text_encoding.*$" . 'font-lock-warning-face)
-   '("#[0-9]+" . 'font-lock-variable-name-face)
-   '("#.*" . 'font-lock-comment-face))
+   '("^#%\\s-*text_encoding.*$" . 'magik-msg-text-encoding-face)
+   '("#[0-9]+" . 'magik-msg-placeholder-face)
+   '("#.*" . 'magik-msg-comment-face))
   "Default fontification of Magik Messages."
   :group 'magik-msg
   :type 'sexp)
