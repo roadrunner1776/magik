@@ -70,14 +70,19 @@ Listed by `magik-version' or `magik-version-file'."
   "Faces for displaying text in a Magik version selection buffer."
   :group 'magik-version)
 
+(defface magik-version-active-face
+  '((t :inherit magik-variable-face))
+  "Font Lock mode face used to display the active line."
+  :group 'magik-version-faces)
+
 (defface magik-version-invalid-face
   '((t :inherit magik-warning-face))
   "Font Lock mode face used to display an invalid line."
   :group 'magik-version-faces)
 
-(defface magik-version-active-face
-  '((t :inherit magik-variable-face))
-  "Font Lock mode face used to display the active line."
+(defface magik-version-name-face
+  '((t :inherit magik-method-face))
+  "Font Lock mode face used to display the name."
   :group 'magik-version-faces)
 
 (defface magik-version-number-face
@@ -92,7 +97,7 @@ Listed by `magik-version' or `magik-version-file'."
      (1 'magik-version-active-face)
      (2 'magik-version-number-face))
    '("^ \\s-+\\(\\S-+\\)\\s-+\\(\\S-+\\)"
-     (1 'magik-method-face)
+     (1 'magik-version-name-face)
      (2 'magik-version-number-face))
    '("^\\S-.*" . 'magik-doc-face))
   "Default fontification of gis_version."
