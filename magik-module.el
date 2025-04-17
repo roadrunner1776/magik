@@ -72,7 +72,7 @@ See `imenu-generic-expression'.")
   :group 'magik-module-faces)
 
 (defface magik-module-language-id-face
-  '((t :inherit font-lock-constant-face)) ;; TODO: Switch to a Magik-specific face?
+  '((t :inherit magik-constant-face))
   "Font Lock mode face used to display a language id."
   :group 'magik-module-faces)
 

@@ -50,12 +50,12 @@ See `imenu-generic-expression'.")
   :group 'magik-msg-faces)
 
 (defface magik-msg-language-id-face
-  '((t :inherit font-lock-constant-face)) ;; TODO: Switch to a Magik-specific face?
+  '((t :inherit magik-constant-face))
   "Font Lock mode face used to display the language id."
   :group 'magik-msg-faces)
 
 (defface magik-msg-message-id-face
-  '((t :inherit font-lock-function-name-face)) ;; TODO: Switch to a Magik-specific face?
+  '((t :inherit magik-method-face))
   "Font Lock mode face used to display the message id."
   :group 'magik-msg-faces)
 
@@ -75,9 +75,9 @@ See `imenu-generic-expression'.")
    '("^\\(:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\s-+\\(:\\sw+\\)"
      (1 'magik-msg-message-id-face)
      (3 'magik-msg-language-id-face))
-   '("^\\([+]\\)\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" ;; TODO: To what does this apply?
+   '("^\\([+]\\)\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" ;; This is obsolete in SW5
      (1 'magik-operator-face)
-     (2 'font-lock-keyword-face))
+     (2 'magik-keyword-statements-face))
    '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . 'magik-msg-message-id-face)
    '("^#%\\s-*text_encoding.*$" . 'magik-msg-text-encoding-face)
    '("#[0-9]+" . 'magik-msg-placeholder-face)

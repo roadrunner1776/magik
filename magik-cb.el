@@ -148,7 +148,7 @@
     ("^\\s-+\\(.*?\\)\\(OPT.*\\)"
      (1 'magik-cb-parameters-face)
      (2 'magik-cb-optional-parameters-face))
-    ("^\\s-+.*$" . 'font-lock-variable-name-face)) ;; TODO: To what does this apply?
+    ("^\\s-+.*$" . 'magik-cb-parameters-face))
   "*Font lock setting for Class Browser fontification."
   :group 'magik-cb
   :type  'sexp)
