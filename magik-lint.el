@@ -81,7 +81,7 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
 
 (if (file-exists-p (magik-lint--jar-file))
     (add-to-list 'flycheck-checkers 'magik-lint-java 'append)
-  (warn (format "magik-lint executable not found: %s; please download from https://github.com/StevenLooman/magik-tools/releases/latest" (magik-lint--jar-file))))
+  (warn "magik-lint executable not found: %s; please download from https://github.com/StevenLooman/magik-tools/releases/latest" (magik-lint--jar-file)))
 
 (provide 'magik-lint)
 ;;; magik-lint.el ends here

@@ -133,28 +133,6 @@ You can customize Module Mode with the `magik-module-mode-hook`.
 (defvar magik-module-mode-syntax-table nil
   "Syntax table in use in Module Mode buffers.")
 
-;; Imenu configuration
-(defvar magik-module-imenu-generic-expression
-  '((nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1))
-  "Imenu generic expression for Magik Message mode.
-See `imenu-generic-expression'.")
-
-;; Font-lock configuration
-(defcustom magik-module-font-lock-keywords
-  (list
-   '("^end\\s-*$" . font-lock-keyword-face)
-   '("^hidden$" . font-lock-keyword-face)
-   '("^\\(language\\)\\s-+\\(\\sw+\\)"
-     (1 font-lock-keyword-face)
-     (2 font-lock-type-face))
-   '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
-   '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
-     (1 font-lock-function-name-face)
-     (2 font-lock-constant-face)))
-  "Default fontification of module.def files."
-  :group 'module
-  :type 'sexp)
-
 (defun magik-module-toggle-save-magikc (boolean)
   "Toggle saving of .magikc files when loading module using BOOLEAN."
   (interactive "P")
@@ -303,8 +281,7 @@ Called by `magik-session-drag-n-drop-load' when a Module FILENAME is dropped."
 ;;; Package registration
 
 ;;;###autoload
-(or (assoc "module\\.def$" auto-mode-alist)
-    (push '("module\\.def$" . magik-module-mode) auto-mode-alist))
+(add-to-list 'auto-mode-alist '("module.def\\'" . magik-module-mode))
 
 (defvar magik-module-f2-map (make-sparse-keymap)
   "Keymap for the F2 function key in Magik module.def buffers.")

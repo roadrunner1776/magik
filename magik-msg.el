@@ -207,10 +207,8 @@ Called by `magik-session-drag-n-drop-load' when a Msg FILENAME is dropped."
 ;;; Package registration
 
 ;;;###autoload
-(or (assoc "\\.msg$" auto-mode-alist)
-    (push '("\\.msg$" . magik-msg-mode) auto-mode-alist))
-(or (assoc "\\.hmsg$" auto-mode-alist)
-    (push '("\\.hmsg$" . magik-msg-mode) auto-mode-alist))
+(add-to-list 'auto-mode-alist '("\\.msg\\'" . magik-msg-mode))
+(add-to-list 'auto-mode-alist '("\\.hmsg\\'" . magik-msg-mode))
 
 ;; speedbar configuration
 (with-eval-after-load 'speedbar
