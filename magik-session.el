@@ -175,18 +175,18 @@ that use command string matching are not affected by this setting."
     '("^---- traceback.* ----" . 'magik-session-traceback-face)
     '("^@.*$"                . 'magik-session-reference-face)))
   "Additional expressions to highlight in Magik mode."
-  :type 'sexp
-  :group 'magik-session)
+  :group 'magik-session
+  :type 'sexp)
 
 (defcustom magik-session-start-process-pre-hook nil
   "*Hook run before starting the process."
-  :type 'hook
-  :group 'magik-session)
+  :group 'magik-session
+  :type 'hook)
 
 (defcustom magik-session-start-process-post-hook nil
   "*Hook run after starting the process."
-  :type 'hook
-  :group 'magik-session)
+  :group 'magik-session
+  :type 'hook)
 
 (defcustom magik-session-auto-insert-dollar nil
   "If t, automatically insert a $ after each valid Magik statement."
@@ -196,15 +196,15 @@ that use command string matching are not affected by this setting."
 (defcustom magik-session-sentinel-hooks nil
   "*Hooks to run after the Magik process has finished.
 Each hook is passed the exit status of the Magik process."
-  :type 'hook
-  :group 'magik-session)
+  :group 'magik-session
+  :type 'hook)
 
 (defcustom magik-session-drag-n-drop-mode nil
   "Variable storing setting of \\[magik-session-drag-n-drop-mode]."
   ;;Use of integers is a standard way of forcing minor modes on and off.
+  :group 'magik-session
   :type '(choice (const :tag "On" 1)
-                 (const :tag "Off" -1))
-  :group 'magik-session)
+                 (const :tag "Off" -1)))
 
 (defvar magik-session-buffer-alist nil
   "Alist storing Magik session buffer name and number.
