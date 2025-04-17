@@ -21,10 +21,6 @@
 
 (require 'flycheck)
 
-(defgroup magik-lint nil
-  "Customise Magik lint group."
-  :group 'magik)
-
 (defun magik-lint--latest-version ()
   "Return latest version of the magik linter."
   (ignore-errors
@@ -34,6 +30,10 @@
       (delete-region (point) (point-min))
       (let ((response (json-read)))
         (cdr (assoc 'tag_name response))))))
+
+(defgroup magik-lint nil
+  "Customise Magik lint group."
+  :group 'magik)
 
 (defcustom magik-lint-jar-file-version
   (or (magik-lint--latest-version) "0.10.1")
