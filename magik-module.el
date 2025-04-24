@@ -49,7 +49,7 @@
 See `imenu-generic-expression'.")
 
 (defvar magik-module-keywords
-  '("condition_message_accesor" "description" "do_not_translate" "hidden" "install_requires" "language" "messages" "optional" "required_by" "requires" "requires_datamodel" "requires_java" "test" "tests_modules" "templates" "end")
+  '("condition_message_accesor" "description" "do_not_translate" "hidden" "install_requires" "language" "messages" "optional" "required_by" "requires_datamodel" "requires_java" "requires" "tests_modules" "test" "templates" "end")
   "List of Magik module keywords.")
 
 (defgroup magik-module-faces nil
