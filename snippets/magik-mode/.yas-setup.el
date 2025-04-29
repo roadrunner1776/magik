@@ -150,13 +150,15 @@ If the buffer is not visiting a file, return an empty string."
           (while (re-search-forward "{\\s-*:\\s-*\\(\\sw+\\)\\s-*,\\s-*\\(_unset\\)\\s-*}" dollar-loc t)
             (push (match-string-no-properties 1) slots))
           (when slots
-            (string-join (cl-mapcar (lambda (slot i)
+            (setq slots (nreverse slots))
+            (concat
+             (string-join (cl-mapcar (lambda (slot i)
                                       (format "%s.%s <<"
                                               (if (= i 0) "\t" "\n\t")
                                               slot))
-                                    (nreverse slots)
-                                    (number-sequence 0 (1- (length slots))))
-                         "\n")))))))
+                                    slots
+                                    (number-sequence 0 (1- (length slots)))))
+             "\n")))))))
 
 (defun magik-yasnippet-module-name ()
   "Recursively search for the module.def and return the module name."
