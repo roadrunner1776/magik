@@ -89,27 +89,30 @@ class name in the context of `_method`, `def_slotted_exemplar`, `def_mixin`,
 `.define_slot_externally_writable`, `.define_slot_externally_readable`.
 Returns the class name as a string, or nil if no class name is found."
   (save-excursion
-    (or
-     (when (re-search-backward (concat "_method[ \t]+" magik-yasnippet--class-name-regexp "\\.") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) nil t)
-       (match-string-no-properties 2))
-     (when (re-search-backward (concat "def_mixin\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) nil t)
-       (match-string-no-properties 2))
-     (when (re-search-backward (concat "def_indexed_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) nil t)
-       (match-string-no-properties 2))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_shared_constant") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_shared_variable") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_access") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_externally_writable") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_externally_readable") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_pseudo_slot") nil t)
-       (match-string-no-properties 1)))))
+    (let ((start-point (point))
+          (patterns
+           `((,(concat "_method[ \t]+" magik-yasnippet--class-name-regexp "\\.") . 1)
+             (,(concat "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) . 2)
+             (,(concat "def_mixin\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) . 2)
+             (,(concat "def_indexed_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) . 2)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_shared_constant") . 1)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_shared_variable") . 1)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_access") . 1)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_externally_writable") . 1)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_externally_readable") . 1)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_pseudo_slot") . 1)))
+          (closest-pos nil)
+          (closest-name nil))
+      (dolist (pattern patterns)
+        (goto-char start-point)
+        (when (re-search-backward (car pattern) nil t)
+          (let ((pos (point))
+                (class-name (match-string-no-properties (cdr pattern))))
+            (when (or (null closest-pos)
+                      (> pos closest-pos))
+              (setq closest-pos pos
+                    closest-name class-name)))))
+      closest-name)))
 
 (defun magik-yasnippet-prev-class-name-with-dot ()
   "Return the class name as a string (postfixed with a dot `.`)."
@@ -147,13 +150,15 @@ If the buffer is not visiting a file, return an empty string."
           (while (re-search-forward "{\\s-*:\\s-*\\(\\sw+\\)\\s-*,\\s-*\\(_unset\\)\\s-*}" dollar-loc t)
             (push (match-string-no-properties 1) slots))
           (when slots
-            (string-join (cl-mapcar (lambda (slot i)
+            (setq slots (nreverse slots))
+            (concat
+             (string-join (cl-mapcar (lambda (slot i)
                                       (format "%s.%s <<"
                                               (if (= i 0) "\t" "\n\t")
                                               slot))
-                                    (nreverse slots)
-                                    (number-sequence 0 (1- (length slots))))
-                         "\n")))))))
+                                    slots
+                                    (number-sequence 0 (1- (length slots)))))
+             "\n")))))))
 
 (defun magik-yasnippet-module-name ()
   "Recursively search for the module.def and return the module name."
