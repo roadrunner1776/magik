@@ -48,18 +48,48 @@
   "Imenu generic expression for Magik Message mode.
 See `imenu-generic-expression'.")
 
+(defvar magik-module-keywords
+  '("condition_message_accesor" "description" "do_not_translate" "hidden" "install_requires" "language" "messages" "optional" "required_by" "requires_datamodel" "requires_java" "requires" "tests_modules" "test" "templates" "end")
+  "List of Magik module keywords.")
+
+(defgroup magik-module-faces nil
+  "Faces for displaying text in a Magik module.def file."
+  :group 'magik-module)
+
+(defface magik-module-base-version-face
+  '((t :inherit magik-number-face))
+  "Font Lock mode face used to display the base version."
+  :group 'magik-module-faces)
+
+(defface magik-module-current-version-face
+  '((t :inherit magik-number-face))
+  "Font Lock mode face used to display the current version."
+  :group 'magik-module-faces)
+
+(defface magik-module-keyword-face
+  '((t :inherit magik-keyword-statements-face))
+  "Font Lock mode face used to display a keyword."
+  :group 'magik-module-faces)
+
+(defface magik-module-language-id-face
+  '((t :inherit magik-constant-face))
+  "Font Lock mode face used to display a language id."
+  :group 'magik-module-faces)
+
+(defface magik-module-name-face
+  '((t :inherit magik-label-face))
+  "Font Lock mode face used to display the module name."
+  :group 'magik-module-faces)
+
 ;; Font-lock configuration
 (defcustom magik-module-font-lock-keywords
   (list
-   '("^end\\s-*$" . font-lock-keyword-face)
-   '("^hidden$" . font-lock-keyword-face)
-   '("^\\(language\\)\\s-+\\(\\sw+\\)"
-     (1 font-lock-keyword-face)
-     (2 font-lock-type-face))
-   '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
-   '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
-     (1 font-lock-function-name-face)
-     (2 font-lock-constant-face)))
+   (list (concat "^\\<\\(" (mapconcat 'identity magik-module-keywords "\\|") "\\)") 0 ''magik-module-keyword-face t)
+   '("^\\(\\sw+\\)\\s-*$"
+     (1 'magik-module-name-face))
+   '("^\\(\\sw+\\)\\s-+\\([0-9]+\\(?:\\s-*[0-9]+\\)?\\)"
+     (1 'magik-module-name-face)
+     (2 'magik-number-face)))
   "Default fontification of module.def files."
   :group 'magik-module
   :type 'sexp)

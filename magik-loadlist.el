@@ -32,11 +32,25 @@ Initial ^ and final $ is automatically added in `loadlist-ignore'."
   :group 'magik-loadlist
   :type  '(repeat regexp))
 
+(defgroup magik-loadlist-faces nil
+  "Faces for displaying text in a Magik load_list file."
+  :group 'magik-loadlist)
+
+(defface magik-loadlist-file-face
+  '((t :inherit font-lock-variable-name-face)) ;; TODO: Switch to a Magik-specific face?
+  "Font Lock mode face used to display file name."
+  :group 'magik-loadlist-faces)
+
+(defface magik-loadlist-folder-face
+  '((t :inherit font-lock-keyword-face)) ;; TODO: Switch to a Magik-specific face?
+  "Font Lock mode face used to display folder name."
+  :group 'magik-loadlist-faces)
+
 ;; Font-lock configuration
 (defcustom magik-loadlist-font-lock-keywords
   (list
-   '("^.+\\([\\/]\\)" 0 font-lock-keyword-face)
-   '("^.+"            0 font-lock-variable-name-face))
+   '("^.+\\([\\/]\\)" 0 'magik-loadlist-folder-face)
+   '("^.+"            0 'magik-loadlist-file-face))
   "Default fontification of load_list.txt files."
   :group 'magik-loadlist
   :type 'sexp)
