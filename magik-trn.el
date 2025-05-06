@@ -1,4 +1,4 @@
-;;; magik-trn.el --- mode for editing Magik Translation files. -*- lexical-binding: t; -*-
+;;; magik-trn.el --- Emacs major mode for editing Magik Translation files.  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024 Sebastiaan Speck
 

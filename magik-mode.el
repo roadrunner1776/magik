@@ -1,4 +1,4 @@
-;;; magik-mode.el --- Emacs major mode for Smallworld Magik files
+;;; magik-mode.el --- Emacs major mode for Smallworld Magik files  -*- lexical-binding: t; -*-
 
 ;; Package-Version: 0.4.1
 ;; Package-Requires: ((emacs "24.4") (compat "28.1") (yasnippet "0.14.0"))
