@@ -31,15 +31,19 @@
       (let ((response (json-read)))
         (cdr (assoc 'tag_name response))))))
 
+(defgroup magik-lint nil
+  "Customise Magik lint group."
+  :group 'magik)
+
 (defcustom magik-lint-jar-file-version
   (or (magik-lint--latest-version) "0.10.1")
   "Version of magik-lint to use."
-  :group 'magik
+  :group 'magik-lint
   :type 'string)
 
 (defcustom magik-lint-jar-file "magik-lint/magik-lint-%s.jar"
   "Location of the magik-lint jar file."
-  :group 'magik
+  :group 'magik-lint
   :type  '(choice (file)
                   (const nil)))
 
