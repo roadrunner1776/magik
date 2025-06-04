@@ -97,6 +97,9 @@ Listed by `magik-version' or `magik-version-file'."
 (defvar-local magik-version-current nil
   "Current gis_version stream.")
 
+(defvar magik-smallworld-gis-current nil
+  "Current selected Smallworld GIS directory.")
+
 (defvar magik-version-position nil
   "A position in the gis version buffer above which the user shouldn't click.")
 
@@ -115,7 +118,8 @@ Listed by `magik-version' or `magik-version-file'."
          (buffer (concat "*gis " stream "*")))
     (setq magik-smallworld-gis smallworld-gis)
     (magik-session buffer)
-    (setq magik-version-current stream)))
+    (setq magik-version-current stream
+          magik-smallworld-gis-current smallworld-gis)))
 
 (defun magik-version-gis-aliases ()
   "Open gis_aliases file of selected version.
@@ -385,9 +389,11 @@ SELECTED-DEFINITION is the definition using the easy-menu or the current line."
   (interactive)
   (let* ((definition (or selected-definition
                          (magik-version-at-version-definition)))
-         (stream (car definition)))
+         (stream (car definition))
+         (smallworld-gis (nth 2 definition)))
     (kill-buffer (current-buffer))
-    (setq magik-smallworld-gis (nth 2 definition))
+    (setq magik-smallworld-gis smallworld-gis
+          magik-smallworld-gis-current smallworld-gis)
     (setq-default magik-version-current stream)
     (run-hooks 'magik-version-select-hook)
     (magik-version-display-title)
