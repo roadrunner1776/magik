@@ -97,7 +97,7 @@ Listed by `magik-version' or `magik-version-file'."
 (defvar-local magik-version-current nil
   "Current gis_version stream.")
 
-(defvar-local magik-smallworld-gis-current nil
+(defvar magik-smallworld-gis-current nil
   "Current selected Smallworld GIS directory.")
 
 (defvar magik-version-position nil
