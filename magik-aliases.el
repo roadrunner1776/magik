@@ -432,7 +432,7 @@ configuration file and return paths to append to variable `exec-path'."
         (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t)))
         (smallworld-gis (or magik-smallworld-gis
                             (when (boundp 'magik-smallworld-gis-current)
-                              (symbol-value 'magik-smallworld-gis-current))))
+                              (symbol-value 'magik-smallworld-gis-current)))))
     (dolist (f (append magik-aliases-user-file-list magik-aliases-common-file-list ))
       (push `[,f
               (progn
