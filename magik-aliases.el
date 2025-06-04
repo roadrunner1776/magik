@@ -269,7 +269,8 @@ With a prefix arg, ask user for current directory to use."
          (setq dir default-directory)))
 
   (let* ((smallworld-gis (or magik-smallworld-gis
-                             magik-smallworld-gis-current))
+                             (when (boundp 'magik-smallworld-gis-current)
+                               (symbol-value 'magik-smallworld-gis-current))))
          (program (magik-aliases-program smallworld-gis))
          (args    magik-aliases-program-args)
          (file    (or file (buffer-file-name)))
@@ -430,7 +431,8 @@ configuration file and return paths to append to variable `exec-path'."
         buffers
         (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t)))
         (smallworld-gis (or magik-smallworld-gis
-                            magik-smallworld-gis-current)))
+                            (when (boundp 'magik-smallworld-gis-current)
+                              (symbol-value 'magik-smallworld-gis-current))))
     (dolist (f (append magik-aliases-user-file-list magik-aliases-common-file-list ))
       (push `[,f
               (progn

@@ -392,9 +392,9 @@ SELECTED-DEFINITION is the definition using the easy-menu or the current line."
          (stream (car definition))
          (smallworld-gis (nth 2 definition)))
     (kill-buffer (current-buffer))
-    (setq magik-smallworld-gis smallworld-gis)
-    (setq-default magik-version-current stream
-                  magik-smallworld-gis-current smallworld-gis)
+    (setq magik-smallworld-gis smallworld-gis
+          magik-smallworld-gis-current smallworld-gis)
+    (setq-default magik-version-current stream)
     (run-hooks 'magik-version-select-hook)
     (magik-version-display-title)
     (message "The current installation for this Emacs is now %s." stream)))
