@@ -65,7 +65,7 @@ Right now apropos() and print_local_methods()."
   :version "28.1"
   (when (bound-and-true-p magik-session-extras)
     (magik-session-extras--activate))
-  (when (not (bound-and-true-p magik-session-extras))
+  (unless (bound-and-true-p magik-session-extras)
     (magik-session-extras--deactivate)))
 
 (defun magik-session-extras-newline (fn &rest args)
@@ -151,7 +151,7 @@ Using the `magik-cb-process' in the background."
 
 (defun magik-session-extras-ensure-magik-code-loaded ()
   "Load the `magik-session-extras-load-magik-code' in the current Magik session."
-  (when (eq magik-session-extras-magik-code-loaded? nil)
+  (unless magik-session-extras-magik-code-loaded?
     (magik-session-extras-load-magik-code)
     (setq magik-session-extras-magik-code-loaded? t)))
 

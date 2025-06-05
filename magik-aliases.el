@@ -276,14 +276,14 @@ when the buffer is displayed:
   "Run `runalias' on the ALIAS FILE in DIR.
 
 With a prefix arg, ask user for current directory to use."
-  (interactive (if (not (magik-aliases-at-alias-definition))
-                   (list
-                    (completing-read "Definition: "
-                                     (mapcar (function
-                                              (lambda (d) (cons d d)))
-                                             (magik-aliases-list))
-                                     nil t)
-                    nil nil)))
+  (interactive (unless (magik-aliases-at-alias-definition)
+                 (list
+                  (completing-read "Definition: "
+                                   (mapcar (function
+                                            (lambda (d) (cons d d)))
+                                           (magik-aliases-list))
+                                   nil t)
+                  nil nil)))
   (cond (current-prefix-arg
          (setq dir (file-name-as-directory
                     (expand-file-name
@@ -311,10 +311,10 @@ With a prefix arg, ask user for current directory to use."
           (setq args (append args (list "-e" env-file) nil))))
       (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last
 
-      (if (stringp version)
-          (setq buf (concat buf " " version)))
-      (if alias
-          (setq buf (concat buf " " alias)))
+      (when (stringp version)
+        (setq buf (concat buf " " version)))
+      (when alias
+        (setq buf (concat buf " " alias)))
       (setq buf (generate-new-buffer (concat "*" buf "*")))
       (kill-buffer (current-buffer))
       (set-buffer buf)
@@ -327,15 +327,14 @@ With a prefix arg, ask user for current directory to use."
       (setq default-directory dir
             args (append (list program) args))
       (compat-call setq-local
-                   magik-session-current-command (mapconcat 'identity args " "))
-      (and (stringp version)
-           (boundp 'magik-version-current)
-           (set 'magik-version-current version))
+            magik-session-current-command (mapconcat 'identity args " "))
+      (when (stringp version)
+        (set 'magik-version-current version))
 
       (insert (format "\nCwd is: %s\n\n" default-directory))
       (magik-session-start-process args))
-    (if (magik-aliases-switch-to-buffer alias)
-        (display-buffer buf))))
+    (when (magik-aliases-switch-to-buffer alias)
+      (display-buffer buf))))
 
 (defun magik-aliases-at-alias-definition ()
   "Return definition, if point is in an alias definition."
@@ -388,16 +387,16 @@ LAYERED_PRODUCTS configuration file."
         (goto-char (point-min))
         (while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
           (setq lp (match-string-no-properties 1))
-          (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
-              (progn
-                (setq pt (point))
-                (end-of-line)
-                (skip-syntax-backward "-")
-                (skip-chars-backward "/\\") ;avoid trailing directory character.
-                (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)) smallworld-gis))
-                (when (file-exists-p (file-name-concat dir "config" "gis_aliases"))
-                  (let ((lp-dir (cons lp dir)))
-                    (or (member lp-dir alist) (push lp-dir alist)))))))
+          (when (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
+            (setq pt (point))
+            (end-of-line)
+            (skip-syntax-backward "-")
+            (skip-chars-backward "/\\") ;avoid trailing directory character.
+            (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point))))
+            (when (file-exists-p (file-name-concat dir "config" "gis_aliases"))
+              (let ((lp-dir (cons lp dir)))
+                (or (member lp-dir alist)
+                    (push lp-dir alist))))))
         alist))))
 
 (defun magik-aliases-layered-products-acp-path (file smallworld-gis)
@@ -418,18 +417,17 @@ configuration file and return paths to append to variable `exec-path'."
       (let (paths pt dir etc-dir)
         (goto-char (point-min))
         (while (re-search-forward "^\\([^\r\n:]+\\):" nil t)
-          (if (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
-              (progn
-                (setq pt (point))
-                (end-of-line)
-                (skip-syntax-backward "-")
-                (skip-chars-backward "/\\") ;avoid trailing directory character.
-                (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)) smallworld-gis)
-                      etc-dir (file-name-concat dir "etc" (if (eq system-type 'windows-nt)
-                                                              "x86"
-                                                            "Linux.x86")))
-                (if (file-directory-p etc-dir)
-                    (push etc-dir paths)))))
+          (when (re-search-forward "^\\s-*path\\s-*=\\s-*" nil t)
+            (setq pt (point))
+            (end-of-line)
+            (skip-syntax-backward "-")
+            (skip-chars-backward "/\\") ;avoid trailing directory character.
+            (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)))
+                  etc-dir (file-name-concat dir "etc" (if (eq system-type 'windows-nt)
+                                                          "x86"
+                                                        "Linux.x86")))
+            (when (file-directory-p etc-dir)
+              (push etc-dir paths))))
         paths))))
 
 (defun magik-aliases-update-menu ()
