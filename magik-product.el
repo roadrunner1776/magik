@@ -33,21 +33,44 @@
 ;; Imenu configuration
 (defvar magik-product-imenu-generic-expression
   '((nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1))
-  "Imenu generic expression for Magik Message mode.
+  "Imenu generic expression for Magik Product mode.
 See `imenu-generic-expression'.")
+
+(defvar magik-product-keywords
+  '("description" "do_not_translate" "requires" "title" "version" "end")
+  "List of Magik product keywords.")
+
+(defgroup magik-product-faces nil
+  "Faces for displaying text in a Magik module.def file."
+  :group 'magik-module)
+
+(defface magik-product-keyword-face
+  '((t :inherit magik-keyword-statements-face))
+  "Font Lock mode face used to display a keyword."
+  :group 'magik-product-faces)
+
+(defface magik-product-name-face
+  '((t :inherit magik-label-face))
+  "Font Lock mode face used to display the product name."
+  :group 'magik-product-faces)
+
+(defface magik-product-type-face
+  '((t :inherit magik-class-face))
+  "Font Lock mode face used to display a product type."
+  :group 'magik-product-faces)
 
 ;; Font-lock configuration
 (defcustom magik-product-font-lock-keywords
   (list
-   '("^end\\s-*$" . font-lock-keyword-face)
-   '("^hidden$" . font-lock-keyword-face)
-   '("^\\(language\\)\\s-+\\(\\sw+\\)"
-     (1 font-lock-keyword-face)
-     (2 font-lock-type-face))
-   '("^\\(\\sw+\\)\\s-*$" . font-lock-variable-name-face)
-   '("^\\(\\sw+\\s-*\\sw*\\)\\s-*\\([0-9]*\\s-*[0-9]*\\)"
-     (1 font-lock-function-name-face)
-     (2 font-lock-constant-face)))
+   '("^\\(\\sw+\\)\\s-*$" . 'magik-product-name-face)
+   '("^\\(\\sw+\\)\\s-*\\(config_product\\|customisation_product\\|layered_product\\)"
+     (1 'magik-product-name-face)
+     (2 'magik-product-type-face))
+   '("^\\(version\\)\\s-*\\([0-9]+\\(?:\\.[0-9]+\\)?\\(?:\\.[0-9]+\\)?\\)\\(.*\\)"
+     (1 'magik-product-keyword-face)
+     (2 'magik-number-face)
+     (3 'magik-comment-face))
+   (list (concat "^\\<\\(" (mapconcat 'identity magik-product-keywords "\\|") "\\)") 0 ''magik-product-keyword-face t))
   "Default fontification of product.def files."
   :group 'magik-product
   :type 'sexp)

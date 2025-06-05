@@ -178,8 +178,12 @@ concrete implementations."
     [,"Uncomment Region"         magik-uncomment-region        t]
     [,"Fill Comment"             magik-fill-public-comment     t]
     "---"
-    [,"Check sw-method-docs for method"      magik-single-sw-method-docs t]
-    [,"Check sw-method-docs for file"        magik-file-sw-method-docs   t]
+    [,"Check sw-method-doc for method" magik-single-method-sw-method-doc t]
+    [,"Check sw-method-doc for file"   magik-file-sw-method-doc       t]
+    [,"Check type-doc for method"      magik-single-method-type-doc   t]
+    [,"Check type-doc for exemplar"    magik-single-exemplar-type-doc t]
+    [,"Check type-doc for file"        magik-file-type-doc            t]
+    "---"
     [,"Check pragma for method/def_slotted_exemplar" magik-single-pragma t]
     [,"Check pragma for file"                        magik-file-pragma   t]
     "---"
@@ -264,14 +268,12 @@ concrete implementations."
 
 ;;; Font-lock configuration
 ;;
-;; Do not use :inherit because we want Emacs 20 support.
-;;
 ;; On Windows Emacsen 21 and earlier, there is a GDI Object based memory leak.
 ;; This has been tracked down to creating italic forms of the font.
 ;; However, bold italic forms do not appear affected,
 ;; so all color based italic fonts are also made bold too.
 (defgroup magik-faces nil
-  "Fontification colours for Magik."
+  "Faces for displaying text in Magik."
   :group 'magik)
 
 ;; font-lock-variable-use-face was introduced in Emacs 29.1.
@@ -447,24 +449,6 @@ concrete implementations."
   '((t (:inherit font-lock-warning-face)))
   "Font Lock mode face used to display write() statements."
   :group 'magik-faces)
-
-(defconst magik-regexp
-  '(("method" .
-     "^[_abstract\s|_private\s|_iter\s]*?_method")
-    ("method-with-arguments" .
-     "^[_abstract\s|_private\s|_iter\s]*?_method.*(\\([\0-\377[:nonascii:]]*?\\))")
-    ("assignment-method" .
-     "^[_abstract\s|_private\s|_iter\s]*?_method.*<<\s?\\(.*\\)")
-    ("endmethod" .
-     "^\\s-*_endmethod\\s-*\\(\n\\$\\s-*\\)?$")
-    ("method-argument" .
-     "_gather\\|_scatter\\|_optional")
-    ("pragma" .
-     "^_pragma(.*)")
-    ("def_slotted_exemplar" .
-     "^[sw:]?def_slotted_exemplar(.*"))
-  "List of regexp strings which can be used for searching.
-In a buffer searching for a Magik-specific.")
 
 (defvar magik-keyword-kleenean
   '("false" "true" "maybe")
@@ -2204,8 +2188,8 @@ Prevents expansion inside strings and comments."
   (define-key magik-base-mode-map (kbd "<f2> <up>") 'magik-safe-backward-method)
   (define-key magik-base-mode-map (kbd "<f2> <down>") 'magik-safe-forward-method)
   (define-key magik-base-mode-map (kbd "<f2> $") 'magik-transmit-$-chunk)
-  (define-key magik-base-mode-map (kbd "<f2> D") 'magik-file-sw-method-docs)
-  (define-key magik-base-mode-map (kbd "<f2> d") 'magik-single-sw-method-docs)
+  (define-key magik-base-mode-map (kbd "<f2> D") 'magik-file-sw-method-doc)
+  (define-key magik-base-mode-map (kbd "<f2> d") 'magik-single-method-sw-method-doc)
   (define-key magik-base-mode-map (kbd "<f2> P") 'magik-file-pragma)
   (define-key magik-base-mode-map (kbd "<f2> p") 'magik-single-pragma)
 

@@ -66,16 +66,40 @@ Listed by `magik-version' or `magik-version-file'."
   :group 'magik-version
   :type  'string)
 
+(defgroup magik-version-faces nil
+  "Faces for displaying text in a Magik version selection buffer."
+  :group 'magik-version)
+
+(defface magik-version-active-face
+  '((t :inherit magik-variable-face))
+  "Font Lock mode face used to display the active line."
+  :group 'magik-version-faces)
+
+(defface magik-version-invalid-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display an invalid line."
+  :group 'magik-version-faces)
+
+(defface magik-version-name-face
+  '((t :inherit magik-method-face))
+  "Font Lock mode face used to display the name."
+  :group 'magik-version-faces)
+
+(defface magik-version-number-face
+  '((t :inherit magik-number-face))
+  "Font Lock mode face used to display the version."
+  :group 'magik-version-faces)
+
 (defcustom magik-version-font-lock-keywords
   (list
-   '("^.*(invalid).*$" . font-lock-warning-face)
+   '("^.*(invalid).*$" . 'magik-version-invalid-face)
    '("^\\([*]\\s-+\\S-+\\)\\s-+\\(\\S-+\\)"
-     (1 font-lock-constant-face)
-     (2 font-lock-variable-name-face))
+     (1 'magik-version-active-face)
+     (2 'magik-version-number-face))
    '("^ \\s-+\\(\\S-+\\)\\s-+\\(\\S-+\\)"
-     (1 font-lock-function-name-face)
-     (2 font-lock-variable-name-face))
-   '("^\\S-.*" . font-lock-doc-face))
+     (1 'magik-version-name-face)
+     (2 'magik-version-number-face))
+   '("^\\S-.*" . 'magik-doc-face))
   "Default fontification of gis_version."
   :group 'magik-version
   :type 'sexp)
