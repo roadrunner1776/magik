@@ -54,13 +54,13 @@ See `imenu-generic-expression'.")
    '("#[0-9]+" . font-lock-variable-name-face)
    '("#.*" . font-lock-comment-face))
   "Default fontification of Magik Messages."
-  :group 'msg
+  :group 'magik-msg
   :type 'sexp)
 
 (defun magik-msg-customize ()
   "Open Customization buffer for Msg Mode."
   (interactive)
-  (customize-group 'msg))
+  (customize-group 'magik-msg))
 
 (defun magik-msg-forward-message ()
   "Put point at beginning of line of next message."

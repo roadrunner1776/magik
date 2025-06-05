@@ -65,12 +65,12 @@ containing the `magik-aliases-program' if it is in a relative path to the file."
 
 (defcustom magik-aliases-layered-products-file "$SMALLWORLD_GIS/../smallworld_registry/LAYERED_PRODUCTS"
   "*The default location of the LAYERED_PRODUCTS file."
-  :group 'magik
+  :group 'magik-aliases
   :type 'string)
 
 (defcustom magik-aliases-default-product-path "sw_core:\n path    = %SMALLWORLD_GIS%\n"
   "*The default product path for sw_core."
-  :group 'magik
+  :group 'magik-aliases
   :type 'string)
 
 (defcustom magik-aliases-switch-to-buffer t
@@ -268,7 +268,9 @@ With a prefix arg, ask user for current directory to use."
         ((null dir)
          (setq dir default-directory)))
 
-  (let* ((smallworld-gis magik-smallworld-gis)
+  (let* ((smallworld-gis (or magik-smallworld-gis
+                             (when (boundp 'magik-smallworld-gis-current)
+                               (symbol-value 'magik-smallworld-gis-current))))
          (program (magik-aliases-program smallworld-gis))
          (args    magik-aliases-program-args)
          (file    (or file (buffer-file-name)))
@@ -426,7 +428,9 @@ configuration file and return paths to append to variable `exec-path'."
         lp-files
         buffers
         (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t)))
-        (smallworld-gis magik-smallworld-gis))
+        (smallworld-gis (or magik-smallworld-gis
+                            (when (boundp 'magik-smallworld-gis-current)
+                              (symbol-value 'magik-smallworld-gis-current)))))
     (dolist (f (append magik-aliases-user-file-list magik-aliases-common-file-list ))
       (push `[,f
               (progn
