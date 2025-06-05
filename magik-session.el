@@ -89,38 +89,40 @@
 (require 'magik-pragma)
 (or (boundp 'ac-sources) (setq ac-sources nil))
 
+(defgroup magik-session nil
+  "Customise Magik session group."
+  :group 'magik
+  :group 'tools)
+
 (defcustom magik-session-buffer nil
   "*The default Smallworld session.
 Used for switching to the first Smallworld session."
-  :group 'magik
+  :group 'magik-session
   :type '(choice string (const nil)))
 
 (defcustom magik-session-buffer-default-name "*gis*"
   "*The default name of a Magik Session buffer when creating new Magik sessions."
-  :group 'magik
+  :group 'magik-session
   :type 'string)
 
-(defcustom magik-session-prompt nil
+(defcustom magik-session-prompt "Magik\\(\\|SF\\)> "
   "String or Regular expression identifying the default Magik Prompt.
 If global value is nil, a Magik session will attempt to discover the current
 setting of the Magik Prompt by calling `magik-session-prompt-get'."
-  :group 'magik
+  :group 'magik-session
   :type '(choice regexp (const nil)))
-
-;; paulw - preset rather than allow discovery (which doesn't seem to work)
-(setq magik-session-prompt "Magik\\(\\|SF\\)> ")
 
 (defcustom magik-session-command-history-max-length 90
   "*The maximum length of the displayed `magik-session-command' in the submenu.
 This applies to the Magik Session -> Magik Session Command History submenu.
 `magik-session-command' is a string of the form \"[DIRECTORY] COMMAND ARGS\"."
-  :group 'magik
+  :group 'magik-session
   :type  'integer)
 
 (defcustom magik-session-command-history-max-length-dir (floor (/ magik-session-command-history-max-length 2))
   "*The maximum length of the displayed directory path in the submenu.
 This applies to the Magik Session -> Magik Session Command History submenu."
-  :group 'magik
+  :group 'magik-session
   :type  'integer)
 
 (defcustom magik-session-recall-cmd-move-to-end nil
@@ -131,22 +133,22 @@ the cursor point in the same position.
 
 The similar commands, \\[magik-session-recall-prev-matching-cmd] and \\[magik-session-recall-next-matching-cmd]
 that use command string matching are not affected by this setting."
-  :group 'magik
+  :group 'magik-session
   :type 'boolean)
 
 (defcustom magik-session-font-lock-prompt-face 'font-lock-type-face
   "*Face name used to display the Magik Prompt."
-  :group 'magik
+  :group 'magik-session
   :type 'face)
 
 (defcustom magik-session-font-lock-error-face 'font-lock-warning-face
   "*Face name used to display Error lines."
-  :group 'magik
+  :group 'magik-session
   :type 'face)
 
 (defcustom magik-session-font-lock-traceback-face 'font-lock-warning-face
   "*Face name used to display Traceback lines."
-  :group 'magik
+  :group 'magik-session
   :type 'face)
 
 (defcustom magik-session-font-lock-keywords
@@ -159,36 +161,36 @@ that use command string matching are not affected by this setting."
     '("^---- traceback.* ----" . magik-session-font-lock-traceback-face)
     '("^@.*$"                . font-lock-reference-face)))
   "Additional expressions to highlight in Magik mode."
-  :type 'sexp
-  :group 'magik)
+  :group 'magik-session
+  :type 'sexp)
 
 (defcustom magik-session-start-process-pre-hook nil
   "*Hook run before starting the process."
-  :type 'hook
-  :group 'magik)
+  :group 'magik-session
+  :type 'hook)
 
 (defcustom magik-session-start-process-post-hook nil
   "*Hook run after starting the process."
-  :type 'hook
-  :group 'magik)
+  :group 'magik-session
+  :type 'hook)
 
 (defcustom magik-session-auto-insert-dollar nil
   "If t, automatically insert a $ after each valid Magik statement."
-  :group 'magik
+  :group 'magik-session
   :type 'boolean)
 
 (defcustom magik-session-sentinel-hooks nil
   "*Hooks to run after the Magik process has finished.
 Each hook is passed the exit status of the Magik process."
-  :type 'hook
-  :group 'magik)
+  :group 'magik-session
+  :type 'hook)
 
 (defcustom magik-session-drag-n-drop-mode nil
   "Variable storing setting of \\[magik-session-drag-n-drop-mode]."
   ;;Use of integers is a standard way of forcing minor modes on and off.
+  :group 'magik-session
   :type '(choice (const :tag "On" 1)
-                 (const :tag "Off" -1))
-  :group 'magik)
+                 (const :tag "Off" -1)))
 
 (defvar magik-session-buffer-alist nil
   "Alist storing Magik session buffer name and number.
@@ -279,7 +281,7 @@ It is offered as the default string for next time.")
 
 (defcustom magik-session-command-history nil
   "*List of commands run by a Magik buffer."
-  :group 'magik
+  :group 'magik-session
   :type  '(choice (const nil)
                   (repeat string)))
 (put 'magik-session-command-history 'permanent-local t)
@@ -287,7 +289,7 @@ It is offered as the default string for next time.")
 (defun magik-session-customize ()
   "Open Customization buffer for Magik Session Mode."
   (interactive)
-  (customize-group 'gis))
+  (customize-group 'magik-session))
 
 (defun magik-session-prompt-update-font-lock ()
   "Update the Font-lock variable `magik-session-font-lock-keywords'.
@@ -330,16 +332,18 @@ queried irrespective of default value of `magik-session-prompt'"
   "Start a command shell with the same environment as the current Magik process."
   (interactive)
   (require 'shell)
-  (let ((process-environment (cl-copy-list magik-session-process-environment))
-        (exec-path (cl-copy-list magik-session-exec-path))
-        (buffer (concat "*shell*" (buffer-name)))
-        (version (and (boundp 'magik-session-version-current) (symbol-value 'magik-session-version-current))))
+  (let ((buffer (concat "*shell*" (buffer-name)))
+        (version (and (boundp 'magik-version-current)
+                      (symbol-value 'magik-version-current)))
+        (smallworld-gis magik-smallworld-gis))
     (make-comint-in-buffer "magik-session-shell"
                            buffer
                            (executable-find "cmd") nil "/k"
-                           (concat (getenv "SMALLWORLD_GIS") "\\config\\environment.bat"))
+                           (expand-file-name "environment.bat" (file-name-concat smallworld-gis "config")))
     (with-current-buffer buffer
-      (if (stringp version) (set 'magik-session-version-current version)))
+      (when (stringp version)
+        (set 'magik-version-current version))
+      (set 'magik-smallworld-gis smallworld-gis))
     (display-buffer buffer)))
 
 (defun magik-session-parse-gis-command (command)
@@ -484,7 +488,7 @@ Return a list of all the components of the COMMAND."
 (defun magik-session-update-tools-magik-shell-menu ()
   "Update External Shell Processes submenu in Tools -> Magik pulldown menu."
   (let ((shell-bufs (magik-utils-buffer-mode-list 'shell-mode
-                                                  (function (lambda () (getenv "SMALLWORLD_GIS")))))
+                                                  (function (lambda () (symbol-value 'magik-smallworld-gis)))))
         shell-list)
     (cl-loop for buf in shell-bufs
              do (push (vector buf (list 'display-buffer buf) t) shell-list))
@@ -526,8 +530,6 @@ Entry to this mode runs `magik-session-mode-hook`.
                                     magik-ac-object-source
                                     magik-ac-raise-condition-source)
                                   ac-sources)
-               magik-session-exec-path (cl-copy-list (or magik-session-exec-path exec-path))
-               magik-session-process-environment (cl-copy-list (or magik-session-process-environment process-environment))
                mode-line-process '(": %s")
                local-abbrev-table magik-base-mode-abbrev-table)
 
@@ -548,12 +550,6 @@ Entry to this mode runs `magik-session-mode-hook`.
       (if (assq n magik-session-buffer-alist)
           (setcdr (assq n magik-session-buffer-alist) (buffer-name))
         (add-to-list 'magik-session-buffer-alist (cons n (buffer-name))))))
-
-  ;; Special handling for *gis* buffer
-  (if (equal (buffer-name) "*gis*")
-      (compat-call setq-local
-                   magik-session-exec-path (cl-copy-list exec-path)
-                   magik-session-process-environment (cl-copy-list process-environment)))
 
   (abbrev-mode 1)
 
@@ -1068,11 +1064,10 @@ Return nil if it isn't in the half-open range [MIN, MAX)."
 
 (defun magik-session--prepare-for-edit-cmd (_beg _end)
   "If we're in a previous command, replace any current command with this one."
-  (let ((n (magik-session--get-curr-cmd-num)))
-    (when n
-      (magik-session-copy-cmd n
-                              (- (point)
-                                 (car (aref magik-session-prev-cmds n)))))))
+  (when-let* ((n (magik-session--get-curr-cmd-num)))
+    (magik-session-copy-cmd n
+                            (- (point)
+                               (car (aref magik-session-prev-cmds n))))))
 
 (defun magik-session-send-command-at-point ()
   "Send the command at point.
@@ -1404,17 +1399,16 @@ An error is is searched using \"**** Error\"."
 ;; When a file is dragged and dropped and the current buffer is
 ;; as Magik mode buffer, the file is loaded into the Magik session.
 
-(defun magik-session-drag-n-drop-mode (&optional arg)
-  "Toggle Drag and drop Magik loading functionality."
+(defun magik-session-drag-n-drop-mode (&optional value)
+  "Toggle Drag and drop Magik loading functionality using VALUE."
   (interactive "P")
   (setq magik-session-drag-n-drop-mode
-        (if (null arg)
+        (if (null value)
             (not magik-session-drag-n-drop-mode)
-          (> (prefix-numeric-value arg) 0)))
-  (add-hook 'find-file-hooks 'magik-session-drag-n-drop-load)
-  (if magik-session-drag-n-drop-mode
-      (message "Magik 'Drag and Drop' file mode is on")
-    (message "Magik 'Drag and Drop' file mode is off"))
+          (> (prefix-numeric-value value) 0)))
+  (add-hook 'find-file-hook 'magik-session-drag-n-drop-load)
+  (message "Magik 'Drag and Drop' file mode is %s"
+           (if magik-session-drag-n-drop-mode "on" "off"))
   (force-mode-line-update))
 
 (defun magik-session-drag-n-drop-load ()

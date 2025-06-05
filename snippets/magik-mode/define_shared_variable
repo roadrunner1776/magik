@@ -4,9 +4,7 @@
 # group: define.object oriented
 # --
 `(magik-yasnippet-prev-pragma)`
-## 
-## 
-## 
+`(magik-yasnippet-documentation t)`
 `(magik-yasnippet-prev-class-name-with-dot)`define_shared_variable(:${1:name}, ${2:initial_value}, ${3:$$(yas-completing-read
 "Flavour?:
 ##  flavour    get  set  boot

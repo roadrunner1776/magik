@@ -42,7 +42,6 @@
 
 (defgroup magik nil
   "Customise Magik Language group."
-  :group 'smallworld
   :group 'languages)
 
 (defcustom magik-transmit-debug-p nil
@@ -81,6 +80,9 @@ Users can also swap the point and mark positions using \\[exchange-point-and-mar
   "*The maximum length of the displayed path in the SW -> Magik Files submenu."
   :group 'magik
   :type  'integer)
+
+(defvar-local magik-smallworld-gis nil
+  "Stores the current SMALLWORLD_GIS.")
 
 (define-derived-mode magik-base-mode prog-mode "Magik"
   "Generic major mode for editing Magik files.
@@ -644,7 +646,7 @@ Based from `magik-font-lock-keywords-4'."
 
 (defcustom magik-transmit-method-eom-mode nil
   "Variable storing setting of \\[magik-transmit-method-eom-mode]."
-  :group  'magik
+  :group 'magik
   :type  (list 'choice
                (list 'const ':tag "Transmit Method = Do Not Move Point" nil)
                (list 'const ':tag "Transmit Method = Move to End" 'end)
@@ -1224,41 +1226,37 @@ See `magik-mark-method-exchange' for more details."
 The construct can be a method, a proc, a def_slotted_exemplar or whatever.
 The rule is that the thing must start against the left margin."
   (interactive)
-  (let
-      ((original-point (point))
-       (beg (point))
-       (stack nil))
-    (if (re-search-backward "^\\w" nil t)
-        (progn
-          (setq beg (point))
-          (forward-line -1)
-          (while
-              (and (not (bobp))
-                   (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
-            (setq beg (point))
-            (forward-line -1))
-          (goto-char beg)
-          (while
-              (and (not (eq (point) (point-max)))
-                   (or (< (point) original-point)
-                       stack))
-            (dolist (tok (magik-tokenise-line))
-              (cond
-               ((assoc (car tok) magik-begins-and-ends)
-                (push (car tok) stack))
-               ((assoc (car tok) magik-ends-and-begins)
-                (if (equal (cdr (assoc (car stack) magik-begins-and-ends)) (car tok))
-                    (pop stack)
-                  (goto-char (cdr tok))
-                  (error "Found '%s' when expecting '%s'"
-                         (car tok)
-                         (cdr (assoc (car stack) magik-begins-and-ends)))))))
-            (forward-line))
-          (if (< (point) original-point)
-              (progn
-                (goto-char original-point)
-                (error "Don't know what to transmit"))
-            (magik-transmit-region beg (point)))))
+  (let ((original-point (point))
+        (beg (point))
+        (stack nil))
+    (when (re-search-backward "^\\w" nil t)
+      (setq beg (point))
+      (forward-line -1)
+      (while (and (not (bobp))
+                  (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
+        (setq beg (point))
+        (forward-line -1))
+      (goto-char beg)
+      (while (and (not (eobp))
+                  (or (< (point) original-point)
+                      stack))
+        (dolist (tok (magik-tokenise-line))
+          (cond
+           ((assoc (car tok) magik-begins-and-ends)
+            (push (car tok) stack))
+           ((assoc (car tok) magik-ends-and-begins)
+            (if (equal (cdr (assoc (car stack) magik-begins-and-ends)) (car tok))
+                (pop stack)
+              (goto-char (cdr tok))
+              (error "Found '%s' when expecting '%s'"
+                     (car tok)
+                     (cdr (assoc (car stack) magik-begins-and-ends)))))))
+        (forward-line))
+      (if (< (point) original-point)
+          (progn
+            (goto-char original-point)
+            (error "Don't know what to transmit"))
+        (magik-transmit-region beg (point))))
     (goto-char original-point)))
 (defalias 'transmit-thing-to-magik 'magik-transmit-thing)
 
@@ -2133,9 +2131,7 @@ Prevents expansion inside strings and comments."
 ;;; Package registration
 
 ;;;###autoload
-(or (assoc "\\.magik\\'" auto-mode-alist)
-    (push '("\\.magik\\'" . magik-mode) auto-mode-alist))
-
+(add-to-list 'auto-mode-alist '("\\.magik\\'" . magik-mode))
 (or (assq 'magik-transmit-debug-p minor-mode-alist)
     (push '(magik-transmit-debug-p magik-transmit-debug-mode-line-string) minor-mode-alist))
 

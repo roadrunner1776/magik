@@ -49,13 +49,13 @@ See `imenu-generic-expression'.")
      (1 font-lock-function-name-face)
      (2 font-lock-constant-face)))
   "Default fontification of product.def files."
-  :group 'product
+  :group 'magik-product
   :type 'sexp)
 
 (defun magik-product-customize ()
   "Open Customization buffer for Product Mode."
   (interactive)
-  (customize-group 'product))
+  (customize-group 'magik-product))
 
 ;;;###autoload
 (define-derived-mode magik-product-mode nil "Product"
@@ -148,8 +148,7 @@ Called by `magik-session-drag-n-drop-load' when a Product FILENAME is dropped."
 ;;; Package registration
 
 ;;;###autoload
-(or (assoc "product\\.def$" auto-mode-alist)
-    (push '("product\\.def$" . magik-product-mode) auto-mode-alist))
+(add-to-list 'auto-mode-alist '("product.def\\'" . magik-product-mode))
 
 (defvar magik-product-f2-map (make-sparse-keymap)
   "Keymap for the F2 function key in Magik product.def buffers.")

@@ -54,13 +54,13 @@ See `imenu-generic-expression'.")
    '("#[0-9]+" . font-lock-variable-name-face)
    '("#.*" . font-lock-comment-face))
   "Default fontification of Magik Messages."
-  :group 'msg
+  :group 'magik-msg
   :type 'sexp)
 
 (defun magik-msg-customize ()
   "Open Customization buffer for Msg Mode."
   (interactive)
-  (customize-group 'msg))
+  (customize-group 'magik-msg))
 
 (defun magik-msg-forward-message ()
   "Put point at beginning of line of next message."
@@ -207,10 +207,8 @@ Called by `magik-session-drag-n-drop-load' when a Msg FILENAME is dropped."
 ;;; Package registration
 
 ;;;###autoload
-(or (assoc "\\.msg$" auto-mode-alist)
-    (push '("\\.msg$" . magik-msg-mode) auto-mode-alist))
-(or (assoc "\\.hmsg$" auto-mode-alist)
-    (push '("\\.hmsg$" . magik-msg-mode) auto-mode-alist))
+(add-to-list 'auto-mode-alist '("\\.msg\\'" . magik-msg-mode))
+(add-to-list 'auto-mode-alist '("\\.hmsg\\'" . magik-msg-mode))
 
 ;; speedbar configuration
 (with-eval-after-load 'speedbar

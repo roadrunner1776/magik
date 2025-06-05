@@ -31,15 +31,19 @@
       (let ((response (json-read)))
         (cdr (assoc 'tag_name response))))))
 
+(defgroup magik-lint nil
+  "Customise Magik lint group."
+  :group 'magik)
+
 (defcustom magik-lint-jar-file-version
   (or (magik-lint--latest-version) "0.10.1")
   "Version of magik-lint to use."
-  :group 'magik
+  :group 'magik-lint
   :type 'string)
 
 (defcustom magik-lint-jar-file "magik-lint/magik-lint-%s.jar"
   "Location of the magik-lint jar file."
-  :group 'magik
+  :group 'magik-lint
   :type  '(choice (file)
                   (const nil)))
 
@@ -81,7 +85,7 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
 
 (if (file-exists-p (magik-lint--jar-file))
     (add-to-list 'flycheck-checkers 'magik-lint-java 'append)
-  (warn (format "magik-lint executable not found: %s; please download from https://github.com/StevenLooman/magik-tools/releases/latest" (magik-lint--jar-file))))
+  (warn "magik-lint executable not found: %s; please download from https://github.com/StevenLooman/magik-tools/releases/latest" (magik-lint--jar-file)))
 
 (provide 'magik-lint)
 ;;; magik-lint.el ends here

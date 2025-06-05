@@ -6,6 +6,9 @@
 
 (require 'yasnippet)
 
+;; Suppress the warnings about modifying the buffer via a snippet
+(add-to-list 'warning-suppress-types '(yasnippet backquote-change))
+
 (defgroup magik-yasnippet nil
   "Customise Magik YASnippet group."
   :tag   "Magik YASnippet"
@@ -16,12 +19,61 @@
   :group 'magik-yasnippet
   :type  'string)
 
-(defconst magik-yasnippet--class-name-regexp "\\(\\(\\sw\\|_\\)+\\)" "The regexp to use for the Magik class name.")
+(defcustom magik-yasnippet-documentation-style 'sw-method-doc
+  "Choose between \\'sw-method-doc\\', \\'type-doc\\', or nil.
+\\'sw-method-doc\\' for Smallworld method documentation style.
+\\'type-doc\\' for type-based documentation.
+nil to disable documentation."
+  :group 'magik-yasnippet
+  :type  '(choice (const :tag "Smallworld method documentation style" sw-method-doc)
+                  (const :tag "Type-based documentation" type-doc)
+                  (const :tag "No documentation" nil)))
+
+(defcustom magik-yasnippet-default-documentation "\t## \n\t## \n\t## "
+  "Default documentation string to insert."
+  :group 'magik-yasnippet
+  :type  'string)
+
+(defcustom magik-yasnippet-sw-method-doc-documentation 'default
+  "Default sw-method-doc documentation string to insert."
+  :group 'magik-yasnippet
+  :type  '(choice (const :tag "Use default documentation" default)
+                  (string :tag "Custom sw-method-doc")))
+
+(defcustom magik-yasnippet-type-doc-documentation 'default
+  "Default type-doc documentation string to insert."
+  :group 'magik-yasnippet
+  :type  '(choice (const :tag "Use default documentation" default)
+                  (string :tag "Custom type-doc")))
+
+(defconst magik-yasnippet--class-name-regexp "\\(\\(\\sw\\|_\\)+\\)"
+  "The regexp to use for the Magik class name.")
+
+(defun magik-yasnippet--documentation-string (value)
+  "Return the documentation string based on VALUE.
+If VALUE is \\'default, return `magik-yasnippet-default-documentation'.
+Otherwise, return VALUE."
+  (if (eq value 'default)
+      magik-yasnippet-default-documentation
+    value))
+
+(defun magik-yasnippet-documentation (&optional untabbed)
+  "Insert the documentation string based on `magik-yasnippet-documentation-style'.
+If UNTABBED is non-nil remove the tabs from the documentation string.
+When documentation style is nil (disabled), it kills the current line."
+  (if magik-yasnippet-documentation-style
+      (let ((documentation-string (pcase magik-yasnippet-documentation-style
+                                    ('sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
+                                    ('type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation)))))
+        (if untabbed
+            (replace-regexp-in-string "\t" "" documentation-string)
+          documentation-string))
+    (kill-line)))
 
 (defun magik-yasnippet-prev-pragma ()
   "Search for the previous pragma in the buffer.
 If a previous pragma is found, return it as a string.
-If no pragm` is found, return the default pragma
+If no pragma is found, return the default pragma
 defined by `magik-yasnippet-default-pragma`."
   (save-excursion
     (if (re-search-backward "^_pragma([^)]*)" nil t)
@@ -37,84 +89,76 @@ class name in the context of `_method`, `def_slotted_exemplar`, `def_mixin`,
 `.define_slot_externally_writable`, `.define_slot_externally_readable`.
 Returns the class name as a string, or nil if no class name is found."
   (save-excursion
-    (or
-     (when (re-search-backward (concat "_method[ \t]+" magik-yasnippet--class-name-regexp "\\.") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) nil t)
-       (match-string-no-properties 2))
-     (when (re-search-backward (concat "def_mixin\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) nil t)
-       (match-string-no-properties 2))
-     (when (re-search-backward (concat "def_indexed_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) nil t)
-       (match-string-no-properties 2))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_shared_constant") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_shared_variable") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_access") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_externally_writable") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_externally_readable") nil t)
-       (match-string-no-properties 1))
-     (when (re-search-backward (concat "^" magik-yasnippet--class-name-regexp "\\.define_pseudo_slot") nil t)
-       (match-string-no-properties 1)))))
+    (let ((start-point (point))
+          (patterns
+           `((,(concat "_method[ \t]+" magik-yasnippet--class-name-regexp "\\.") . 1)
+             (,(concat "def_slotted_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) . 2)
+             (,(concat "def_mixin\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) . 2)
+             (,(concat "def_indexed_exemplar\\s-*(\\(\\s-\\|\n\\)*:" magik-yasnippet--class-name-regexp) . 2)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_shared_constant") . 1)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_shared_variable") . 1)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_access") . 1)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_externally_writable") . 1)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_slot_externally_readable") . 1)
+             (,(concat "^" magik-yasnippet--class-name-regexp "\\.define_pseudo_slot") . 1)))
+          (closest-pos nil)
+          (closest-name nil))
+      (dolist (pattern patterns)
+        (goto-char start-point)
+        (when (re-search-backward (car pattern) nil t)
+          (let ((pos (point))
+                (class-name (match-string-no-properties (cdr pattern))))
+            (when (or (null closest-pos)
+                      (> pos closest-pos))
+              (setq closest-pos pos
+                    closest-name class-name)))))
+      closest-name)))
 
 (defun magik-yasnippet-prev-class-name-with-dot ()
   "Return the class name as a string (postfixed with a dot `.`)."
-  (let ((class-name (magik-yasnippet-prev-class-name)))
-    (when class-name
-      (concat class-name "."))))
+  (when-let* ((class-name (magik-yasnippet-prev-class-name)))
+    (concat class-name ".")))
 
 (defun magik-yasnippet-prev-class-name-as-symbol ()
   "Return the class name as a symbol (prefixed with a colon `:`)."
-  (let ((class-name (magik-yasnippet-prev-class-name)))
-    (when class-name
-      (concat ":" class-name))))
+  (when-let* ((class-name (magik-yasnippet-prev-class-name)))
+    (concat ":" class-name)))
 
 (defun magik-yasnippet-filename ()
   "Return the current buffer's filename without the `.magik` extension.
 If the buffer is not visiting a file, return an empty string."
-  (let ((name (if (buffer-file-name)
-                  (file-name-nondirectory (buffer-file-name))
-                "")))
-    (if (string-match "\\.magik$" name)
-        (setq name (substring name 0 (- (length name) 6))))))
+  (if-let* ((buffer-file (buffer-file-name))
+            (name (and (string-suffix-p ".magik" buffer-file)
+                       buffer-file)))
+      (file-name-sans-extension (file-name-nondirectory name))
+    ""))
 
 (defun magik-yasnippet-filename-as-symbol ()
   "Return the filename as a symbol (prefixed with a colon `:`)."
-  (let ((name (magik-yasnippet-filename)))
-    (concat ":" name)))
+  (concat ":" (magik-yasnippet-filename)))
 
 (defun magik-yasnippet-prev-slotted-exemplar-slots ()
   "Search for the previous `def_slotted_exemplar` and return slot names."
-  (let ((slot_count 1)
-        (slot_name nil)
-        (slotted_loc nil)
-        (dollar_loc nil)
-        (more_slots nil)
-        (result ""))
-    (save-excursion
-      (when (re-search-backward "\\(def_slotted_exemplar\\)" nil t)
-        (setq slotted_loc (match-beginning 0))
-        (goto-char slotted_loc)
-        (when (re-search-forward "\\(\\$\\)" nil t)
-          (setq dollar_loc (match-beginning 0)))
-        (setq more_slots t)))
-
-    (while more_slots
-      (save-excursion
-        (goto-char slotted_loc)
-        (if (re-search-forward "{\\s-*:\\s-*\\(\\sw+\\)\\s-*,\\s-*\\(_unset\\)\\s-*}" dollar_loc t slot_count)
-            (setq slot_count (1+ slot_count)
-                  slot_name (match-string-no-properties 1)
-                  result (concat result
-                                 (if (= slot_count 2)
-                                     (concat "\t." slot_name " << ")
-                                   (concat "\n\t." slot_name " << "))))
-          (setq more_slots nil)
-          (when (> slot_count 1)
-            (setq result (concat result "\n"))))))
-    result))
+  (save-excursion
+    (when-let* ((slotted-loc (and (re-search-backward "def_slotted_exemplar" nil t)
+                                  (match-beginning 0))))
+      (goto-char slotted-loc)
+      (when-let* ((dollar-loc (and (re-search-forward "\\$" nil t)
+                                   (match-beginning 0))))
+        (let (slots)
+          (goto-char slotted-loc)
+          (while (re-search-forward "{\\s-*:\\s-*\\(\\sw+\\)\\s-*,\\s-*\\(_unset\\)\\s-*}" dollar-loc t)
+            (push (match-string-no-properties 1) slots))
+          (when slots
+            (setq slots (nreverse slots))
+            (concat
+             (string-join (cl-mapcar (lambda (slot i)
+                                      (format "%s.%s <<"
+                                              (if (= i 0) "\t" "\n\t")
+                                              slot))
+                                    slots
+                                    (number-sequence 0 (1- (length slots)))))
+             "\n")))))))
 
 (defun magik-yasnippet-module-name ()
   "Recursively search for the module.def and return the module name."
@@ -134,9 +178,17 @@ If the buffer is not visiting a file, return an empty string."
 
 (defun magik-yasnippet--first-word-of-file (file)
   "Return the first word of a FILE."
-  (with-temp-buffer
-    (insert-file-contents file)
-    (goto-char (point-min))
-    (current-word)))
+  (when (file-exists-p file)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (goto-char (point-min))
+      (let ((word nil))
+        (while (and (not word)
+                    (not (eobp)))
+          (skip-chars-forward " \t")
+          (if (not (looking-at "#"))
+              (setq word (current-word))
+            (forward-line 1)))
+        word))))
 
 ;;; .yas-setup.el ends here

@@ -20,10 +20,22 @@
 ;;; Code:
 
 (require 'compat)
+(require 'magik-utils)
 
 (defgroup magik-pragma nil
   "Magik Pragma features."
   :group 'magik)
+
+(defcustom magik-pragma-topics-file nil
+  "Location of the pragma-topics file."
+  :group 'magik-pragma
+  :type '(choice (file)
+                 (const nil)))
+
+(defcustom magik-pragma-default-topics-filename "pragma_topics"
+  "Default name of the pragma-topics file."
+  :group 'magik-pragma
+  :type 'string)
 
 ;;;;;;;;;;;;;;;;;;;; User interface ;;;;;;;;;;;;;;;;;;;
 
@@ -390,24 +402,25 @@ the deprecated template."
 (defun magik-pragma-if-match-do-the-electric-pragma-topics (current next reverse)
   "Select pragma topics from a menu."
   (let* ((buffer-dir (if buffer-file-name (file-name-directory buffer-file-name) default-directory))
-         (magik-pragma-files (if buffer-dir (magik-utils-find-files-up buffer-dir "data/doc/pragma_topics")))
-         (product-pragma-file (if (getenv "SMALLWORLD_GIS") (expand-file-name (concat (getenv "SMALLWORLD_GIS") "/data/doc/pragma_topics"))))
+         (magik-pragma-files (when buffer-dir (magik-utils-locate-all-dominating-file buffer-dir magik-pragma-default-topics-filename)))
+         (product-pragma-file (when magik-pragma-topics-file (expand-file-name magik-pragma-topics-file)))
          topics pos)
     (re-search-forward "= *")
     (setq pos (point))
-    (if (not (eq (following-char) ?{ ))
-        (progn (insert "{") (search-forward ",") (backward-char) (insert "}")))
+    (unless (eq (following-char) ?{)
+      (insert "{")
+      (search-forward ",")
+      (backward-char)
+      (insert "}"))
     (goto-char pos)
     (forward-char)
-    (while
-        (looking-at " *\\(\\w+\\)")
+    (while (looking-at " *\\(\\w+\\)")
       (push (cons (match-string 1) t) topics)
       (goto-char (match-end 0))
       (looking-at " *,")
       (goto-char (match-end 0)))
     (goto-char pos)
-    (setq magik-pragma-window-configuration
-          (current-window-configuration))
+    (setq magik-pragma-window-configuration (current-window-configuration))
     (pop-to-buffer "*topic-selection*")
     (erase-buffer)
     (magik-pragma-topic-select-mode)
@@ -426,22 +439,19 @@ q      - quit
          (not (member product-pragma-file magik-pragma-files))
          (file-exists-p product-pragma-file)
          (insert-file-contents product-pragma-file))
-    (or magik-pragma-files
-        product-pragma-file
-        (error "There is no value for $SMALLWORLD_GIS"))
-    (goto-char
-     (prog1
-         (point)
-       (while (not (eq (point) (point-max)))
-         (let
-             ((topic
-               (and
-                (looking-at "\\s-*\\S-+\\s-+\\(\\S-+\\)")
-                (match-string 1))))
-           (beginning-of-line)
-           (insert
-            (if (assoc topic topics) "> " "  "))
-           (forward-line)))))))
+
+    (unless (or magik-pragma-files product-pragma-file)
+      (error "There is no pragma_topics file"))
+
+    (goto-char (point-min))
+    (while (not (eobp))
+      (let ((topic (when (looking-at "\\s-*\\S-+\\s-+\\(\\S-+\\)")
+                     (match-string 1))))
+        (beginning-of-line)
+        (insert (if (assoc topic topics)
+                    "> "
+                  "  ")))
+      (forward-line))))
 
 (define-derived-mode magik-pragma-topic-select-mode nil "Topic Select"
   "Major mode for selecting topics in pragmas.
@@ -460,8 +470,7 @@ q      - quit
   "Add the one CHARACTER string to the beginning of the current line.
 Also moves down a line.
 Beep if not looking at \"[ >] (\""
-  (if
-      (not (looking-at "[ >] "))
+  (if (not (looking-at "[ >] "))
       (beep)
     (beginning-of-line)
     (insert character)
@@ -483,36 +492,30 @@ Beep if not looking at \"[ >] (\""
   "Put the selected topics back into the pragma."
   (interactive)
   (goto-char (point-min))
-  (let
-      ((str ""))
-    (while
-        (not (eq (point) (point-max)))
-      (if (looking-at ">\\s-*\\S-+\\s-+\\(\\S-+\\)")
-          (setq str (concat str (match-string 1) ", ")))
+  (let ((str ""))
+    (while (not (eobp))
+      (when (looking-at ">\\s-*\\S-+\\s-+\\(\\S-+\\)")
+        (setq str (concat str (match-string 1) ", ")))
       (forward-line))
-    (if (not (equal str ""))
-        (setq str (substring str 0 (- (length str) 2))))
+    (when (not (equal str ""))
+      (setq str (substring str 0 (- (length str) 2))))
     (kill-buffer (current-buffer))
     (set-window-configuration magik-pragma-window-configuration)
     (forward-char)
-    (delete-region
-     (point)
-     (progn (search-forward "}") (backward-char) (point)))
+    (delete-region (point) (progn (search-forward "}") (backward-char) (point)))
     (insert str)))
 
 (defun magik-pragma-topic-edit ()
-  "Edit the topics file for the Smallworld Product \".../data/doc/pragma_topics\"."
+  "Edit the pragma_topics file."
   (interactive)
   (let* ((buffer-dir (if buffer-file-name (file-name-directory buffer-file-name) default-directory))
-         (magik-pragma-file (if buffer-dir (magik-utils-find-files-up buffer-dir "data/doc/pragma_topics" t))))
-    (cond (magik-pragma-file
-           (find-file (car magik-pragma-file)))
-          ((getenv "SMALLWORLD_GIS")
-           (find-file
-            (concat (file-name-as-directory (getenv "SMALLWORLD_GIS"))
-                    "data/doc/pragma_topics")))
+         (magik-pragma-dir (when buffer-dir (locate-dominating-file buffer-dir magik-pragma-default-topics-filename))))
+    (cond (magik-pragma-dir
+           (find-file (expand-file-name magik-pragma-default-topics-filename magik-pragma-dir)))
+          (magik-pragma-topics-file
+           (find-file (expand-file-name magik-pragma-topics-file)))
           (t
-           (error "There is no value for $SMALLWORLD_GIS")))))
+           (error "There is no pragma_topics file")))))
 
 (progn
   ;; ------------------------ magik pragma topic select mode ------------------------
