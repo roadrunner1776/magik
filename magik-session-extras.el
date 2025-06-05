@@ -32,14 +32,14 @@
 (defface magik-session-traceback-call-stack-face
   '((t :inherit link))
   "Font Lock mode face used to highlight the call stack lines in a Traceback."
-  :group 'magik)
+  :group 'magik-session-faces)
 
 (defface magik-session-method-definition-face
-  '((t :inherit font-lock-function-name-face
+  '((t :inherit magik-method-face
        :underline t))
   "Font Lock mode face used to highlight specific method lines.
 Right now apropos() and print_local_methods()."
-  :group 'magik)
+  :group 'magik-session-faces)
 
 (defvar magik-session-extras-font-lock-keywords
   '(("^.+\.[^0-9]+ \(.+\:[0-9]+\)" . 'magik-session-traceback-call-stack-face)

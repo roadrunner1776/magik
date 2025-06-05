@@ -136,30 +136,44 @@ that use command string matching are not affected by this setting."
   :group 'magik-session
   :type 'boolean)
 
-(defcustom magik-session-font-lock-prompt-face 'font-lock-type-face
-  "*Face name used to display the Magik Prompt."
-  :group 'magik-session
-  :type 'face)
+(defgroup magik-session-faces nil
+  "Faces for displaying text in the Magik session."
+  :group 'magik-session)
 
-(defcustom magik-session-font-lock-error-face 'font-lock-warning-face
-  "*Face name used to display Error lines."
-  :group 'magik-session
-  :type 'face)
+(defface magik-session-error-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display Error lines."
+  :group 'magik-session-faces)
 
-(defcustom magik-session-font-lock-traceback-face 'font-lock-warning-face
-  "*Face name used to display Traceback lines."
-  :group 'magik-session
-  :type 'face)
+(defface magik-session-prompt-face
+  '((t :inherit font-lock-type-face)) ;; TODO: Switch to a Magik-specific face?
+  "Font Lock mode face used to display the Magik Prompt."
+  :group 'magik-session-faces)
+
+(defface magik-session-reference-face
+  '((t :inherit magik-global-reference-face))
+  "Font Lock mode face used to display global references."
+  :group 'magik-session-faces)
+
+(defface magik-session-traceback-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display Traceback lines."
+  :group 'magik-session-faces)
+
+(defface magik-session-warning-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display Warning lines."
+  :group 'magik-session-faces)
 
 (defcustom magik-session-font-lock-keywords
   (append
    magik-font-lock-keywords-1
    magik-font-lock-keywords-2
    (list
-    '("^\\*\\*\\*\\* Error:.*$"      0 magik-session-font-lock-error-face t)
-    '("^\\*\\*\\*\\* Warning:.*$"    0 font-lock-warning-face t)
-    '("^---- traceback.* ----" . magik-session-font-lock-traceback-face)
-    '("^@.*$"                . font-lock-reference-face)))
+    '("^\\*\\*\\*\\* Error:.*$"      0 'magik-session-error-face t)
+    '("^\\*\\*\\*\\* Warning:.*$"    0 'magik-session-warning-face t)
+    '("^---- traceback.* ----" . 'magik-session-traceback-face)
+    '("^@.*$"                . 'magik-session-reference-face)))
   "Additional expressions to highlight in Magik mode."
   :group 'magik-session
   :type 'sexp)
@@ -294,14 +308,10 @@ It is offered as the default string for next time.")
 (defun magik-session-prompt-update-font-lock ()
   "Update the Font-lock variable `magik-session-font-lock-keywords'.
 Uses current `magik-session-prompt' setting as value."
-  (let ((entry (list (concat "^" magik-session-prompt) 0 magik-session-font-lock-prompt-face t)))
-    (if (member entry magik-session-font-lock-keywords)
-        nil ;; Already entered
-      (setq magik-session-font-lock-keywords (append magik-session-font-lock-keywords (list entry)))
-      (if (fboundp 'font-lock-set-defaults)
-          (progn  ;; Emacs 20 and later font-lock mode post-process its variables
-            (set 'font-lock-set-defaults nil)
-            (funcall 'font-lock-set-defaults))))))
+  (let ((entry (list (concat "^" magik-session-prompt) 0 ''magik-session-prompt-face t)))
+    (unless (member entry magik-session-font-lock-keywords)
+      (add-to-list 'magik-session-font-lock-keywords entry)
+      (font-lock-refresh-defaults))))
 
 (defun magik-session-prompt-get (&optional force-query-p)
   "If `magik-session-prompt' is nil, get the Magik session's command line prompt.
