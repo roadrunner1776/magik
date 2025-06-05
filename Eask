@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "magik-mode"
          "0.4.1"
          "Emacs major mode for Smallworld Magik files")
