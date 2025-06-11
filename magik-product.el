@@ -159,6 +159,7 @@ Called by `magik-session-drag-n-drop-load' when a Product FILENAME is dropped."
   (fset 'magik-product-f2-map   magik-product-f2-map)
 
   (define-key magik-product-mode-map [f2]    'magik-product-f2-map)
+  (define-key magik-product-mode-map " "     'magik-yas-maybe-expand)
 
   (define-key magik-product-f2-map    "b"    'magik-product-transmit-buffer)
   (define-key magik-product-f2-map    "r"    'magik-product-reinitialise))

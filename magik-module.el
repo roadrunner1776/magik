@@ -292,6 +292,7 @@ Called by `magik-session-drag-n-drop-load' when a Module FILENAME is dropped."
   (fset 'magik-module-f2-map   magik-module-f2-map)
 
   (define-key magik-module-mode-map [f2]    'magik-module-f2-map)
+  (define-key magik-module-mode-map " "     'magik-yas-maybe-expand)
 
   (define-key magik-module-f2-map   "b"     'magik-module-transmit-buffer)
   (define-key magik-module-f2-map   "c"     'magik-module-compile-messages)
