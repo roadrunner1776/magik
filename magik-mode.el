@@ -27,9 +27,6 @@
 (eval-when-compile
   (require 'font-lock)
   (defvar msb-menu-cond)
-  (defvar ac-sources)
-  (defvar ac-prefix)
-  (defvar ac-modes)
   (require 'magik-indent)
   (require 'magik-electric)
   (require 'magik-pragma)
@@ -107,15 +104,6 @@ concrete implementations."
                imenu-generic-expression imenu-generic-expression
                imenu-create-index-function 'magik-imenu-create-index-function
                imenu-syntax-alist '((?_ . "w"))
-               ac-sources (append '(
-                                    magik-ac-class-method-source
-                                    magik-ac-dynamic-source
-                                    magik-ac-global-source
-                                    magik-ac-object-source
-                                    magik-ac-raise-condition-source)
-                                  (and (boundp 'ac-sources)
-                                       ac-sources))
-
                outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
 
   (when magik-auto-abbrevs (abbrev-mode 1))
@@ -655,62 +643,6 @@ Used by \\[magik-method-name-mode].")
 (defvar magik-method-name-set-text-function 'magik-method-name-set-text-properties
   "Function to use for setting the Mode line to include Method name.
 Function takes two arguments BUFFER and METHOD.")
-
-;; consider enabling refresh using auto-complete's 10 minute refresh idle timer?
-(defvar magik-ac-object-source-cache nil
-  "Cache of all Magik Objects for use in auto-complete-mode.
-Once initialised this variable is not refreshed.")
-
-(defvar magik-ac-object-source
-  '((init       . magik-ac-object-source-init)
-    (candidates . magik-ac-object-source-cache)
-    (prefix     . magik-object)
-    (requires   . 3)
-    (symbol     . "o"))
-  "Auto-complete mode source definition for listing all Magik Objects.
-Use auto-complete mode \"o\" symbol convention to represent an object.")
-
-(defvar magik-ac-class-method-source-cache nil
-  "Cache of all Magik methods on current class for use in auto-complete-mode.")
-
-(defvar magik-ac-class-method-source
-  '((init       . magik-ac-object-source-init)
-    (candidates . magik-ac-class-method-source)
-    (prefix     . magik-method)
-    (symbol     . "f"))
-  "Auto-complete mode source definition for listing methods on a given class.
-Use auto-complete mode \"f\" symbol convention to represent a function, method.")
-
-(defvar magik-ac-raise-condition-source-cache nil
-  "Cache of all Magik Conditions for use in auto-complete-mode.")
-
-(defvar magik-ac-raise-condition-source
-  '((init       . magik-ac-raise-condition-source-init)
-    (candidates . magik-ac-raise-condition-source-cache)
-    (prefix     . magik-condition)
-    (symbol     . "c"))
-  "Auto-complete mode source definition for listing known conditions.
-Uses auto-complete \"c\" symbol convention to represent a condition!")
-
-(defvar magik-ac-global-source-cache nil
-  "Cache of all Magik Globals for use in auto-complete-mode.
-Once initialised this variable is not refreshed.")
-
-(defvar magik-ac-dynamic-source
-  '((init       . magik-ac-global-source-init)
-    (candidates . magik-ac-global-source-cache)
-    (prefix     . magik-dynamic)
-    (symbol     . "d"))
-  "Auto-complete mode source definition for listing Magik language dynamics.
-Use auto-complete mode \"d\" symbol convention to represent.")
-
-(defvar magik-ac-global-source
-  '((init       . magik-ac-global-source-init)
-    (candidates . magik-ac-global-source-cache)
-                                        ;(requires   . 3)
-    (symbol     . "g"))
-  "Auto-complete mode source definition for listing all Magik Globals.
-Use auto-complete mode \"g\" symbol convention to represent a global.")
 
 (defun magik-customize ()
   "Open Customization buffer for Magik Mode."
@@ -1912,119 +1844,6 @@ provide extra control over the name that appears in the index."
       (nconc (delq main-element (delq 'dummy index-alist))
              (cdr main-element)))))
 
-(defun magik-ac-exemplar-near-point ()
-  "Get current exemplar near cursor position."
-  (save-excursion
-    (save-match-data
-      (let ((pt (1- (magik-ac-method-prefix)))
-            variable
-            exemplar)
-        (goto-char pt)
-        ;; Usefully skip over various syntax types:
-        (if (not (zerop (skip-syntax-backward "w_().")))
-            (setq variable (buffer-substring-no-properties (point) pt)))
-        (if variable
-            (setq exemplar (cond ((equal variable "_self")
-                                  (or (cadr (magik-current-method-name))
-                                      (file-name-sans-extension (buffer-name))))
-                                 ((member variable magik-ac-object-source-cache)
-                                  variable)
-                                 ((re-search-backward (concat (regexp-quote variable) "\\s-*^?<<[ \t\n]*\\(\\S-+\\)\\.new") nil t)
-                                  (buffer-substring-no-properties (match-beginning 1) (match-end 1)))
-                                 (t
-                                  nil))))
-        exemplar))))
-
-(defun magik-ac-class-method-source ()
-  "List of methods on a class.
-Uses a cache variable `magik-ac-class-method-source-cache'.
-All the methods beginning with the first character are returned and
-stored in the cache.  Thus subsequent characters refining the match are
-handled by auto-complete refining the list of all possible matches,
-without recourse to the class browser."
-  (let ((exemplar (magik-ac-exemplar-near-point))
-        (ac-prefix ac-prefix))
-    (if exemplar
-        (progn
-          (setq ac-prefix (concat exemplar  "." (if (> (length ac-prefix) 0) (substring ac-prefix 0 1))))
-          (if (and magik-ac-class-method-source-cache
-                   (equal (concat " " ac-prefix) (car magik-ac-class-method-source-cache)))
-              ;; Reuse cache.
-              magik-ac-class-method-source-cache
-            ;; reset cache
-            (setq magik-ac-class-method-source-cache (magik-cb-ac-method-candidates)))))))
-
-(defun magik-ac-object-source-init ()
-  "Initialisation function for obtaining all Magik Objects.
-For use in auto-complete-mode."
-  (if (magik-cb-ac-start-process)
-      (let ((ac-prefix "sw:object"))
-        (setq magik-ac-object-source-cache (magik-cb-ac-class-candidates)))))
-
-(defun magik-ac-object-prefix ()
-  "Detect if point is at a possible object, allowing for a package: prefix."
-  (let (pt)
-    (cond
-     ((re-search-backward "\\(\\sw+:\\)\\(\\sw+\\)\\=" nil t)
-      (match-beginning 2))
-     ((and (re-search-backward "\\Sw\\(\\sw+\\)\\=" nil t)
-           (not (eq (following-char) ?.))
-           (setq pt (match-beginning 1))
-           (not (equal ":" (buffer-substring-no-properties pt (1+ pt)))))
-      pt)
-     (t nil))))
-
-(defun magik-ac-method-prefix ()
-  "Detect if point is at . method point."
-  (if (re-search-backward "\\(_self\\|_clone\\|\\S-\\)\\.\\(\\sw+\\)\\=" nil t)
-      (match-beginning 2)))
-
-(defun magik-ac-raise-condition-source-init ()
-  "Initialisation function for obtaining all Magik Conditions.
-For use in auto-complete-mode.  Once initialised this variable is not refreshed."
-  (if (magik-cb-ac-start-process)
-      (let ((ac-prefix "<condition>."))
-        (if magik-ac-raise-condition-source-cache
-            ;; consider enabling refresh using auto-complete's 10 minute refresh idle timer?
-            magik-ac-raise-condition-source-cache
-          (setq magik-ac-raise-condition-source-cache (magik-cb-ac-method-candidates))))))
-
-(defun magik-ac-raise-condition-prefix ()
-  "Detect if point is at a condition.raise."
-  (if (re-search-backward "condition\\.raise(\\s-*:\\(\\sw+\\)\\=" nil t)
-      (match-beginning 1)))
-
-(defun magik-ac-global-source-init ()
-  "Initialisation function for obtaining all Magik Conditions.
-For use in auto-complete-mode.  Once initialised this variable is not refreshed."
-  (if (magik-cb-ac-start-process)
-      (let ((ac-prefix "<global>."))
-        (if magik-ac-global-source-cache
-            ;; consider enabling refresh using auto-complete's 10 minute refresh idle timer?
-            magik-ac-global-source-cache
-          (setq magik-ac-global-source-cache (magik-cb-ac-method-candidates))))))
-
-(defun magik-ac-dynamic-prefix ()
-  "Detect if point is at !..! dynamic point."
-  (let (pt)
-    (if (and (re-search-backward "\\Sw\\(!\\sw*\\)\\=" nil t)
-             (not (eq (following-char) ?.))
-             (setq pt (match-beginning 1))
-             (not (equal ":" (buffer-substring-no-properties pt (1+ pt)))))
-        pt)))
-
-(defun magik-ac-complete ()
-  "Auto-complete command for Magik entities."
-  (interactive)
-  (let ((ac 'auto-complete))
-    (when (fboundp ac)
-      (funcall ac '(
-                    magik-ac-class-method-source
-                    magik-ac-raise-condition-source
-                    magik-ac-dynamic-source
-                    magik-ac-object-source
-                    magik-ac-global-source)))))
-
 ;;; Smallworld Compatibility functions
 (defalias 'magik-point-on-pragma-line-p 'pragma-line-p)
 
@@ -2139,33 +1958,6 @@ Prevents expansion inside strings and comments."
 
 (with-eval-after-load 'msb
   (magik-msb-configuration))
-
-;;Auto-complete configuration
-(defun magik-ac-configuration ()
-  "Configure Magik package for auto-complete mode."
-  (ac-define-prefix 'magik-dynamic 'magik-ac-dynamic-prefix)
-  (ac-define-prefix 'magik-condition 'magik-ac-raise-condition-prefix)
-  (ac-define-prefix 'magik-object 'magik-ac-object-prefix)
-  (ac-define-prefix 'magik-method 'magik-ac-method-prefix)
-  (setq ac-modes (append (list 'magik-mode) ac-modes)))
-
-(with-eval-after-load 'auto-complete
-  (magik-ac-configuration))
-
-;;Flycheck configuration
-(with-eval-after-load 'flycheck
-  (require 'magik-lint))
-
-;;YASnippet configuration
-(defun magik--snippets-initialize ()
-  "Initialize the Magik snippets."
-  (let ((snip-dir (expand-file-name "snippets" (file-name-directory (or load-file-name (buffer-file-name))))))
-    (when (boundp 'yas-snippet-dirs)
-      (add-to-list 'yas-snippet-dirs snip-dir t))
-    (yas-load-directory snip-dir)))
-
-(with-eval-after-load 'yasnippet
-  (magik--snippets-initialize))
 
 (progn
   ;; ------------------------ magik mode ------------------------
