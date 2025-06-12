@@ -87,7 +87,6 @@
 (require 'magik-mode)
 (require 'magik-indent)
 (require 'magik-pragma)
-(or (boundp 'ac-sources) (setq ac-sources nil))
 
 (defgroup magik-session nil
   "Customise Magik session group."
@@ -534,12 +533,6 @@ Entry to this mode runs `magik-session-mode-hook`.
                magik-transmit-debug-mode-line-string " #DEBUG"
                show-trailing-whitespace nil
                font-lock-defaults '(magik-session-font-lock-keywords nil t ((?_ . "w")))
-               ac-sources (append '(magik-ac-class-method-source
-                                    magik-ac-dynamic-source
-                                    magik-ac-global-source
-                                    magik-ac-object-source
-                                    magik-ac-raise-condition-source)
-                                  ac-sources)
                mode-line-process '(": %s")
                local-abbrev-table magik-base-mode-abbrev-table)
 
@@ -1485,9 +1478,6 @@ where MODE is the name of the major mode with the '-mode' postfix."
 
 (with-eval-after-load 'msb
   (magik-session-msb-configuration))
-
-(with-eval-after-load 'auto-complete
-  (add-to-list 'ac-modes 'magik-session-mode))
 
 (defvar magik-session-mode-error-map (make-sparse-keymap)
   "Keymap for Jumping to error messages.")

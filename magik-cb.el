@@ -324,12 +324,6 @@ Not used yet.")
 (defvar magik-cb2-was-one-window nil
   "If t, the cb2 was started from an unsplit-screen configuration.")
 
-(defvar magik-cb--ac-candidates nil
-  "Internal return value from CB auto-complete process.")
-
-(defvar magik-cb-ac-process nil
-  "Class Browser process object to use for auto-complete-mode.")
-
 (defface magik-cb2-on-face
   '((t :inherit magik-method-face))
   "Font Lock mode face used to display something is on."
@@ -2398,9 +2392,6 @@ See the variable `magik-cb-generalise-file-name-alist' for more customisation."
 
 (with-eval-after-load 'msb
   (magik-cb-msb-configuration))
-
-(with-eval-after-load 'autocomplete
-  (require 'magik-cb-ac))
 
 (progn
   ;; ------------------------ magik cb mode  ------------------------

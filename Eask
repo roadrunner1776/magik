@@ -16,7 +16,6 @@
 (source "melpa")
 
 (depends-on "emacs" "24.4")
-(depends-on "auto-complete")
 (depends-on "compat")
 (depends-on "flycheck")
 (depends-on "yasnippet")
