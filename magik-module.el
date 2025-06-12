@@ -101,7 +101,7 @@ See `imenu-generic-expression'.")
   (customize-group 'magik-module))
 
 (defun magik-module-yas-maybe-expand ()
-  "Expand `yasnippet` if possible, otherwise insert a space.
+  "Expand yasnippet if possible, otherwise insert a space.
 Prevents expansion inside indented areas."
   (interactive)
   (if (or (= 1 (point))
