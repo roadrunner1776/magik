@@ -66,16 +66,40 @@ Listed by `magik-version' or `magik-version-file'."
   :group 'magik-version
   :type  'string)
 
+(defgroup magik-version-faces nil
+  "Faces for displaying text in a Magik version selection buffer."
+  :group 'magik-version)
+
+(defface magik-version-active-face
+  '((t :inherit magik-variable-face))
+  "Font Lock mode face used to display the active line."
+  :group 'magik-version-faces)
+
+(defface magik-version-invalid-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display an invalid line."
+  :group 'magik-version-faces)
+
+(defface magik-version-name-face
+  '((t :inherit magik-method-face))
+  "Font Lock mode face used to display the name."
+  :group 'magik-version-faces)
+
+(defface magik-version-number-face
+  '((t :inherit magik-number-face))
+  "Font Lock mode face used to display the version."
+  :group 'magik-version-faces)
+
 (defcustom magik-version-font-lock-keywords
   (list
-   '("^.*(invalid).*$" . font-lock-warning-face)
+   '("^.*(invalid).*$" . 'magik-version-invalid-face)
    '("^\\([*]\\s-+\\S-+\\)\\s-+\\(\\S-+\\)"
-     (1 font-lock-constant-face)
-     (2 font-lock-variable-name-face))
+     (1 'magik-version-active-face)
+     (2 'magik-version-number-face))
    '("^ \\s-+\\(\\S-+\\)\\s-+\\(\\S-+\\)"
-     (1 font-lock-function-name-face)
-     (2 font-lock-variable-name-face))
-   '("^\\S-.*" . font-lock-doc-face))
+     (1 'magik-version-name-face)
+     (2 'magik-version-number-face))
+   '("^\\S-.*" . 'magik-doc-face))
   "Default fontification of gis_version."
   :group 'magik-version
   :type 'sexp)
@@ -97,6 +121,9 @@ Listed by `magik-version' or `magik-version-file'."
 (defvar-local magik-version-current nil
   "Current gis_version stream.")
 
+(defvar magik-smallworld-gis-current nil
+  "Current selected Smallworld GIS directory.")
+
 (defvar magik-version-position nil
   "A position in the gis version buffer above which the user shouldn't click.")
 
@@ -115,7 +142,8 @@ Listed by `magik-version' or `magik-version-file'."
          (buffer (concat "*gis " stream "*")))
     (setq magik-smallworld-gis smallworld-gis)
     (magik-session buffer)
-    (setq magik-version-current stream)))
+    (setq magik-version-current stream
+          magik-smallworld-gis-current smallworld-gis)))
 
 (defun magik-version-gis-aliases ()
   "Open gis_aliases file of selected version.
@@ -385,9 +413,11 @@ SELECTED-DEFINITION is the definition using the easy-menu or the current line."
   (interactive)
   (let* ((definition (or selected-definition
                          (magik-version-at-version-definition)))
-         (stream (car definition)))
+         (stream (car definition))
+         (smallworld-gis (nth 2 definition)))
     (kill-buffer (current-buffer))
-    (setq magik-smallworld-gis (nth 2 definition))
+    (setq magik-smallworld-gis smallworld-gis
+          magik-smallworld-gis-current smallworld-gis)
     (setq-default magik-version-current stream)
     (run-hooks 'magik-version-select-hook)
     (magik-version-display-title)

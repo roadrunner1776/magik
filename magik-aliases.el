@@ -102,14 +102,37 @@ If any function returns t, then the buffer is displayed."
    (list nil magik-aliases-definition-regexp 1))
   "Imenu generic expression for Aliases mode.  See `imenu-generic-expression'.")
 
+(defgroup magik-aliases-faces nil
+  "Faces for displaying text in a Magik aliases file."
+  :group 'magik-aliases)
+
+(defface magik-aliases-alias-name-face
+  '((t :inherit magik-method-face))
+  "Font Lock mode face used to display the alias name."
+  :group 'magik-aliases-faces)
+
+(defface magik-aliases-environment-variable-face
+  '((t :inherit magik-variable-face))
+  "Font Lock mode face used to display the environment variable."
+  :group 'magik-aliases-faces)
+
+(defface magik-aliases-environment-variable-placeholder-face
+  '((t :inherit magik-constant-face))
+  "Font Lock mode face used to display the environment variable placeholder."
+  :group 'magik-aliases-faces)
+
+(defface magik-aliases-property-key-face
+  '((t :inherit magik-keyword-arguments-face))
+  "Font Lock mode face used to display the property key."
+  :group 'magik-aliases-faces)
+
 ;; Font-lock configuration
 (defcustom magik-aliases-font-lock-keywords
   (list
-   (cons magik-aliases-definition-regexp 'font-lock-function-name-face)
-   '("^\\s-+\\([A-Z_]+\\)\\s-*:=" 1 font-lock-type-face)
-   '("^\\s-+\\([A-Z_0-9]+\\)\\s-*=" 1 font-lock-variable-name-face)
-   '("^\\s-+\\(\\sw+\\)\\s-*=" 1 font-lock-builtin-face)
-   '("\\s$\\sw+\\s$" . font-lock-constant-face))
+   (cons magik-aliases-definition-regexp ''magik-aliases-alias-name-face)
+   '("^\\s-+\\([A-Z_0-9]+\\)\\s-*[:=|=]" 1 'magik-aliases-environment-variable-face)
+   '("^\\s-+\\(\\sw+\\)\\s-*=" 1 'magik-aliases-property-key-face)
+   '("%[A-Z_0-9]+%" . 'magik-aliases-environment-variable-placeholder-face))
   "Default fontification of Aliases buffers."
   :group 'magik-aliases
   :type 'sexp)
@@ -268,7 +291,9 @@ With a prefix arg, ask user for current directory to use."
         ((null dir)
          (setq dir default-directory)))
 
-  (let* ((smallworld-gis magik-smallworld-gis)
+  (let* ((smallworld-gis (or magik-smallworld-gis
+                             (when (boundp 'magik-smallworld-gis-current)
+                               (symbol-value 'magik-smallworld-gis-current))))
          (program (magik-aliases-program smallworld-gis))
          (args    magik-aliases-program-args)
          (file    (or file (buffer-file-name)))
@@ -428,7 +453,9 @@ configuration file and return paths to append to variable `exec-path'."
         lp-files
         buffers
         (rescan (list "---" (vector "*Rescan*" 'magik-aliases-update-sw-menu t)))
-        (smallworld-gis magik-smallworld-gis))
+        (smallworld-gis (or magik-smallworld-gis
+                            (when (boundp 'magik-smallworld-gis-current)
+                              (symbol-value 'magik-smallworld-gis-current)))))
     (dolist (f (append magik-aliases-user-file-list magik-aliases-common-file-list ))
       (push `[,f
               (progn
