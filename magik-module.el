@@ -26,6 +26,7 @@
   (require 'magik-session))
 
 (require 'compat)
+(require 'yasnippet)
 
 (defgroup magik-module nil
   "Customise Magik module.def files group."
@@ -68,6 +69,18 @@ See `imenu-generic-expression'.")
   "Open Customization buffer for Module Mode."
   (interactive)
   (customize-group 'magik-module))
+
+(defun magik-module-yas-maybe-expand ()
+  "Expand `yasnippet` if possible, otherwise insert a space.
+Prevents expansion inside indented areas."
+  (interactive)
+  (if (or (= 1 (point))
+          (not (member
+                (get-text-property (- (point) 1) 'face)
+                '(magik-module-keyword-face magik-module-name-face)))
+          (not (yas-expand)))
+      (self-insert-command 1)))
+
 
 ;;;###autoload
 (define-derived-mode magik-module-mode nil "Module"
@@ -292,7 +305,7 @@ Called by `magik-session-drag-n-drop-load' when a Module FILENAME is dropped."
   (fset 'magik-module-f2-map   magik-module-f2-map)
 
   (define-key magik-module-mode-map [f2]    'magik-module-f2-map)
-  (define-key magik-module-mode-map " "     'magik-yas-maybe-expand)
+  (define-key magik-module-mode-map " "     'magik-module-yas-maybe-expand)
 
   (define-key magik-module-f2-map   "b"     'magik-module-transmit-buffer)
   (define-key magik-module-f2-map   "c"     'magik-module-compile-messages)
