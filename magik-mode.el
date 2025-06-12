@@ -1959,6 +1959,21 @@ Prevents expansion inside strings and comments."
 (with-eval-after-load 'msb
   (magik-msb-configuration))
 
+;;Flycheck configuration
+(with-eval-after-load 'flycheck
+  (require 'magik-lint))
+
+;;YASnippet configuration
+(defun magik--snippets-initialize ()
+  "Initialize the Magik snippets."
+  (let ((snip-dir (expand-file-name "snippets" (file-name-directory (or load-file-name (buffer-file-name))))))
+    (when (boundp 'yas-snippet-dirs)
+      (add-to-list 'yas-snippet-dirs snip-dir t))
+    (yas-load-directory snip-dir)))
+
+(with-eval-after-load 'yasnippet
+  (magik--snippets-initialize))
+
 (progn
   ;; ------------------------ magik mode ------------------------
 
