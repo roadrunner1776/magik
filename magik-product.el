@@ -86,7 +86,7 @@ See `imenu-generic-expression'.")
   "Expand yasnippet if possible, otherwise insert a space.
 Prevents expansion inside indented areas."
   (interactive)
-  (if (or (= 1 (point))
+  (when (or (= 1 (point))
           (not (member
                 (get-text-property (- (point) 1) 'face)
                 '(magik-product-keyword-face magik-product-name-face magik-product-type-face)))

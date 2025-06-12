@@ -2051,7 +2051,7 @@ Translate it and the closing bracket into the new \"{...}\" notation."
   "Expand yasnippet if possible, otherwise insert a space.
 Prevents expansion inside strings and comments."
   (interactive)
-  (if (or (magik--in-string-or-comment-p)
+  (when (or (magik--in-string-or-comment-p)
           (not (yas-expand)))
       (self-insert-command 1)))
 
