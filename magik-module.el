@@ -105,11 +105,11 @@ See `imenu-generic-expression'.")
 Prevents expansion inside indented areas."
   (interactive)
   (when (or (= 1 (point))
-          (not (member
-                (get-text-property (- (point) 1) 'face)
-                '(magik-module-keyword-face magik-module-name-face)))
-          (not (yas-expand)))
-      (self-insert-command 1)))
+            (not (member
+                  (get-text-property (- (point) 1) 'face)
+                  '(magik-module-keyword-face magik-module-name-face)))
+            (not (yas-expand)))
+    (self-insert-command 1)))
 
 
 ;;;###autoload

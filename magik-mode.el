@@ -2052,8 +2052,8 @@ Translate it and the closing bracket into the new \"{...}\" notation."
 Prevents expansion inside strings and comments."
   (interactive)
   (when (or (magik--in-string-or-comment-p)
-          (not (yas-expand)))
-      (self-insert-command 1)))
+            (not (yas-expand)))
+    (self-insert-command 1)))
 
 ;;; Package initialisation
 (define-abbrev-table 'magik-base-mode-abbrev-table
