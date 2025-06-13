@@ -82,6 +82,7 @@ the variable `magik-session-buffer'."
 
 ;; ------------------------ magik trn mode -------------------------
 (define-key magik-trn-mode-map (kbd "<f2> b") 'magik-trn-transmit-buffer)
+(define-key magik-trn-mode-map " "            'magik-yas-maybe-expand)
 
 (provide 'magik-trn)
 ;;; magik-trn.el ends here
