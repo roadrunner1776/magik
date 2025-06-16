@@ -27,6 +27,10 @@ The alternative, and recommended, way of installing [magik-mode](https://github.
 
 ## Features
 
+### Automatic completion support
+
+Automatic completion support is no longer provided by this package. Please refer to the [magik-company](https://github.com/reinierkof/magik-company) package for this functionality."
+
 ### Global keys
 
 Global keys are set by calling `(magik-global-bindings)` after the packages has been loaded.
