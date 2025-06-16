@@ -1,4 +1,4 @@
-;;; magik-indent.el --- calc. the indentation for a line of Magik code.  -*- lexical-binding: t; -*-
+;;; magik-indent.el --- calculate the indentation for a line of Magik code.  -*- lexical-binding: t; -*-
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
