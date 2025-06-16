@@ -25,6 +25,8 @@
   (require 'magik-utils)
   (require 'magik-session))
 
+(require 'yasnippet)
+
 (defgroup magik-product nil
   "Customise Magik product.def files group."
   :group 'magik
@@ -79,6 +81,17 @@ See `imenu-generic-expression'.")
   "Open Customization buffer for Product Mode."
   (interactive)
   (customize-group 'magik-product))
+
+(defun magik-product-yas-maybe-expand ()
+  "Expand yasnippet if possible, otherwise insert a space.
+Prevents expansion inside indented areas."
+  (interactive)
+  (when (or (= 1 (point))
+            (not (member
+                  (get-text-property (- (point) 1) 'face)
+                  '(magik-product-keyword-face magik-product-name-face magik-product-type-face)))
+            (not (yas-expand)))
+    (self-insert-command 1)))
 
 ;;;###autoload
 (define-derived-mode magik-product-mode nil "Product"
@@ -182,6 +195,7 @@ Called by `magik-session-drag-n-drop-load' when a Product FILENAME is dropped."
   (fset 'magik-product-f2-map   magik-product-f2-map)
 
   (define-key magik-product-mode-map [f2]    'magik-product-f2-map)
+  (define-key magik-product-mode-map " "     'magik-product-yas-maybe-expand)
 
   (define-key magik-product-f2-map    "b"    'magik-product-transmit-buffer)
   (define-key magik-product-f2-map    "r"    'magik-product-reinitialise))

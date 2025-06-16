@@ -2048,12 +2048,12 @@ Translate it and the closing bracket into the new \"{...}\" notation."
   (syntax-ppss-context (syntax-ppss)))
 
 (defun magik-yas-maybe-expand ()
-  "Expand `yasnippet` if possible, otherwise insert a space.
+  "Expand yasnippet if possible, otherwise insert a space.
 Prevents expansion inside strings and comments."
   (interactive)
-  (if (or (magik--in-string-or-comment-p)
-          (not (yas-expand)))
-      (self-insert-command 1)))
+  (when (or (magik--in-string-or-comment-p)
+            (not (yas-expand)))
+    (self-insert-command 1)))
 
 ;;; Package initialisation
 (define-abbrev-table 'magik-base-mode-abbrev-table
