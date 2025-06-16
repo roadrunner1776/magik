@@ -156,7 +156,8 @@ With a prefix ARG accept all changes without prompting."
   (unless dir
     (setq dir (file-name-directory (buffer-file-name))))
   ;;Do not bother prompting if buffer is empty.
-  (if (zerop (buffer-size)) (setq arg t))
+  (when (zerop (buffer-size))
+    (setq arg t))
 
   (let ((buflist (magik-loadlist-buffer-list))
         updated
@@ -169,16 +170,15 @@ With a prefix ARG accept all changes without prompting."
                    (real-str     (elt buf-i 1))
                    (len  (length (elt buf-i 0)))
                    (pt   (elt buf-i 2)))
-               (if (and (or real-file real-str)
-                        (not (equal real-file real-str)))
-                   (progn
-                     (goto-char pt)
-                     (delete-char len)
-                     (insert replace-file)
-                     (princ (format "Updated '%s' with '%s'"
-                                    (or real-str (elt buf-i 0))
-                                    replace-file))
-                     (setq updated t)))
+               (when (and (or real-file real-str)
+                          (not (equal real-file real-str)))
+                 (goto-char pt)
+                 (delete-char len)
+                 (insert replace-file)
+                 (princ (format "Updated '%s' with '%s'"
+                                (or real-str (elt buf-i 0))
+                                replace-file))
+                 (setq updated t))
                (setcdr buf-i nil)))
             (t
              (push (or (elt i 1) (elt i 0)) newlist))))

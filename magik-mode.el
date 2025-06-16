@@ -930,11 +930,11 @@ you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recal
   (interactive
    (list
     (read-string "Method Name: " (current-word))
-    (if current-prefix-arg
-        (read-string "Class Name: "
-                     (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
+    (when current-prefix-arg
+      (read-string "Class Name: "
+                   (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
 
-  (if class nil
+  (unless class
     (setq class (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
   (let* ((method-cons (magik-method-name-type method))
          (method-root (car method-cons))
@@ -1148,11 +1148,10 @@ Optional argument GIS ..."
             (t ;no "on line" errors found.
              nil)))
 
-    (if pt
-        (progn
-          (pop-to-buffer gis)
-          (goto-char pt)
-          (magik-gis-error-goto)))))
+    (when pt
+      (pop-to-buffer gis)
+      (goto-char pt)
+      (magik-gis-error-goto))))
 
 (defun magik-perform-replace-no-set-mark (from to regexp-flag)
   "Like `perform-replace' but without setting the mark.
@@ -1210,20 +1209,23 @@ See `magik-mark-method-exchange' for more details."
 The construct can be a method, a proc, a def_slotted_exemplar or whatever.
 The rule is that the thing must start against the left margin."
   (interactive)
-  (let ((original-point (point))
-        (beg (point))
-        (stack nil))
+  (let
+      ((original-point (point))
+       (beg (point))
+       (stack nil))
     (when (re-search-backward "^\\w" nil t)
       (setq beg (point))
       (forward-line -1)
-      (while (and (not (bobp))
-                  (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
+      (while
+          (and (not (bobp))
+               (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
         (setq beg (point))
         (forward-line -1))
       (goto-char beg)
-      (while (and (not (eobp))
-                  (or (< (point) original-point)
-                      stack))
+      (while
+          (and (not (eq (point) (point-max)))
+               (or (< (point) original-point)
+                   stack))
         (dolist (tok (magik-tokenise-line))
           (cond
            ((assoc (car tok) magik-begins-and-ends)
@@ -1271,7 +1273,8 @@ If \\='end, then point is left at the end of the method.
 Otherwise, point is left where it is."
   (interactive)
   ;;DEBUG (message "this %s, last %s" this-command last-command)
-  (if (eq last-command 'magik-transmit-method-first) (magik-forward-endmethod))
+  (when (eq last-command 'magik-transmit-method-first)
+    (magik-forward-endmethod))
   (let ((magik-mark-method-exchange nil)
         mark)
     (save-excursion
@@ -1572,8 +1575,8 @@ If PT is given, goto that char position."
           (while
               (and (looking-at regexp-str)
                    (zerop (forward-line -1))))
-          (if (not (looking-at regexp-str))
-              (forward-line 1))
+          (unless (looking-at regexp-str)
+            (forward-line 1))
           (setq beg (point))
           (while (and (looking-at regexp-str)
                       (zerop (forward-line 1))))
@@ -1769,11 +1772,11 @@ Argument END ..."
       (let ((starting-point (line-number-at-pos))
             (exemplar-point nil)
             (method-point nil))
-        (when (not (equal (search-backward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t) nil))
+        (unless (equal (search-backward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t) nil)
           (setq exemplar-point (line-number-at-pos)))
         (goto-char (point-min))
         (forward-line (1- starting-point))
-        (when (not (equal (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t) nil))
+        (unless (equal (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t) nil)
           (setq method-point (line-number-at-pos)))
         (when (or (not (equal exemplar-point nil))
                   (not (equal method-point nil)))
@@ -1921,18 +1924,18 @@ provide extra control over the name that appears in the index."
             exemplar)
         (goto-char pt)
         ;; Usefully skip over various syntax types:
-        (if (not (zerop (skip-syntax-backward "w_().")))
-            (setq variable (buffer-substring-no-properties (point) pt)))
-        (if variable
-            (setq exemplar (cond ((equal variable "_self")
-                                  (or (cadr (magik-current-method-name))
-                                      (file-name-sans-extension (buffer-name))))
-                                 ((member variable magik-ac-object-source-cache)
-                                  variable)
-                                 ((re-search-backward (concat (regexp-quote variable) "\\s-*^?<<[ \t\n]*\\(\\S-+\\)\\.new") nil t)
-                                  (buffer-substring-no-properties (match-beginning 1) (match-end 1)))
-                                 (t
-                                  nil))))
+        (unless (zerop (skip-syntax-backward "w_()."))
+          (setq variable (buffer-substring-no-properties (point) pt)))
+        (when variable
+          (setq exemplar (cond ((equal variable "_self")
+                                (or (cadr (magik-current-method-name))
+                                    (file-name-sans-extension (buffer-name))))
+                               ((member variable magik-ac-object-source-cache)
+                                variable)
+                               ((re-search-backward (concat (regexp-quote variable) "\\s-*^?<<[ \t\n]*\\(\\S-+\\)\\.new") nil t)
+                                (buffer-substring-no-properties (match-beginning 1) (match-end 1)))
+                               (t
+                                nil))))
         exemplar))))
 
 (defun magik-ac-class-method-source ()
@@ -1944,22 +1947,21 @@ handled by auto-complete refining the list of all possible matches,
 without recourse to the class browser."
   (let ((exemplar (magik-ac-exemplar-near-point))
         (ac-prefix ac-prefix))
-    (if exemplar
-        (progn
-          (setq ac-prefix (concat exemplar  "." (if (> (length ac-prefix) 0) (substring ac-prefix 0 1))))
-          (if (and magik-ac-class-method-source-cache
-                   (equal (concat " " ac-prefix) (car magik-ac-class-method-source-cache)))
-              ;; Reuse cache.
-              magik-ac-class-method-source-cache
-            ;; reset cache
-            (setq magik-ac-class-method-source-cache (magik-cb-ac-method-candidates)))))))
+    (when exemplar
+      (setq ac-prefix (concat exemplar  "." (if (> (length ac-prefix) 0) (substring ac-prefix 0 1))))
+      (if (and magik-ac-class-method-source-cache
+               (equal (concat " " ac-prefix) (car magik-ac-class-method-source-cache)))
+          ;; Reuse cache.
+          magik-ac-class-method-source-cache
+        ;; reset cache
+        (setq magik-ac-class-method-source-cache (magik-cb-ac-method-candidates))))))
 
 (defun magik-ac-object-source-init ()
   "Initialisation function for obtaining all Magik Objects.
 For use in auto-complete-mode."
-  (if (magik-cb-ac-start-process)
-      (let ((ac-prefix "sw:object"))
-        (setq magik-ac-object-source-cache (magik-cb-ac-class-candidates)))))
+  (when (magik-cb-ac-start-process)
+    (let ((ac-prefix "sw:object"))
+      (setq magik-ac-object-source-cache (magik-cb-ac-class-candidates)))))
 
 (defun magik-ac-object-prefix ()
   "Detect if point is at a possible object, allowing for a package: prefix."
@@ -1991,8 +1993,8 @@ For use in auto-complete-mode.  Once initialised this variable is not refreshed.
 
 (defun magik-ac-raise-condition-prefix ()
   "Detect if point is at a condition.raise."
-  (if (re-search-backward "condition\\.raise(\\s-*:\\(\\sw+\\)\\=" nil t)
-      (match-beginning 1)))
+  (when (re-search-backward "condition\\.raise(\\s-*:\\(\\sw+\\)\\=" nil t)
+    (match-beginning 1)))
 
 (defun magik-ac-global-source-init ()
   "Initialisation function for obtaining all Magik Conditions.
@@ -2007,11 +2009,11 @@ For use in auto-complete-mode.  Once initialised this variable is not refreshed.
 (defun magik-ac-dynamic-prefix ()
   "Detect if point is at !..! dynamic point."
   (let (pt)
-    (if (and (re-search-backward "\\Sw\\(!\\sw*\\)\\=" nil t)
-             (not (eq (following-char) ?.))
-             (setq pt (match-beginning 1))
-             (not (equal ":" (buffer-substring-no-properties pt (1+ pt)))))
-        pt)))
+    (when (and (re-search-backward "\\Sw\\(!\\sw*\\)\\=" nil t)
+               (not (eq (following-char) ?.))
+               (setq pt (match-beginning 1))
+               (not (equal ":" (buffer-substring-no-properties pt (1+ pt)))))
+      pt)))
 
 (defun magik-ac-complete ()
   "Auto-complete command for Magik entities."
@@ -2067,8 +2069,8 @@ Prevents expansion inside strings and comments."
   "Abbrev table for Magik mode."
   :regexp "\\<\\([+[:word:]]+\\)")
 
-(if magik-under-as-char
-    (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
+(when magik-under-as-char
+  (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
 (modify-syntax-entry ?\\ "." magik-base-mode-syntax-table) ;; \ is not an escape character in magik mode.
 (modify-syntax-entry ?? "w" magik-base-mode-syntax-table)
 (modify-syntax-entry ?! "w" magik-base-mode-syntax-table)
