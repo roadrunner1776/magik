@@ -793,7 +793,7 @@ there is not, prompt for a command to run, and then run it."
   "Start a new Magik session."
   (interactive)
   (let ((current-prefix-arg t))
-    (call-interactively 'gis)))
+    (call-interactively #'magik-session)))
 
 (defun magik-session-kill-process ()
   "Kill the current Magik process."
