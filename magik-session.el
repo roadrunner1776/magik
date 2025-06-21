@@ -780,6 +780,9 @@ there is not, prompt for a command to run, and then run it."
                                (file-name-as-directory
                                 (substitute-in-file-name dir))))
       (compat-call setq-local
+                   magik-smallworld-gis (or magik-smallworld-gis
+                                            (when (boundp 'magik-smallworld-gis-current)
+                                              (symbol-value 'magik-smallworld-gis-current)))
                    magik-session-current-command (copy-sequence magik-session-command)
                    magik-session-command-history (cons magik-session-current-command
                                                        (delete magik-session-current-command magik-session-command-history)))
