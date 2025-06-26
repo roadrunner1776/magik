@@ -71,16 +71,14 @@ Support for imenu. Try: `(add-hook 'magik-mode-hook 'imenu-add-menubar-index)`
 
 ### magik-ts-mode
 
-Major mode for using Treesit with Magik.
+Major Mode for Using Tree-sitter with Magik
 
-You can use <kbd>M</kbd>-<kbd>x</kbd> `treesit-install-language-grammar` to install (and build) the grammar or download the latest artifact from [GitHub](https://github.com/krn-robin/tree-sitter-magik/releases/latest) for your OS.
-When downloaded from GitHub, place the downloaded file inside `~/.emacs.d/tree-sitter`.
+You can use <kbd>M</kbd>-<kbd>x</kbd> `treesit-install-language-grammar` to install and build the grammar, or download the latest prebuilt artifact from [GitHub](https://github.com/krn-robin/tree-sitter-magik/releases/latest) for your operating system.
+If downloading from GitHub, place the extracted file in `~/.emacs.d/tree-sitter`.
 
-To easily switch to the `magik-ts-mode`, if you have the grammar installed, please refer to the [treesit-auto](https://github.com/renzmann/treesit-auto) package.
+With `magik-ts-mode` enabled, you can use <kbd>M</kbd>-<kbd>x</kbd> `treesit-explore-mode` to view the syntax tree of the current buffer.
 
-When having the `magik-ts-mode` enabled, you can use <kbd>M</kbd>-<kbd>x</kbd> `treesit-explore-mode` to view the syntax tree for your current buffer.
-
-For more information about tree-sitter, please refer to the [tutorial](https://www.masteringemacs.org/article/how-to-get-started-tree-sitter) from Mastering Emacs.
+For more information about Tree-sitter, see the Mastering Emacs [tutorial](https://www.masteringemacs.org/article/how-to-get-started-tree-sitter).
 
 ### magik-electric-mode
 
