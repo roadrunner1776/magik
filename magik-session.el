@@ -699,14 +699,17 @@ there is not, prompt for a command to run, and then run it."
         (alias-buffer "*temp gis alias buffer*")
         (keepgoing t)
         (magik-session-start-process-pre-hook magik-session-start-process-pre-hook)
-        (buffer (magik-utils-get-buffer-mode (cond (buffer buffer)
-                                                   ((derived-mode-p 'magik-session-mode) (buffer-name))
-                                                   (t nil))
-                                             'magik-session-mode
-                                             "Enter Magik Session buffer:"
-                                             (or magik-session-buffer magik-session-buffer-default-name)
-                                             'magik-session-buffer-alist-prefix-function
-                                             (generate-new-buffer-name magik-session-buffer-default-name)))
+        (buffer (or
+                 (magik-utils-get-buffer-mode (cond (buffer buffer)
+                                                    ((derived-mode-p 'magik-session-mode) (buffer-name))
+                                                    (t nil))
+                                              'magik-session-mode
+                                              "Enter Magik Session buffer:"
+                                              (or magik-session-buffer magik-session-buffer-default-name)
+                                              'magik-session-buffer-alist-prefix-function
+                                              (generate-new-buffer-name magik-session-buffer-default-name)
+                                              t)
+                 (generate-new-buffer-name (or magik-session-buffer magik-session-buffer-default-name))))
         (rev-1920-regexp " +\\[rev\\(19\\|20\\)\\] +")
         (alias-subst-regexp "\\\\!\\(\\\\\\)?\\*"))
     (if (and (get-buffer-process buffer)
@@ -777,6 +780,9 @@ there is not, prompt for a command to run, and then run it."
                                (file-name-as-directory
                                 (substitute-in-file-name dir))))
       (compat-call setq-local
+                   magik-smallworld-gis (or magik-smallworld-gis
+                                            (when (boundp 'magik-smallworld-gis-current)
+                                              (symbol-value 'magik-smallworld-gis-current)))
                    magik-session-current-command (copy-sequence magik-session-command)
                    magik-session-command-history (cons magik-session-current-command
                                                        (delete magik-session-current-command magik-session-command-history)))
