@@ -29,7 +29,7 @@ The alternative, and recommended, way of installing [magik-mode](https://github.
 
 ### Automatic completion support
 
-Automatic completion support is no longer provided by this package. Please refer to the [magik-company](https://github.com/reinierkof/magik-company) package for this functionality."
+Automatic completion support is no longer provided by this package. Please refer to the [magik-company](https://github.com/reinierkof/magik-company) package for this functionality.
 
 ### Global keys
 
@@ -68,6 +68,17 @@ Major prog mode for editing Magik code.
 Support for outline-minor mode. Try: `(outline-minor-mode)`
 
 Support for imenu. Try: `(add-hook 'magik-mode-hook 'imenu-add-menubar-index)`
+
+### magik-ts-mode
+
+Major Mode for Using Tree-sitter with Magik
+
+You can use <kbd>M</kbd>-<kbd>x</kbd> `treesit-install-language-grammar` to install and build the grammar, or download the latest prebuilt artifact from [GitHub](https://github.com/krn-robin/tree-sitter-magik/releases/latest) for your operating system.
+If downloading from GitHub, place the extracted file in `~/.emacs.d/tree-sitter`.
+
+With `magik-ts-mode` enabled, you can use <kbd>M</kbd>-<kbd>x</kbd> `treesit-explore-mode` to view the syntax tree of the current buffer.
+
+For more information about Tree-sitter, see the Mastering Emacs [tutorial](https://www.masteringemacs.org/article/how-to-get-started-tree-sitter).
 
 ### magik-electric-mode
 
