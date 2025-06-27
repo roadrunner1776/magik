@@ -29,12 +29,12 @@
   (defvar msb-menu-cond)
   (require 'magik-indent)
   (require 'magik-electric)
-  (require 'magik-pragma)
-  (require 'magik-doc-gen))
+  (require 'magik-pragma))
 
 (require 'compat)
 (require 'imenu)
 (require 'yasnippet)
+(require 'magik-doc-gen)
 (require 'magik-template)
 
 (defgroup magik nil
