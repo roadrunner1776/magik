@@ -85,7 +85,7 @@ Returns a list of paths, or nil if none are found."
   "Return the directory name for the current buffer."
   (when-let ((directory (or buffer-file-name
                             default-directory)))
-    (file-name-nondirectory (directory-file-name (file-name-directory directory)))))
+    (file-name-nondirectory (directory-file-name (file-name-directory (expand-file-name directory))))))
 
 (defun magik-utils-curr-word ()
   "Return the word (or part-word) before point as a string."
