@@ -42,8 +42,12 @@ Right now apropos() and print_local_methods()."
   :group 'magik-session-faces)
 
 (defvar magik-session-extras-font-lock-keywords
-  '(("^.+\.[^0-9]+ \(.+\:[0-9]+\)" . 'magik-session-traceback-call-stack-face)
-    ("^\\(slot\\|iter\\|method\\|class\\) .+ in .+" . 'magik-session-method-definition-face))
+  `((,(rx bol (one-or-more not-newline) "." (one-or-more (not numeric))
+          (one-or-more whitespace) (syntax open-parenthesis)
+          (one-or-more not-newline) ":" (one-or-more (or numeric not-newline))
+          (syntax close-parenthesis) eol) . 'magik-session-traceback-call-stack-face)
+	(,(rx bol (or "slot" "iter" "method" "class" "CORRUPT") " "
+		  (one-or-more anychar) " in " (one-or-more not-newline) eol) . 'magik-session-method-definition-face))
   "Additional Font-lock Keywords for `magik-session-mode'.")
 
 (defun magik-session-extras--activate ()
