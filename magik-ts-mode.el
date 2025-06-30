@@ -165,8 +165,7 @@
      ((parent-is "unary_operator") parent 0)
      ((parent-is "documentation") parent 0)
 
-     ((parent-is "invoke") (nth-sibling 2) 0)
-
+     ((parent-is "invoke") parent-bol magik-indent-level)
      ((parent-is "call") parent-bol magik-indent-level)
      ((parent-is "vector") parent-bol magik-indent-level)
 
