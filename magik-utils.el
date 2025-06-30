@@ -81,6 +81,12 @@ Returns a list of paths, or nil if none are found."
       (setq directory (file-name-directory (directory-file-name directory))))
     (nreverse paths)))
 
+(defun magik-utils-current-directory-name ()
+  "Return the directory name for the current buffer."
+  (when-let ((directory (or buffer-file-name
+                            default-directory)))
+    (file-name-nondirectory (directory-file-name (file-name-directory (expand-file-name directory))))))
+
 (defun magik-utils-curr-word ()
   "Return the word (or part-word) before point as a string."
   (save-excursion

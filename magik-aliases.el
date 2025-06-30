@@ -319,12 +319,8 @@ With a prefix arg, ask user for current directory to use."
       (kill-buffer (current-buffer))
       (set-buffer buf)
       (magik-session-mode)
-      (setq magik-smallworld-gis smallworld-gis)
-
-      (insert (current-time-string) "\n")
-      (insert "Command: " program " ")
-      (mapc (function (lambda (s) (insert s " "))) args)
-      (setq default-directory dir
+      (setq magik-smallworld-gis smallworld-gis
+            default-directory dir
             args (append (list program) args))
       (compat-call setq-local
                    magik-session-current-command (mapconcat 'identity args " "))
@@ -332,7 +328,8 @@ With a prefix arg, ask user for current directory to use."
            (boundp 'magik-version-current)
            (set 'magik-version-current version))
 
-      (insert (format "\nCwd is: %s\n\n" default-directory))
+      (insert (format "Startup time: %s\nCommand: [%s] %s\n" (current-time-string) dir magik-session-current-command))
+
       (magik-session-start-process args))
     (if (magik-aliases-switch-to-buffer alias)
         (display-buffer buf))))
