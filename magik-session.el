@@ -169,9 +169,9 @@ that use command string matching are not affected by this setting."
    magik-font-lock-keywords-1
    magik-font-lock-keywords-2
    (list
-    '("\\*\\*\\*\\* Error:.*$"          0 'magik-session-error-face t)
-    '("\\*\\*\\*\\* Warning:.*$"        0 'magik-session-warning-face t)
-    '("\\*\\*\\*\\* Parser warning:.*$" 0 'magik-session-warning-face t)
+    '("\\*\\*\\*\\* Error.*$"          0 'magik-session-error-face t)
+    '("\\*\\*\\*\\* Warning.*$"        0 'magik-session-warning-face t)
+    '("\\*\\*\\*\\* Parser warning.*$" 0 'magik-session-warning-face t)
     '("^---- traceback.* ----" . 'magik-session-traceback-face)
     '("^@.*$"                . 'magik-session-reference-face)))
   "Additional expressions to highlight in Magik mode."
