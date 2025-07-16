@@ -101,10 +101,7 @@
 (define-minor-mode magik-electric-mode
   "Toggle the electric switch."
   :init-value t
-  :version "28.1"
-  (message (if (bound-and-true-p magik-electric-mode)
-               "Electric Magik on"
-             "Electric Magik off")))
+  (message "Electric Magik %s" (if magik-electric-mode "on" "off")))
 (defalias 'magik-electric-toggle 'magik-electric-mode) ;compatibility
 
 (defun magik-electric-hash (char)
