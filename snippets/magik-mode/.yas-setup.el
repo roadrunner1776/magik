@@ -19,6 +19,11 @@
   :group 'magik-yasnippet
   :type  'string)
 
+(defcustom magik-yasnippet-default-package-name "user"
+  "Default package name."
+  :group 'magik-yasnippet
+  :type  'string)
+
 (defcustom magik-yasnippet-documentation-style 'sw-method-doc
   "Choose between \\'sw-method-doc\\', \\'type-doc\\', or nil.
 \\'sw-method-doc\\' for Smallworld method documentation style.
