@@ -29,11 +29,6 @@
   :tag   "Electric Magik"
   :group 'magik)
 
-(defcustom magik-electric-mode t
-  "*Says whether the electric mode is on or off."
-  :group 'magik-electric
-  :type  'boolean)
-
 (defcustom magik-electric-insert-template-line-pre-hook nil
   "*Hook run before `electric-insert-template-line'."
   :group 'magik-electric
@@ -102,16 +97,15 @@
    magik-electric-templates-methods)
   "*An association list of Magik templates.")
 
-(defun magik-electric-mode (&optional arg)
+;;;###autoload
+(define-minor-mode magik-electric-mode
   "Toggle the electric switch."
-  (interactive)
-  (setq magik-electric-mode
-        (if (null arg)
-            (not magik-electric-mode)
-          (> (prefix-numeric-value arg) 0)))
-  (message (if magik-electric-mode
-               "Electric Magik on"
-             "Electric Magik off")))
+  :init-value t
+  (message "Electric Magik %s" (if magik-electric-mode "on" "off")))
+
+;;;###autoload
+(magik-electric-mode magik-electric-mode)
+
 (defalias 'magik-electric-toggle 'magik-electric-mode) ;compatibility
 
 (defun magik-electric-hash (char)
@@ -309,9 +303,6 @@ If it's the first '#' and the previous line starts with '#', align with it."
       (indent-to col)
       (insert line)))
     (run-hook-with-args 'magik-electric-insert-template-line-post-hook name line col)))
-
-;;; setup of minor modes via setting of variable before load.
-(and magik-electric-mode (magik-electric-mode 1))
 
 (provide 'magik-electric)
 ;;; magik-electric.el ends here
