@@ -102,6 +102,10 @@
   "Toggle the electric switch."
   :init-value t
   (message "Electric Magik %s" (if magik-electric-mode "on" "off")))
+
+;;;###autoload
+(magik-electric-mode magik-electric-mode)
+
 (defalias 'magik-electric-toggle 'magik-electric-mode) ;compatibility
 
 (defun magik-electric-hash (char)
