@@ -164,15 +164,23 @@ that use command string matching are not affected by this setting."
   "Font Lock mode face used to display Warning lines."
   :group 'magik-session-faces)
 
+(defcustom magik-session-strict-line-start t
+  "If non-nil, force matching of session output at the beginning of the line.
+If nil, allow matching anywhere in the line."
+  :group 'magik-session
+  :type 'boolean)
+
 (defcustom magik-session-font-lock-keywords
   (append
    magik-font-lock-keywords-1
    magik-font-lock-keywords-2
-   (list
-    '("^\\*\\*\\*\\* Error:.*$"      0 'magik-session-error-face t)
-    '("^\\*\\*\\*\\* Warning:.*$"    0 'magik-session-warning-face t)
-    '("^---- traceback.* ----" . 'magik-session-traceback-face)
-    '("^@.*$"                . 'magik-session-reference-face)))
+   (let ((prefix (if magik-session-strict-line-start "^" "")))
+     (list
+      `(,(concat prefix "\\*\\*\\*\\* Error.*$")          0 'magik-session-error-face t)
+      `(,(concat prefix "\\*\\*\\*\\* Warning.*$")        0 'magik-session-warning-face t)
+      `(,(concat prefix "\\*\\*\\*\\* Parser warning.*$") 0 'magik-session-warning-face t)
+      '("^---- traceback.* ----" . 'magik-session-traceback-face)
+      '("^@.*$"                   . 'magik-session-reference-face))))
   "Additional expressions to highlight in Magik mode."
   :group 'magik-session
   :type 'sexp)
