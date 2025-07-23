@@ -104,7 +104,8 @@
   (message "Electric Magik %s" (if magik-electric-mode "on" "off")))
 
 ;;;###autoload
-(magik-electric-mode magik-electric-mode)
+(magik-electric-mode (or (bound-and-true-p magik-electric-mode)
+                         (not (boundp 'magik-electric-mode))))
 
 (defalias 'magik-electric-toggle 'magik-electric-mode) ;compatibility
 
