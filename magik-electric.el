@@ -100,15 +100,11 @@
 ;;;###autoload
 (define-minor-mode magik-electric-mode
   "Toggle the electric switch."
-  :init-value t
-  (when (called-interactively-p 'any) (message "Electric Magik %s" (if magik-electric-mode "on" "off"))))
+  :global t
+  :init-value t)
 
 ;;;###autoload
 (with-eval-after-load 'magik-mode (or (boundp 'magik-electric-mode) (require 'magik-electric)))
-
-(magik-electric-mode magik-electric-mode)
-
-(defalias 'magik-electric-toggle 'magik-electric-mode) ;compatibility
 
 (defun magik-electric-hash (char)
   "Insert the CHAR, '#'.
