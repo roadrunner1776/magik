@@ -121,7 +121,9 @@ Listed by `magik-version' or `magik-version-file'."
 (defvar-local magik-version-current nil
   "Current gis_version stream.")
 
-(defvar magik-smallworld-gis-current nil
+(defvar magik-smallworld-gis-current (when-let* ((smallworld-gis (getenv "SMALLWORLD_GIS")))
+				       (warn "SMALLWORLD_GIS environment variable has been set.  This breaks multi-session support.")
+				       smallworld-gis)
   "Current selected Smallworld GIS directory.")
 
 (defvar magik-version-position nil
