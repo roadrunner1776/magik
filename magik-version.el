@@ -92,7 +92,7 @@ Listed by `magik-version' or `magik-version-file'."
 
 (defcustom magik-version-font-lock-keywords
   (list
-   '("^.*(invalid).*$" . 'magik-version-invalid-face)
+   '("^.*(invalid).*$" . ((0 'magik-version-invalid-face t)))
    '("^\\([*]\\s-+\\S-+\\)\\s-+\\(\\S-+\\)"
      (1 'magik-version-active-face)
      (2 'magik-version-number-face))
