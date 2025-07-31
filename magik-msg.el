@@ -203,7 +203,7 @@ the variable `magik-session-buffer'."
 
    module << sw_module_manager.locate_module(directory)
    _if module _isnt _unset
-   _then sw_module_manager.compile_messages(module)
+   _then module.compile_messages()
    _endif
       _endproc(%S)\n$\n"
       directory))
