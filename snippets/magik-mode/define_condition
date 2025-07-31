@@ -4,6 +4,8 @@
 # expand-env: ((yas-indent-line 'fixed))
 # group: condition
 # --
+`(magik-yasnippet-prev-pragma)`
+`(magik-yasnippet-documentation t)`
 condition.define_condition(:${1:condition_name},
 	:${2:parent_condition_name},
 	{${3:data_name_list}})
