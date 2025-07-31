@@ -59,13 +59,13 @@
 The Magik session process used is either that given by GIS or
 the variable `magik-session-buffer'."
   (interactive)
-  (let ((gis (magik-utils-get-buffer-mode gis
+  (let* ((gis (magik-utils-get-buffer-mode gis
                                           'magik-session-mode
                                           "Enter Magik Session buffer:"
                                           magik-session-buffer
                                           'magik-session-buffer-alist-prefix-function))
-        (process (barf-if-no-gis gis))
-        (filename (buffer-file-name)))
+         (process (barf-if-no-gis gis))
+         (filename (buffer-file-name)))
     ;; Load messages
     (message "%s loaded in buffer %s." filename gis)
     (process-send-string
