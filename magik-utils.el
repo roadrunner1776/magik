@@ -125,18 +125,10 @@ Returns a list of paths, or nil if none are found."
                               (point))))
       nil)))
 
-(defun magik-utils-substitute-in-string (string)
-  "Return STRING with environment variable references replaced."
-  (let ((substr string)
-        start)
-    (while (or (string-match "\$\\(\\sw+\\)" substr start)
-               (string-match "\${\\(\\sw+\\)}" substr start)
-               (string-match "%\\(\\sw+\\)%" substr start))
-      (let ((env-name (substring substr (match-beginning 1) (match-end 1))))
-        (setq start (match-end 0)) ;increment start position irrespective of a match
-        (and (getenv env-name)
-             (setq substr (replace-match (getenv env-name) t t substr 0)))))
-    substr))
+(defun magik-utils-substitute-in-file-name (string)
+  "Return STRING suitable for `expand-file-name' to expand environment variables."
+  (substitute-in-file-name
+   (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) string nil 'literal)))
 
 (defun which-file (filename &optional err path)
   "Return the full path when the given FILENAME name is in the PATH.
