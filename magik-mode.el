@@ -1192,6 +1192,15 @@ The rule is that the thing must start against the left margin."
              (goto-char (point-min)))
          end)))))
 
+(defun magik-transmit-line ()
+  "Send this line to the process running in the buffer in the var, `gis-buffer'.
+When this is a method line, strip anything before _method."
+  (interactive)
+  (let ((start-pos (line-beginning-position)))
+    (when (re-search-backward "_method" (line-beginning-position) t)
+      (setq start-pos (match-end 0)))
+    (magik-transmit-region start-pos (line-end-position))))
+
 (defun magik-transmit-method ()
   "Send the current method to magik.
 The location of point is determined by
