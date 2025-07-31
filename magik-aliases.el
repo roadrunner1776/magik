@@ -354,8 +354,7 @@ Returns nil if FILE can't be expanded."
   (condition-case nil
       (with-environment-variables (("SMALLWORLD_GIS" smallworld-gis))
         (expand-file-name
-         (substitute-in-file-name
-          (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) file nil 'literal))))
+         (magik-utils-substitute-in-file-name file)))
     (error nil)))
 
 (defun magik--aliases-insert-default-product-path ()
