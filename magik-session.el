@@ -800,7 +800,7 @@ there is not, prompt for a command to run, and then run it."
 
       (insert (format "Startup time: %s\nCommand: %s\n" (current-time-string) magik-session-command))
 
-      (magik-session-start-process (magik-session-parse-gis-command (concat cmd " " args))))))
+      (magik-session-start-process (magik-session-parse-gis-command (concat (magik-utils-substitute-in-file-name cmd) " " args))))))
 
 (defun magik-session-new-buffer ()
   "Start a new Magik session."
