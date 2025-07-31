@@ -785,7 +785,7 @@ there is not, prompt for a command to run, and then run it."
       (goto-char (point-max))
       (setq default-directory (expand-file-name
                                (file-name-as-directory
-                                (substitute-in-file-name dir))))
+                                (magik-utils-substitute-in-file-name dir))))
       (compat-call setq-local
                    magik-smallworld-gis (or magik-smallworld-gis
                                             (when (boundp 'magik-smallworld-gis-current)
@@ -800,7 +800,7 @@ there is not, prompt for a command to run, and then run it."
 
       (insert (format "Startup time: %s\nCommand: %s\n" (current-time-string) magik-session-command))
 
-      (magik-session-start-process (magik-session-parse-gis-command (concat cmd " " args))))))
+      (magik-session-start-process (magik-session-parse-gis-command (concat (magik-utils-substitute-in-file-name cmd) " " args))))))
 
 (defun magik-session-new-buffer ()
   "Start a new Magik session."
