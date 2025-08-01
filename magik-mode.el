@@ -1197,8 +1197,9 @@ The rule is that the thing must start against the left margin."
 When this is a method line, strip anything before _method."
   (interactive)
   (let ((start-pos (line-beginning-position)))
-    (when (re-search-backward "_method" (line-beginning-position) t)
-      (setq start-pos (match-end 0)))
+    (save-excursion
+      (when (re-search-backward "_method" (line-beginning-position) t)
+        (setq start-pos (match-end 0))))
     (magik-transmit-region start-pos (line-end-position))))
 
 (defun magik-transmit-method ()
