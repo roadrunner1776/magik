@@ -29,7 +29,8 @@
   (defvar msb-menu-cond)
   (require 'magik-indent)
   (require 'magik-electric)
-  (require 'magik-pragma))
+  (require 'magik-pragma)
+  (require 'magik-utils))
 
 (require 'compat)
 (require 'imenu)
@@ -1054,9 +1055,9 @@ e.g. (magik-function \"system.test\" \"file\" \\='unset 4) returns the string
 Argument CMD ...
 Optional argument ARGS ..."
 
-                                        ;process arg types: nil, string, other...
+  ;; process arg types: nil, string, other...
   (setq args (mapcar 'magik-function-convert args))
-                                        ;bring the command together adding commas between the arguments
+  ;; bring the command together adding commas between the arguments
   (concat cmd "(" (mapconcat 'identity args ", ") ")\n"))
 
 (defun magik-gis-error-goto (&optional gis)
@@ -1564,13 +1565,13 @@ With a prefix arg, ask user for GIS buffer to use."
                                             'magik-session-buffer-alist-prefix-function))
   (barf-if-no-gis buffer)
 
-  (if (equal (magik-utils-curr-word) "")
+  (if (equal (magik-utils--current-word) "")
       (message "Doing a completion on the empty string would take too long")
-    (if (<= (length (magik-utils-curr-word)) 2)
+    (if (<= (length (magik-utils--current-word)) 2)
         (message "Symbol is already complete or is too short."))
     (process-send-string
      (get-buffer-process buffer)
-     (concat "symbol_table.emacs_write_completions(\"" (magik-utils-curr-word) "\")\n$\n"))))
+     (concat "symbol_table.emacs_write_completions(\"" (magik-utils--current-word) "\")\n$\n"))))
 
 (defun magik-compare-methods (ignore-whitespace)
   "Compare Methods in two windows using \\[compare-windows].

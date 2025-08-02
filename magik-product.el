@@ -123,12 +123,6 @@ You can customize Product Mode with the `magik-product-mode-hook`.
 (defvar magik-product-mode-syntax-table nil
   "Syntax table in use in Product Mode buffers.")
 
-(defun magik-product-name ()
-  "Return current Product's name as a string."
-  (save-excursion
-    (goto-char (point-min))
-    (current-word)))
-
 (defun magik-product-reinitialise (&optional gis)
   "Reinitialise this product in GIS."
   (interactive)
@@ -143,7 +137,7 @@ You can customize Product Mode with the `magik-product-mode-hook`.
      process
      (concat ;; the .products[] interface is used for backwards compatibility.
       "smallworld_product"
-      ".products[:|" (magik-product-name) "|]"
+      ".products[:|" (magik-utils-product-name) "|]"
       ".reinitialise()\n$\n"))
     gis))
 
