@@ -164,7 +164,11 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
                comment-end ""
                show-trailing-whitespace nil
                imenu-generic-expression magik-aliases-imenu-generic-expression
-               font-lock-defaults '(magik-aliases-font-lock-keywords nil nil))
+               font-lock-defaults '(magik-aliases-font-lock-keywords nil nil)
+               mode-name (if (and (boundp 'magik-version-current)
+                                  (symbol-value 'magik-version-current))
+                             '(:eval (format "Aliases[%s]" (symbol-value 'magik-version-current)))
+                           "Aliases"))
 
   (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
   (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
