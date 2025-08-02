@@ -53,6 +53,7 @@
   (global-set-key (kbd "<f2> #")      'magik-comment-region)
   (global-set-key (kbd "<f2> ESC #")    'magik-uncomment-region)
   (global-set-key (kbd "<f2> b")      'magik-transmit-buffer)
+  (global-set-key (kbd "<f2> l")      'magik-transmit-line)
   ;; (global-set-key (kbd "<f2> h")      'magik-heading)
   (global-set-key (kbd "<f2> m")      'magik-transmit-method)
   (global-set-key (kbd "<f2> r")      'magik-transmit-region)
