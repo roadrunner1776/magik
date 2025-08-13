@@ -103,9 +103,6 @@
   :global t
   :init-value t)
 
-;;;###autoload
-(with-eval-after-load 'magik-mode (or (featurep 'magik-electric) (require 'magik-electric)))
-
 (defun magik-electric-hash (char)
   "Insert the CHAR, '#'.
 If it's the first '#' and the previous line starts with '#', align with it."
