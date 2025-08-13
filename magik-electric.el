@@ -104,7 +104,7 @@
   :init-value t)
 
 ;;;###autoload
-(with-eval-after-load 'magik-mode (or (boundp 'magik-electric-mode) (require 'magik-electric)))
+(with-eval-after-load 'magik-mode (or (featurep 'magik-electric) (require 'magik-electric)))
 
 (defun magik-electric-hash (char)
   "Insert the CHAR, '#'.
