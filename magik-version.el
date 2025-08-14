@@ -92,7 +92,7 @@ Listed by `magik-version' or `magik-version-file'."
 
 (defcustom magik-version-font-lock-keywords
   (list
-   '("^.*(invalid).*$" . 'magik-version-invalid-face)
+   `(,(concat "^.*" (regexp-quote magik-version-invalid-string) ".*$") . ((0 'magik-version-invalid-face t)))
    '("^\\([*]\\s-+\\S-+\\)\\s-+\\(\\S-+\\)"
      (1 'magik-version-active-face)
      (2 'magik-version-number-face))
@@ -121,7 +121,9 @@ Listed by `magik-version' or `magik-version-file'."
 (defvar-local magik-version-current nil
   "Current gis_version stream.")
 
-(defvar magik-smallworld-gis-current nil
+(defvar magik-smallworld-gis-current (when-let* ((smallworld-gis (getenv "SMALLWORLD_GIS")))
+				       (warn "SMALLWORLD_GIS environment variable has been set.  This breaks multi-session support.")
+				       smallworld-gis)
   "Current selected Smallworld GIS directory.")
 
 (defvar magik-version-position nil

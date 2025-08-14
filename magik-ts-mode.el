@@ -158,6 +158,12 @@
      ((parent-is "catch") parent magik-indent-level)
      ((parent-is "handling") parent magik-indent-level)
      ((parent-is "assignment") parent magik-indent-level)
+     ((parent-is "local") parent magik-indent-level)
+     ((parent-is "constant") parent magik-indent-level)
+     ((parent-is "dynamic_import") parent magik-indent-level)
+     ((parent-is "dynamic") parent magik-indent-level)
+     ((parent-is "global") parent magik-indent-level)
+     ((parent-is "import") parent magik-indent-level)
 
      ((parent-is "logical_operator") parent 0)
      ((parent-is "relational_operator") parent 0)
@@ -165,8 +171,7 @@
      ((parent-is "unary_operator") parent 0)
      ((parent-is "documentation") parent 0)
 
-     ((parent-is "invoke") (nth-sibling 2) 0)
-
+     ((parent-is "invoke") parent-bol magik-indent-level)
      ((parent-is "call") parent-bol magik-indent-level)
      ((parent-is "vector") parent-bol magik-indent-level)
 
