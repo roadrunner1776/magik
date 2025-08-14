@@ -162,10 +162,10 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
                require-final-newline t
                comment-start "#"
                comment-end ""
-               show-trailing-whitespace nil
                imenu-generic-expression magik-aliases-imenu-generic-expression
                font-lock-defaults '(magik-aliases-font-lock-keywords nil nil))
 
+  (add-hook 'read-only-mode-hook #'magik-aliases--update-show-trailing-whitespace nil t)
   (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
   (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
 
@@ -427,6 +427,11 @@ configuration file and return paths to append to variable `exec-path'."
                 (if (file-directory-p etc-dir)
                     (push etc-dir paths)))))
         paths))))
+
+(defun magik-aliases--update-show-trailing-whitespace ()
+  "Set `show-trailing-whitespace' based on `buffer-read-only'.
+If `buffer-read-only' is t, set it to nil (and vice-versa)."
+  (setq-local show-trailing-whitespace (not buffer-read-only)))
 
 (defun magik-aliases-update-menu ()
   "Update the dynamic Aliases submenu."
