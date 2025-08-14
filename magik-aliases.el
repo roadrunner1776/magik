@@ -171,7 +171,7 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
 
   (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
   (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t)
-  (add-hook 'read-only-mode-hook 'magik-aliases-update-keymap nil t))
+  (add-hook 'read-only-mode-hook #'magik-aliases--update-keymap nil t))
 
 (defvar magik-aliases-menu nil
   "Menu for Aliases mode.")
@@ -193,8 +193,8 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
     (setq major-mode 'fundamental-mode) ;; prevent current buffer being listed.
     (magik-aliases-update-sw-menu)))
 
-(defun magik-aliases-update-keymap ()
-  "Update keymap bindings depending on buffer read-only state."
+(defun magik-aliases--update-keymap ()
+  "Update keymap bindings depending on `buffer-read-only'."
   (if buffer-read-only
       (progn
         (unless magik-aliases--original-local-map
