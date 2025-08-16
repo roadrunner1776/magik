@@ -80,8 +80,8 @@ See `imenu-generic-expression'.")
      (2 'magik-keyword-statements-face))
    '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . 'magik-msg-message-id-face)
    '("^#%\\s-*text_encoding.*$" . 'magik-msg-text-encoding-face)
-   '("#[0-9]+" . 'magik-msg-placeholder-face)
-   '("#.*" . 'magik-msg-comment-face))
+   '("#\\([h@]?\\)[1-9]" . 'magik-msg-placeholder-face)
+   '("#[n|s|t|#]" . 'magik-msg-comment-face))
   "Default fontification of Magik Messages."
   :group 'magik-msg
   :type 'sexp)
