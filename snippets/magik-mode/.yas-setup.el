@@ -164,36 +164,4 @@ If the buffer is not visiting a file, return an empty string."
                                     slots
                                     (number-sequence 0 (1- (length slots)))))
              "\n")))))))
-
-(defun magik-yasnippet-module-name ()
-  "Recursively search for the module.def and return the module name."
-  (when-let* ((module-file (magik-yasnippet--locate-dominating-file "module.def")))
-    (magik-yasnippet--first-word-of-file module-file)))
-
-(defun magik-yasnippet-product-name ()
-  "Recursively search for the product.def and return the product name."
-  (when-let* ((product-file (magik-yasnippet--locate-dominating-file "product.def")))
-    (magik-yasnippet--first-word-of-file product-file)))
-
-(defun magik-yasnippet--locate-dominating-file (file-name)
-  "Recursively search for the FILE-NAME."
-  (when-let* ((buffer-file (buffer-file-name))
-              (directory (locate-dominating-file buffer-file file-name)))
-    (expand-file-name file-name directory)))
-
-(defun magik-yasnippet--first-word-of-file (file)
-  "Return the first word of a FILE."
-  (when (file-exists-p file)
-    (with-temp-buffer
-      (insert-file-contents file)
-      (goto-char (point-min))
-      (let ((word nil))
-        (while (and (not word)
-                    (not (eobp)))
-          (skip-chars-forward " \t")
-          (if (not (looking-at "#"))
-              (setq word (current-word))
-            (forward-line 1)))
-        word))))
-
 ;;; .yas-setup.el ends here
