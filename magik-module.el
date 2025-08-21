@@ -222,7 +222,7 @@ option is set."
     (process-send-string
      process
      (concat
-      (magik-function "sw_module_manager.reload_module_definition" magik-module-name-with-pipes) ;; include version number?
+      (magik-function "sw_module_manager.reload_module_definition" (magik-module-name-with-pipes)) ;; include version number?
       "$\n"))
     gis))
 
@@ -247,7 +247,7 @@ option is set."
      a_module.compile_messages()
    _endif
        _endproc"
-       magik-module-name-with-pipes 'unset) ;; include version number?
+       (magik-module-name-with-pipes) 'unset) ;; include version number?
       "\n$\n"))
     gis))
 
@@ -266,7 +266,7 @@ a standalone module."
     (process-send-string
      process
      (concat
-      (magik-function "sw_module_manager.remove_module" magik-module-name-with-pipes)
+      (magik-function "sw_module_manager.remove_module" (magik-module-name-with-pipes))
       "$\n"))
     gis))
 
@@ -278,7 +278,7 @@ a standalone module."
    process
    (concat
     "_try\n"
-    (magik-function "sw_module_manager.load_module" magik-module-name-with-pipes 'unset
+    (magik-function "sw_module_manager.load_module" (magik-module-name-with-pipes) 'unset
                     'save_magikc?  magik-module-option-save-magikc
                     'force_reload? magik-module-option-force-reload)
     "_when sw_module_no_such_module\n"
