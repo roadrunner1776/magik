@@ -1743,12 +1743,26 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
         (setq mode-line-format mode-line)
         (set-buffer-modified-p (buffer-modified-p))))))
 
-(defun magik-cb-modeline-flags ()
-  "Return a string that looks something like the following.
+(defun magik-cb--flag-text-properties (label action &optional help)
+  "Return text properties for clickable LABEL in the mode-line.
+ACTION is a command (function of no args) to run on mouse click.
+HELP is the optional help-echo string."
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line mouse-1]
+      (lambda () (interactive) (funcall action)))
+    (define-key map [mode-line mouse-2]
+      (lambda () (interactive) (funcall action))))
+    (list 'help-echo (or help (format "mouse-1, mouse-2: toggle %s" label))
+          'mouse-face 'mode-line-highlight
+          'local-map map)))
 
+(defun magik-cb-modeline-flags ()
+  "Return a clickable string for CB flags to display in the mode-line.
+  
      *b  a  *s  r  d  <inh>  F  T  2 dp rs   GIS"
   (let ((ans "")
         s)
+    ;; Normal topics
     (cl-loop for topic in '("basic" "advanced" "subclassable" "redefinable" "debug")
              do (progn
                   (setq s (concat
@@ -1756,53 +1770,64 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                            (substring topic 0 1)
                            " "))
                   (add-text-properties 0 (length s)
-                                       (list 'help-echo
-                                             (format "mouse-1, mouse-2: toggle %s flag" topic))
+                                       (magik-cb--flag-text-properties
+                                        topic
+                                        (lambda () (magik-cb-toggle-flag topic))
+                                        (format "mouse-1, mouse-2: toggle %s flag" topic))
                                        s)
                   (setq ans (concat ans s))))
+    ;; Inheritance flag
     (setq s (cond ((magik-cb-topic-on-p "inherit-from-\"object\"") " <inh> ")
                   ((magik-cb-topic-on-p "inherit-not-\"object\"")  " <obj> ")
-                  (t                                         " <loc> ")))
+                  (t                                                " <loc> ")))
     (add-text-properties 0 (length s)
-                         (list 'help-echo
-                               (format "mouse-1, mouse-2: toggle %s flag" "inherit"))
+                         (magik-cb--flag-text-properties
+                          "inherit"
+                          (lambda () (magik-cb-toggle-flag "inherit"))
+                          "mouse-1, mouse-2: toggle inherit flag")
                          s)
     (setq ans (concat ans s))
+    ;; Override flags
     (cl-loop for topic in '("override-flags" "override-topics" "override-200-limit")
              do (progn
                   (setq s (concat
                            (if (magik-cb-topic-on-p topic) "*" " ")
-                           (upcase (substring topic (length "override-") (1+ (length "override-"))))
+                           (upcase (substring topic (length "override-")
+                                              (1+ (length "override-"))))
                            " "))
                   (add-text-properties 0 (length s)
-                                       (list 'help-echo
-                                             (format "mouse-1, mouse-2: toggle %s flag" topic))
+                                       (magik-cb--flag-text-properties
+                                        topic
+                                        (lambda () (magik-cb-toggle-flag topic))
+                                        (format "mouse-1, mouse-2: toggle %s flag" topic))
                                        s)
                   (setq ans (concat ans s))))
-    (if magik-cb-mf-extended-flags
-        (cl-loop for topic in '( "deprecated" "restricted" )
-                 do (progn
-                      (setq s (concat
-                               (if (magik-cb-topic-on-p topic) "*" " ")
-                               (substring topic 0 1)
-                               (substring topic 2 3 )
-                               " "))
-                      (add-text-properties 0 (length s)
-                                           (list 'help-echo
-                                                 (format "mouse-1, mouse-2: toggle %s flag" topic))
-                                           s)
-                      (setq ans (concat ans s)))))
-
-
+    ;; Extended flags
+    (when magik-cb-mf-extended-flags
+      (cl-loop for topic in '("deprecated" "restricted")
+               do (progn
+                    (setq s (concat
+                             (if (magik-cb-topic-on-p topic) "*" " ")
+                             (substring topic 0 1)
+                             (substring topic 2 3)
+                             " "))
+                    (add-text-properties 0 (length s)
+                                         (magik-cb--flag-text-properties
+                                          topic
+                                          (lambda () (magik-cb-toggle-flag topic))
+                                          (format "mouse-1, mouse-2: toggle %s flag" topic))
+                                         s)
+                    (setq ans (concat ans s))))))
     (setq ans (concat ans "  "))
+    ;; Buffer name / GIS buffer
     (if magik-cb-filename
-        ;;(buffer-name) will be main CB buffer since this is evaluated their
-        ;; for CB2 mode buffers.
         (setq ans (concat ans (substring (buffer-name) 4)))
       (setq s (magik-cb-gis-buffer))
       (add-text-properties 0 (length s)
-                           (list 'help-echo
-                                 (format "mouse-1, mouse-2: Switch to buffer %s" s))
+                           (magik-cb--flag-text-properties
+                            s
+                            (lambda () (switch-to-buffer s))
+                            (format "mouse-1, mouse-2: Switch to buffer %s" s))
                            s)
       (setq ans (concat ans s)))
     ans))
