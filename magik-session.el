@@ -808,17 +808,42 @@ there is not, prompt for a command to run, and then run it."
   (let ((current-prefix-arg t))
     (call-interactively #'magik-session)))
 
+(defun magik-session-capture-environment-variable (environment-variable)
+  "Capture and return only the result from system.getenv(ENVIRONMENT-VARIABLE)."
+  (when-let ((process (and (eq (process-status magik-session-process) 'run)
+                           magik-session-process)))
+    (let ((output "")
+          (done nil)
+          (original-filter (process-filter process)))
+      (set-process-filter
+       process
+       (lambda (_proc string)
+         (setq output (concat output string))
+         (when (string-match-p magik-session-prompt string)
+           (setq done t))))
+      (process-send-string process (concat "system.getenv(\"" environment-variable  "\")\n"))
+      (while (not done)
+        (accept-process-output process 0.1))
+      (set-process-filter process original-filter)
+      (setq output (string-trim (replace-regexp-in-string magik-session-prompt "" output)))
+      (if (string-match "^\"\\(.*\\)\"$" output)
+          (match-string 1 output)
+        output))))
+
 (defun magik-session-kill-process ()
   "Kill the current Magik process."
   (interactive)
-  (if (and magik-session-process
-           (eq (process-status magik-session-process) 'run)
-           (y-or-n-p "Kill the Magik process? "))
-      (let ((status (process-status magik-session-process)))
-        (kill-process magik-session-process)
-        (sit-for 0.1)
-        (if (eq status (process-status magik-session-process))
-            (insert "\nMagik is still busy and will exit at an appropriate point. Please be patient... \n")))))
+  (when (and magik-session-process
+             (eq (process-status magik-session-process) 'run)
+             (y-or-n-p "Kill the Magik process? "))
+    (let ((status (process-status magik-session-process))
+          (osgi-dir (magik-session-capture-environment-variable "SW_LAUNCH_OSGI_CONFIG_DIR")))
+      (kill-process magik-session-process)
+      (sit-for 0.1)
+      (when (eq status (process-status magik-session-process))
+        (insert "\nMagik is still busy and will exit at an appropriate point. Please be patient... \n"))
+      (when osgi-dir
+        (delete-directory (expand-file-name osgi-dir) t)))))
 
 (defun magik-session-query-interrupt-shell-subjob ()
   "Ask and then `comint-interrupt-subjob'."
