@@ -131,11 +131,6 @@
   "Font Lock mode face used to display parameters."
   :group 'magik-cb-faces)
 
-(defface magik-cb-mode-line-topic-on-face
-  '((t :inherit mode-line-emphasis :weight bold))
-  "Font Lock mode face used to display a topic is turned on in the mode-line."
-  :group 'magik-cb-faces)
-
 (defcustom magik-cb-font-lock-keywords
   `(("\\*\\*\\*.*" . 'magik-comment-face)
     ("##.*$" . 'magik-doc-face)
@@ -201,10 +196,6 @@ Can be set using \\[cb-set-mode-line-cursor]."
   "Set to t to enable debugging output from the C."
   :group 'magik-cb
   :type  'boolean)
-
-;; In case used in a version of Emacs prior to 20
-(or (fboundp 'set-process-coding-system)
-    (defalias 'set-process-coding-system 'ignore))
 
 (defvar magik-cb-buffer-alist nil
   "Alist storing CB buffer filename and number used for prefix key switching.")
@@ -349,8 +340,8 @@ Not used yet.")
   :group 'magik-cb
   :type  'sexp)
 
-;;; Functions
-;;; _________
+;; F U N C T I O N S
+;; _________
 
 (defun magik-cb-gis ()
   "Goto Magik session buffer with the same environment as the current CB process."
@@ -800,7 +791,7 @@ If FILTER is given then it is set on the process."
              (error "Can't start CB")))
 
       (when magik-cb-process
-        (with-current-buffer (get-buffer-create buffer)
+        (with-current-buffer buffer
           (unless (derived-mode-p 'magik-cb-mode)
             (magik-cb-mode))
           (compat-call setq-local magik-cb-filename cb-file))
@@ -1703,7 +1694,6 @@ Also delete the end-of-line character."
 (defun magik-cb-redraw-modeline ()
   "Copy the contents of the invisible \"m*cb*\" and \"c*cb*\" onto the modelines.
 Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
-  (interactive)
   (let ((five-spaces (make-string 5 ?\s)))
     (with-current-buffer (magik-cb-buffer)
       (compat-call setq-local mode-line-format (list mode-line-front-space
@@ -1815,7 +1805,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb--propertized-flag (flag label)
   "Return a propertized string suitable to toggle the FLAG with a LABEL."
   (propertize (format "%s%s " (if (magik-cb-topic-on-p flag) "*" " ") label)
-              'face (when (magik-cb-topic-on-p flag) 'magik-cb-mode-line-topic-on-face)
+              'face (when (magik-cb-topic-on-p flag) 'mode-line-emphasis)
               'help-echo (format "mouse-1, mouse-2: Toggle %s flag" flag)
               'mouse-face 'mode-line-highlight
               'local-map (let ((map (make-sparse-keymap)))
@@ -1829,7 +1819,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                     ((magik-cb-topic-on-p "inherit-not-\"object\"")  "<obj>")
                     (t "<loc>"))))
     (propertize (format " %s " flag)
-                'face 'magik-cb-mode-line-topic-on-face
+                'face 'mode-line-emphasis
                 'help-echo "mouse-1, mouse-2: Cycle inheritance setting"
                 'mouse-face 'mode-line-highlight
                 'local-map (let ((map (make-sparse-keymap)))
@@ -1840,7 +1830,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb-send-modeline-and-pr ()
   "Redraw the modeline, send its contents to the C and request new methods."
   (magik-cb-redraw-modeline)
-  (magik-cb-send-string            ;??? is there some duplication of sending stuff???
+  (magik-cb-send-string ;; ??? is there some duplication of sending stuff???
    (concat "method_name "
            (save-excursion (magik-cb-set-buffer-m) (buffer-string))
            "\nunadd class\nadd class "
@@ -2028,17 +2018,15 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
          (package (elt method-exemplar-block 2))
          (magik-cb-jump-replaces-cb-buffer t) ; # Put the source file in the right window.
          (buf-A (current-buffer))
-         (pt-A (point))
          (current-wc (current-window-configuration))
-         buf-B pt-B)
+         buf-B)
 
     (set-buffer cb)
     (magik-cb-send-string (format "pr_source_file %s %s:%s\n" method package class))
     (sit-for 0.1)
 
     ;; Hopefully this should be the file from the CB filter
-    (setq buf-B (window-buffer)
-          pt-B  (point))
+    (setq buf-B (window-buffer))
 
     (if (not (eq buf-A buf-B))
         (magik-ediff-methods buf-A buf-B)
@@ -2178,7 +2166,7 @@ compression or lazy re-draw or something."
 ;; to be sent.
 
 (defun magik-cb-send-tmp-file-name (file)
-  "Send \\='tmp_FILE_name FILE' command to the method finder."
+  "Send \\='tmp_file_name FILE' command to the method finder."
   (magik-cb-send-string "tmp_file_name '" file "'\n"))
 
 (defun magik-cb-send-load (file)
