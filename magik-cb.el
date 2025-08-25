@@ -1349,7 +1349,7 @@ Provided the \"*cb2*\" buffer exists and is in topic mode."
     (magik-cb-send-topic str)
     (magik-cb-display-topic str)
     (magik-cb-print-curr-methods)
-    (message (if (magik-cb-topic-on-p flag) "Turning '%s' flag on." "Turning '%s' flag off."))))
+    (message (if (magik-cb-topic-on-p str) "Turning '%s' flag on." "Turning '%s' flag off.") str)))
 
 (defun magik-cb-set-thermometer-flags (str)
   "Deal with the set of flags that act like a thermometer.
