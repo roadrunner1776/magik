@@ -131,6 +131,11 @@
   "Font Lock mode face used to display parameters."
   :group 'magik-cb-faces)
 
+(defface magik-cb-mode-line-topic-on-face
+  '((t :inherit mode-line-emphasis :weight bold))
+  "Font Lock mode face used to display a topic is turned on in the mode-line."
+  :group 'magik-cb-faces)
+
 (defcustom magik-cb-font-lock-keywords
   `(("\\*\\*\\*.*" . 'magik-comment-face)
     ("##.*$" . 'magik-doc-face)
@@ -1808,9 +1813,9 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                            map)))
 
 (defun magik-cb--propertized-flag (flag label)
-  "Return a propertized string suitable to toggle the FLAG with a LABEL"
+  "Return a propertized string suitable to toggle the FLAG with a LABEL."
   (propertize (format "%s%s " (if (magik-cb-topic-on-p flag) "*" " ") label)
-              'face 'mode-line-buffer-id
+              'face (when (magik-cb-topic-on-p flag) 'magik-cb-mode-line-topic-on-face)
               'help-echo (format "mouse-1, mouse-2: Toggle %s flag" flag)
               'mouse-face 'mode-line-highlight
               'local-map (let ((map (make-sparse-keymap)))
@@ -1824,7 +1829,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                     ((magik-cb-topic-on-p "inherit-not-\"object\"")  "<obj>")
                     (t "<loc>"))))
     (propertize (format " %s " flag)
-                'face 'mode-line-buffer-id
+                'face 'magik-cb-mode-line-topic-on-face
                 'help-echo "mouse-1, mouse-2: Cycle inheritance setting"
                 'mouse-face 'mode-line-highlight
                 'local-map (let ((map (make-sparse-keymap)))
