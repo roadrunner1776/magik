@@ -1349,7 +1349,8 @@ Provided the \"*cb2*\" buffer exists and is in topic mode."
     (magik-cb-make-sure-something-is-on str)
     (magik-cb-send-topic str)
     (magik-cb-display-topic str)
-    (magik-cb-print-curr-methods)))
+    (magik-cb-print-curr-methods)
+    (message (if (magik-cb-topic-on-p flag) "Turning '%s' flag on." "Turning '%s' flag off."))))
 
 (defun magik-cb-set-thermometer-flags (str)
   "Deal with the set of flags that act like a thermometer.
@@ -1776,8 +1777,8 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
               'help-echo (format "mouse-1, mouse-2: Toggle %s flag" flag)
               'mouse-face 'mode-line-highlight
               'local-map (let ((map (make-sparse-keymap)))
-                           (define-key map [mode-line mouse-1] `(lambda () (interactive) (magik-cb--toggle ,flag)))
-                           (define-key map [mode-line mouse-2] `(lambda () (interactive) (magik-cb--toggle ,flag)))
+                           (define-key map [mode-line mouse-1] `(lambda () (interactive) (magik-cb-toggle ,flag)))
+                           (define-key map [mode-line mouse-2] `(lambda () (interactive) (magik-cb-toggle ,flag)))
                            map)))
 
 (defun magik-cb--propertized-inheritance ()
