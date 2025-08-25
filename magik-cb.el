@@ -1376,7 +1376,7 @@ The settings are:
 local-only           - display methods that are defined on the current classes.
 inherit-not-\"obj\"  - display inherited methods too but not anything on object.
 inherit-from-\"obj\" - display methods on object too."
-  (interactive)
+  (interactive "@")
   (cond
    ((magik-cb-topic-on-p "inherit-from-\"object\"")
     (magik-cb-set-thermometer-flags "local-only")
@@ -1777,8 +1777,8 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
               'help-echo (format "mouse-1, mouse-2: Toggle %s flag" flag)
               'mouse-face 'mode-line-highlight
               'local-map (let ((map (make-sparse-keymap)))
-                           (define-key map [mode-line mouse-1] `(lambda () (interactive) (magik-cb-toggle ,flag)))
-                           (define-key map [mode-line mouse-2] `(lambda () (interactive) (magik-cb-toggle ,flag)))
+                           (define-key map [mode-line mouse-1] `(lambda () (interactive "@") (magik-cb-toggle ,flag)))
+                           (define-key map [mode-line mouse-2] `(lambda () (interactive "@") (magik-cb-toggle ,flag)))
                            map)))
 
 (defun magik-cb--propertized-inheritance ()
