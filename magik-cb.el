@@ -197,7 +197,7 @@ Can be set using \\[cb-set-mode-line-cursor]."
   :group 'magik-cb
   :type  'boolean)
 
-                                        ;In case used in a version of Emacs prior to 20
+;; In case used in a version of Emacs prior to 20
 (or (fboundp 'set-process-coding-system)
     (defalias 'set-process-coding-system 'ignore))
 
@@ -798,8 +798,7 @@ If FILTER is given then it is set on the process."
         (with-current-buffer (get-buffer-create buffer)
           (unless (derived-mode-p 'magik-cb-mode)
             (magik-cb-mode))
-          (compat-call setq-local
-                       magik-cb-filename cb-file))
+          (compat-call setq-local magik-cb-filename cb-file))
         ;; Note that magik-cb-start-process uses magik-cb-filter when the process starts.
         ;; This is so that it can handle the topic information that the method finder
         ;; process sends back. At the moment magik-cb-ac-filter (the only other filter in use)
@@ -810,7 +809,7 @@ If FILTER is given then it is set on the process."
 
 (defun magik-cb-interactive-buffer ()
   "Initialise an interactive Class Browser in current buffer."
-  ;;Ensure interaction buffers are empty
+  ;; Ensure interaction buffers are empty
   (magik-cb-set-method-str "")
   (magik-cb-set-class-str "")
 
@@ -1668,7 +1667,7 @@ We also save some state for a clean exit."
         (magik-cb-set-buffer-m))
       (yank arg)
       (magik-cb-delete-lines)
-      (set-text-properties (point-min) (point-max) nil) ;remove text properties
+      (set-text-properties (point-min) (point-max) nil) ;; Remove text properties
       (setq this-command 'yank))
     (magik-cb-send-modeline-and-pr)))
 
@@ -1682,7 +1681,7 @@ We also save some state for a clean exit."
         (magik-cb-set-buffer-m))
       (yank-pop arg)
       (magik-cb-delete-lines)
-      (set-text-properties (point-min) (point-max) nil) ;remove text properties
+      (set-text-properties (point-min) (point-max) nil) ;; Remove text properties
       (setq this-command 'yank))
     (magik-cb-send-modeline-and-pr)))
 
@@ -1699,26 +1698,27 @@ Also delete the end-of-line character."
 (defun magik-cb-redraw-modeline ()
   "Copy the contents of the invisible \"m*cb*\" and \"c*cb*\" onto the modelines.
 Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
-  (with-current-buffer (magik-cb-buffer)
-    (setq-local mode-line-format
-                (list mode-line-front-space
-                      (format "%5s" magik-cb-n-methods-str)
-                      "     "
-                      (magik-cb--propertized-method-name)
-                      magik-cb-in-keyword
-                      (magik-cb--propertized-class-name)
-                      "     "
-                      (magik-cb-modeline-flags)
-                      "     "
-                      (magik-cb--propertized-gis-buffer)
-                      mode-line-end-spaces))
-    (set-buffer-modified-p (buffer-modified-p)))
+  (interactive)
+  (let ((five-spaces (make-string 5 ?\s)))
+    (with-current-buffer (magik-cb-buffer)
+      (compat-call setq-local mode-line-format (list mode-line-front-space
+                                                     (format "%5s" magik-cb-n-methods-str)
+                                                     five-spaces
+                                                     (magik-cb--propertized-method-name)
+                                                     magik-cb-in-keyword
+                                                     (magik-cb--propertized-class-name)
+                                                     five-spaces
+                                                     (magik-cb-modeline-flags)
+                                                     five-spaces
+                                                     (magik-cb--propertized-gis-buffer)
+                                                     mode-line-end-spaces))
+      (set-buffer-modified-p (buffer-modified-p))))
 
-  ;;update CB2 if buffer exists.
+  ;; Update CB2 if buffer exists.
   (when-let* ((cb2 (magik-cb2-buffer))
               (mode-line (symbol-value 'mode-line-format)))
     (with-current-buffer cb2
-      (setq-local mode-line-format mode-line)
+      (compat-call setq-local mode-line-format mode-line)
       (set-buffer-modified-p (buffer-modified-p)))))
 
 (defun magik-cb-modeline-flags ()
@@ -2174,13 +2174,11 @@ compression or lazy re-draw or something."
 
 (defun magik-cb-send-tmp-file-name (file)
   "Send \\='tmp_FILE_name FILE' command to the method finder."
-  (setq file (concat "'" file "'"))
-  (magik-cb-send-string "tmp_file_name " file "\n"))
+  (magik-cb-send-string "tmp_file_name '" file "'\n"))
 
 (defun magik-cb-send-load (file)
   "Send \\='load FILE' command to the method finder."
-  (setq file (concat "'" file "'"))
-  (magik-cb-send-string "load " file "\n"))
+  (magik-cb-send-string "load '" file "'\n"))
 
 ;; Send all the STRINGS to the C.  All calls to process-send-string should go
 ;; through here, so that we can do diagnostics like this:
