@@ -1702,24 +1702,24 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
   (with-current-buffer (magik-cb-buffer)
     (setq-local mode-line-format
                 (list mode-line-front-space
-                      (concat
-                       (make-string (max 0 (- 5 (length magik-cb-n-methods-str))) ? )
-                       magik-cb-n-methods-str  "    ")
+                      (format "%5s" magik-cb-n-methods-str)
+                      "     "
                       (magik-cb--propertized-method-name)
                       magik-cb-in-keyword
                       (magik-cb--propertized-class-name)
-                      "          "
+                      "     "
                       (magik-cb-modeline-flags)
-                      (magik-cb--propertized-gis-buffer)))
-    (set-buffer-modified-p (buffer-modified-p))
+                      "     "
+                      (magik-cb--propertized-gis-buffer)
+                      mode-line-end-spaces))
+    (set-buffer-modified-p (buffer-modified-p)))
 
-    ;;update CB2 if buffer exists.
-    (let ((cb2 (magik-cb2-buffer))
-          (mode-line (symbol-value 'mode-line-format)))
-      (when (get-buffer cb2)
-        (set-buffer cb2)
-        (setq mode-line-format mode-line)
-        (set-buffer-modified-p (buffer-modified-p))))))
+  ;;update CB2 if buffer exists.
+  (when-let* ((cb2 (magik-cb2-buffer))
+              (mode-line (symbol-value 'mode-line-format)))
+    (with-current-buffer cb2
+      (setq-local mode-line-format mode-line)
+      (set-buffer-modified-p (buffer-modified-p)))))
 
 (defun magik-cb-modeline-flags ()
   "Return the propertized flag section of the Magik CB modeline.
