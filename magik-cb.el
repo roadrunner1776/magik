@@ -218,16 +218,6 @@ Can be set using \\[cb-set-mode-line-cursor]."
 (defvar magik-cb-was-started-from-top-half nil
   "If t, this shows if cb was invoked from the top-most window.")
 
-(defvar magik-cb-quote-file-name nil
-  "If t, the method_finder allows a quoted filename if the path has spaces.
-Only supported in method_finder version 5.3.0 and above")
-(put 'magik-cb-quote-file-name 'permanent-local t)
-
-(defvar magik-cb-mf-extended-flags nil
-  "If t, then method_finder accepts queries with deprecated and restricted flags.
-Only support in method_finder version 6.0.0 and above")
-(put 'magik-cb-mf-extended-flags 'permanent-local t)
-
 (defvar magik-cb-temp-method-name nil
   "If not nil, name of method used in last pr_source_file command.
 This is set when \\[magik-cb-jump-to-source] is done from a Magik buffer.")
@@ -550,8 +540,6 @@ To view the help on these variables type \\[describe-variable] and enter the var
                font-lock-defaults '(magik-cb-font-lock-keywords nil t ((?_ . "w")))
                magik-cb-process (magik-cb-process)
                magik-cb-topics (mapcar #'(lambda (x) (append x ())) magik-cb-initial-topics)
-               magik-cb-quote-file-name nil
-               magik-cb-mf-extended-flags nil
                magik-cb-filename nil
                magik-cb-filter-str ""
                magik-cb-n-methods-str "0"
@@ -645,11 +633,6 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
     (if newval
         (compat-call setq-local magik-cb-cursor-pos newval)
       magik-cb-cursor-pos)))
-
-(defun magik-cb-mf-extended-flags (&optional buffer)
-  "Get `cb-mf-extended-flags' variable from the CB BUFFER."
-  (with-current-buffer (magik-cb-buffer buffer)
-    magik-cb-mf-extended-flags))
 
 (defun magik-cb-buffer-alist-remove ()
   "Remove current buffer from `magik-cb-buffer-alist'."
@@ -813,14 +796,11 @@ If FILTER is given then it is set on the process."
 
       (when magik-cb-process
         (save-excursion
-          (let ((version (magik-cb-method-finder-version smallworld-gis)))
-            (set-buffer (get-buffer-create buffer))
-            (unless (derived-mode-p 'magik-cb-mode)
-              (magik-cb-mode))
-            (compat-call setq-local
-                         magik-cb-quote-file-name   (version< "5.2.0" version)
-                         magik-cb-mf-extended-flags (version< "6.0.0" version)
-                         magik-cb-filename cb-file)))
+          (set-buffer (get-buffer-create buffer))
+          (unless (derived-mode-p 'magik-cb-mode)
+            (magik-cb-mode))
+          (compat-call setq-local
+                       magik-cb-filename cb-file))
         ;; Note that magik-cb-start-process uses magik-cb-filter when the process starts.
         ;; This is so that it can handle the topic information that the method finder
         ;; process sends back. At the moment magik-cb-ac-filter (the only other filter in use)
@@ -1763,12 +1743,12 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
             parts))
 
     ;; Extended flags
-    (when magik-cb-mf-extended-flags
-      (dolist (flag '("deprecated" "restricted"))
-        (push (magik-cb--propertized-flag flag
-                                          (concat (substring flag 0 1)
-                                                  (substring flag 2 3)))
-              parts)))
+    (dolist (flag '("deprecated" "restricted"))
+      (push (magik-cb--propertized-flag flag
+                                        (concat (substring flag 0 1)
+                                                (substring flag 2 3)))
+            parts))
+
     (nreverse parts)))
 
 (defun magik-cb--switch-to-gis-buffer ()
@@ -2192,16 +2172,12 @@ compression or lazy re-draw or something."
 
 (defun magik-cb-send-tmp-file-name (file)
   "Send \\='tmp_FILE_name FILE' command to the method finder."
-  (setq file (if magik-cb-quote-file-name
-                 (concat "'" file "'")
-               file))
+  (setq file (concat "'" file "'"))
   (magik-cb-send-string "tmp_file_name " file "\n"))
 
 (defun magik-cb-send-load (file)
   "Send \\='load FILE' command to the method finder."
-  (setq file (if magik-cb-quote-file-name
-                 (concat "'" file "'")
-               file))
+  (setq file (concat "'" file "'"))
   (magik-cb-send-string "load " file "\n"))
 
 ;; Send all the STRINGS to the C.  All calls to process-send-string should go
@@ -2289,18 +2265,6 @@ Cut out trailing comments etc."
 
 (defun magik-cb-class-str ()
   (save-excursion (magik-cb-set-buffer-c) (buffer-string)))
-
-(defun magik-cb-method-finder-version (smallworld-gis)
-  "Return the version of the method_finder as a string using SMALLWORLD-GIS."
-  (let ((program (magik-cb--executable-find "method_finder" smallworld-gis)))
-    (unless program
-      (error "The 'method_finder' executable couldn't be found"))
-    (with-temp-buffer
-      (call-process program nil t nil "-v")
-      (goto-char (point-min))
-      (if (re-search-forward "[0-9.]+" nil t)
-          (buffer-substring (match-beginning 0) (match-end 0))
-        (error "Using call-process on the method_finder failed")))))
 
 (defun magik-cb-temp-file-name (p)
   "The filename the method_finder uses to pass data back to the class browser."
