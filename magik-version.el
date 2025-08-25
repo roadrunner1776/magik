@@ -176,6 +176,7 @@ has more than one aliases file available."
                    magik-smallworld-gis smallworld-gis
                    magik-version-current stream)
       (read-only-mode t)
+      (magik-aliases-next)
       (set-buffer-modified-p nil))))
 
 (defun magik-version-next ()
