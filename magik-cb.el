@@ -795,8 +795,7 @@ If FILTER is given then it is set on the process."
              (error "Can't start CB")))
 
       (when magik-cb-process
-        (save-excursion
-          (set-buffer (get-buffer-create buffer))
+        (with-current-buffer (get-buffer-create buffer)
           (unless (derived-mode-p 'magik-cb-mode)
             (magik-cb-mode))
           (compat-call setq-local
