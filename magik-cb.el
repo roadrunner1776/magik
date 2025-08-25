@@ -1721,19 +1721,20 @@ Also delete the end-of-line character."
 Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
   (with-current-buffer (magik-cb-buffer)
     (setq mode-line-format
-          (concat
-           (make-string (max 0 (- 5 (length magik-cb-n-methods-str))) ? )
-           magik-cb-n-methods-str  "    "
-           (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point-min) (point)))
-           (if (eq magik-cb-cursor-pos 'method-name) magik-cb-mode-line-cursor "")
-           (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point) (point-max)))
-           magik-cb-in-keyword
-           (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point-min) (point)))
-           (if (eq magik-cb-cursor-pos 'method-name) "" magik-cb-mode-line-cursor)
-           (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point) (point-max)))
-           "          "
-           (magik-cb-modeline-flags)))
-    (set-buffer-modified-p (buffer-modified-p))
+          (append (list (concat
+                         (make-string (max 0 (- 5 (length magik-cb-n-methods-str))) ? )
+                         magik-cb-n-methods-str  "    "
+                         (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point-min) (point)))
+                         (if (eq magik-cb-cursor-pos 'method-name) magik-cb-mode-line-cursor "")
+                         (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point) (point-max)))
+                         magik-cb-in-keyword
+                         (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point-min) (point)))
+                         (if (eq magik-cb-cursor-pos 'method-name) "" magik-cb-mode-line-cursor)
+                         (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point) (point-max)))
+                         "          "))
+                  (magik-cb-modeline-flags)
+                  (magik-cb--propertized-gis-buffer)))
+          (set-buffer-modified-p (buffer-modified-p))
 
     ;;update CB2 if buffer exists.
     (let ((cb2 (magik-cb2-buffer))
@@ -1743,94 +1744,76 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
         (setq mode-line-format mode-line)
         (set-buffer-modified-p (buffer-modified-p))))))
 
-(defun magik-cb--flag-text-properties (label action &optional help)
-  "Return text properties for clickable LABEL in the mode-line.
-ACTION is a command (function of no args) to run on mouse click.
-HELP is the optional help-echo string."
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mode-line mouse-1]
-      (lambda () (interactive) (funcall action)))
-    (define-key map [mode-line mouse-2]
-      (lambda () (interactive) (funcall action))))
-    (list 'help-echo (or help (format "mouse-1, mouse-2: toggle %s" label))
-          'mouse-face 'mode-line-highlight
-          'local-map map)))
-
 (defun magik-cb-modeline-flags ()
-  "Return a clickable string for CB flags to display in the mode-line.
-  
-     *b  a  *s  r  d  <inh>  F  T  2 dp rs   GIS"
-  (let ((ans "")
-        s)
-    ;; Normal topics
-    (cl-loop for topic in '("basic" "advanced" "subclassable" "redefinable" "debug")
-             do (progn
-                  (setq s (concat
-                           (if (magik-cb-topic-on-p topic) "*" " ")
-                           (substring topic 0 1)
-                           " "))
-                  (add-text-properties 0 (length s)
-                                       (magik-cb--flag-text-properties
-                                        topic
-                                        (lambda () (magik-cb-toggle-flag topic))
-                                        (format "mouse-1, mouse-2: toggle %s flag" topic))
-                                       s)
-                  (setq ans (concat ans s))))
-    ;; Inheritance flag
-    (setq s (cond ((magik-cb-topic-on-p "inherit-from-\"object\"") " <inh> ")
-                  ((magik-cb-topic-on-p "inherit-not-\"object\"")  " <obj> ")
-                  (t                                                " <loc> ")))
-    (add-text-properties 0 (length s)
-                         (magik-cb--flag-text-properties
-                          "inherit"
-                          (lambda () (magik-cb-toggle-flag "inherit"))
-                          "mouse-1, mouse-2: toggle inherit flag")
-                         s)
-    (setq ans (concat ans s))
+  "Return the propertized flag section of the Magik CB modeline.
+
+     *b  a  s  r  *d  <inh> *F  T  2 dp rs   *gis*"
+  (let ((parts '()))
+    ;; Core flags
+    (dolist (flag '("basic" "advanced" "subclassable" "redefinable" "debug"))
+      (push (magik-cb--propertized-flag flag (substring flag 0 1)) parts))
+
+    ;; Inheritance
+    (push (magik-cb--propertized-inheritance) parts)
+
     ;; Override flags
-    (cl-loop for topic in '("override-flags" "override-topics" "override-200-limit")
-             do (progn
-                  (setq s (concat
-                           (if (magik-cb-topic-on-p topic) "*" " ")
-                           (upcase (substring topic (length "override-")
-                                              (1+ (length "override-"))))
-                           " "))
-                  (add-text-properties 0 (length s)
-                                       (magik-cb--flag-text-properties
-                                        topic
-                                        (lambda () (magik-cb-toggle-flag topic))
-                                        (format "mouse-1, mouse-2: toggle %s flag" topic))
-                                       s)
-                  (setq ans (concat ans s))))
+    (dolist (flag '("override-flags" "override-topics" "override-200-limit"))
+      (push (magik-cb--propertized-flag flag
+                                        (upcase (substring flag (length "override-") (1+ (length "override-")))))
+            parts))
+
     ;; Extended flags
     (when magik-cb-mf-extended-flags
-      (cl-loop for topic in '("deprecated" "restricted")
-               do (progn
-                    (setq s (concat
-                             (if (magik-cb-topic-on-p topic) "*" " ")
-                             (substring topic 0 1)
-                             (substring topic 2 3)
-                             " "))
-                    (add-text-properties 0 (length s)
-                                         (magik-cb--flag-text-properties
-                                          topic
-                                          (lambda () (magik-cb-toggle-flag topic))
-                                          (format "mouse-1, mouse-2: toggle %s flag" topic))
-                                         s)
-                    (setq ans (concat ans s))))))
-    (setq ans (concat ans "  "))
-    ;; Buffer name / GIS buffer
-    (if magik-cb-filename
-        (setq ans (concat ans (substring (buffer-name) 4)))
-      (setq s (magik-cb-gis-buffer))
-      (add-text-properties 0 (length s)
-                           (magik-cb--flag-text-properties
-                            s
-                            (lambda () (switch-to-buffer s))
-                            (format "mouse-1, mouse-2: Switch to buffer %s" s))
-                           s)
-      (setq ans (concat ans s)))
-    ans))
+      (dolist (flag '("deprecated" "restricted"))
+        (push (magik-cb--propertized-flag flag
+                                          (concat (substring flag 0 1)
+                                                  (substring flag 2 3)))
+              parts)))
+    (nreverse parts)))
+
+(defun magik-cb--switch-to-gis-buffer ()
+  "Display the gis buffer."
+  (interactive "@")
+  (when-let* ((buf (get-buffer (magik-cb-gis-buffer)))
+              (_ (and (buffer-live-p buf)
+                      (get-buffer-process buf))))
+    (display-buffer buf)))
+
+(defun magik-cb--propertized-gis-buffer ()
+  "Return a list suitable for display the gis buffer name."
+  (list (propertize (magik-cb-gis-buffer)
+                    'face 'mode-line-buffer-id
+                    'help-echo (format "mouse-1, mouse-2: Switch to buffer %s" (magik-cb-gis-buffer))
+                    'mouse-face 'mode-line-highlight
+                    'local-map (let ((map (make-sparse-keymap)))
+                                 (define-key map [mode-line mouse-1] #'magik-cb--switch-to-gis-buffer)
+                                 (define-key map [mode-line mouse-2] #'magik-cb--switch-to-gis-buffer)
+                                 map))))
+
+(defun magik-cb--propertized-flag (flag label)
+  "Return a list suitable for toggling FLAG with a LABEL with display."
+  (propertize (format "%s%s " (if (magik-cb-topic-on-p flag) "*" " ") label)
+              'face 'mode-line-buffer-id
+              'help-echo (format "mouse-1, mouse-2: Toggle %s flag" flag)
+              'mouse-face 'mode-line-highlight
+              'local-map (let ((map (make-sparse-keymap)))
+                           (define-key map [mode-line mouse-1] `(lambda () (interactive) (magik-cb--toggle ,flag)))
+                           (define-key map [mode-line mouse-2] `(lambda () (interactive) (magik-cb--toggle ,flag)))
+                           map)))
+
+(defun magik-cb--propertized-inheritance ()
+  "Return a clickable inheritance flag."
+  (let ((flag (cond ((magik-cb-topic-on-p "inherit-from-\"object\"") "<inh>")
+                    ((magik-cb-topic-on-p "inherit-not-\"object\"")  "<obj>")
+                    (t "<loc>"))))
+    (propertize (format " %s " flag)
+                'face 'mode-line-buffer-id
+                'help-echo "mouse-1, mouse-2: Cycle inheritance setting"
+                'mouse-face 'mode-line-highlight
+                'local-map (let ((map (make-sparse-keymap)))
+                             (define-key map [mode-line mouse-1] #'magik-cb-next-inheritance-setting)
+                             (define-key map [mode-line mouse-2] #'magik-cb-next-inheritance-setting)
+                             map))))
 
 (defun magik-cb-send-modeline-and-pr ()
   "Redraw the modeline, send its contents to the C and request new methods."
@@ -1880,76 +1863,39 @@ HELP is the optional help-echo string."
          (magik-cb-family (magik-utils-find-tag-default)))))
 
 (defun magik-cb-mode-line-click (event)
-  "Move the `magik-cb` modeline cursor using EVENT."
+  "Handle EVENT on the method/class position segments of the modeline."
   (interactive "@e")
   (let* ((b (window-buffer (posn-window (event-start event))))
          (p (get-buffer-process b))
          (x (car (posn-col-row (event-start event))))
-         (effective-len-cb-n-methods-str 1)
          (cursor-pos (with-current-buffer b magik-cb-cursor-pos))
-         (offset1 (- x (length "    ") effective-len-cb-n-methods-str (length "    ")))
          (len1 (save-excursion (magik-cb-set-buffer-m) (1- (point-max))))
          (len2 (save-excursion (magik-cb-set-buffer-c) (1- (point-max))))
+         (offset1 (- x (length "    ") 1 (length "    ")))
          (offset2 (- offset1 (+ len1 (length magik-cb-in-keyword)))))
 
     (cond
+     ;; method name segment
      ((and (>= offset1 -1)
            (<= offset1 (+ 2 len1)))
       (magik-cb-set-buffer-m)
-      (if (and (eq cursor-pos 'method-name)
-               (<= (point) offset1))
-          ;; then goto one more than the offset because emacs counts buffer positions
-          ;; from 1 rather than 0 and then take one off because of the (') cursor.
-          (goto-char offset1)
-        ;; else goto one more than the offset because emacs ...etc.
-        (goto-char (1+ offset1)))
+      (goto-char (if (and (eq cursor-pos 'method-name)
+                          (<= (point) offset1))
+                     offset1
+                   (1+ offset1)))
       (set-buffer b)
       (compat-call setq-local magik-cb-cursor-pos 'method-name))
+
+     ;; class name segment
      ((and (>= offset2 -1)
            (<= offset2 (+ 2 len2)))
       (magik-cb-set-buffer-c)
-      (if (or (eq cursor-pos 'method-name)
-              (<= (point) offset2))
-          (goto-char offset2)
-        (goto-char (1+ offset2)))
+      (goto-char (if (or (eq cursor-pos 'method-name)
+                         (<= (point) offset2))
+                     offset2
+                   (1+ offset2)))
       (set-buffer b)
-      (compat-call setq-local magik-cb-cursor-pos 'class-name))
-     ((and (>= x (+ 25 len1 len2))
-           (<  x (+ 25 15 len1 len2)))
-      (let ((flag (nth (/ (- x (+ 25 len1 len2)) 3)
-                       '("basic" "advanced" "subclassable" "redefinable" "debug"))))
-        (magik-cb-toggle flag)
-        (message (if (magik-cb-topic-on-p flag)
-                     "Turning '%s' flag on."
-                   "Turning '%s' flag off.")
-                 flag)))
-
-     ((and (>= x (+ 25 15 len1 len2))
-           (<  x (+ 25 22 len1 len2)))
-      (magik-cb-next-inheritance-setting))
-
-     ((and (>= x (+ 25 22 len1 len2))
-           (<  x (+ 25 22 9 len1 len2)))
-      (let
-          ((flag (nth (/ (- x (+ 25 22 len1 len2)) 3)
-                      '("override-flags" "override-topics" "override-200-limit"))))
-        (magik-cb-toggle flag)
-        (message (if (magik-cb-topic-on-p flag) "Turning '%s' flag on." "Turning '%s' flag off.")
-                 flag)))
-
-     ((and (>= x (+ 25 22 9 len1 len2))
-           (<  x (+ 25 22 9 8 len1 len2)))
-      (if (magik-cb-mf-extended-flags)
-          (let
-              ((flag (nth (/ (- x (+ 25 22 9 len1 len2)) 4)
-                          '("deprecated" "restricted"))))
-            (magik-cb-toggle flag)
-            (message (if (magik-cb-topic-on-p flag) "Turning '%s' flag on." "Turning '%s' flag off.")
-                     flag))))
-     ((and (>= x (+ 25 22 9 8 3 len1 len2))
-           (buffer-live-p (get-buffer (magik-cb-gis-buffer)))
-           (get-buffer-process (get-buffer (magik-cb-gis-buffer))))
-      (display-buffer (magik-cb-gis-buffer)))))
+      (compat-call setq-local magik-cb-cursor-pos 'class-name))))
   (magik-cb-redraw-modeline))
 
 ;; U S E R   I N T E R F A C E
