@@ -1757,7 +1757,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
     (display-buffer buf)))
 
 (defun magik-cb--propertized-method-name ()
-  "DOCUMENTATION."
+  "Return a propertized string suitable to display the method name."
   (let ((active (eq magik-cb-cursor-pos 'method-name))
         (callback (lambda ()
                     (interactive "@")
@@ -1777,7 +1777,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                   map))))
 
 (defun magik-cb--propertized-class-name ()
-  "DOCUMENTATION."
+  "Return a propertized string suitable to display the class name."
   (let ((active (eq magik-cb-cursor-pos 'class-name))
         (callback (lambda ()
                     (interactive "@")
@@ -1797,7 +1797,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                   map))))
 
 (defun magik-cb--propertized-gis-buffer ()
-  "Return a list suitable for display the gis buffer name."
+  "Return a propertized string suitable to display the GIS buffer name."
   (propertize (magik-cb-gis-buffer)
                     'face 'mode-line-buffer-id
                     'help-echo (format "mouse-1, mouse-2: Switch to buffer %s" (magik-cb-gis-buffer))
@@ -1808,7 +1808,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                                  map)))
 
 (defun magik-cb--propertized-flag (flag label)
-  "Return a list suitable for toggling FLAG with a LABEL with display."
+  "Return a propertized string suitable to toggle the FLAG with a LABEL"
   (propertize (format "%s%s " (if (magik-cb-topic-on-p flag) "*" " ") label)
               'face 'mode-line-buffer-id
               'help-echo (format "mouse-1, mouse-2: Toggle %s flag" flag)
@@ -1819,7 +1819,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                            map)))
 
 (defun magik-cb--propertized-inheritance ()
-  "Return a clickable inheritance flag."
+  "Return a propertized string suitable to toggle the inheritance flag."
   (let ((flag (cond ((magik-cb-topic-on-p "inherit-from-\"object\"") "<inh>")
                     ((magik-cb-topic-on-p "inherit-not-\"object\"")  "<obj>")
                     (t "<loc>"))))
