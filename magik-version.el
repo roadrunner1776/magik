@@ -172,10 +172,10 @@ has more than one aliases file available."
     (when alias-file
       (kill-buffer (current-buffer))
       (find-file alias-file)
-      (setq-local magik-smallworld-gis smallworld-gis
-                  magik-version-current stream
-                  buffer-read-only t)
-      (magik-aliases-next)
+      (compat-call setq-local
+                   magik-smallworld-gis smallworld-gis
+                   magik-version-current stream)
+      (read-only-mode t)
       (set-buffer-modified-p nil))))
 
 (defun magik-version-next ()
