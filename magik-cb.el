@@ -1700,21 +1700,18 @@ Also delete the end-of-line character."
   "Copy the contents of the invisible \"m*cb*\" and \"c*cb*\" onto the modelines.
 Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
   (with-current-buffer (magik-cb-buffer)
-    (setq mode-line-format
-          (append (list (concat
-                         (make-string (max 0 (- 5 (length magik-cb-n-methods-str))) ? )
-                         magik-cb-n-methods-str  "    "
-                         (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point-min) (point)))
-                         (if (eq magik-cb-cursor-pos 'method-name) magik-cb-mode-line-cursor "")
-                         (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point) (point-max)))
-                         magik-cb-in-keyword
-                         (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point-min) (point)))
-                         (if (eq magik-cb-cursor-pos 'method-name) "" magik-cb-mode-line-cursor)
-                         (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point) (point-max)))
-                         "          "))
-                  (magik-cb-modeline-flags)
-                  (magik-cb--propertized-gis-buffer)))
-          (set-buffer-modified-p (buffer-modified-p))
+    (setq-local mode-line-format
+                (list mode-line-front-space
+                      (concat
+                       (make-string (max 0 (- 5 (length magik-cb-n-methods-str))) ? )
+                       magik-cb-n-methods-str  "    ")
+                      (magik-cb--propertized-method-name)
+                      magik-cb-in-keyword
+                      (magik-cb--propertized-class-name)
+                      "          "
+                      (magik-cb-modeline-flags)
+                      (magik-cb--propertized-gis-buffer)))
+    (set-buffer-modified-p (buffer-modified-p))
 
     ;;update CB2 if buffer exists.
     (let ((cb2 (magik-cb2-buffer))
@@ -1759,16 +1756,56 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                       (get-buffer-process buf))))
     (display-buffer buf)))
 
+(defun magik-cb--propertized-method-name ()
+  "DOCUMENTATION."
+  (let ((active (eq magik-cb-cursor-pos 'method-name))
+        (callback (lambda ()
+                    (interactive "@")
+                    (magik-cb-cursor-pos 'method-name)
+                    (magik-cb-redraw-modeline))))
+    (propertize
+     (concat
+      (propertize (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point-min) (point)))
+                  'face (if active 'mode-line-highlight 'mode-line-emphasis))
+      (if active magik-cb-mode-line-cursor)
+      (propertize (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point) (point-max)))
+                  'face (if active 'mode-line-highlight 'mode-line-emphasis)))
+     'mouse-face 'mode-line-highlight
+          'local-map (let ((map (make-sparse-keymap)))
+                  (define-key map [mode-line mouse-1] callback)
+                  (define-key map [mode-line mouse-2] callback)
+                  map))))
+
+(defun magik-cb--propertized-class-name ()
+  "DOCUMENTATION."
+  (let ((active (eq magik-cb-cursor-pos 'class-name))
+        (callback (lambda ()
+                    (interactive "@")
+                    (magik-cb-cursor-pos 'class-name)
+                    (magik-cb-redraw-modeline))))
+    (propertize
+     (concat
+      (propertize (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point-min) (point)))
+                  'face (if active 'mode-line-highlight 'mode-line-emphasis))
+      (if active magik-cb-mode-line-cursor)
+      (propertize (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point) (point-max)))
+                  'face (if active 'mode-line-highlight 'mode-line-emphasis)))
+     'mouse-face 'mode-line-highlight
+     'local-map (let ((map (make-sparse-keymap)))
+                  (define-key map [mode-line mouse-1] callback)
+                  (define-key map [mode-line mouse-2] callback)
+                  map))))
+
 (defun magik-cb--propertized-gis-buffer ()
   "Return a list suitable for display the gis buffer name."
-  (list (propertize (magik-cb-gis-buffer)
+  (propertize (magik-cb-gis-buffer)
                     'face 'mode-line-buffer-id
                     'help-echo (format "mouse-1, mouse-2: Switch to buffer %s" (magik-cb-gis-buffer))
                     'mouse-face 'mode-line-highlight
                     'local-map (let ((map (make-sparse-keymap)))
                                  (define-key map [mode-line mouse-1] #'magik-cb--switch-to-gis-buffer)
                                  (define-key map [mode-line mouse-2] #'magik-cb--switch-to-gis-buffer)
-                                 map))))
+                                 map)))
 
 (defun magik-cb--propertized-flag (flag label)
   "Return a list suitable for toggling FLAG with a LABEL with display."
@@ -1822,6 +1859,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                      magik-cb2-mode 'family
                      font-lock-defaults nil) ;remove colourisation from family mode.
         (magik-cb-send-string "pr_family " class "\n"))))
+
 ;; M O U S E
 ;; _________
 
@@ -1841,42 +1879,6 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
          (magik-cb-toggle-topic-or-flag))
         ((eq magik-cb2-mode 'family)
          (magik-cb-family (magik-utils-find-tag-default)))))
-
-(defun magik-cb-mode-line-click (event)
-  "Handle EVENT on the method/class position segments of the modeline."
-  (interactive "@e")
-  (let* ((b (window-buffer (posn-window (event-start event))))
-         (p (get-buffer-process b))
-         (x (car (posn-col-row (event-start event))))
-         (cursor-pos (with-current-buffer b magik-cb-cursor-pos))
-         (len1 (save-excursion (magik-cb-set-buffer-m) (1- (point-max))))
-         (len2 (save-excursion (magik-cb-set-buffer-c) (1- (point-max))))
-         (offset1 (- x (length "    ") 1 (length "    ")))
-         (offset2 (- offset1 (+ len1 (length magik-cb-in-keyword)))))
-
-    (cond
-     ;; method name segment
-     ((and (>= offset1 -1)
-           (<= offset1 (+ 2 len1)))
-      (magik-cb-set-buffer-m)
-      (goto-char (if (and (eq cursor-pos 'method-name)
-                          (<= (point) offset1))
-                     offset1
-                   (1+ offset1)))
-      (set-buffer b)
-      (compat-call setq-local magik-cb-cursor-pos 'method-name))
-
-     ;; class name segment
-     ((and (>= offset2 -1)
-           (<= offset2 (+ 2 len2)))
-      (magik-cb-set-buffer-c)
-      (goto-char (if (or (eq cursor-pos 'method-name)
-                         (<= (point) offset2))
-                     offset2
-                   (1+ offset2)))
-      (set-buffer b)
-      (compat-call setq-local magik-cb-cursor-pos 'class-name))))
-  (magik-cb-redraw-modeline))
 
 ;; U S E R   I N T E R F A C E
 ;; ___________________________
@@ -2351,9 +2353,6 @@ See the variable `magik-cb-generalise-file-name-alist' for more customisation."
   (define-key magik-cb-mode-map [left]    'magik-cb-backward-char)
   (define-key magik-cb-mode-map [right]   'magik-cb-forward-char)
   (define-key magik-cb-mode-map [mouse-2] 'magik-cb-mouse)
-
-  (define-key magik-cb-mode-map [mode-line mouse-1] 'magik-cb-mode-line-click)
-  (define-key magik-cb-mode-map [mode-line mouse-2] 'magik-cb-mode-line-click)
 
   (define-key magik-cb-mode-map (kbd "<f3> <up>")   'magik-cb-fold)
   (define-key magik-cb-mode-map (kbd "<f3> <down>") 'magik-cb-unfold)
