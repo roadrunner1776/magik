@@ -69,7 +69,11 @@ jobs:
         version: 'snapshot'
 
     - name: Run tests
-      run: make ci
+      run: |
+        eask install-deps
+        eask package
+        eask install
+        eask compile
 
   melpazoid:
     runs-on: ubuntu-latest
