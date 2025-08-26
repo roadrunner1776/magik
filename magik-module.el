@@ -206,7 +206,7 @@ option is set."
 
 (defun magik-module-name-with-pipes ()
   "Return the name of the current module, surrounded by pipes (\"|\")."
-  (format "|%s|" (magik-utils-module-name)))
+  (intern (format "|%s|" (magik-utils-module-name))))
 
 (defun magik-module-reload-module-definition (&optional gis)
   "Reload the module definition in the GIS process."
