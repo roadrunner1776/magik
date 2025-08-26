@@ -107,7 +107,7 @@
   :group 'magik-cb-faces)
 
 (defface magik-cb-cursor-face
-  '((t (:inverse-video t)))
+  '((t (:inverse-video t :box t)))
   "Font Lock mode face used to display the Mode line cursor."
   :group 'magik-cb-faces)
 
@@ -129,6 +129,21 @@
 (defface magik-cb-parameters-face
   '((t (:inherit magik-argument-face)))
   "Font Lock mode face used to display parameters."
+  :group 'magik-cb-faces)
+
+(defface magik-cb-mode-line-buffer-id
+  '((t (:inherit mode-line-buffer-id)))
+  "Face used for buffer identification parts of the mode line."
+  :group 'magik-cb-faces)
+
+(defface magik-cb-mode-line-emphasis
+  '((t (:inherit mode-line-emphasis)))
+  "Face used to emphasize certain mode line features."
+  :group 'magik-cb-faces)
+
+(defface magik-cb-mode-line-highlight
+  '((t (:inherit mode-line-highlight)))
+  "Basic mode line face for highlighting."
   :group 'magik-cb-faces)
 
 (defcustom magik-cb-font-lock-keywords
@@ -1753,19 +1768,20 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 
 (defun magik-cb--propertized-method-name ()
   "Return a propertized string suitable to display the method name."
-  (let ((active (eq magik-cb-cursor-pos 'method-name))
-        (callback (lambda ()
-                    (interactive "@")
-                    (magik-cb-cursor-pos 'method-name)
-                    (magik-cb-redraw-modeline))))
+  (let* ((active (eq magik-cb-cursor-pos 'method-name))
+         (face (if active 'magik-cb-mode-line-highlight 'magik-cb-mode-line-emphasis))
+         (callback (lambda ()
+                     (interactive "@")
+                     (magik-cb-cursor-pos 'method-name)
+                     (magik-cb-redraw-modeline))))
     (propertize
      (concat
       (propertize (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point-min) (point)))
-                  'face (if active 'mode-line-highlight 'mode-line-emphasis))
-      (if active magik-cb-mode-line-cursor)
+                  'face face)
+      (when active magik-cb-mode-line-cursor)
       (propertize (save-excursion (magik-cb-set-buffer-m) (buffer-substring (point) (point-max)))
-                  'face (if active 'mode-line-highlight 'mode-line-emphasis)))
-     'mouse-face 'mode-line-highlight
+                  'face face))
+     'mouse-face 'magik-cb-mode-line-highlight
      'local-map (let ((map (make-sparse-keymap)))
                   (define-key map [mode-line mouse-1] callback)
                   (define-key map [mode-line mouse-2] callback)
@@ -1773,19 +1789,20 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 
 (defun magik-cb--propertized-class-name ()
   "Return a propertized string suitable to display the class name."
-  (let ((active (eq magik-cb-cursor-pos 'class-name))
-        (callback (lambda ()
+  (let* ((active (eq magik-cb-cursor-pos 'class-name))
+         (face (if active 'magik-cb-mode-line-highlight 'magik-cb-mode-line-emphasis))
+         (callback (lambda ()
                     (interactive "@")
                     (magik-cb-cursor-pos 'class-name)
                     (magik-cb-redraw-modeline))))
     (propertize
      (concat
       (propertize (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point-min) (point)))
-                  'face (if active 'mode-line-highlight 'mode-line-emphasis))
-      (if active magik-cb-mode-line-cursor)
+                  'face face)
+      (when active magik-cb-mode-line-cursor)
       (propertize (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point) (point-max)))
-                  'face (if active 'mode-line-highlight 'mode-line-emphasis)))
-     'mouse-face 'mode-line-highlight
+                  'face face))
+     'mouse-face 'magik-cb-mode-line-highlight
      'local-map (let ((map (make-sparse-keymap)))
                   (define-key map [mode-line mouse-1] callback)
                   (define-key map [mode-line mouse-2] callback)
@@ -1794,9 +1811,9 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb--propertized-gis-buffer ()
   "Return a propertized string suitable to display the GIS buffer name."
   (propertize (magik-cb-gis-buffer)
-              'face 'mode-line-buffer-id
+              'face 'magik-cb-mode-line-buffer-id
               'help-echo (format "mouse-1, mouse-2: Switch to buffer %s" (magik-cb-gis-buffer))
-              'mouse-face 'mode-line-highlight
+              'mouse-face 'magik-cb-mode-line-highlight
               'local-map (let ((map (make-sparse-keymap)))
                            (define-key map [mode-line mouse-1] #'magik-cb--switch-to-gis-buffer)
                            (define-key map [mode-line mouse-2] #'magik-cb--switch-to-gis-buffer)
@@ -1805,9 +1822,9 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb--propertized-flag (flag label)
   "Return a propertized string suitable to toggle the FLAG with a LABEL."
   (propertize (format "%s%s " (if (magik-cb-topic-on-p flag) "*" " ") label)
-              'face (when (magik-cb-topic-on-p flag) 'mode-line-emphasis)
+              'face (when (magik-cb-topic-on-p flag) 'magik-cb-mode-line-emphasis)
               'help-echo (format "mouse-1, mouse-2: Toggle %s flag" flag)
-              'mouse-face 'mode-line-highlight
+              'mouse-face 'magik-cb-mode-line-highlight
               'local-map (let ((map (make-sparse-keymap)))
                            (define-key map [mode-line mouse-1] `(lambda () (interactive "@") (magik-cb-toggle ,flag)))
                            (define-key map [mode-line mouse-2] `(lambda () (interactive "@") (magik-cb-toggle ,flag)))
@@ -1819,7 +1836,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                     ((magik-cb-topic-on-p "inherit-not-\"object\"")  "<obj>")
                     (t "<loc>"))))
     (propertize (format " %s " flag)
-                'face 'mode-line-emphasis
+                'face 'magik-cb-mode-line-emphasis
                 'help-echo "mouse-1, mouse-2: Cycle inheritance setting"
                 'mouse-face 'mode-line-highlight
                 'local-map (let ((map (make-sparse-keymap)))
