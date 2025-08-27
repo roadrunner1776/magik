@@ -204,10 +204,6 @@ option is set."
   (message "Set :force_reload? option to %s"
            (magik-function-convert magik-module-option-force-reload)))
 
-(defun magik-module-name-with-pipes ()
-  "Return the name of the current module, surrounded by pipes (\"|\")."
-  (intern (format "|%s|" (magik-utils-module-name))))
-
 (defun magik-module-reload-module-definition (&optional gis)
   "Reload the module definition in the GIS process."
   (interactive)
@@ -222,7 +218,7 @@ option is set."
     (process-send-string
      process
      (concat
-      (magik-function "sw_module_manager.reload_module_definition" (magik-module-name-with-pipes)) ;; include version number?
+      (magik-function "sw_module_manager.reload_module_definition" (magik-utils-module-name) 'unset) ;; include version number?
       "$\n"))
     gis))
 
@@ -247,7 +243,7 @@ option is set."
      a_module.compile_messages()
    _endif
        _endproc"
-       (magik-module-name-with-pipes) 'unset) ;; include version number?
+       (magik-utils-module-name) 'unset) ;; include version number?
       "\n$\n"))
     gis))
 
@@ -266,7 +262,7 @@ a standalone module."
     (process-send-string
      process
      (concat
-      (magik-function "sw_module_manager.remove_module" (magik-module-name-with-pipes))
+      (magik-function "sw_module_manager.remove_module" (magik-utils-module-name))
       "$\n"))
     gis))
 
@@ -278,7 +274,7 @@ a standalone module."
    process
    (concat
     "_try\n"
-    (magik-function "sw_module_manager.load_module" (magik-module-name-with-pipes) 'unset
+    (magik-function "sw_module_manager.load_module" (magik-utils-module-name) 'unset
                     'save_magikc?  magik-module-option-save-magikc
                     'force_reload? magik-module-option-force-reload)
     "_when sw_module_no_such_module\n"
