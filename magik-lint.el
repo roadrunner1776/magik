@@ -36,7 +36,7 @@
   :group 'magik)
 
 (defcustom magik-lint-jar-file-version
-  (or (magik-lint--latest-version) "0.10.1")
+  (or (magik-lint--latest-version) "0.11.0")
   "Version of magik-lint to use."
   :group 'magik-lint
   :type 'string)
