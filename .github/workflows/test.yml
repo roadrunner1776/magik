@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jcs090218/setup-emacs@92a8837139284fc8ab031454ae758896740f5f22
+      - uses: jcs090218/setup-emacs@3586c34483bee442d1293c9a428fa3da44421509
         with:
           version: ${{ matrix.emacs-version }}
 
