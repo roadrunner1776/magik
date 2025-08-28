@@ -108,5 +108,5 @@ jobs:
         env:
           LOCAL_REPO: ${{ github.workspace }}
           EXIST_OK: true
-        run: melpazoid
+        run: make -C melpazoid
         continue-on-error: true
