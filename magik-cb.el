@@ -1821,14 +1821,18 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 
 (defun magik-cb--propertized-flag (flag label)
   "Return a propertized string suitable to toggle the FLAG with a LABEL."
-  (propertize (format "%s%s " (if (magik-cb-topic-on-p flag) "*" " ") label)
-              'face (when (magik-cb-topic-on-p flag) 'magik-cb-mode-line-emphasis)
-              'help-echo (format "mouse-1, mouse-2: Toggle %s flag" flag)
-              'mouse-face 'magik-cb-mode-line-highlight
-              'local-map (let ((map (make-sparse-keymap)))
-                           (define-key map [mode-line mouse-1] `(lambda () (interactive "@") (magik-cb-toggle ,flag)))
-                           (define-key map [mode-line mouse-2] `(lambda () (interactive "@") (magik-cb-toggle ,flag)))
-                           map)))
+  (let ((face (when (magik-cb-topic-on-p flag) 'magik-cb-mode-line-emphasis))
+        (callback `(lambda ()
+                     (interactive "@")
+                     (magik-cb-toggle ,flag))))
+    (propertize (format "%s%s " (if (magik-cb-topic-on-p flag) "*" " ") label)
+                'face face
+                'help-echo (format "mouse-1, mouse-2: Toggle %s flag" flag)
+                'mouse-face 'magik-cb-mode-line-highlight
+                'local-map (let ((map (make-sparse-keymap)))
+                             (define-key map [mode-line mouse-1] callback)
+                             (define-key map [mode-line mouse-2] callback)
+                             map))))
 
 (defun magik-cb--propertized-inheritance ()
   "Return a propertized string suitable to toggle the inheritance flag."
