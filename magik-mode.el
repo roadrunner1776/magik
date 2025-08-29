@@ -107,7 +107,9 @@ concrete implementations."
                imenu-syntax-alist '((?_ . "w"))
                outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
 
-  (when magik-auto-abbrevs (abbrev-mode 1))
+  (when magik-auto-abbrevs
+    (abbrev-mode t)
+    (yas-minor-mode t))
 
   (imenu-add-menubar-index))
 
@@ -1872,6 +1874,7 @@ Translate it and the closing bracket into the new \"{...}\" notation."
 Prevents expansion inside strings and comments."
   (interactive)
   (when (or (magik--in-string-or-comment-p)
+            (not yas-minor-mode)
             (not (yas-expand)))
     (self-insert-command 1)))
 
