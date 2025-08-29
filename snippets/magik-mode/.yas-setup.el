@@ -68,8 +68,8 @@ If UNTABBED is non-nil remove the tabs from the documentation string.
 When documentation style is nil (disabled), it kills the current line."
   (if magik-yasnippet-documentation-style
       (let ((documentation-string (pcase magik-yasnippet-documentation-style
-                                    ('sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
-                                    ('type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation)))))
+                                    (`sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
+                                    (`type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation)))))
         (if untabbed
             (replace-regexp-in-string "\t" "" documentation-string)
           documentation-string))
