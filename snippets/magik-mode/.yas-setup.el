@@ -4,6 +4,9 @@
 
 ;;; Code:
 
+(require 'compat)
+(require 'subr-x)
+(require 'warnings)
 (require 'yasnippet)
 
 ;; Suppress the warnings about modifying the buffer via a snippet
