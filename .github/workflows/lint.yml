@@ -26,12 +26,12 @@ jobs:
 
       - name: Run Indentation Lint
         run: |
-          find . -name "*.el" ! -name "*.dir-locals.el" \
+          find . -name "*.el" ! -path "./.eask/*" ! -name "*.dir-locals.el" \
           | xargs -t -I^ eask emacs -q --batch ^ --eval "\
-              (let ((require-final-newline t)) \
-                (require 'flycheck) \
-                (eval-buffer) \
-                (untabify (point-min) (point-max)) \
-                (indent-region (point-min) (point-max)) \
-                (save-buffer))" \
-          ; git diff --exit-code
+            (let ((require-final-newline t)) \
+              (require 'flycheck) \
+              (eval-buffer) \
+              (untabify (point-min) (point-max)) \
+              (indent-region (point-min) (point-max)) \
+              (save-buffer))"
+          git diff --exit-code
