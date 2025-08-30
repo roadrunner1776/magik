@@ -47,7 +47,8 @@ jobs:
 
       - run: eask install-deps --dev
 
-      - run: |
+      - name: Check indentation
+        run: |
           find . -name "*.el" ! -path "./.eask/*" \
           | xargs -t -I^ eask emacs -q --batch ^ --eval "\
             (let ((require-final-newline t)) \
