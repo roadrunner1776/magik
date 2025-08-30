@@ -26,7 +26,7 @@ jobs:
 
       - name: Run Indentation Lint
         run: |
-          find . -name "*.el" ! -name "*.dir-locals.el" \
+          find . -name "*.el" ! -path "./.eask/*" \
           | xargs -t -I^ eask emacs -q --batch ^ --eval "\
             (let ((require-final-newline t)) \
               (require 'flycheck) \
