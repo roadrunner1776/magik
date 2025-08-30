@@ -51,12 +51,12 @@ jobs:
         run: |
           find . -name "*.el" ! -path "./.eask/*" \
           | xargs -t -I^ eask emacs -q --batch ^ --eval "\
-            (require 'editorconfig) \
-            (setq editorconfig-lisp-use-default-indent 2) \
-            (editorconfig-mode t) \
+            (require 'editorconfig)
+            (setq editorconfig-lisp-use-default-indent 2)
+            (editorconfig-mode t)
 
-            (untabify (point-min) (point-max)) \
-            (indent-region (point-min) (point-max)) \
+            (untabify (point-min) (point-max))
+            (indent-region (point-min) (point-max))
             (save-buffer)"
 
           git diff
