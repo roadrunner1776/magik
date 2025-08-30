@@ -210,8 +210,8 @@ action's function setting."
   "Magik sessions Filter Action interface for a Magik symbol completion.
 According to STR returned from Magik."
   (let* ((ans (read str))
-        (curr-word (magik-utils--current-word))
-        (curr-word-len (length curr-word)))
+         (curr-word (magik-utils--current-word))
+         (curr-word-len (length curr-word)))
     (cond
      ((eq (length ans) 0)
       (message "Can't find completion for %s." curr-word))

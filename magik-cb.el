@@ -1792,9 +1792,9 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
   (let* ((active (eq magik-cb-cursor-pos 'class-name))
          (face (if active 'magik-cb-mode-line-highlight 'magik-cb-mode-line-emphasis))
          (callback (lambda ()
-                    (interactive "@")
-                    (magik-cb-cursor-pos 'class-name)
-                    (magik-cb-redraw-modeline))))
+                     (interactive "@")
+                     (magik-cb-cursor-pos 'class-name)
+                     (magik-cb-redraw-modeline))))
     (propertize
      (concat
       (propertize (save-excursion (magik-cb-set-buffer-c) (buffer-substring (point-min) (point)))

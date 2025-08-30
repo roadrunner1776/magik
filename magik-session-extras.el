@@ -46,8 +46,8 @@ Right now apropos() and print_local_methods()."
           (one-or-more whitespace) (syntax open-parenthesis)
           (one-or-more not-newline) ":" (one-or-more (or numeric not-newline))
           (syntax close-parenthesis) eol) . 'magik-session-traceback-call-stack-face)
-	(,(rx bol (or "slot" "iter" "method" "class" "CORRUPT") " "
-		  (one-or-more anychar) " in " (one-or-more not-newline) eol) . 'magik-session-method-definition-face))
+    (,(rx bol (or "slot" "iter" "method" "class" "CORRUPT") " "
+	  (one-or-more anychar) " in " (one-or-more not-newline) eol) . 'magik-session-method-definition-face))
   "Additional Font-lock Keywords for `magik-session-mode'.")
 
 (defun magik-session-extras--activate ()
