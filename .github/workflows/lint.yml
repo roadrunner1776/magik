@@ -47,17 +47,19 @@ jobs:
 
       - run: eask install-deps --dev
 
+      - run: eask emacs -q --batch -f package-initialize --eval="(package-install 'editorconfig)"
+
       - name: Check indentation
         run: |
           find . -name "*.el" ! -path "./.eask/*" \
           | xargs -t -I^ eask emacs -q --batch ^ --eval "\
-            (let ((require-final-newline t)
-                  (indent-tabs-mode nil)
-                  (lisp-body-indent 2)) \
-              (eval-buffer) \
-              (untabify (point-min) (point-max)) \
-              (indent-region (point-min) (point-max)) \
-              (save-buffer))"
+            (require 'editorconfig) \
+            (setq editorconfig-lisp-use-default-indent 2) \
+            (editorconfig-mode t) \
+
+            (untabify (point-min) (point-max)) \
+            (indent-region (point-min) (point-max)) \
+            (save-buffer)"
 
           git diff
 
