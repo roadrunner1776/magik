@@ -268,7 +268,7 @@ Argument WRITE-RETURN indicates whether to insert @return documentation."
             (equal documentation-found 1))
         (progn
           (goto-char (point-min))
-           (forward-line (1- starting-point))
+          (forward-line (1- starting-point))
           (when (equal documentation-found 0)
             (insert comment-line))
           (insert (mapconcat (lambda (parameter) (format "\t## @param {:} %s\n" parameter)) missing-parameters))
