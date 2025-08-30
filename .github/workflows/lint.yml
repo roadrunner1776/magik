@@ -34,4 +34,4 @@ jobs:
               (untabify (point-min) (point-max)) \
               (indent-region (point-min) (point-max)) \
               (save-buffer))"
-          git diff --exit-code
+          git diff --name-only --exit-code
