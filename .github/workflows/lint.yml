@@ -8,24 +8,38 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  markdown-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: purcell/setup-emacs@master
+      - uses: DavidAnson/markdownlint-cli2-action@v19
+
+  codespell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: codespell-project/actions-codespell@v2
         with:
-          version: 'snapshot'
+          ignore_words_list: ans,ine,inh,isnt
 
-      - uses: emacs-eask/setup-eask@master
+  emacs-indentation-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jcs090218/setup-emacs@3586c34483bee442d1293c9a428fa3da44421509
         with:
-          version: 'snapshot'
+          version: snapshot
 
-      - name: Resolve dependency
-        run: eask install-deps --dev
+      - uses: emacs-eask/setup-eask@cc250315b6a3177fa27dbb5bb6a2a9d9b90b2ef7
+        with:
+          version: snapshot
 
-      - name: Run Indentation Lint
-        run: |
+      - run: eask install-deps --dev
+
+      - run: |
           find . -name "*.el" ! -path "./.eask/*" \
           | xargs -t -I^ eask emacs -q --batch ^ --eval "\
             (let ((require-final-newline t)) \
@@ -34,7 +48,7 @@ jobs:
               (untabify (point-min) (point-max)) \
               (indent-region (point-min) (point-max)) \
               (save-buffer))"
-          
+
           CHANGED=$(git diff --name-only)
           if [ -n "$CHANGED" ]; then
             for file in $CHANGED; do
