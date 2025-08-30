@@ -26,7 +26,7 @@ jobs:
 
       - name: Run Indentation Lint
         run: |
-          find . -name "*.el" ! -path "./.eask/*" ! -name "*.dir-locals.el" \
+          find . -name "*.el" ! -name "*.dir-locals.el" \
           | xargs -t -I^ eask emacs -q --batch ^ --eval "\
             (let ((require-final-newline t)) \
               (require 'flycheck) \
@@ -34,4 +34,10 @@ jobs:
               (untabify (point-min) (point-max)) \
               (indent-region (point-min) (point-max)) \
               (save-buffer))"
-          git diff --name-only --exit-code
+          
+          CHANGED=$(git diff --name-only)
+          if [ -n "$CHANGED" ]; then
+            echo "The following files have indentation changes:"
+            echo "$CHANGED"
+            exit 1
+          fi
