@@ -47,8 +47,6 @@ jobs:
 
       - run: eask install-deps --dev
 
-      - run: eask emacs -q --batch -f package-initialize --eval="(package-install 'editorconfig)"
-
       - name: Check indentation
         run: |
           find . -name "*.el" ! -path "./.eask/*" \
@@ -70,3 +68,5 @@ jobs:
             done
             exit 1
           fi
+
+          echo "No files need indentation fix"
