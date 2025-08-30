@@ -37,7 +37,8 @@ jobs:
           
           CHANGED=$(git diff --name-only)
           if [ -n "$CHANGED" ]; then
-            echo "The following files have indentation changes:"
-            echo "$CHANGED"
+            for file in $CHANGED; do
+              echo "::warning file=$file::File needs indentation fix"
+            done
             exit 1
           fi
