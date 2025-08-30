@@ -58,7 +58,9 @@ jobs:
               (indent-region (point-min) (point-max)) \
               (save-buffer))"
 
-          CHANGED=$(git diff --name-only)
+          git diff
+
+          CHANGED=$(git diff --name-only | sort)
           if [ -n "$CHANGED" ]; then
             for file in $CHANGED; do
               echo "::warning file=$file::$file needs indentation fix"
