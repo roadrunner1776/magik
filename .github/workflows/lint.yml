@@ -69,4 +69,4 @@ jobs:
             exit 1
           fi
 
-          echo "No files need indentation fix"
+          echo -e "\033[0;32mNo files need indentation fix\033[0m"
