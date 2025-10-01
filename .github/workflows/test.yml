@@ -57,7 +57,6 @@ jobs:
           eask install
           eask compile
 
-
   melpazoid:
     runs-on: ubuntu-latest
     steps:
@@ -81,6 +80,9 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
+      - name: Install Emacs
+        run: sudo apt-get install emacs && emacs --version
 
       - name: Install melpazoid
         run: pip install -e melpazoid
