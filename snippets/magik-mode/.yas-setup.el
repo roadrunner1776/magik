@@ -161,10 +161,10 @@ If the buffer is not visiting a file, return an empty string."
             (setq slots (nreverse slots))
             (concat
              (string-join (cl-mapcar (lambda (slot i)
-                                      (format "%s.%s <<"
-                                              (if (= i 0) "\t" "\n\t")
-                                              slot))
-                                    slots
-                                    (number-sequence 0 (1- (length slots)))))
+                                       (format "%s.%s <<"
+                                               (if (= i 0) "\t" "\n\t")
+                                               slot))
+                                     slots
+                                     (number-sequence 0 (1- (length slots)))))
              "\n")))))))
 ;;; .yas-setup.el ends here
