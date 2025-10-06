@@ -243,6 +243,7 @@ is dropped."
 ;;; Package registration
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("load_list.txt\\'" . magik-loadlist-mode))
+(add-to-list 'auto-mode-alist '("patch_list.txt\\'" . magik-loadlist-mode))
 
 (progn
   ;; ------------------------ magik loadlist mode  ------------------------
