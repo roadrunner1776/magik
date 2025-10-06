@@ -70,13 +70,12 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
             (eval flycheck-magik-lint-args)
             (config-file "--rcfile" flycheck-magik-lintrc)
             "--max-infractions" (eval (number-to-string flycheck-checker-error-threshold))
-            "--msg-template" "\"${path}:${line}:${column}: (${category}) ${msg} (${symbol})\""
+            "--msg-template" "\"${path}:${line}:${column}:${end_line}:${end_column}: (${category}) [${symbol}] ${msg}\""
             "--column-offset" "+1"
             source)
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ": (Critical) " (message) line-end)
-   (error line-start (file-name) ":" line ":" column ": (Major) " (message) line-end)
-   (warning line-start (file-name) ":" line ":" column ": (Minor) " (message) line-end))
+  ((error line-start (file-name) ":" line ":" column ":" end-line ":" end-column ": " (or "(Critical)" "(Major)") " [" (id (one-or-more (not (any "]")))) "] " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column ":" end-line ":" end-column ": (Minor) [" (id (one-or-more (not (any "]")))) "] " (message) line-end))
   :modes (magik-mode magik-ts-mode))
 
 (when (and (eq system-type 'windows-nt)
