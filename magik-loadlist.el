@@ -50,7 +50,7 @@ Initial ^ and final $ is automatically added in `loadlist-ignore'."
 (defcustom magik-loadlist-font-lock-keywords
   (list
    '("^.+\\([\\/]\\)" 0 'magik-loadlist-folder-face)
-   '("^.+"            0 'magik-loadlist-file-face))
+   '("^\\([^#]+\\)" 1 'magik-loadlist-file-face))
   "Default fontification of load_list.txt files."
   :group 'magik-loadlist
   :type 'sexp)
