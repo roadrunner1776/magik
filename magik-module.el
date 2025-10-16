@@ -85,12 +85,12 @@ See `imenu-generic-expression'.")
 ;; Font-lock configuration
 (defcustom magik-module-font-lock-keywords
   (list
-   (list (concat "^\\<\\(" (mapconcat 'identity magik-module-keywords "\\|") "\\)") 0 ''magik-module-keyword-face t)
    '("^\\(\\sw+\\)\\s-*$"
      (1 'magik-module-name-face))
    '("^\\(\\sw+\\)\\s-+\\([0-9]+\\(?:\\s-*[0-9]+\\)?\\)"
      (1 'magik-module-name-face)
-     (2 'magik-number-face)))
+     (2 'magik-number-face))
+   (list (concat "^\\<\\(" (mapconcat 'identity magik-module-keywords "\\|") "\\)\\>") 0 ''magik-module-keyword-face t))
   "Default fontification of module.def files."
   :group 'magik-module
   :type 'sexp)
