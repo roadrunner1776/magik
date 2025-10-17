@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: for-with-keep-data
+# key: for
+# condition: (not (magik-yasnippet-after-point-empty?))
+# expand-env: ((yas-indent-line 'fixed))
+# group: control structure.loop
+# type: command
+# --
+(kill-line)(yas-expand-snippet (yas-lookup-snippet "for-internal-insert"))
+(setq kill-ring (cdr kill-ring))

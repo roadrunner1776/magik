@@ -167,4 +167,10 @@ If the buffer is not visiting a file, return an empty string."
                                      slots
                                      (number-sequence 0 (1- (length slots)))))
              "\n")))))))
+
+(defun magik-yasnippet-after-point-empty? ()
+  "Current line after point is empty or contain only whitespaces."
+  (save-excursion
+    (let ((line-after-point (buffer-substring-no-properties (point) (line-end-position))))
+      (string-match-p "^\\s-*$" line-after-point))))
 ;;; .yas-setup.el ends here

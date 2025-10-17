@@ -1,11 +1,9 @@
 # -*- mode: snippet -*-
-# name: for
-# key: for
-# condition: (magik-yasnippet-after-point-empty?)
+# name: for-internal-insert
 # expand-env: ((yas-indent-line 'fixed))
 # group: control structure.loop
 # --
-_for ${1:var} _over ${2:collection}
+_for ${1:var} _over ${2:`(current-kill 0)`}
 _loop
 	$0
 _endloop
