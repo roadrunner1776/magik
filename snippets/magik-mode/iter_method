@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: iter method
 # key: iter
+# condition: (not (line-after-point-contains-method))
 # expand-env: ((yas-indent-line 'fixed))
 # group: methods
 # --

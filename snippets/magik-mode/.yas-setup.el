@@ -167,4 +167,10 @@ If the buffer is not visiting a file, return an empty string."
                                      slots
                                      (number-sequence 0 (1- (length slots)))))
              "\n")))))))
+
+(defun line-after-point-contains-method ()
+  "Check if the text after the point in the current line contain _method."
+  (save-excursion
+    (let ((line-after-point (buffer-substring-no-properties (point) (line-end-position))))
+      (string-match-p "_method" line-after-point))))
 ;;; .yas-setup.el ends here
