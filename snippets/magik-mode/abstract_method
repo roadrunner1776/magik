@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
 # name: abstract method
 # key: abstract
-# condition: (not (line-after-point-contains-method))
+# condition: (not (magik-yasnippet-line-after-point-contains-method))
 # expand-env: ((yas-indent-line 'fixed))
 # group: methods
 # --
