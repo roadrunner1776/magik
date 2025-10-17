@@ -71,7 +71,7 @@ You can customize magik-loadlist-mode with the magik-loadlist-mode-hook.
   :abbrev-table nil
 
   (compat-call setq-local
-               command-start-skip "#+ *"
+               comment-start-skip "#+ *"
                require-final-newline t
                font-lock-defaults '(magik-loadlist-font-lock-keywords nil t)))
 
