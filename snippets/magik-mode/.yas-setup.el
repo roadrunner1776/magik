@@ -4,6 +4,9 @@
 
 ;;; Code:
 
+(require 'compat)
+(require 'subr-x)
+(require 'warnings)
 (require 'yasnippet)
 
 ;; Suppress the warnings about modifying the buffer via a snippet
@@ -68,8 +71,8 @@ If UNTABBED is non-nil remove the tabs from the documentation string.
 When documentation style is nil (disabled), it kills the current line."
   (if magik-yasnippet-documentation-style
       (let ((documentation-string (pcase magik-yasnippet-documentation-style
-                                    ('sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
-                                    ('type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation)))))
+                                    (`sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
+                                    (`type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation)))))
         (if untabbed
             (replace-regexp-in-string "\t" "" documentation-string)
           documentation-string))
@@ -158,42 +161,10 @@ If the buffer is not visiting a file, return an empty string."
             (setq slots (nreverse slots))
             (concat
              (string-join (cl-mapcar (lambda (slot i)
-                                      (format "%s.%s <<"
-                                              (if (= i 0) "\t" "\n\t")
-                                              slot))
-                                    slots
-                                    (number-sequence 0 (1- (length slots)))))
+                                       (format "%s.%s <<"
+                                               (if (= i 0) "\t" "\n\t")
+                                               slot))
+                                     slots
+                                     (number-sequence 0 (1- (length slots)))))
              "\n")))))))
-
-(defun magik-yasnippet-module-name ()
-  "Recursively search for the module.def and return the module name."
-  (when-let* ((module-file (magik-yasnippet--locate-dominating-file "module.def")))
-    (magik-yasnippet--first-word-of-file module-file)))
-
-(defun magik-yasnippet-product-name ()
-  "Recursively search for the product.def and return the product name."
-  (when-let* ((product-file (magik-yasnippet--locate-dominating-file "product.def")))
-    (magik-yasnippet--first-word-of-file product-file)))
-
-(defun magik-yasnippet--locate-dominating-file (file-name)
-  "Recursively search for the FILE-NAME."
-  (when-let* ((buffer-file (buffer-file-name))
-              (directory (locate-dominating-file buffer-file file-name)))
-    (expand-file-name file-name directory)))
-
-(defun magik-yasnippet--first-word-of-file (file)
-  "Return the first word of a FILE."
-  (when (file-exists-p file)
-    (with-temp-buffer
-      (insert-file-contents file)
-      (goto-char (point-min))
-      (let ((word nil))
-        (while (and (not word)
-                    (not (eobp)))
-          (skip-chars-forward " \t")
-          (if (not (looking-at "#"))
-              (setq word (current-word))
-            (forward-line 1)))
-        word))))
-
 ;;; .yas-setup.el ends here

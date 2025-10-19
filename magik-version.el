@@ -155,26 +155,27 @@ has more than one aliases file available."
   (interactive)
   (beginning-of-line)
   (let* ((version-list (magik-version-at-version-definition))
-          (stream (car version-list))
-          (smallworld-gis (nth 2 version-list))
-          (lp-alist (magik-aliases-layered-products-file (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
-          alias-file)
+         (stream (car version-list))
+         (smallworld-gis (nth 2 version-list))
+         (lp-alist (magik-aliases-layered-products-file (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
+         alias-file)
     (when (not stream)
       (error "Invalid selection"))
     (cond ((null lp-alist) nil)
-      ((eq (length lp-alist) 1)
-        (setq alias-file (file-name-concat (cdar lp-alist) "config" "gis_aliases")))
-      (t
-        (let* ((lp (completing-read "Select a Layered Product with gis_aliases file: " lp-alist nil t))
-                (path (cdr (assoc lp lp-alist))))
-          (when path
-            (setq alias-file (file-name-concat path "config" "gis_aliases"))))))
+          ((eq (length lp-alist) 1)
+           (setq alias-file (file-name-concat (cdar lp-alist) "config" "gis_aliases")))
+          (t
+           (let* ((lp (completing-read "Select a Layered Product with gis_aliases file: " lp-alist nil t))
+                  (path (cdr (assoc lp lp-alist))))
+             (when path
+               (setq alias-file (file-name-concat path "config" "gis_aliases"))))))
     (when alias-file
       (kill-buffer (current-buffer))
       (find-file alias-file)
-      (setq-local magik-smallworld-gis smallworld-gis
-                  magik-version-current stream
-                  buffer-read-only t)
+      (compat-call setq-local
+                   magik-smallworld-gis smallworld-gis
+                   magik-version-current stream)
+      (read-only-mode t)
       (magik-aliases-next)
       (set-buffer-modified-p nil))))
 
@@ -287,7 +288,7 @@ installation directory suitable for selection."
   "Add a new entry to the file given by `gis-version-file'."
   (interactive
    (let* ((_ok (or magik-version-file
-                  (error "File interface is not being used")))
+                   (error "File interface is not being used")))
           (root (magik-version-read-smallworld-gis))
           (product-version-file (file-name-concat (file-name-as-directory root) "config" "PRODUCT_VERSION"))
           name version)

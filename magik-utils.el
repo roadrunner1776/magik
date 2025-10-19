@@ -81,13 +81,29 @@ Returns a list of paths, or nil if none are found."
       (setq directory (file-name-directory (directory-file-name directory))))
     (nreverse paths)))
 
+(defun magik-utils-module-name ()
+  "Recursively search for the module.def and return the module name."
+  (when-let* ((module-file (magik-utils--locate-dominating-file "module.def")))
+    (magik-utils--first-word-of-file module-file)))
+
+(defun magik-utils-product-name ()
+  "Recursively search for the product.def and return the product name."
+  (when-let* ((product-file (magik-utils--locate-dominating-file "product.def")))
+    (magik-utils--first-word-of-file product-file)))
+
+(defun magik-utils--locate-dominating-file (file-name)
+  "Recursively search for the FILE-NAME."
+  (when-let* ((buffer-file (buffer-file-name))
+              (directory (locate-dominating-file buffer-file file-name)))
+    (expand-file-name file-name directory)))
+
 (defun magik-utils-current-directory-name ()
   "Return the directory name for the current buffer."
-  (when-let ((directory (or buffer-file-name
-                            default-directory)))
+  (when-let* ((directory (or buffer-file-name
+                             default-directory)))
     (file-name-nondirectory (directory-file-name (file-name-directory (expand-file-name directory))))))
 
-(defun magik-utils-curr-word ()
+(defun magik-utils--current-word ()
   "Return the word (or part-word) before point as a string."
   (save-excursion
     (buffer-substring
@@ -95,6 +111,21 @@ Returns a list of paths, or nil if none are found."
      (progn
        (skip-chars-backward "_!?a-zA-Z0-9")
        (point)))))
+
+(defun magik-utils--first-word-of-file (file)
+  "Return the first word of a FILE."
+  (when (file-exists-p file)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (goto-char (point-min))
+      (let ((word nil))
+        (while (and (not word)
+                    (not (eobp)))
+          (skip-chars-forward " \t")
+          (if (not (looking-at "#"))
+              (setq word (current-word))
+            (forward-line 1)))
+        word))))
 
 ;; copied from emacs 18 because the emacs 19 find-tag-tag seems to be different.
 (defun magik-utils-find-tag-tag (string)

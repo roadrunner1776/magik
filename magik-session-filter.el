@@ -43,7 +43,7 @@
 (require 'magik-session)
 
 (defvar magik-session-filter-state "\C-a"
-  "Either \"\\C-a\", \"\\C-e\, \"\\C-f\" or \" \".")
+  "Either \\[move-beginning-of-line], \\[move-end-of-line], \\[forward-char] or \" \".")
 
 (defcustom magik-session-filter-action-alist nil
   "An alist that matches the different filter actions with the action character.
@@ -209,11 +209,12 @@ action's function setting."
 (defun magik-session-filter-action-completion (proc str)
   "Magik sessions Filter Action interface for a Magik symbol completion.
 According to STR returned from Magik."
-  (let ((ans (read str))
-        (curr-word-len (length (magik-utils-curr-word))))
+  (let* ((ans (read str))
+         (curr-word (magik-utils--current-word))
+         (curr-word-len (length curr-word)))
     (cond
      ((eq (length ans) 0)
-      (message "Can't find completion for %s." (magik-utils-curr-word)))
+      (message "Can't find completion for %s." curr-word))
      ((eq (length ans) 1)
       (if (eq (length (car ans)) curr-word-len)
           (message "Sole completion.")

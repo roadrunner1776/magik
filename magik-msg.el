@@ -80,8 +80,8 @@ See `imenu-generic-expression'.")
      (2 'magik-keyword-statements-face))
    '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . 'magik-msg-message-id-face)
    '("^#%\\s-*text_encoding.*$" . 'magik-msg-text-encoding-face)
-   '("#[0-9]+" . 'magik-msg-placeholder-face)
-   '("#.*" . 'magik-msg-comment-face))
+   '("#\\([h@]?\\)[1-9]" . 'magik-msg-placeholder-face)
+   '("#[n|s|t|#]" . 'magik-msg-comment-face))
   "Default fontification of Magik Messages."
   :group 'magik-msg
   :type 'sexp)
@@ -159,10 +159,10 @@ The GIS process used is either that given by BUF or
 the variable `magik-session-buffer'."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-                                          'magik-session-mode
-                                          "Enter Magik Session buffer:"
-                                          magik-session-buffer
-                                          'magik-session-buffer-alist-prefix-function))
+                                           'magik-session-mode
+                                           "Enter Magik Session buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
          (process (barf-if-no-gis gis))
          (filename (buffer-file-name)))
     ;; Load messages
@@ -187,10 +187,10 @@ The GIS process used is either that given by BUF or
 the variable `magik-session-buffer'."
   (interactive)
   (let* ((gis (magik-utils-get-buffer-mode gis
-                                          'magik-session-mode
-                                          "Enter Magik Session buffer:"
-                                          magik-session-buffer
-                                          'magik-session-buffer-alist-prefix-function))
+                                           'magik-session-mode
+                                           "Enter Magik Session buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
          (process (barf-if-no-gis gis))
          (directory (file-name-directory (buffer-file-name))))
     ;; Load messages
