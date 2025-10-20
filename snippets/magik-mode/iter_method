@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
 # name: iter method
 # key: iter
-# condition: (not (magik-yasnippet-line-after-point-contains-method))
+# condition: (not (magik-yasnippet--line-after-point-contains-method-p))
 # expand-env: ((yas-indent-line 'fixed))
 # group: methods
 # --
