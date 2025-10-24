@@ -169,7 +169,7 @@ If the buffer is not visiting a file, return an empty string."
   "Return the filename as a symbol (prefixed with a colon `:`)."
   (concat ":" (magik-yasnippet-filename)))
 
-(defun magik-yasnippet-prev-slotted-exemplar-slots ()
+(defun magik-yasnippet-prev-slotted-exemplar-slots (dollar-start-count)
   "Search for the previous `def_slotted_exemplar` and return slot names."
   (save-excursion
     (when-let* ((slotted-loc (and (re-search-backward "def_slotted_exemplar" nil t)
@@ -184,11 +184,15 @@ If the buffer is not visiting a file, return an empty string."
           (when slots
             (setq slots (nreverse slots))
             (concat
-             (string-join (cl-mapcar (lambda (slot i)
-                                       (format "%s.%s <<"
-                                               (if (= i 0) "\t" "\n\t")
-                                               slot))
-                                     slots
-                                     (number-sequence 0 (1- (length slots)))))
+             (string-join
+              (cl-mapcar
+               (lambda (slot i)
+                 (format "%s.%s << ${%d:value}"
+                         (if (= i 0) "\t" "\n\t")
+                         slot
+                         (cl-incf dollar-start-count)))
+               slots
+               (number-sequence 0 (1- (length slots)))))
+
              "\n")))))))
 ;;; .yas-setup.el ends here
