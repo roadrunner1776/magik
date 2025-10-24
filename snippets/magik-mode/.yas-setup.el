@@ -85,10 +85,10 @@ If no pragma is found, return the default pragma
 defined by `magik-yasnippet-default-pragma`."
   (save-excursion
     (if (re-search-backward "^_pragma([^)]*)" nil t)
-	(match-string-no-properties 0)
+        (match-string-no-properties 0)
       (if (re-search-forward "^_pragma([^)]*)" nil t)
-	  (match-string-no-properties 0)
-	magik-yasnippet-default-pragma))))
+          (match-string-no-properties 0)
+        magik-yasnippet-default-pragma))))
 
 (defun magik-yasnippet-pragma-snippet (end-of-cursor?)
   "Create the pragma snippet in a string.
