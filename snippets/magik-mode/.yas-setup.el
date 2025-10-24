@@ -192,7 +192,5 @@ If the buffer is not visiting a file, return an empty string."
                          slot
                          (cl-incf dollar-start-count)))
                slots
-               (number-sequence 0 (1- (length slots)))))
-
-             "\n")))))))
+               (number-sequence 0 (1- (length slots))))))))))))
 ;;; .yas-setup.el ends here
