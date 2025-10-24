@@ -34,8 +34,8 @@
 nil to disable documentation."
   :group 'magik-yasnippet
   :type  '(choice (const :tag "Smallworld method documentation style" sw-method-doc)
-		  (const :tag "Type-based documentation" type-doc)
-		  (const :tag "No documentation" nil)))
+                  (const :tag "Type-based documentation" type-doc)
+                  (const :tag "No documentation" nil)))
 
 (defcustom magik-yasnippet-default-documentation "\t## \n\t## \n\t## "
   "Default documentation string to insert."
@@ -110,7 +110,7 @@ Returns a list with a snippet string and the amount of $ inserted internally/"
 	t
       (if (re-search-forward "^_pragma([^)]*)" nil t)
 	  t
-        nil))))
+	nil))))
 
 (defun magik-yasnippet-prev-class-name ()
   "Search for the previous class name in the buffer.
