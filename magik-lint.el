@@ -72,7 +72,7 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
             "--max-infractions" (eval (number-to-string flycheck-checker-error-threshold))
             "--msg-template" "\"${path}:${line}:${column}:${end_line}:${end_column}: (${category}) [${symbol}] ${msg}\""
             "--column-offset" "+1"
-            source)
+            source-original)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":" end-line ":" end-column ": " (or "(Critical)" "(Major)") " [" (id (one-or-more (not (any "]")))) "] " (message) line-end)
    (warning line-start (file-name) ":" line ":" column ":" end-line ":" end-column ": (Minor) [" (id (one-or-more (not (any "]")))) "] " (message) line-end))
