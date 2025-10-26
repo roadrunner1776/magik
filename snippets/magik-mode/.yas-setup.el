@@ -199,4 +199,9 @@ If the buffer is not visiting a file, return an empty string."
   (save-excursion
     (let ((line-after-point (buffer-substring-no-properties (point) (line-end-position))))
       (string-match-p "^\\s-*$" line-after-point))))
+
+(defun magik-yasnippet--line-after-point-contains-method-p ()
+  "Return t if the text after point in the current line has _method."
+  (save-excursion
+     (re-search-forward "_method" (line-end-position) t)))
 ;;; .yas-setup.el ends here

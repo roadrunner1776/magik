@@ -2,6 +2,7 @@
 # name: iter method
 # key: iter
 # expand-env: ((yas-indent-line 'fixed))
+# condition: (not (magik-yasnippet--line-after-point-contains-method-p))
 # group: methods
 # type: command
 # --
