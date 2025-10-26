@@ -197,7 +197,8 @@ If the buffer is not visiting a file, return an empty string."
 (defun magik-yasnippet--after-point-empty-p ()
   "Return t if the line after point is empty or contain only whitespace."
   (save-excursion
-    (re-search-forward "^\\s-*$" (line-end-position) t)))
+    (let ((line-after-point (buffer-substring-no-properties (point) (line-end-position))))
+      (string-match-p "^\\s-*$" line-after-point))))
 
 (defun magik-yasnippet--line-after-point-contains-method-p ()
   "Return t if the text after point in the current line has _method."
