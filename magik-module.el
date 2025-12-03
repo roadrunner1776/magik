@@ -53,6 +53,10 @@ See `imenu-generic-expression'.")
   '("condition_message_accesor" "description" "do_not_translate" "hidden" "install_requires" "language" "messages" "optional" "required_by" "requires_datamodel" "requires_java" "requires" "tests_modules" "test" "templates" "end")
   "List of Magik module keywords.")
 
+(defvar magik-module-installation-keywords
+  '("ace_installation" "auth_installation" "case_installation" "style_installation" "system_installation")
+  "List of Magik module installation keywords.")
+
 (defgroup magik-module-faces nil
   "Faces for displaying text in a Magik module.def file."
   :group 'magik-module)
@@ -86,6 +90,7 @@ See `imenu-generic-expression'.")
 (defcustom magik-module-font-lock-keywords
   (list
    (list (concat "^\\<\\(" (mapconcat 'identity magik-module-keywords "\\|") "\\)") 0 ''magik-module-keyword-face t)
+   (list (concat "^\\<\\(" (mapconcat 'identity magik-module-installation-keywords "\\|") "\\)") 0 ''magik-module-keyword-face t)
    '("^\\(\\sw+\\)\\s-*$"
      (1 'magik-module-name-face))
    '("^\\(\\sw+\\)\\s-+\\([0-9]+\\(?:\\s-*[0-9]+\\)?\\)"
