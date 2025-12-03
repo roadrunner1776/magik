@@ -68,7 +68,7 @@ See `imenu-generic-expression'.")
    '("^\\(\\sw+\\)\\s-*\\(config_product\\|customisation_product\\|layered_product\\)"
      (1 'magik-product-name-face)
      (2 'magik-product-type-face))
-   '("^\\(version\\)\\s-*\\([0-9]+\\(?:\\.[0-9]+\\)?\\(?:\\.[0-9]+\\)?\\)\\(.*\\)"
+   '("^\\(version\\)\\s-*\\([0-9]+\\(?:\\.[0-9]+\\)\\{1,3\\}\\(?:-[0-9]+\\)?\\)\\(.*\\)"
      (1 'magik-product-keyword-face)
      (2 'magik-number-face)
      (3 'magik-comment-face))
