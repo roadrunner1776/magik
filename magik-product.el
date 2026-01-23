@@ -71,7 +71,7 @@ See `imenu-generic-expression'.")
    '("^\\(version\\)\\s-\\(.*\\)"
      (1 'magik-product-keyword-face)
      (2 'magik-number-face))
-   (list (concat "^\\<\\(" (mapconcat 'identity magik-product-keywords "\\|") "\\)") 0 ''magik-product-keyword-face t))
+   (list (concat "^\\<\\(" (mapconcat 'identity magik-product-keywords "\\|") "\\)\\>") 0 ''magik-product-keyword-face t))
   "Default fontification of product.def files."
   :group 'magik-product
   :type 'sexp)
