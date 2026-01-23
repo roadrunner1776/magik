@@ -3,10 +3,23 @@
 # key: method
 # expand-env: ((yas-indent-line 'fixed))
 # group: methods
+# type: command
 # --
-`(magik-yasnippet-prev-pragma)`
-_method `(magik-yasnippet-prev-class-name-with-dot)`${1:name}
-`(magik-yasnippet-documentation)`
-	$0
-_endmethod
-$
+(let* ((snippet-content '())
+       (pragma-snippet (car (magik-yasnippet-pragma-snippet nil)))
+       (dollar-count (cadr (magik-yasnippet-pragma-snippet nil)))
+       (doc-string (magik-yasnippet-documentation))
+       (method-line (concat "_method " (magik-yasnippet-prev-class-name-with-dot)
+                            "${" (number-to-string (1+ dollar-count)) ":name}")))
+
+  (setq snippet-content
+	(delq nil
+              (list pragma-snippet
+		    method-line
+		    (unless (string-empty-p doc-string) doc-string)
+		    "\t$0"
+		    "_endmethod"
+		    "$"
+                    "")))
+
+  (yas-expand-snippet (string-join snippet-content "\n")))

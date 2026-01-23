@@ -2,11 +2,20 @@
 # name: define_slot_access
 # key: define_slot_access
 # group: object oriented.slot
+# type: command
 # --
-`(magik-yasnippet-prev-pragma)`
-`(magik-yasnippet-documentation t)`
-`(magik-yasnippet-prev-class-name-with-dot)`define_slot_access(:${1:name}, ${2:$$(yas-completing-read
-"Flag?:
+(let* ((snippet-content '())
+       (pragma-snippet (car (magik-yasnippet-pragma-snippet nil)))
+       (dollar-count (cadr (magik-yasnippet-pragma-snippet nil)))
+       (doc-string (magik-yasnippet-documentation))
+       (slotaccess-line
+        (concat
+         (magik-yasnippet-prev-class-name-with-dot) "define_slot_access(:${"
+         (number-to-string (+ dollar-count 1))
+         ":name}, ${"
+         (number-to-string (+ dollar-count 2))
+         ":$$(yas-completing-read \"
+Flag?:
 ##  flag               flavour        get  set  boot
 ##  ------------------------------------------------
 ##  :read/:readable    :public/false  pub  x    x
@@ -14,7 +23,16 @@
 ##  :write/:writable   :public        pub  pub  pub
 ##  :write/:writable   :read_only     pub  pri  pri
 ##  :write/:writable   :private       pri  pri  pri
-" '(":readable" ":writable" ":read" ":write"))})
-$
+\"
+'(:readable :writable :read :write))})")))
 
-$0
+  (setq snippet-content
+        (delq nil
+              (list pragma-snippet
+                    (unless (string-empty-p doc-string) doc-string)
+                    slotaccess-line
+                    "$"
+                    ""
+                    "$0")))
+
+  (yas-expand-snippet (string-join snippet-content "\n")))
