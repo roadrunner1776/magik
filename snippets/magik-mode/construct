@@ -27,6 +27,7 @@
                     method-init-line
 		    (unless (string-empty-p doc-string) doc-string)
                     slots-line
+                    self-line
                     endmethod-lines
 		    "$0")))
 

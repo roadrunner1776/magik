@@ -70,17 +70,20 @@ Otherwise, return VALUE."
 If UNTABBED is non-nil remove the tabs from the documentation string.
 When documentation style is nil (disabled), it kills the current line."
   (if magik-yasnippet-documentation-style
-      (let ((documentation-string (pcase magik-yasnippet-documentation-style
-                                    (`sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
-                                    (`type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation)))))
+      (let ((documentation-string
+             (pcase magik-yasnippet-documentation-style
+               (`sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
+               (`type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation))
+               (`nil ""))))
         (if untabbed
             (replace-regexp-in-string "\t" "" documentation-string)
           documentation-string))
     (kill-line)))
 
 (defun magik-yasnippet-pragma ()
-  "Search for the previous pragma in the buffer.
+  "Search for a pragma in the buffer.
 If a previous pragma is found, return it as a string.
+If a next pragma is found, return it as a string.
 If no pragma is found, return the default pragma
 defined by `magik-yasnippet-default-pragma`."
   (save-excursion
@@ -89,6 +92,8 @@ defined by `magik-yasnippet-default-pragma`."
       (if (re-search-forward "^_pragma([^)]*)" nil t)
           (match-string-no-properties 0)
         magik-yasnippet-default-pragma))))
+
+(defalias 'magik-yasnippet-prev-pragma 'magik-yasnippet-pragma "supporting old function name.")
 
 (defun magik-yasnippet-pragma-snippet (end-of-cursor?)
   "Create the pragma snippet in a string.
