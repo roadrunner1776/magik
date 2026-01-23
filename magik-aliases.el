@@ -143,6 +143,9 @@ If any function returns t, then the buffer is displayed."
 (defvar magik-aliases-process-environment nil
   "Stored variable `process-environment' for executing Magik session command.")
 
+(defvar-local magik-aliases--original-local-map nil
+  "Stores the original local map before overriding for read-only.")
+
 (defun magik-aliases-customize ()
   "Open Customization buffer for Aliases Mode."
   (interactive)
@@ -167,7 +170,8 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
 
   (add-hook 'read-only-mode-hook #'magik-aliases--update-show-trailing-whitespace nil t)
   (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
-  (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
+  (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t)
+  (add-hook 'read-only-mode-hook #'magik-aliases--update-keymap nil t))
 
 (defvar magik-aliases-menu nil
   "Menu for Aliases mode.")
@@ -189,19 +193,20 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
     (setq major-mode 'fundamental-mode) ;; prevent current buffer being listed.
     (magik-aliases-update-sw-menu)))
 
-(defun magik-aliases-n ()
-  "If buffer is read-only goto next alias, else insert SPC."
-  (interactive)
+(defun magik-aliases--update-keymap ()
+  "Update keymap bindings depending on `buffer-read-only'."
   (if buffer-read-only
-      (magik-aliases-next)
-    (magik-aliases-insert " ")))
-
-(defun magik-aliases-down ()
-  "If buffer is read-only goto next alias, else insert <down>."
-  (interactive)
-  (if buffer-read-only
-      (magik-aliases-next)
-    (forward-line)))
+      (progn
+        (unless magik-aliases--original-local-map
+          (setq magik-aliases--original-local-map (current-local-map)))
+        (let ((override-map (make-sparse-keymap)))
+          (define-key magik-aliases-mode-map " "            'magik-aliases-next)
+          (define-key magik-aliases-mode-map (kbd "<down>") 'magik-aliases-next)
+          (define-key magik-aliases-mode-map "q"            'magik-aliases-quit)
+          (use-local-map (make-composed-keymap override-map magik-aliases--original-local-map))))
+    (when magik-aliases--original-local-map
+      (use-local-map magik-aliases--original-local-map)
+      (setq magik-aliases--original-local-map nil))))
 
 (defun magik-aliases-next ()
   "Move point to next valid alias listed."
@@ -213,21 +218,10 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
     (when (re-search-forward magik-aliases-definition-regexp nil t)
       (forward-line))))
 
-(defun magik-aliases-q ()
-  "If buffer is read-only goto next alias, else insert q."
-  (interactive)
-  (if buffer-read-only
-      (magik-aliases-quit)
-    (magik-aliases-insert "q")))
-
 (defun magik-aliases-quit ()
   "Quit, without selecting anything, aliases selection mode."
   (interactive)
   (kill-buffer (current-buffer)))
-
-(defun magik-aliases-insert (arg)
-  "Insert ARG at point."
-  (insert arg))
 
 (defun magik-aliases-list ()
   "Return list of alias definitions."
@@ -490,6 +484,7 @@ If `buffer-read-only' is t, set it to nil (and vice-versa)."
 
 ;;; Package initialisation
 (add-hook 'magik-aliases-mode-hook 'magik-aliases-update-sw-menu)
+(add-hook 'magik-aliases-mode-hook 'magik-aliases-update-keymap)
 
 (modify-syntax-entry ?_ "w" magik-aliases-mode-syntax-table)
 (modify-syntax-entry ?: "w" magik-aliases-mode-syntax-table)
@@ -521,10 +516,7 @@ If `buffer-read-only' is t, set it to nil (and vice-versa)."
 (progn
   ;; ------------------------ magik aliases mode ------------------------
 
-  (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
-  (define-key magik-aliases-mode-map " "                'magik-aliases-n)
-  (define-key magik-aliases-mode-map (kbd "<down>")     'magik-aliases-down)
-  (define-key magik-aliases-mode-map "q"                'magik-aliases-q))
+  (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program))
 
 (provide 'magik-aliases)
 ;;; magik-aliases.el ends here
