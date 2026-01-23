@@ -362,8 +362,8 @@ Will set `gis-version-file' to FILE."
               ((file-exists-p (match-string-no-properties 3))
                nil)
               (t
-               (goto-char (match-beginning 3))
-               (insert magik-version-invalid-string " "))))))
+               (end-of-line)
+               (insert " " magik-version-invalid-string))))))
 
   (if (stringp magik-version-current)
       (save-excursion
