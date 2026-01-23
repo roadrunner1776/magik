@@ -2,6 +2,6 @@
 # name: pragma
 # key: pragma
 # group: documentation
-# TODO: If we use the default pragma, put the cursor after classify_level=
+# type : command
 # --
-`(magik-yasnippet-prev-pragma)`$0
+(yas-expand-snippet (car (magik-yasnippet-pragma-snippet t)))
