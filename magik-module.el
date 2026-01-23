@@ -130,6 +130,7 @@ You can customize Module Mode with the `magik-module-mode-hook`.
   :abbrev-table nil
 
   (compat-call setq-local
+               comment-start-skip "#+ *"
                require-final-newline t
                imenu-generic-expression magik-module-imenu-generic-expression
                font-lock-defaults '(magik-module-font-lock-keywords nil t)))

@@ -104,6 +104,7 @@ You can customize Product Mode with the `magik-product-mode-hook`.
   :syntax-table nil
 
   (compat-call setq-local
+               comment-start-skip "#+ *"
                require-final-newline t
                imenu-generic-expression magik-product-imenu-generic-expression
                font-lock-defaults '(magik-product-font-lock-keywords nil t)))
