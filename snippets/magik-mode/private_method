@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: private method
 # key: private
+# condition: (not (magik-yasnippet--line-after-point-contains-method-p))
 # expand-env: ((yas-indent-line 'fixed))
 # group: methods
 # --
