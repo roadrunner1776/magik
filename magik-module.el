@@ -91,9 +91,9 @@ See `imenu-generic-expression'.")
   (list
    (list (concat "^\\<\\(" (mapconcat 'identity magik-module-keywords "\\|") "\\)") 0 ''magik-module-keyword-face t)
    (list (concat "^\\<\\(" (mapconcat 'identity magik-module-installation-keywords "\\|") "\\)") 0 ''magik-module-keyword-face t)
-   '("^\\(\\sw+\\)\\s-*$"
+   '("^\\([[:word:]!]+\\)\\s-*$"
      (1 'magik-module-name-face))
-   '("^\\(\\sw+\\)\\s-+\\([0-9]+\\(?:\\s-*[0-9]+\\)?\\)"
+   '("^\\([[:word:]!]+\\)\\s-+\\([0-9]+\\(?:\\s-*[0-9]+\\)?\\)"
      (1 'magik-module-name-face)
      (2 'magik-number-face)))
   "Default fontification of module.def files."
