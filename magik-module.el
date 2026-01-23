@@ -95,7 +95,8 @@ See `imenu-generic-expression'.")
      (1 'magik-module-name-face))
    '("^\\([[:word:]!]+\\)\\s-+\\([0-9]+\\(?:\\s-*[0-9]+\\)?\\)"
      (1 'magik-module-name-face)
-     (2 'magik-number-face)))
+     (2 'magik-number-face))
+   (list (concat "^\\<\\(" (mapconcat 'identity magik-module-keywords "\\|") "\\)\\>") 0 ''magik-module-keyword-face t))
   "Default fontification of module.def files."
   :group 'magik-module
   :type 'sexp)
