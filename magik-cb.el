@@ -482,6 +482,8 @@ Set METHOD and CLASS if given."
            t)
           ((and magik-session-buffer (get-buffer magik-session-buffer) (get-buffer-process magik-session-buffer))
            (setq gis magik-session-buffer))
+          ((not gis)
+           (error "There is no Magik Session running"))
           (t
            (setq smallworld-gis (buffer-local-value 'magik-smallworld-gis (get-buffer gis))
                  magik-cb-file (magik-cb-set-filename smallworld-gis)
