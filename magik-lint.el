@@ -76,7 +76,7 @@ See URL `https://github.com/StevenLooman/sonar-magik/tree/master/magik-lint'."
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":" end-line ":" end-column ": " (or "(Critical)" "(Major)") " [" (id (one-or-more (not (any "]")))) "] " (message) line-end)
    (warning line-start (file-name) ":" line ":" column ":" end-line ":" end-column ": (Minor) [" (id (one-or-more (not (any "]")))) "] " (message) line-end))
-  :modes (magik-mode magik-ts-mode))
+  :modes (magik-mode magik-ts-mode magik-module-mode magik-product-mode magik-loadlist-mode))
 
 (when (and (eq system-type 'windows-nt)
            (not (funcall flycheck-executable-find "java")))
