@@ -66,19 +66,16 @@ Otherwise, return VALUE."
     value))
 
 (defun magik-yasnippet-documentation (&optional untabbed)
-  "Insert the documentation string based on `magik-yasnippet-documentation-style'.
-If UNTABBED is non-nil remove the tabs from the documentation string.
-When documentation style is nil (disabled), it kills the current line."
-  (if magik-yasnippet-documentation-style
-      (let ((documentation-string
-             (pcase magik-yasnippet-documentation-style
-               (`sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
-               (`type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation))
-               (`nil ""))))
-        (if untabbed
-            (replace-regexp-in-string "\t" "" documentation-string)
-          documentation-string))
-    (kill-line)))
+  "Return the documentation string based on `magik-yasnippet-documentation-style'.
+If UNTABBED is non-nil remove the tabs from the documentation string."
+  (let ((documentation-string
+         (pcase magik-yasnippet-documentation-style
+           (`sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
+           (`type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation))
+           (`nil ""))))
+    (if untabbed
+        (replace-regexp-in-string "\t" "" documentation-string)
+      documentation-string)))
 
 (defun magik-yasnippet-pragma ()
   "Search for a pragma in the buffer.
