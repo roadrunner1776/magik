@@ -205,5 +205,5 @@ If the buffer is not visiting a file, return an empty string."
 (defun magik-yasnippet--line-after-point-contains-method-p ()
   "Return t if the text after point in the current line has _method."
   (save-excursion
-     (re-search-forward "_method" (line-end-position) t)))
+    (re-search-forward "_method" (line-end-position) t)))
 ;;; .yas-setup.el ends here
