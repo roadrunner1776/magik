@@ -45,7 +45,7 @@ form the top section of the SW->Alias Files submenu."
   :group 'magik-aliases
   :type  '(repeat file))
 
-(defcustom magik-aliases-program "runalias.exe"
+(defcustom magik-aliases-program (concat "runalias" (when (eq system-type 'windows-nt) ".exe"))
   "*Program to process an alias file."
   :group 'magik-aliases
   :type  'string)
