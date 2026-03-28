@@ -56,6 +56,11 @@ Listed by `magik-version' or `magik-version-file'."
   :group 'magik-version
   :type  'string)
 
+(defcustom magik-version-validate-entries t
+  "Whether the file entries in the gis-version are checked."
+  :group 'magik-version
+  :type 'boolean)
+
 (defcustom magik-version-help "Select a Smallworld Core Product Installation.\n\nThe product you select will define the environment for any new Smallworld\nsessions that are started.\n\nTo make the selection, move the cursor to the line you want and press RETURN.\nOr press 'a' to open the gis_aliases file.\n\n\nPress 'q' to exit and do nothing.\n\n"
   "Help text displayed at top of gis_version buffer."
   :group 'magik-version
@@ -169,15 +174,17 @@ has more than one aliases file available."
                   (path (cdr (assoc lp lp-alist))))
              (when path
                (setq alias-file (file-name-concat path "config" "gis_aliases"))))))
-    (when alias-file
-      (kill-buffer (current-buffer))
-      (find-file alias-file)
-      (compat-call setq-local
-                   magik-smallworld-gis smallworld-gis
-                   magik-version-current stream)
-      (read-only-mode t)
-      (magik-aliases-next)
-      (set-buffer-modified-p nil))))
+    (if alias-file
+        (progn
+          (kill-buffer (current-buffer))
+          (find-file alias-file)
+          (compat-call setq-local
+                       magik-smallworld-gis smallworld-gis
+                       magik-version-current stream)
+          (read-only-mode t)
+          (magik-aliases-next)
+          (set-buffer-modified-p nil))
+      (error "Could not find alias file associated to: %s" smallworld-gis))))
 
 (defun magik-version-next ()
   "Move point to next valid version listed."
@@ -359,7 +366,8 @@ Will set `gis-version-file' to FILE."
         (insert " ")
         (cond ((string-match magik-version-invalid-string (match-string-no-properties 3))
                nil)
-              ((file-exists-p (match-string-no-properties 3))
+              ((or (not magik-version-validate-entries)
+                   (file-exists-p (match-string-no-properties 3)))
                nil)
               (t
                (goto-char (match-beginning 3))
