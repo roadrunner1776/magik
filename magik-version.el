@@ -157,7 +157,7 @@ has more than one aliases file available."
   (let* ((version-list (magik-version-at-version-definition))
          (stream (car version-list))
          (smallworld-gis (nth 2 version-list))
-         (lp-alist (magik-aliases-layered-products-file (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
+         (lp-alist (magik-aliases-all-layered-products smallworld-gis))
          alias-file)
     (when (not stream)
       (error "Invalid selection"))
