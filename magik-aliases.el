@@ -399,21 +399,7 @@ LAYERED_PRODUCTS configuration file."
                 (when (file-exists-p (file-name-concat dir "config" "gis_aliases"))
                   (let ((lp-dir (cons lp dir)))
                     (or (member lp-dir alist) (push lp-dir alist)))))))
-        (nreverse alist)))))
-
-(defun magik-aliases-all-layered-products (smallworld-gis)
-  "Return deduplicated alist of layered products for SMALLWORLD-GIS.
-Checks both the path derived from SMALLWORLD-GIS and the
-`SMALLWORLD_REGISTRY' environment variable."
-  (delete-dups
-   (append
-    (magik-aliases-layered-products-file
-     (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis)
-     smallworld-gis)
-    (when-let ((registry (getenv "SMALLWORLD_REGISTRY")))
-      (magik-aliases-layered-products-file
-       (file-name-concat registry "LAYERED_PRODUCTS")
-       smallworld-gis)))))
+        alist))))
 
 (defun magik-aliases-layered-products-acp-path (file smallworld-gis)
   "Read LAYERED_PRODUCTS configuration file using SMALLWORLD-GIS.
@@ -485,7 +471,8 @@ If `buffer-read-only' is t, set it to nil (and vice-versa)."
               ]
             default-files))
     (when smallworld-gis
-      (dolist (lp (magik-aliases-all-layered-products smallworld-gis))
+      (dolist (lp (magik-aliases-layered-products-file
+                   (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
         (push `[,(format "%s: %s" (car lp) (cdr lp))
                 (progn
                   (find-file ,(file-name-concat (cdr lp) "config" "gis_aliases"))
@@ -493,7 +480,6 @@ If `buffer-read-only' is t, set it to nil (and vice-versa)."
                 ,(cdr lp)
                 ]
               lp-files))
-      (setq lp-files (nreverse lp-files))
       (push "---" lp-files))
 
     (cl-loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)
