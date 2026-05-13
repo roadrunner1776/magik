@@ -45,6 +45,11 @@ form the top section of the SW->Alias Files submenu."
   :group 'magik-aliases
   :type  '(repeat file))
 
+(defcustom magik-aliases-environment-file (concat "environment" (when (eq system-type 'windows-nt) ".bat"))
+  "*Name of the environment file."
+  :group 'magik-aliases
+  :type  'string)
+
 (defcustom magik-aliases-program (concat "runalias" (when (eq system-type 'windows-nt) ".exe"))
   "*Program to process an alias file."
   :group 'magik-aliases
@@ -306,15 +311,10 @@ With a prefix arg, ask user for current directory to use."
              (setq alias (match-string-no-properties 1)))
             (t
              (error "Can't find any alias definitions")))
-      (when-let* ((dir (file-name-directory file))
-                  (env-file (file-name-concat dir
-                                              (if (eq system-type 'windows-nt)
-                                                  "environment.bat"
-                                                "environment")))
-                  (_ (file-exists-p env-file)))
-        (setq args (append args (list "-e" env-file))))
-      (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last
-
+      (let ((env-file (file-name-concat (file-name-directory file) magik-aliases-environment-file)))
+        (when (file-exists-p env-file)
+          (setq args (append args (list "-e" env-file) nil))))
+     (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last
       (if (stringp version)
           (setq buf (concat buf " " version)))
       (if alias
