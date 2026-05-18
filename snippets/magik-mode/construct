@@ -3,21 +3,32 @@
 # key: construct
 # expand-env: ((yas-indent-line 'fixed))
 # group: object oriented
-# TODO: If we have slots, put the cursor after the first slot assignment
+# type: command
 # --
-`(magik-yasnippet-prev-pragma)`
-_method `(magik-yasnippet-prev-class-name-with-dot)`new()
-`(magik-yasnippet-documentation)`
-	>> _clone.init()
-_endmethod
-$
+(let* ((snippet-content '())
+       (pragma-snippet (car (magik-yasnippet-pragma-snippet nil)))
+       (dollar-count (cadr (magik-yasnippet-pragma-snippet nil)))
+       (doc-string (magik-yasnippet-documentation))
+       (method-new-line (concat "_method " (magik-yasnippet-prev-class-name-with-dot) "new()"))
+       (method-init-line (concat "_method " (magik-yasnippet-prev-class-name-with-dot) "init()"))
+       (clone-line "\t>> _clone.init()")
+       (slots-line (magik-yasnippet-prev-slotted-exemplar-slots dollar-count))
+       (self-line "\t>> _self")
+       (endmethod-lines "_endmethod\n$\n"))
 
-`(magik-yasnippet-prev-pragma)`
-_private _method `(magik-yasnippet-prev-class-name-with-dot)`init()
-`(magik-yasnippet-documentation)`
-`(magik-yasnippet-prev-slotted-exemplar-slots)`
-	>> _self
-_endmethod
-$
+  (setq snippet-content
+	(delq nil
+              (list pragma-snippet
+                    method-new-line
+		    (unless (string-empty-p doc-string) doc-string)
+		    clone-line
+                    endmethod-lines
+                    pragma-snippet
+                    method-init-line
+		    (unless (string-empty-p doc-string) doc-string)
+                    slots-line
+                    self-line
+                    endmethod-lines
+		    "$0")))
 
-$0
+  (yas-expand-snippet (string-join snippet-content "\n")))

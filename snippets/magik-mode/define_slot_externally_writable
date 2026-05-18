@@ -2,12 +2,25 @@
 # name: define_slot_externally_writable
 # key: define_slot_externally_writable
 # group: object oriented.slot
+# type: command
 # --
-`(magik-yasnippet-prev-pragma)`
-##
-##
-##
-`(magik-yasnippet-prev-class-name-with-dot)`define_slot_externally_writable(:${1:name})
-$
+(let* ((snippet-content '())
+       (pragma-snippet (car (magik-yasnippet-pragma-snippet nil)))
+       (dollar-count (cadr (magik-yasnippet-pragma-snippet nil)))
+       (doc-string (magik-yasnippet-documentation))
+       (define-line (concat
+		     (magik-yasnippet-prev-class-name-with-dot)
+		     "define_slot_externally_writeable(:${"
+		     (number-to-string (+ dollar-count 1))
+		     ":name})")))
 
-$0
+  (setq snippet-content
+	(delq nil
+              (list pragma-snippet
+		    (unless (string-empty-p doc-string) doc-string)
+		    define-line
+		    "$"
+		    ""
+		    "$0")))
+
+  (yas-expand-snippet (string-join snippet-content "\n")))
