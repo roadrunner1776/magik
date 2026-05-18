@@ -1,0 +1,27 @@
+# -*- mode: snippet -*-
+# name: add_child
+# key: add_child
+# group: define.object oriented
+# type: command
+# --
+(let* ((snippet-content '())
+       (pragma-snippet (car (magik-yasnippet-pragma-snippet nil)))
+       (dollar-count (cadr (magik-yasnippet-pragma-snippet nil)))
+       (doc-string (magik-yasnippet-documentation))
+       (property-line (concat
+                      "${"
+                      (number-to-string (+ dollar-count 1))
+		       ":mixin}.add_child(${"
+                       (number-to-string (+ dollar-count 2))
+		       ":"
+                       (magik-yasnippet-prev-class-name)
+		       "})")))
+
+  (setq snippet-content
+	(delq nil
+              (list pragma-snippet
+		    property-line
+		    "$"
+		    "$0")))
+
+  (yas-expand-snippet (string-join snippet-content "\n")))
