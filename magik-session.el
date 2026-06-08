@@ -99,12 +99,12 @@ Used for switching to the first Smallworld session."
   :group 'magik-session
   :type '(choice string (const nil)))
 
-(defcustom magik-session-buffer-default-name "*gis*"
-  "*The default name of a Magik Session buffer when creating new Magik sessions."
+(defcustom magik-session-buffer-default-name "*magik*"
+  "*The default name of a Magik session buffer when creating new Magik sessions."
   :group 'magik-session
   :type 'string)
 
-(defcustom magik-session-prompt "Magik\\(\\|SF\\)> "
+(defcustom magik-session-prompt (regexp-opt `("Magik> " "MagikSF> " "Majestik> "))
   "String or Regular expression identifying the default Magik Prompt.
 If global value is nil, a Magik session will attempt to discover the current
 setting of the Magik Prompt by calling `magik-session-prompt-get'."
