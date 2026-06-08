@@ -55,7 +55,7 @@ form the top section of the SW->Alias Files submenu."
   :group 'magik-aliases
   :type  'string)
 
-(defcustom magik-aliases-program-path '("../bin/x86" "../../product/bin/x86")
+(defcustom magik-aliases-program-path '("../bin/x86" "../../product/bin/x86" "../bin/share")
   "*Path to `magik-aliases-program'.
 Setting this sets the default value.  When opening a gis_aliases file,
 the buffer local value of this variable will be set to the directory
