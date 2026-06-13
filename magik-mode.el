@@ -37,6 +37,7 @@
 (require 'yasnippet)
 (require 'magik-doc-gen)
 (require 'magik-template)
+(require 'magik-completion)
 
 (defgroup magik nil
   "Customise Magik Language group."
@@ -111,6 +112,7 @@ concrete implementations."
     (abbrev-mode t)
     (yas-minor-mode t))
 
+  (magik-completion-setup)
   (imenu-add-menubar-index))
 
 ;;;###autoload

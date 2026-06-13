@@ -567,11 +567,13 @@ Entry to this mode runs `magik-session-mode-hook`.
   (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
     (erase-buffer))
 
-  (add-hook 'before-change-functions 'magik-session--prepare-for-edit-cmd nil t)
-  (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu nil t)
-  (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu nil t)
-  (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu nil t)
-  (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t))
+  (magik-completion-setup)
+
+  (add-hook 'before-change-functions #'magik-session--prepare-for-edit-cmd nil t)
+  (add-hook 'menu-bar-update-hook #'magik-session-update-magik-session-menu nil t)
+  (add-hook 'menu-bar-update-hook #'magik-session-update-tools-magik-gis-menu nil t)
+  (add-hook 'menu-bar-update-hook #'magik-session-update-tools-magik-shell-menu nil t)
+  (add-hook 'kill-buffer-hook #'magik-session-buffer-alist-remove nil t))
 
 (defvar magik-session-menu nil
   "Keymap for the Magik session buffer menu bar.")
