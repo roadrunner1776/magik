@@ -590,7 +590,6 @@ Entry to this mode runs `magik-session-mode-hook`.
     [,"Unfold"                           magik-session-undisplay-history :active t :keys "<f2> <down>,   <f2> C-n"]
     "----"
     [,"Electric Template"                magik-explicit-electric-space           t]
-    [,"Symbol Complete"                  magik-symbol-complete                   t]
     ;; [,"Deep Print"                       magik-deep-print                      :active t :keys "<f2> x"]
     "----"
     [,"Previous Traceback"               magik-session-traceback-up              t]
@@ -1523,7 +1522,6 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (define-key magik-session-mode-map (kbd "<f2> p")      'magik-session-recall-prev-matching-cmd)
   (define-key magik-session-mode-map (kbd "<f2> n")      'magik-session-recall-next-matching-cmd)
 
-  (define-key magik-session-mode-map (kbd "<f4> <f4>")   'magik-symbol-complete)
   (define-key magik-session-mode-map (kbd "<f4> <up>")   'magik-session-traceback-up)
   (define-key magik-session-mode-map (kbd "<f4> <down>") 'magik-session-traceback-down)
   (define-key magik-session-mode-map (kbd "<f4> $")      'magik-session-shell)

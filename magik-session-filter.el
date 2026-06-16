@@ -206,44 +206,6 @@ action's function setting."
 ;;; generic magik-session-filter code ends here.
 
 ;;; Set up filter action functions for the Magik session process
-(defun magik-session-filter-action-completion (proc str)
-  "Magik sessions Filter Action interface for a Magik symbol completion.
-According to STR returned from Magik."
-  (let* ((ans (read str))
-         (curr-word (magik-utils--current-word))
-         (curr-word-len (length curr-word)))
-    (cond
-     ((eq (length ans) 0)
-      (message "Can't find completion for %s." curr-word))
-     ((eq (length ans) 1)
-      (if (eq (length (car ans)) curr-word-len)
-          (message "Sole completion.")
-        (insert (substring (car ans) curr-word-len))
-        (if (<= curr-word-len 2)
-            (message "Finding completions... Done"))))
-     (t
-      (let*
-          ((longest-common-prefix (car ans))
-           (len (length longest-common-prefix))
-           (strings (cdr ans))
-           i)
-        (while
-            strings
-          (setq i 0)
-          (while
-              (and (< i len)
-                   (< i (length (car strings)))
-                   (eq (aref (car strings) i) (aref longest-common-prefix i)))
-            (cl-incf i))
-          (setq len i)
-          (pop strings))
-        (if (> len curr-word-len)
-            (insert (substring longest-common-prefix curr-word-len len))
-          (with-output-to-temp-buffer "*magik completions*"
-            (display-completion-list ans))))
-      (if (<= curr-word-len 2)
-          (message "Finding completions...Done."))))))
-
 
 (defun magik-session-filter-action-deep-print (proc str)
   "Magik session Filter Action interface for a deep print action.
@@ -352,7 +314,6 @@ The behaviour is undefined if any search key and line or column are used."
        (message (error-message-string err))))
     (kill-buffer (current-buffer))))
 
-(magik-session-filter-register-action "\n" 'magik-session-filter-action-completion)
 (magik-session-filter-register-action "p"  'magik-session-filter-action-deep-print)
 (magik-session-filter-register-action "f"  'magik-session-filter-action-find-file)
 
