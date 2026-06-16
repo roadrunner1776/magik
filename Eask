@@ -10,7 +10,8 @@
 (package-file "magik-mode.el")
 (files "*.el" "snippets")
 
-(script "test" "echo \"Error: no test specified\" && exit 1")
+(add-load-path "test")
+(script "test" "eask test ert ./test/*-test.el")
 
 (source "gnu")
 (source "melpa")
