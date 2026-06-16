@@ -46,6 +46,13 @@
   "Completion-at-point support for Magik."
   :group 'magik)
 
+(defcustom magik-completion-enabled t
+  "When non-nil, enable Magik completion-at-point.
+Set to nil before mode activation to disable, or use
+`magik-completion-mode' to toggle interactively."
+  :type 'boolean
+  :group 'magik-completion)
+
 (defcustom magik-completion-enable-keywords t
   "When non-nil, include Magik keywords in completion candidates."
   :type 'boolean
@@ -902,22 +909,44 @@ Intended to be called after transmitting code to the session."
 
 ;;; --- Setup ---
 
-(defun magik-completion-setup ()
-  "Add Magik CAPF functions to the current buffer.
-Intended to be called from `magik-mode-hook' or `magik-session-mode-hook'."
-  ;; CB-backed completions (lower priority - added first)
-  (add-hook 'completion-at-point-functions #'magik-completion-at-point-conditions nil t)
-  (add-hook 'completion-at-point-functions #'magik-completion-at-point-globals nil t)
-  (add-hook 'completion-at-point-functions #'magik-completion-at-point-classes nil t)
-  (add-hook 'completion-at-point-functions #'magik-completion-at-point-methods nil t)
-  ;; Buffer-local completions (higher priority - added last so they run first)
-  (add-hook 'completion-at-point-functions #'magik-completion-at-point-slots nil t)
-  (add-hook 'completion-at-point-functions #'magik-completion-at-point-variables nil t)
-  (add-hook 'completion-at-point-functions #'magik-completion-at-point-builtins nil t)
-  (add-hook 'completion-at-point-functions #'magik-completion-at-point-keywords nil t)
-  ;; Invalidate cache when code is transmitted
+(defvar magik-completion--capf-functions
+  '(magik-completion-at-point-conditions
+    magik-completion-at-point-globals
+    magik-completion-at-point-classes
+    magik-completion-at-point-methods
+    magik-completion-at-point-slots
+    magik-completion-at-point-variables
+    magik-completion-at-point-builtins
+    magik-completion-at-point-keywords)
+  "List of Magik CAPF functions, lowest priority first.")
+
+(defun magik-completion--enable ()
+  "Add Magik CAPF functions to the current buffer."
+  (dolist (fn magik-completion--capf-functions)
+    (add-hook 'completion-at-point-functions fn nil t))
   (when (fboundp 'magik-transmit-region)
     (advice-add 'magik-transmit-region :after #'magik-completion-invalidate-cache)))
+
+(defun magik-completion--disable ()
+  "Remove Magik CAPF functions from the current buffer."
+  (dolist (fn magik-completion--capf-functions)
+    (remove-hook 'completion-at-point-functions fn t))
+  (when (fboundp 'magik-transmit-region)
+    (advice-remove 'magik-transmit-region #'magik-completion-invalidate-cache)))
+
+(define-minor-mode magik-completion-mode
+  "Toggle Magik completion-at-point support in the current buffer."
+  :lighter " MagikC"
+  (if magik-completion-mode
+      (magik-completion--enable)
+    (magik-completion--disable)))
+
+(defun magik-completion-setup ()
+  "Add Magik CAPF functions to the current buffer.
+Intended to be called from `magik-mode-hook' or `magik-session-mode-hook'.
+Respects `magik-completion-enabled'."
+  (when magik-completion-enabled
+    (magik-completion-mode 1)))
 
 (provide 'magik-completion)
 ;;; magik-completion.el ends here
