@@ -202,6 +202,7 @@ Returns the updated VARIABLES list."
   "Scan variables using regex (fallback when tree-sitter unavailable).
 Returns a list of variable name strings."
   (let ((variables '())
+        (limit (point))
         (method-start (save-excursion
                         (or (re-search-backward
                              "^\\s-*\\(_method\\|_proc\\|_block\\)" nil t)
@@ -211,14 +212,14 @@ Returns a list of variable name strings."
       ;; Find _local declarations
       (goto-char method-start)
       (while (re-search-forward
-              "\\_<_local\\s-+\\([a-z_][a-z0-9_!?]*\\)" (point) t)
+              "\\_<_local\\s-+\\([a-z_][a-z0-9_!?]*\\)" limit t)
         (let ((var (match-string-no-properties 1)))
           (unless (member var variables)
             (push var variables))))
       ;; Find << assignments (often introduces variables)
       (goto-char method-start)
       (while (re-search-forward
-              "\\b\\([a-z_][a-z0-9_!?]*\\)\\s-*<<" (point) t)
+              "\\b\\([a-z_][a-z0-9_!?]*\\)\\s-*<<" limit t)
         (let ((var (match-string-no-properties 1)))
           (unless (or (member var variables)
                       (string-prefix-p "_" var))
@@ -226,7 +227,7 @@ Returns a list of variable name strings."
       ;; Find _for loop variables
       (goto-char method-start)
       (while (re-search-forward
-              "\\_<_for\\s-+\\([a-z_][a-z0-9_!?, ]*\\)\\s-+_over" (point) t)
+              "\\_<_for\\s-+\\([a-z_][a-z0-9_!?, ]*\\)\\s-+_over" limit t)
         (let ((vars-str (match-string-no-properties 1)))
           (dolist (v (split-string vars-str "[, \t]+" t))
             (unless (member v variables)
