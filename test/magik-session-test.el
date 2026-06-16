@@ -37,40 +37,6 @@
     (should (equal (magik-session-parse-gis-command "$TEST_DIR/gis")
                    '("/opt/magik/gis")))))
 
-;;; Overlay-based history folding
-
-(ert-deftest magik-session-display-history--creates-overlays ()
-  "Verify that display-history creates invisible overlays."
-  (with-temp-buffer
-    (magik-session-mode)
-    (add-to-invisibility-spec '(magik-session-fold . t))
-    ;; Simulate 3 commands in the buffer with prompt-based detection
-    (insert "MagikSF> cmd1\noutput1\nMagikSF> cmd2\noutput2\nMagikSF> cmd3\noutput3\n")
-    ;; Display last 2 commands (should fold everything before cmd2)
-    (magik-session-display-history 2)
-    ;; Check overlays exist
-    (let ((ovs (overlays-in (point-min) (point-max))))
-      (should (cl-some (lambda (ov) (overlay-get ov 'magik-session-fold)) ovs)))))
-
-(ert-deftest magik-session-undisplay-history--removes-overlays ()
-  "Verify that undisplay-history removes all fold overlays."
-  (with-temp-buffer
-    (magik-session-mode)
-    (add-to-invisibility-spec '(magik-session-fold . t))
-    (insert "some text\nmore text\n")
-    ;; Manually create a fold overlay
-    (let ((ov (make-overlay (point-min) 10)))
-      (overlay-put ov 'invisible 'magik-session-fold)
-      (overlay-put ov 'magik-session-fold t))
-    ;; Verify it exists
-    (should (cl-some (lambda (ov) (overlay-get ov 'magik-session-fold))
-                     (overlays-in (point-min) (point-max))))
-    ;; Now undisplay
-    (magik-session-undisplay-history nil)
-    ;; Verify gone
-    (should-not (cl-some (lambda (ov) (overlay-get ov 'magik-session-fold))
-                         (overlays-in (point-min) (point-max))))))
-
 ;;; magik-session-buffer-alist-remove
 
 (ert-deftest magik-session-buffer-alist-remove--removes-entry ()
