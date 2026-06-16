@@ -10,9 +10,6 @@
 (package-file "magik-mode.el")
 (files "*.el" "snippets")
 
-(add-load-path "test")
-(script "test" "eask test ert ./test/*-test.el")
-
 (source "gnu")
 (source "melpa")
 
