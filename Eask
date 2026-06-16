@@ -18,6 +18,8 @@
 (depends-on "flycheck")
 (depends-on "yasnippet")
 
+(script "test" "eask test ert test/test-helper.el ./test/*-test.el")
+
 ;; do not try to compile magik-ts-mode.el if we are below 29.1
 (when (version< emacs-version "29.1")
   (add-hook 'eask-before-compile-hook

@@ -56,7 +56,7 @@ jobs:
           eask package
           eask install
           eask compile
-          eask test ert ./test/*-test.el
+          eask run script test
 
   melpazoid:
     runs-on: ubuntu-latest
