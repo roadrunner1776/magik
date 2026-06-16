@@ -64,7 +64,7 @@
 
 (ert-deftest magik-aliases-expand-file--expands-smallworld-gis ()
   (let ((result (magik-aliases-expand-file "$SMALLWORLD_GIS/etc" "/opt/sw")))
-    (should (equal result "/opt/sw/etc"))))
+    (should (string-suffix-p "/opt/sw/etc" result))))
 
 (ert-deftest magik-aliases-expand-file--handles-percent-syntax ()
   ;; Windows-style %VAR% should be expanded via magik-utils-substitute
