@@ -125,9 +125,9 @@ Returns a list of variable name strings visible at point."
     (let ((scope-node (magik-completion--ts-enclosing-scope node)))
       (when scope-node
         ;; Collect parameters from the method/proc signature
-        (magik-completion--ts-collect-params scope-node variables)
+        (setq variables (magik-completion--ts-collect-params scope-node variables))
         ;; Collect local variables and assignments within scope, before point
-        (magik-completion--ts-collect-locals scope-node variables)))
+        (setq variables (magik-completion--ts-collect-locals scope-node variables))))
     (delete-dups variables)))
 
 (defun magik-completion--ts-enclosing-scope (node)
@@ -140,7 +140,8 @@ Returns a list of variable name strings visible at point."
     current))
 
 (defun magik-completion--ts-collect-params (scope-node variables)
-  "Collect parameter names from SCOPE-NODE into VARIABLES list."
+  "Collect parameter names from SCOPE-NODE into VARIABLES list.
+Returns the updated VARIABLES list."
   (let ((params (treesit-node-children scope-node)))
     (dolist (child params)
       (when (equal (treesit-node-type child) "parameters")
@@ -149,17 +150,18 @@ Returns a list of variable name strings visible at point."
             (let ((name (treesit-node-text param t)))
               (unless (or (string-prefix-p "_" name)
                           (member name variables))
-                (push name variables)))))))))
+                (push name variables))))))))
+  variables)
 
 (defun magik-completion--ts-collect-locals (scope-node variables)
   "Collect local variables from SCOPE-NODE that appear before point.
-Adds to VARIABLES list."
+Returns the updated VARIABLES list."
   (let ((cursor-pos (point)))
     (magik-completion--ts-walk-for-assignments scope-node cursor-pos variables)))
 
 (defun magik-completion--ts-walk-for-assignments (node limit variables)
   "Walk NODE tree collecting variable names assigned before LIMIT position.
-Adds to VARIABLES list."
+Returns the updated VARIABLES list."
   (when (and node (< (treesit-node-start node) limit))
     (let ((type (treesit-node-type node)))
       (cond
@@ -193,7 +195,8 @@ Adds to VARIABLES list."
     ;; Recurse into children
     (dolist (child (treesit-node-children node))
       (when (< (treesit-node-start child) limit)
-        (magik-completion--ts-walk-for-assignments child limit variables)))))
+        (setq variables (magik-completion--ts-walk-for-assignments child limit variables)))))
+  variables)
 
 (defun magik-completion--regex-scan-variables ()
   "Scan variables using regex (fallback when tree-sitter unavailable).
@@ -744,11 +747,7 @@ Detects `object.meth' patterns and returns bounds of `meth'."
                    ;; Ensure there's a word/symbol before the dot
                    (let ((pre-dot (char-before (1- beg))))
                      (and pre-dot
-                          (or (memq (char-syntax pre-dot) '(?w ?_))
-                              ;; handles _self. _clone.
-                              (eq pre-dot ?f) ;; end of _self
-                              (eq pre-dot ?e) ;; end of _clone
-                              ))))
+                          (memq (char-syntax pre-dot) '(?w ?_)))))
           (cons beg end))))))
 
 ;;; --- Yasnippet post-completion ---
