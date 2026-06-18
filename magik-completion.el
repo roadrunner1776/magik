@@ -485,7 +485,8 @@ Returns a list of propertized candidate strings."
         (limit magik-completion-cb-max-methods)
         (in-kw (if (boundp 'magik-cb-in-keyword) magik-cb-in-keyword "  IN  "))
         (regexp nil))
-    (setq regexp (concat "^\\([^ \t\n]+\\)" in-kw "\\([^ \t\n]+\\)[  \t]+\\(.*\\)\n\\(.*\n\\)\n"))
+    (setq regexp (concat "^\\([^ \t\n]+\\)" in-kw "\\([^ \t\n]+\\)[  \t]+\\(.*\\)\n\\(.*\n\\)\n"
+                         "\\(\\(?:[ \t]+##.*\n\\)*\\)"))
     (goto-char (point-min))
     (save-match-data
       (while (and (< i limit)
@@ -494,6 +495,9 @@ Returns a list of propertized candidate strings."
                (class (match-string-no-properties 2))
                (classify (match-string-no-properties 3))
                (args-str (match-string-no-properties 4))
+               (doc (when-let* ((raw (match-string-no-properties 5))
+                                ((not (string-empty-p raw))))
+                      (replace-regexp-in-string "^[ \t]+## ?" "" raw)))
                (parsed-args (magik-completion--parse-args-line
                              (match-beginning 4)))
                (annotation (magik-completion--format-annotation
@@ -518,6 +522,7 @@ Returns a list of propertized candidate strings."
             (push (propertize method
                               'magik-class class
                               'magik-annotation annotation
+                              'magik-documentation doc
                               'magik-args (car parsed-args)
                               'magik-optional (cadr parsed-args)
                               'magik-gather (caddr parsed-args)
@@ -779,6 +784,14 @@ Returns a snippet string like \"(${1:arg1}, ${2:arg2})\" or nil."
                               all-params)))
           (concat start-sig (string-join fields ", ") ")$0"))))))
 
+(defun magik-completion--doc-buffer (candidate)
+  "Return a documentation buffer for CANDIDATE, or nil if none available."
+  (when-let* ((doc (get-text-property 0 'magik-documentation candidate)))
+    (with-current-buffer (get-buffer-create " *magik-completion-doc*")
+      (erase-buffer)
+      (insert doc)
+      (current-buffer))))
+
 (defun magik-completion--exit-function (candidate status)
   "Exit function for method completion.
 Inserts parameters as yasnippet when STATUS is `finished'."
@@ -812,6 +825,7 @@ Inserts parameters as yasnippet when STATUS is `finished'."
                     (lambda (c)
                       (when-let* ((ann (get-text-property 0 'magik-annotation c)))
                         (concat " " ann)))
+                    :company-doc-buffer #'magik-completion--doc-buffer
                     :exit-function #'magik-completion--exit-function))))))))
 
 (defun magik-completion-at-point-classes ()

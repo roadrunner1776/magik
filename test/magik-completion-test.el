@@ -210,5 +210,46 @@ Returns (ARGS OPTIONAL GATHER)."
     (let ((result (magik-completion--parse-args-line (point-min))))
       (should (equal (caddr result) '("args"))))))
 
+;;; magik-completion--doc-buffer
+
+(defun magik-completion-test--candidate-with-doc (doc)
+  "Return a candidate string with DOC as `magik-documentation' text property."
+  (propertize "write_on" 'magik-documentation doc))
+
+(ert-deftest magik-completion--doc-buffer--returns-nil-without-doc ()
+  "Candidates without documentation return nil."
+  (let ((cand (propertize "write_on")))
+    (should-not (magik-completion--doc-buffer cand))))
+
+(ert-deftest magik-completion--doc-buffer--returns-buffer-with-doc ()
+  "Candidates with documentation return a live buffer."
+  (let* ((cand (magik-completion-test--candidate-with-doc "Writes _self to A_STREAM."))
+         (buf (magik-completion--doc-buffer cand)))
+    (should (bufferp buf))
+    (should (buffer-live-p buf))))
+
+(ert-deftest magik-completion--doc-buffer--buffer-contains-doc ()
+  "The returned buffer's contents equal the documentation string."
+  (let* ((doc "Writes _self to A_STREAM.\nReturns _self.")
+         (cand (magik-completion-test--candidate-with-doc doc))
+         (buf (magik-completion--doc-buffer cand)))
+    (should (equal (with-current-buffer buf (buffer-string)) doc))))
+
+(ert-deftest magik-completion--doc-buffer--multiline-doc-preserved ()
+  "Multi-line documentation is stored verbatim."
+  (let* ((doc "First line.\nSecond line.\nThird line.")
+         (cand (magik-completion-test--candidate-with-doc doc))
+         (buf (magik-completion--doc-buffer cand)))
+    (should (equal (with-current-buffer buf (buffer-string)) doc))))
+
+(ert-deftest magik-completion--doc-buffer--reuses-named-buffer ()
+  "Successive calls reuse the same ` *magik-completion-doc*' buffer."
+  (let* ((buf1 (magik-completion--doc-buffer
+                (magik-completion-test--candidate-with-doc "first")))
+         (buf2 (magik-completion--doc-buffer
+                (magik-completion-test--candidate-with-doc "second"))))
+    (should (eq buf1 buf2))
+    (should (equal (with-current-buffer buf2 (buffer-string)) "second"))))
+
 (provide 'magik-completion-test)
 ;;; magik-completion-test.el ends here
