@@ -47,7 +47,7 @@
   :group 'magik)
 
 (defcustom magik-completion-enabled t
-  "When non-nil, enable Magik completion-at-point.
+  "When non-nil, enable Magik `completion-at-point'.
 Set to nil before mode activation to disable, or use
 `magik-completion-mode' to toggle interactively."
   :type 'boolean
@@ -517,8 +517,8 @@ Returns a list of propertized candidate strings."
                          (substring method-raw 0 -2))
                         (t method-raw))))
           (unless (or (string-empty-p method)
-                     (string-match-p "\\`\\s-" method)
-                     (member method candidates))
+                      (string-match-p "\\`\\s-" method)
+                      (member method candidates))
             (push (propertize method
                               'magik-class class
                               'magik-annotation annotation
@@ -794,6 +794,7 @@ Returns a snippet string like \"(${1:arg1}, ${2:arg2})\" or nil."
 
 (defun magik-completion--exit-function (candidate status)
   "Exit function for method completion.
+CANDIDATE is the completed string.
 Inserts parameters as yasnippet when STATUS is `finished'."
   (when (and (eq status 'finished)
              magik-completion-insert-params
@@ -949,7 +950,7 @@ Intended to be called after transmitting code to the session."
     (advice-remove 'magik-transmit-region #'magik-completion-invalidate-cache)))
 
 (define-minor-mode magik-completion-mode
-  "Toggle Magik completion-at-point support in the current buffer."
+  "Toggle Magik `completion-at-point' support in the current buffer."
   :lighter " MagikC"
   (if magik-completion-mode
       (magik-completion--enable)
