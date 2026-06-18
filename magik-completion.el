@@ -543,7 +543,7 @@ Returns a list (REQUIRED OPTIONAL GATHER)."
         (forward-char 1) ;; skip leading space
         (while (not (or (looking-at "$") (eolp)))
           (cond
-           ((looking-at "\\(OPT \\)?GATH \\(\\S-+\\)")
+           ((looking-at "\\(OPT \\)?GATH \\([^ \t\n]+\\)")
             (setq gather (list (match-string-no-properties 2)))
             (goto-char (match-end 0)))
            ((looking-at "OPT ")
@@ -765,24 +765,30 @@ Detects `object.meth' patterns and returns bounds of `meth'."
 Returns a snippet string like \"(${1:arg1}, ${2:arg2})\" or nil."
   (when magik-completion-insert-params
     (let* ((args (get-text-property 0 'magik-args candidate))
-           (optional (and magik-completion-insert-optional-params
-                          (get-text-property 0 'magik-optional candidate)))
+           (optional-raw (get-text-property 0 'magik-optional candidate))
+           (gather-raw (get-text-property 0 'magik-gather candidate))
+           (optional (and magik-completion-insert-optional-params optional-raw))
+           ;; Only include gather when there are no skipped optional params
+           ;; before it — you can't pass gather args without first providing
+           ;; all positional optional args.
            (gather (and magik-completion-insert-gather-param
-                        (get-text-property 0 'magik-gather candidate)))
+                        gather-raw
+                        (or (null optional-raw) optional)
+                        gather-raw))
            (start-sig (get-text-property 0 'magik-start-signature candidate))
            (all-params (append args
-                               (when optional
-                                 (cons (concat "_optional " (car optional))
-                                       (cdr optional)))
+                               optional
                                (when gather
-                                 (list (concat "_gather " (car gather))))))
+                                 gather)))
            (idx 0))
-      (when (and start-sig all-params)
-        (let ((fields (mapcar (lambda (p)
-                                (cl-incf idx)
-                                (format "${%d:%s}" idx p))
-                              all-params)))
-          (concat start-sig (string-join fields ", ") ")$0"))))))
+      (when start-sig
+        (if all-params
+            (let ((fields (mapcar (lambda (p)
+                                    (cl-incf idx)
+                                    (format "${%d:%s}" idx p))
+                                  all-params)))
+              (concat start-sig (string-join fields ", ") ")$0"))
+          "()")))))
 
 (defun magik-completion--doc-buffer (candidate)
   "Return a documentation buffer for CANDIDATE, or nil if none available."
