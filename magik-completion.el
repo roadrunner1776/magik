@@ -47,7 +47,7 @@
   :group 'magik)
 
 (defcustom magik-completion-enabled t
-  "When non-nil, enable Magik completion-at-point.
+  "When non-nil, enable Magik `completion-at-point'.
 Set to nil before mode activation to disable, or use
 `magik-completion-mode' to toggle interactively."
   :type 'boolean
@@ -202,6 +202,7 @@ Returns the updated VARIABLES list."
   "Scan variables using regex (fallback when tree-sitter unavailable).
 Returns a list of variable name strings."
   (let ((variables '())
+        (limit (point))
         (method-start (save-excursion
                         (or (re-search-backward
                              "^\\s-*\\(_method\\|_proc\\|_block\\)" nil t)
@@ -211,14 +212,14 @@ Returns a list of variable name strings."
       ;; Find _local declarations
       (goto-char method-start)
       (while (re-search-forward
-              "\\_<_local\\s-+\\([a-z_][a-z0-9_!?]*\\)" (point) t)
+              "\\_<_local\\s-+\\([a-z_][a-z0-9_!?]*\\)" limit t)
         (let ((var (match-string-no-properties 1)))
           (unless (member var variables)
             (push var variables))))
       ;; Find << assignments (often introduces variables)
       (goto-char method-start)
       (while (re-search-forward
-              "\\b\\([a-z_][a-z0-9_!?]*\\)\\s-*<<" (point) t)
+              "\\b\\([a-z_][a-z0-9_!?]*\\)\\s-*<<" limit t)
         (let ((var (match-string-no-properties 1)))
           (unless (or (member var variables)
                       (string-prefix-p "_" var))
@@ -226,7 +227,7 @@ Returns a list of variable name strings."
       ;; Find _for loop variables
       (goto-char method-start)
       (while (re-search-forward
-              "\\_<_for\\s-+\\([a-z_][a-z0-9_!?, ]*\\)\\s-+_over" (point) t)
+              "\\_<_for\\s-+\\([a-z_][a-z0-9_!?, ]*\\)\\s-+_over" limit t)
         (let ((vars-str (match-string-no-properties 1)))
           (dolist (v (split-string vars-str "[, \t]+" t))
             (unless (member v variables)
@@ -484,7 +485,8 @@ Returns a list of propertized candidate strings."
         (limit magik-completion-cb-max-methods)
         (in-kw (if (boundp 'magik-cb-in-keyword) magik-cb-in-keyword "  IN  "))
         (regexp nil))
-    (setq regexp (concat "^\\([^ \t\n]+\\)" in-kw "\\([^ \t\n]+\\)[  \t]+\\(.*\\)\n\\(.*\n\\)\n"))
+    (setq regexp (concat "^\\([^ \t\n]+\\)" in-kw "\\([^ \t\n]+\\)[  \t]+\\(.*\\)\n\\(.*\n\\)\n"
+                         "\\(\\(?:[ \t]+##.*\n\\)*\\)"))
     (goto-char (point-min))
     (save-match-data
       (while (and (< i limit)
@@ -493,6 +495,9 @@ Returns a list of propertized candidate strings."
                (class (match-string-no-properties 2))
                (classify (match-string-no-properties 3))
                (args-str (match-string-no-properties 4))
+               (doc (when-let* ((raw (match-string-no-properties 5))
+                                ((not (string-empty-p raw))))
+                      (replace-regexp-in-string "^[ \t]+## ?" "" raw)))
                (parsed-args (magik-completion--parse-args-line
                              (match-beginning 4)))
                (annotation (magik-completion--format-annotation
@@ -512,11 +517,12 @@ Returns a list of propertized candidate strings."
                          (substring method-raw 0 -2))
                         (t method-raw))))
           (unless (or (string-empty-p method)
-                     (string-match-p "\\`\\s-" method)
-                     (member method candidates))
+                      (string-match-p "\\`\\s-" method)
+                      (member method candidates))
             (push (propertize method
                               'magik-class class
                               'magik-annotation annotation
+                              'magik-documentation doc
                               'magik-args (car parsed-args)
                               'magik-optional (cadr parsed-args)
                               'magik-gather (caddr parsed-args)
@@ -537,7 +543,7 @@ Returns a list (REQUIRED OPTIONAL GATHER)."
         (forward-char 1) ;; skip leading space
         (while (not (or (looking-at "$") (eolp)))
           (cond
-           ((looking-at "\\(OPT \\)?GATH \\(\\S-+\\)")
+           ((looking-at "\\(OPT \\)?GATH \\([^ \t\n]+\\)")
             (setq gather (list (match-string-no-properties 2)))
             (goto-char (match-end 0)))
            ((looking-at "OPT ")
@@ -759,27 +765,42 @@ Detects `object.meth' patterns and returns bounds of `meth'."
 Returns a snippet string like \"(${1:arg1}, ${2:arg2})\" or nil."
   (when magik-completion-insert-params
     (let* ((args (get-text-property 0 'magik-args candidate))
-           (optional (and magik-completion-insert-optional-params
-                          (get-text-property 0 'magik-optional candidate)))
+           (optional-raw (get-text-property 0 'magik-optional candidate))
+           (gather-raw (get-text-property 0 'magik-gather candidate))
+           (optional (and magik-completion-insert-optional-params optional-raw))
+           ;; Only include gather when there are no skipped optional params
+           ;; before it — you can't pass gather args without first providing
+           ;; all positional optional args.
            (gather (and magik-completion-insert-gather-param
-                        (get-text-property 0 'magik-gather candidate)))
+                        gather-raw
+                        (or (null optional-raw) optional)
+                        gather-raw))
            (start-sig (get-text-property 0 'magik-start-signature candidate))
            (all-params (append args
-                               (when optional
-                                 (cons (concat "_optional " (car optional))
-                                       (cdr optional)))
+                               optional
                                (when gather
-                                 (list (concat "_gather " (car gather))))))
+                                 gather)))
            (idx 0))
-      (when (and start-sig all-params)
-        (let ((fields (mapcar (lambda (p)
-                                (cl-incf idx)
-                                (format "${%d:%s}" idx p))
-                              all-params)))
-          (concat start-sig (string-join fields ", ") ")$0"))))))
+      (when start-sig
+        (if all-params
+            (let ((fields (mapcar (lambda (p)
+                                    (cl-incf idx)
+                                    (format "${%d:%s}" idx p))
+                                  all-params)))
+              (concat start-sig (string-join fields ", ") ")$0"))
+          "()")))))
+
+(defun magik-completion--doc-buffer (candidate)
+  "Return a documentation buffer for CANDIDATE, or nil if none available."
+  (when-let* ((doc (get-text-property 0 'magik-documentation candidate)))
+    (with-current-buffer (get-buffer-create " *magik-completion-doc*")
+      (erase-buffer)
+      (insert doc)
+      (current-buffer))))
 
 (defun magik-completion--exit-function (candidate status)
   "Exit function for method completion.
+CANDIDATE is the completed string.
 Inserts parameters as yasnippet when STATUS is `finished'."
   (when (and (eq status 'finished)
              magik-completion-insert-params
@@ -811,6 +832,7 @@ Inserts parameters as yasnippet when STATUS is `finished'."
                     (lambda (c)
                       (when-let* ((ann (get-text-property 0 'magik-annotation c)))
                         (concat " " ann)))
+                    :company-doc-buffer #'magik-completion--doc-buffer
                     :exit-function #'magik-completion--exit-function))))))))
 
 (defun magik-completion-at-point-classes ()
@@ -934,7 +956,7 @@ Intended to be called after transmitting code to the session."
     (advice-remove 'magik-transmit-region #'magik-completion-invalidate-cache)))
 
 (define-minor-mode magik-completion-mode
-  "Toggle Magik completion-at-point support in the current buffer."
+  "Toggle Magik `completion-at-point' support in the current buffer."
   :lighter " MagikC"
   (if magik-completion-mode
       (magik-completion--enable)
