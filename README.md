@@ -163,7 +163,6 @@ With `magik-ts-mode` enabled, you can use <kbd>M</kbd>-<kbd>x</kbd> `treesit-exp
 
 For more information about Tree-sitter, see the Mastering Emacs [tutorial](https://www.masteringemacs.org/article/how-to-get-started-tree-sitter).
 
-
 ### magik-cb
 
 Major mode for the Magik Class Browser. Searches for methods and classes using a running `method_finder` process and lets you jump directly to source.
@@ -287,13 +286,15 @@ To enable automatic linting in `magik-mode` buffers, the following conditions ha
 
 ### YASnippet
 
-`yasnippet` is a required dependency and its snippets are loaded automatically. In `magik-mode`, `magik-ts-mode`, and `magik-session-mode`, the <kbd>Space</kbd> key is bound to `magik-yas-maybe-expand`: if the word before point matches a snippet key it expands the snippet, otherwise it inserts a regular space. Use <kbd>Tab</kbd> to jump between fields inside an expanded snippet.
+`yasnippet` is a required dependency and its snippets are loaded automatically.
+In `magik-mode`, `magik-ts-mode`, and `magik-session-mode`, the <kbd>Space</kbd> key is bound to `magik-yas-maybe-expand`: if the word before point matches a snippet key it expands the snippet, otherwise it inserts a regular space.
+Use <kbd>Tab</kbd> to jump between fields inside an expanded snippet.
 
 The snippets below are available in `magik-mode`, `magik-ts-mode`, and `magik-session-mode`. `magik-module-mode`, `magik-product-mode`, and `magik-trn-mode` have their own dedicated snippet sets listed after.
 
 **magik-mode / magik-ts-mode / magik-session-mode snippets, organised into groups:**
 
-**Methods**
+#### Methods
 
 | Key | Snippet |
 | --- | --- |
@@ -302,7 +303,7 @@ The snippets below are available in `magik-mode`, `magik-ts-mode`, and `magik-se
 | `abstract` | `_abstract _method` / `_endmethod` |
 | `iter` | `_iter _method` / `_endmethod` with `_loopbody` |
 
-**Control structures**
+#### Control structures
 
 | Key | Snippet |
 | --- | --- |
@@ -329,7 +330,7 @@ The snippets below are available in `magik-mode`, `magik-ts-mode`, and `magik-se
 | `proc` | `_proc()` / `_endproc` |
 | `proc_ol` | `_proc(...) ... _endproc` (one line) |
 
-**Object-oriented**
+#### Object-oriented
 
 | Key | Snippet |
 | --- | --- |
@@ -343,7 +344,7 @@ The snippets below are available in `magik-mode`, `magik-ts-mode`, and `magik-se
 | `remex` | `remex(:filename)` using the current file name |
 | `add_child` | `add_child(...)` call |
 
-**Slots and properties**
+#### Slots and properties
 
 | Key | Snippet |
 | --- | --- |
@@ -359,15 +360,15 @@ The snippets below are available in `magik-mode`, `magik-ts-mode`, and `magik-se
 | `define_binary_operator_case` | `define_binary_operator_case(...)` |
 | `def_property` | Property definition |
 
-**Documentation and pragmas**
+#### Documentation and pragmas
 
 | Key | Snippet |
 | --- | --- |
 | `pragma` | `_pragma(classify_level=, topic={}, usage={})` |
-| `doc` | Single `## ` docstring line |
+| `doc` | Single `##` docstring line |
 | `dob` | Multi-line docstring block |
 
-**Conditions and messages**
+#### Conditions and messages
 
 | Key | Snippet |
 | --- | --- |
@@ -375,7 +376,7 @@ The snippets below are available in `magik-mode`, `magik-ts-mode`, and `magik-se
 | `raise` | `condition.raise(...)` |
 | `message_handler` | `message_handler.new(...)` using the current class name |
 
-**Keywords**
+#### Keywords
 
 | Key | Snippet |
 | --- | --- |
@@ -423,7 +424,8 @@ The snippets below are available in `magik-mode`, `magik-ts-mode`, and `magik-se
 
 ### magik-electric-mode
 
-Minor mode providing the older electric template system. Use <kbd>F2</kbd>-<kbd>Space</kbd> to trigger an electric expansion explicitly at point, regardless of whether `magik-electric-mode` is enabled. Toggle the mode with <kbd>F2</kbd>-<kbd>e</kbd> or <kbd>M</kbd>-<kbd>x</kbd> `magik-electric-mode`.
+Minor mode providing the older electric template system. Use <kbd>F2</kbd>-<kbd>Space</kbd> to trigger an electric expansion explicitly at point, regardless of whether `magik-electric-mode` is enabled.
+Toggle the mode with <kbd>F2</kbd>-<kbd>e</kbd> or <kbd>M</kbd>-<kbd>x</kbd> `magik-electric-mode`.
 
 ## Usage with Smallworld 4.x or older
 
