@@ -864,6 +864,7 @@ Inserts parameters as yasnippet when STATUS is `finished'."
             (when globals
               (list (car bounds) (cdr bounds) globals
                     :exclusive 'no
+                    :exit-function #'magik-completion--exit-function
                     :company-kind (lambda (_) 'variable)))))))))
 
 ;;; --- Condition completion ---
