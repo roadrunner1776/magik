@@ -440,6 +440,9 @@ Returns the process object or nil if it cannot be started."
                            smallworld-gis gis-buf nil)))
                 (when (and proc (process-live-p proc))
                   (setq magik-completion--cb-process proc)
+                  (with-current-buffer (process-buffer proc)
+                    (setq major-mode 'fundamental-mode
+                          mode-name "Fundamental"))
                   proc))
             (error nil)))))))
 
