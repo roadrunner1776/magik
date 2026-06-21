@@ -96,12 +96,11 @@ Set to nil before mode activation to disable, or use
   "List of Magik language keywords for completion.")
 
 (defconst magik-completion--builtins
-  '("def_slotted_exemplar" "def_indexed_exemplar" "def_mixin"
-    "write" "show" "print" "newline" "condition" "sw"
-    "smallworld_product" "system" "date" "simple_vector"
-    "hash_table" "property_list" "rope" "concurrent_hash_map"
-    "equality_hash_table" "set" "sorted_collection" "integer"
-    "float" "char16_vector" "symbol")
+  '("bag" "char16_vector" "concurrent_hash_map" "condition" "date"
+    "equality_hash_table" "equality_set" "float" "gis_program_manager"
+    "hash_table" "integer" "property_list" "queue" "rope" "set"
+    "simple_vector" "smallworld_product" "sorted_collection" "stack"
+    "sw_module_manager" "symbol" "system")
   "List of commonly used Magik built-in names for completion.")
 
 ;;; --- Variable scanning ---
