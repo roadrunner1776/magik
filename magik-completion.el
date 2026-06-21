@@ -410,7 +410,7 @@ KEY is \"class.first-char\" to detect when to re-query.")
   "Return the buffer name for the completion CB process."
   (or magik-completion--cb-buffer-name
       (setq magik-completion--cb-buffer-name
-            (concat "*cb*" (buffer-name) "*completion*"))))
+            (concat " *cb*" (buffer-name) "*completion*"))))
 
 (defun magik-completion--gis-buffer ()
   "Return the active Magik session buffer name, or nil."
@@ -433,15 +433,16 @@ Returns the process object or nil if it cannot be started."
                                 'magik-smallworld-gis (get-buffer gis-buf)))
                (cb-buf (magik-completion--cb-buffer)))
           (condition-case nil
-              (let ((proc (magik-cb-get-process-create
-                           cb-buf
-                           #'magik-completion--cb-filter
-                           smallworld-gis gis-buf nil)))
+              (let ((proc (cl-letf (((symbol-function 'magik-cb-mode)
+                                     #'fundamental-mode))
+                            (magik-cb-get-process-create
+                             cb-buf
+                             #'magik-completion--cb-filter
+                             smallworld-gis gis-buf nil))))
                 (when (and proc (process-live-p proc))
-                  (setq magik-completion--cb-process proc)
-                  (with-current-buffer (process-buffer proc)
-                    (setq major-mode 'fundamental-mode
-                          mode-name "Fundamental"))
+                  (setq magik-completion--cb-process proc
+                        magik-completion--cb-buffer-name
+                        (buffer-name (process-buffer proc)))
                   proc))
             (error nil)))))))
 
