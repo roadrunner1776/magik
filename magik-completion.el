@@ -662,13 +662,8 @@ Returns exemplar name string or nil."
              (variable (buffer-substring-no-properties beg end)))
         (cond
          ((string-empty-p variable) nil)
-         ;; _self or _clone -> current exemplar
-         ((or (equal variable "_self")
-              (equal variable "_clone"))
-          (when (fboundp 'magik-current-method-name)
-            (cadr (magik-current-method-name))))
-         ;; _super -> current exemplar (CB will resolve hierarchy)
-         ((equal variable "_super")
+         ;; _self, _clone, _super -> current exemplar
+         ((member variable '("_self" "_clone" "_super"))
           (when (fboundp 'magik-current-method-name)
             (cadr (magik-current-method-name))))
          ;; Check typed assignment patterns
