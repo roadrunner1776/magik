@@ -618,7 +618,8 @@ Returns list of method name strings."
                           "override_flags\nshow_classes\nshow_args\nshow_comments\n"
                           "print_curr_methods\nshow_topics\n"))
              (result (magik-completion--cb-query cmd)))
-        (setq magik-completion--method-cache (cons cache-key result))
+        (when result
+          (setq magik-completion--method-cache (cons cache-key result)))
         result))))
 
 (defun magik-completion--query-classes ()
@@ -736,7 +737,7 @@ Detects `object.meth' patterns and returns bounds of `meth'."
             (beg (save-excursion
                    (skip-chars-backward "a-zA-Z0-9_!?")
                    (point))))
-        (when (and (<= beg end)
+        (when (and (< beg end)
                    (> beg (point-min))
                    (eq (char-before beg) ?.)
                    ;; Ensure there's a word/symbol before the dot
@@ -884,7 +885,7 @@ Returns (BEG . END) of the condition name being typed, or nil."
       (save-excursion
         (let ((end (point))
               (beg (progn (skip-chars-backward "a-zA-Z0-9_!?") (point))))
-          (when (and (>= end beg)
+          (when (and (> end beg)
                      (eq (char-before beg) ?:)
                      (save-excursion
                        (goto-char (1- beg))
