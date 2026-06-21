@@ -616,7 +616,7 @@ Returns list of method name strings."
              (equal cache-key (car magik-completion--method-cache)))
         (cdr magik-completion--method-cache)
       (let* ((cmd (concat "method_name ^" char "\n"
-                          "unadd class \nadd class " class "\n"
+                          "unadd class \nadd class " class "$\n"
                           "method_cut_off " (number-to-string magik-completion-cb-max-methods) "\n"
                           "override_flags\nshow_classes\nshow_args\nshow_comments\n"
                           "print_curr_methods\nshow_topics\n"))
