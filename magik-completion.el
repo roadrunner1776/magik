@@ -508,7 +508,7 @@ Returns a list of propertized candidate strings."
                (start-sig (cond
                            ((string-suffix-p "()" method-raw) "(")
                            ((string-suffix-p "<<" method-raw) nil)
-                           ((car parsed-args) "(")
+                           ((or (car parsed-args) (cadr parsed-args) (caddr parsed-args)) "(")
                            (t nil)))
                (method (cond
                         ((string-suffix-p "()" method-raw)
@@ -863,8 +863,23 @@ Inserts parameters as yasnippet when STATUS is `finished'."
             (when globals
               (list (car bounds) (cdr bounds) globals
                     :exclusive 'no
-                    :exit-function #'magik-completion--exit-function
                     :company-kind (lambda (_) 'variable)))))))))
+
+(defun magik-completion-at-point-global-procedures ()
+  "Completion-at-point function for global procedures via CB."
+  (when magik-completion-enable-cb
+    (when-let* ((bounds (magik-completion--bounds)))
+      (let ((beg (car bounds))
+            (prefix (buffer-substring-no-properties (car bounds) (cdr bounds))))
+        (unless (or (string-prefix-p "_" prefix)
+                    (and (> beg (point-min))
+                         (eq (char-before beg) ?.)))
+          (let ((global-procedures (magik-completion--query-globals)))
+            (when global-procedures
+              (list beg (cdr bounds) global-procedures
+                    :exclusive 'no
+                    :exit-function #'magik-completion--exit-function
+                    :company-kind (lambda (_) 'method)))))))))
 
 ;;; --- Condition completion ---
 
@@ -935,6 +950,7 @@ Intended to be called after transmitting code to the session."
 
 (defvar magik-completion--capf-functions
   '(magik-completion-at-point-conditions
+    magik-completion-at-point-global-procedures
     magik-completion-at-point-globals
     magik-completion-at-point-classes
     magik-completion-at-point-methods
