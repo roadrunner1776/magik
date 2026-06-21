@@ -96,12 +96,11 @@ Set to nil before mode activation to disable, or use
   "List of Magik language keywords for completion.")
 
 (defconst magik-completion--builtins
-  '("def_slotted_exemplar" "def_indexed_exemplar" "def_mixin"
-    "write" "show" "print" "newline" "condition" "sw"
-    "smallworld_product" "system" "date" "simple_vector"
-    "hash_table" "property_list" "rope" "concurrent_hash_map"
-    "equality_hash_table" "set" "sorted_collection" "integer"
-    "float" "char16_vector" "symbol")
+  '("bag" "char16_vector" "concurrent_hash_map" "condition" "date"
+    "equality_hash_table" "equality_set" "float" "gis_program_manager"
+    "hash_table" "integer" "property_list" "queue" "rope" "set"
+    "simple_vector" "smallworld_product" "sorted_collection" "stack"
+    "sw_module_manager" "symbol" "system")
   "List of commonly used Magik built-in names for completion.")
 
 ;;; --- Variable scanning ---
@@ -411,7 +410,7 @@ KEY is \"class.first-char\" to detect when to re-query.")
   "Return the buffer name for the completion CB process."
   (or magik-completion--cb-buffer-name
       (setq magik-completion--cb-buffer-name
-            (concat "*cb*" (buffer-name) "*completion*"))))
+            (concat " *cb*" (buffer-name) "*completion*"))))
 
 (defun magik-completion--gis-buffer ()
   "Return the active Magik session buffer name, or nil."
@@ -434,12 +433,16 @@ Returns the process object or nil if it cannot be started."
                                 'magik-smallworld-gis (get-buffer gis-buf)))
                (cb-buf (magik-completion--cb-buffer)))
           (condition-case nil
-              (let ((proc (magik-cb-get-process-create
-                           cb-buf
-                           #'magik-completion--cb-filter
-                           smallworld-gis gis-buf nil)))
+              (let ((proc (cl-letf (((symbol-function 'magik-cb-mode)
+                                     #'fundamental-mode))
+                            (magik-cb-get-process-create
+                             cb-buf
+                             #'magik-completion--cb-filter
+                             smallworld-gis gis-buf nil))))
                 (when (and proc (process-live-p proc))
-                  (setq magik-completion--cb-process proc)
+                  (setq magik-completion--cb-process proc
+                        magik-completion--cb-buffer-name
+                        (buffer-name (process-buffer proc)))
                   proc))
             (error nil)))))))
 
@@ -506,14 +509,10 @@ Returns a list of propertized candidate strings."
                (start-sig (cond
                            ((string-suffix-p "()" method-raw) "(")
                            ((string-suffix-p "<<" method-raw) nil)
-                           ((car parsed-args) "(")
+                           ((or (car parsed-args) (cadr parsed-args) (caddr parsed-args)) "(")
                            (t nil)))
                (method (cond
                         ((string-suffix-p "()" method-raw)
-                         (substring method-raw 0 -2))
-                        ((string-suffix-p "^<<" method-raw)
-                         (substring method-raw 0 -3))
-                        ((string-suffix-p "<<" method-raw)
                          (substring method-raw 0 -2))
                         (t method-raw))))
           (unless (or (string-empty-p method)
@@ -617,7 +616,7 @@ Returns list of method name strings."
              (equal cache-key (car magik-completion--method-cache)))
         (cdr magik-completion--method-cache)
       (let* ((cmd (concat "method_name ^" char "\n"
-                          "unadd class \nadd class " class "\n"
+                          "unadd class \nadd class " class "$\n"
                           "method_cut_off " (number-to-string magik-completion-cb-max-methods) "\n"
                           "override_flags\nshow_classes\nshow_args\nshow_comments\n"
                           "print_curr_methods\nshow_topics\n"))
@@ -781,14 +780,18 @@ Returns a snippet string like \"(${1:arg1}, ${2:arg2})\" or nil."
                                (when gather
                                  gather)))
            (idx 0))
-      (when start-sig
+      (cond
+       (start-sig
         (if all-params
             (let ((fields (mapcar (lambda (p)
                                     (cl-incf idx)
                                     (format "${%d:%s}" idx p))
                                   all-params)))
               (concat start-sig (string-join fields ", ") ")$0"))
-          "()")))))
+          "()"))
+       ((string-suffix-p "<<" candidate)
+        (when-let* ((val (or (car args) (car optional-raw))))
+          (concat " " (format "${1:%s}" val) "$0")))))))
 
 (defun magik-completion--doc-buffer (candidate)
   "Return a documentation buffer for CANDIDATE, or nil if none available."
@@ -863,6 +866,22 @@ Inserts parameters as yasnippet when STATUS is `finished'."
                     :exclusive 'no
                     :company-kind (lambda (_) 'variable)))))))))
 
+(defun magik-completion-at-point-global-procedures ()
+  "Completion-at-point function for global procedures via CB."
+  (when magik-completion-enable-cb
+    (when-let* ((bounds (magik-completion--bounds)))
+      (let ((beg (car bounds))
+            (prefix (buffer-substring-no-properties (car bounds) (cdr bounds))))
+        (unless (or (string-prefix-p "_" prefix)
+                    (and (> beg (point-min))
+                         (eq (char-before beg) ?.)))
+          (let ((global-procedures (magik-completion--query-globals)))
+            (when global-procedures
+              (list beg (cdr bounds) global-procedures
+                    :exclusive 'no
+                    :exit-function #'magik-completion--exit-function
+                    :company-kind (lambda (_) 'method)))))))))
+
 ;;; --- Condition completion ---
 
 (defvar magik-completion--condition-cache nil
@@ -932,6 +951,7 @@ Intended to be called after transmitting code to the session."
 
 (defvar magik-completion--capf-functions
   '(magik-completion-at-point-conditions
+    magik-completion-at-point-global-procedures
     magik-completion-at-point-globals
     magik-completion-at-point-classes
     magik-completion-at-point-methods
