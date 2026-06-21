@@ -513,10 +513,6 @@ Returns a list of propertized candidate strings."
                (method (cond
                         ((string-suffix-p "()" method-raw)
                          (substring method-raw 0 -2))
-                        ((string-suffix-p "^<<" method-raw)
-                         (substring method-raw 0 -3))
-                        ((string-suffix-p "<<" method-raw)
-                         (substring method-raw 0 -2))
                         (t method-raw))))
           (unless (or (string-empty-p method)
                       (string-match-p "\\`\\s-" method)
@@ -783,14 +779,18 @@ Returns a snippet string like \"(${1:arg1}, ${2:arg2})\" or nil."
                                (when gather
                                  gather)))
            (idx 0))
-      (when start-sig
+      (cond
+       (start-sig
         (if all-params
             (let ((fields (mapcar (lambda (p)
                                     (cl-incf idx)
                                     (format "${%d:%s}" idx p))
                                   all-params)))
               (concat start-sig (string-join fields ", ") ")$0"))
-          "()")))))
+          "()"))
+       ((string-suffix-p "<<" candidate)
+        (when-let* ((val (or (car args) (car optional-raw))))
+          (concat " " (format "${1:%s}" val) "$0")))))))
 
 (defun magik-completion--doc-buffer (candidate)
   "Return a documentation buffer for CANDIDATE, or nil if none available."
