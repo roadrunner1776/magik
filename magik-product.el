@@ -25,6 +25,8 @@
   (require 'magik-utils)
   (require 'magik-session))
 
+(require 'yasnippet)
+
 (defgroup magik-product nil
   "Customise Magik product.def files group."
   :group 'magik
@@ -66,11 +68,10 @@ See `imenu-generic-expression'.")
    '("^\\(\\sw+\\)\\s-*\\(config_product\\|customisation_product\\|layered_product\\)"
      (1 'magik-product-name-face)
      (2 'magik-product-type-face))
-   '("^\\(version\\)\\s-*\\([0-9]+\\(?:\\.[0-9]+\\)?\\(?:\\.[0-9]+\\)?\\)\\(.*\\)"
+   '("^\\(version\\)\\s-\\(.*\\)"
      (1 'magik-product-keyword-face)
-     (2 'magik-number-face)
-     (3 'magik-comment-face))
-   (list (concat "^\\<\\(" (mapconcat 'identity magik-product-keywords "\\|") "\\)") 0 ''magik-product-keyword-face t))
+     (2 'magik-number-face))
+   (list (concat "^\\<\\(" (mapconcat 'identity magik-product-keywords "\\|") "\\)\\>") 0 ''magik-product-keyword-face t))
   "Default fontification of product.def files."
   :group 'magik-product
   :type 'sexp)
@@ -79,6 +80,17 @@ See `imenu-generic-expression'.")
   "Open Customization buffer for Product Mode."
   (interactive)
   (customize-group 'magik-product))
+
+(defun magik-product-yas-maybe-expand ()
+  "Expand yasnippet if possible, otherwise insert a space.
+Prevents expansion inside indented areas."
+  (interactive)
+  (when (or (= 1 (point))
+            (not (member
+                  (get-text-property (- (point) 1) 'face)
+                  '(magik-product-keyword-face magik-product-name-face magik-product-type-face)))
+            (not (yas-expand)))
+    (self-insert-command 1)))
 
 ;;;###autoload
 (define-derived-mode magik-product-mode nil "Product"
@@ -92,6 +104,7 @@ You can customize Product Mode with the `magik-product-mode-hook`.
   :syntax-table nil
 
   (compat-call setq-local
+               comment-start-skip "#+ *"
                require-final-newline t
                imenu-generic-expression magik-product-imenu-generic-expression
                font-lock-defaults '(magik-product-font-lock-keywords nil t)))
@@ -110,12 +123,6 @@ You can customize Product Mode with the `magik-product-mode-hook`.
 (defvar magik-product-mode-syntax-table nil
   "Syntax table in use in Product Mode buffers.")
 
-(defun magik-product-name ()
-  "Return current Product's name as a string."
-  (save-excursion
-    (goto-char (point-min))
-    (current-word)))
-
 (defun magik-product-reinitialise (&optional gis)
   "Reinitialise this product in GIS."
   (interactive)
@@ -130,7 +137,7 @@ You can customize Product Mode with the `magik-product-mode-hook`.
      process
      (concat ;; the .products[] interface is used for backwards compatibility.
       "smallworld_product"
-      ".products[:|" (magik-product-name) "|]"
+      ".products[:|" (magik-utils-product-name) "|]"
       ".reinitialise()\n$\n"))
     gis))
 
@@ -182,6 +189,7 @@ Called by `magik-session-drag-n-drop-load' when a Product FILENAME is dropped."
   (fset 'magik-product-f2-map   magik-product-f2-map)
 
   (define-key magik-product-mode-map [f2]    'magik-product-f2-map)
+  (define-key magik-product-mode-map " "     'magik-product-yas-maybe-expand)
 
   (define-key magik-product-f2-map    "b"    'magik-product-transmit-buffer)
   (define-key magik-product-f2-map    "r"    'magik-product-reinitialise))

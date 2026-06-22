@@ -1,7 +1,7 @@
 ;; -*- mode: eask; lexical-binding: t -*-
 
 (package "magik-mode"
-         "0.4.1"
+         "0.6.0"
          "Emacs major mode for Smallworld Magik files")
 
 (website-url "https://github.com/roadrunner1776/magik")
@@ -16,7 +16,6 @@
 (source "melpa")
 
 (depends-on "emacs" "24.4")
-(depends-on "auto-complete")
 (depends-on "compat")
 (depends-on "flycheck")
 (depends-on "yasnippet")

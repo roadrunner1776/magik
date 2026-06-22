@@ -3,6 +3,6 @@
 # key: new
 # expand-env: ((yas-indent-line 'fixed))
 # --
-${1:module_name}	${2:1}
+${1:`(magik-utils-current-directory-name)`}	${2:1}
 
 $0

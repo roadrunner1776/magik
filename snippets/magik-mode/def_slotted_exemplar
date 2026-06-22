@@ -3,13 +3,31 @@
 # key: def_slotted_exemplar
 # expand-env: ((yas-indent-line 'fixed))
 # group: object oriented
+# type: command
 # --
-`(magik-yasnippet-prev-pragma)`
-`(magik-yasnippet-documentation t)`
-def_slotted_exemplar(:${1:`(magik-yasnippet-filename)`},
-		     {
-			     $2
-		     }$3)
-$
+(let* ((snippet-content '())
+       (pragma-snippet (car (magik-yasnippet-pragma-snippet nil)))
+       (dollar-count (cadr (magik-yasnippet-pragma-snippet nil)))
+       (doc-string (magik-yasnippet-documentation))
+       (slotted-exemplar
+        (concat
+         "def_slotted_exemplar(:${"
+         (number-to-string (+ dollar-count 1))
+         ":"
+         (magik-yasnippet-filename)
+         "},\n{\n\t$"
+         (number-to-string (+ dollar-count 2))
+         "\n}$"
+         (number-to-string (+ dollar-count 3))
+         ")")))
 
-$0
+
+  (setq snippet-content
+        (delq nil
+              (list pragma-snippet
+                    (unless (string-empty-p doc-string) doc-string)
+                    slotted-exemplar
+                    "$\n\n$0"
+                    )))
+
+  (yas-expand-snippet (string-join snippet-content "\n")))

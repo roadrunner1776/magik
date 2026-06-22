@@ -56,6 +56,11 @@ Listed by `magik-version' or `magik-version-file'."
   :group 'magik-version
   :type  'string)
 
+(defcustom magik-version-validate-entries t
+  "Whether the file entries in the gis-version are checked."
+  :group 'magik-version
+  :type 'boolean)
+
 (defcustom magik-version-help "Select a Smallworld Core Product Installation.\n\nThe product you select will define the environment for any new Smallworld\nsessions that are started.\n\nTo make the selection, move the cursor to the line you want and press RETURN.\nOr press 'a' to open the gis_aliases file.\n\n\nPress 'q' to exit and do nothing.\n\n"
   "Help text displayed at top of gis_version buffer."
   :group 'magik-version
@@ -92,7 +97,7 @@ Listed by `magik-version' or `magik-version-file'."
 
 (defcustom magik-version-font-lock-keywords
   (list
-   '("^.*(invalid).*$" . 'magik-version-invalid-face)
+   `(,(concat "^.*" (regexp-quote magik-version-invalid-string) ".*$") . ((0 'magik-version-invalid-face t)))
    '("^\\([*]\\s-+\\S-+\\)\\s-+\\(\\S-+\\)"
      (1 'magik-version-active-face)
      (2 'magik-version-number-face))
@@ -121,7 +126,9 @@ Listed by `magik-version' or `magik-version-file'."
 (defvar-local magik-version-current nil
   "Current gis_version stream.")
 
-(defvar magik-smallworld-gis-current nil
+(defvar magik-smallworld-gis-current (when-let* ((smallworld-gis (getenv "SMALLWORLD_GIS")))
+				       (warn "SMALLWORLD_GIS environment variable has been set.  This breaks multi-session support.")
+				       smallworld-gis)
   "Current selected Smallworld GIS directory.")
 
 (defvar magik-version-position nil
@@ -153,27 +160,31 @@ has more than one aliases file available."
   (interactive)
   (beginning-of-line)
   (let* ((version-list (magik-version-at-version-definition))
-          (stream (car version-list))
-          (smallworld-gis (nth 2 version-list))
-          (lp-alist (magik-aliases-layered-products-file (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
-          alias-file)
+         (stream (car version-list))
+         (smallworld-gis (nth 2 version-list))
+         (lp-alist (magik-aliases-all-layered-products smallworld-gis))
+         alias-file)
     (when (not stream)
       (error "Invalid selection"))
     (cond ((null lp-alist) nil)
-      ((eq (length lp-alist) 1)
-        (setq alias-file (file-name-concat (cdar lp-alist) "config" "gis_aliases")))
-      (t
-        (let* ((lp (completing-read "Select a Layered Product with gis_aliases file: " lp-alist nil t))
-                (path (cdr (assoc lp lp-alist))))
-          (when path
-            (setq alias-file (file-name-concat path "config" "gis_aliases"))))))
-    (when alias-file
-      (kill-buffer (current-buffer))
-      (find-file alias-file)
-      (setq magik-smallworld-gis smallworld-gis)
-      (magik-aliases-next)
-      (setq buffer-read-only t)
-      (set-buffer-modified-p nil))))
+          ((eq (length lp-alist) 1)
+           (setq alias-file (file-name-concat (cdar lp-alist) "config" "gis_aliases")))
+          (t
+           (let* ((lp (completing-read "Select a Layered Product with gis_aliases file: " lp-alist nil t))
+                  (path (cdr (assoc lp lp-alist))))
+             (when path
+               (setq alias-file (file-name-concat path "config" "gis_aliases"))))))
+    (if alias-file
+        (progn
+          (kill-buffer (current-buffer))
+          (find-file alias-file)
+          (compat-call setq-local
+                       magik-smallworld-gis smallworld-gis
+                       magik-version-current stream)
+          (read-only-mode t)
+          (magik-aliases-next)
+          (set-buffer-modified-p nil))
+      (error "Could not find alias file associated to: %s" smallworld-gis))))
 
 (defun magik-version-next ()
   "Move point to next valid version listed."
@@ -283,8 +294,8 @@ installation directory suitable for selection."
 (defun magik-version-file-add (root name version)
   "Add a new entry to the file given by `gis-version-file'."
   (interactive
-   (let* ((ok (or magik-version-file
-                  (error "File interface is not being used")))
+   (let* ((_ok (or magik-version-file
+                   (error "File interface is not being used")))
           (root (magik-version-read-smallworld-gis))
           (product-version-file (file-name-concat (file-name-as-directory root) "config" "PRODUCT_VERSION"))
           name version)
@@ -356,7 +367,8 @@ Will set `gis-version-file' to FILE."
         (insert " ")
         (cond ((string-match magik-version-invalid-string (match-string-no-properties 3))
                nil)
-              ((file-exists-p (match-string-no-properties 3))
+              ((or (not magik-version-validate-entries)
+                   (file-exists-p (match-string-no-properties 3)))
                nil)
               (t
                (goto-char (match-beginning 3))
@@ -494,18 +506,9 @@ by the current Smallworld version."
 (defun magik-version-header-string ()
   "Insert a string describing the gis_version status.
 Used before running a GIS process."
-
-  (let (gis-version-script)
-    (if (stringp magik-version-current)
-        (setq gis-version-script (magik-version magik-version-current)))
-    (cond ((eq magik-version-current 'no-gis-version-script)
-           nil)
-          ((null magik-version-current)
-           (insert "\n** There is no currently selected gis product.\n** (Attempting to run anyway).\n\n"))
-          ((eq gis-version-script 'failed)
-           (insert (format "\n** Can't find the currently selected product, %s.\n** (Attempting to run anyway).\n" magik-version-current)))
-          (t
-           (insert (format "Gis Environment: %s\n" magik-version-current))))))
+  (if magik-version-current
+      (insert (format "Gis Environment: %s\n" magik-version-current))
+    (insert "\n** There is no currently selected gis product.\n** (Attempting to run anyway).\n\n")))
 
 (defun magik-versions-list ()
   "Return a list of valid version definitions as (STREAM VERSION SMALLWORLD_GIS)."
@@ -541,9 +544,7 @@ Used before running a GIS process."
 ;;; Package initialisation
 (modify-syntax-entry ?_  "w"  magik-version-mode-syntax-table)
 
-(setq-default magik-version-current (magik-version-current))
-
-(add-hook 'gis-start-process-pre-hook 'magik-version-header-string)
+(add-hook 'magik-session-start-process-pre-hook #'magik-version-header-string)
 
 (progn
   ;; ------------------------ magik version mode ------------------------

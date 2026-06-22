@@ -5,7 +5,7 @@
 # group: requirements
 # --
 requires_datamodel
-	${1:datamodel_module_name}$2
+	${1:datamodel_module_name} ${2:datamodel_name} ${3:datamodel_version}$4
 end
 
 $0

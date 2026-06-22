@@ -4,6 +4,9 @@
 
 ;;; Code:
 
+(require 'compat)
+(require 'subr-x)
+(require 'warnings)
 (require 'yasnippet)
 
 ;; Suppress the warnings about modifying the buffer via a snippet
@@ -16,6 +19,11 @@
 
 (defcustom magik-yasnippet-default-pragma "_pragma(classify_level=, topic={}, usage={})"
   "Default pragma to use if no previous pragma could be found."
+  :group 'magik-yasnippet
+  :type  'string)
+
+(defcustom magik-yasnippet-default-package-name "user"
+  "Default package name."
   :group 'magik-yasnippet
   :type  'string)
 
@@ -58,27 +66,53 @@ Otherwise, return VALUE."
     value))
 
 (defun magik-yasnippet-documentation (&optional untabbed)
-  "Insert the documentation string based on `magik-yasnippet-documentation-style'.
-If UNTABBED is non-nil remove the tabs from the documentation string.
-When documentation style is nil (disabled), it kills the current line."
-  (if magik-yasnippet-documentation-style
-      (let ((documentation-string (pcase magik-yasnippet-documentation-style
-                                    ('sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
-                                    ('type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation)))))
-        (if untabbed
-            (replace-regexp-in-string "\t" "" documentation-string)
-          documentation-string))
-    (kill-line)))
+  "Return the documentation string based on `magik-yasnippet-documentation-style'.
+If UNTABBED is non-nil remove the tabs from the documentation string."
+  (let ((documentation-string
+         (pcase magik-yasnippet-documentation-style
+           (`sw-method-doc (magik-yasnippet--documentation-string magik-yasnippet-sw-method-doc-documentation))
+           (`type-doc (magik-yasnippet--documentation-string magik-yasnippet-type-doc-documentation))
+           (`nil ""))))
+    (if untabbed
+        (replace-regexp-in-string "\t" "" documentation-string)
+      documentation-string)))
 
-(defun magik-yasnippet-prev-pragma ()
-  "Search for the previous pragma in the buffer.
+(defun magik-yasnippet-pragma ()
+  "Search for a pragma in the buffer.
 If a previous pragma is found, return it as a string.
+If a next pragma is found, return it as a string.
 If no pragma is found, return the default pragma
 defined by `magik-yasnippet-default-pragma`."
   (save-excursion
     (if (re-search-backward "^_pragma([^)]*)" nil t)
         (match-string-no-properties 0)
-      magik-yasnippet-default-pragma)))
+      (if (re-search-forward "^_pragma([^)]*)" nil t)
+          (match-string-no-properties 0)
+        magik-yasnippet-default-pragma))))
+
+(defalias 'magik-yasnippet-prev-pragma 'magik-yasnippet-pragma "supporting old function name.")
+
+(defun magik-yasnippet-pragma-snippet (end-of-cursor?)
+  "Create the pragma snippet in a string.
+END-OF-CURSOR? inserts a `$0' at the end of the snippet.
+Returns a list with a snippet string and the amount of $ inserted internally/"
+  (let ((snippet-content (if (magik-yasnippet--pragma-p)
+                             (list (magik-yasnippet-pragma) 0)
+                           (if (get 'magik-yasnippet-default-pragma 'custom-set)
+                               (list magik-yasnippet-default-pragma 0)
+                             (list "_pragma(classify_level=$1, topic={$2}, usage={$3})" 3)))))
+    (when end-of-cursor?
+      (setcar snippet-content (concat (car snippet-content) "$0")))
+    snippet-content))
+
+(defun magik-yasnippet--pragma-p ()
+  "Search for a in the buffer if found return t."
+  (save-excursion
+    (if (re-search-backward "^_pragma([^)]*)" nil t)
+        t
+      (if (re-search-forward "^_pragma([^)]*)" nil t)
+          t
+        nil))))
 
 (defun magik-yasnippet-prev-class-name ()
   "Search for the previous class name in the buffer.
@@ -137,7 +171,7 @@ If the buffer is not visiting a file, return an empty string."
   "Return the filename as a symbol (prefixed with a colon `:`)."
   (concat ":" (magik-yasnippet-filename)))
 
-(defun magik-yasnippet-prev-slotted-exemplar-slots ()
+(defun magik-yasnippet-prev-slotted-exemplar-slots (dollar-start-count)
   "Search for the previous `def_slotted_exemplar` and return slot names."
   (save-excursion
     (when-let* ((slotted-loc (and (re-search-backward "def_slotted_exemplar" nil t)
@@ -152,43 +186,24 @@ If the buffer is not visiting a file, return an empty string."
           (when slots
             (setq slots (nreverse slots))
             (concat
-             (string-join (cl-mapcar (lambda (slot i)
-                                      (format "%s.%s <<"
-                                              (if (= i 0) "\t" "\n\t")
-                                              slot))
-                                    slots
-                                    (number-sequence 0 (1- (length slots)))))
-             "\n")))))))
+             (string-join
+              (cl-mapcar
+               (lambda (slot i)
+                 (format "%s.%s << ${%d:value}"
+                         (if (= i 0) "\t" "\n\t")
+                         slot
+                         (cl-incf dollar-start-count)))
+               slots
+               (number-sequence 0 (1- (length slots))))))))))))
 
-(defun magik-yasnippet-module-name ()
-  "Recursively search for the module.def and return the module name."
-  (when-let* ((module-file (magik-yasnippet--locate-dominating-file "module.def")))
-    (magik-yasnippet--first-word-of-file module-file)))
+(defun magik-yasnippet--after-point-empty-p ()
+  "Return t if the line after point is empty or contain only whitespace."
+  (save-excursion
+    (let ((line-after-point (buffer-substring-no-properties (point) (line-end-position))))
+      (string-match-p "^\\s-*$" line-after-point))))
 
-(defun magik-yasnippet-product-name ()
-  "Recursively search for the product.def and return the product name."
-  (when-let* ((product-file (magik-yasnippet--locate-dominating-file "product.def")))
-    (magik-yasnippet--first-word-of-file product-file)))
-
-(defun magik-yasnippet--locate-dominating-file (file-name)
-  "Recursively search for the FILE-NAME."
-  (when-let* ((buffer-file (buffer-file-name))
-              (directory (locate-dominating-file buffer-file file-name)))
-    (expand-file-name file-name directory)))
-
-(defun magik-yasnippet--first-word-of-file (file)
-  "Return the first word of a FILE."
-  (when (file-exists-p file)
-    (with-temp-buffer
-      (insert-file-contents file)
-      (goto-char (point-min))
-      (let ((word nil))
-        (while (and (not word)
-                    (not (eobp)))
-          (skip-chars-forward " \t")
-          (if (not (looking-at "#"))
-              (setq word (current-word))
-            (forward-line 1)))
-        word))))
-
+(defun magik-yasnippet--line-after-point-contains-method-p ()
+  "Return t if the text after point in the current line has _method."
+  (save-excursion
+    (re-search-forward "_method" (line-end-position) t)))
 ;;; .yas-setup.el ends here

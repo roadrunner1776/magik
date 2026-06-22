@@ -5,5 +5,7 @@
 # group: control structure.try
 # --
 _try
+	$1
+_when ${2:cond}
 	$0
 _endtry
