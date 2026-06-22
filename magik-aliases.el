@@ -436,7 +436,7 @@ configuration file and return paths to append to variable `exec-path'."
             (end-of-line)
             (skip-syntax-backward "-")
             (skip-chars-backward "/\\") ;avoid trailing directory character.
-            (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)))
+            (setq dir (magik-aliases-expand-file (buffer-substring-no-properties pt (point)) smallworld-gis)
                   etc-dir (file-name-concat dir "etc" (if (eq system-type 'windows-nt)
                                                           "x86"
                                                         "Linux.x86")))

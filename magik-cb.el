@@ -508,7 +508,7 @@ Set METHOD and CLASS if given."
     (with-current-buffer buffer
       (unless running-p
         (compat-call setq-local
-                     magik-cb-process (magik-cb-get-process-create buffer 'magik-cb-filter gis magik-cb-file)
+                     magik-cb-process (magik-cb-get-process-create buffer 'magik-cb-filter smallworld-gis gis magik-cb-file)
                      magik-smallworld-gis smallworld-gis)
         (magik-cb-interactive-buffer)
         (sleep-for 0.1))
