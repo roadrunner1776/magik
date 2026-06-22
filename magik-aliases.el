@@ -200,9 +200,9 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
         (unless magik-aliases--original-local-map
           (setq magik-aliases--original-local-map (current-local-map)))
         (let ((override-map (make-sparse-keymap)))
-          (define-key magik-aliases-mode-map " "            'magik-aliases-next)
-          (define-key magik-aliases-mode-map (kbd "<down>") 'magik-aliases-next)
-          (define-key magik-aliases-mode-map "q"            'magik-aliases-quit)
+          (define-key override-map " "            'magik-aliases-next)
+          (define-key override-map (kbd "<down>") 'magik-aliases-next)
+          (define-key override-map "q"            'magik-aliases-quit)
           (use-local-map (make-composed-keymap override-map magik-aliases--original-local-map))))
     (when magik-aliases--original-local-map
       (use-local-map magik-aliases--original-local-map)
@@ -484,7 +484,7 @@ If `buffer-read-only' is t, set it to nil (and vice-versa)."
 
 ;;; Package initialisation
 (add-hook 'magik-aliases-mode-hook 'magik-aliases-update-sw-menu)
-(add-hook 'magik-aliases-mode-hook 'magik-aliases-update-keymap)
+(add-hook 'magik-aliases-mode-hook 'magik-aliases--update-keymap)
 
 (modify-syntax-entry ?_ "w" magik-aliases-mode-syntax-table)
 (modify-syntax-entry ?: "w" magik-aliases-mode-syntax-table)
