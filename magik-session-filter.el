@@ -174,8 +174,8 @@ With a prefix arg, ask user for Magik session buffer to use."
          fn)
 
     ;;Protect against filter running with minibuffer window active.
-    (if minibuffer-active-p
-        (set-buffer (process-buffer proc)))
+    (when minibuffer-active-p
+      (set-buffer (process-buffer proc)))
 
     (setq str (substring str 1)
           fn (cdr (assoc s magik-session-filter-action-alist)))
@@ -316,12 +316,11 @@ The behaviour is undefined if any search key and line or column are used."
         (goto-char (or start-pt (point-min))) ;;continue search from class.method?
         (when (search-forward (cdr val) nil t)
           (goto-char (match-beginning 0))))
-      (if (setq val (assq 'line alist))
-          (progn
-            (goto-char (point-min))
-            (forward-line (string-to-number (cdr val)))))
-      (if (setq val (assq 'column alist))
-          (move-to-column (string-to-number (cdr val)))))))
+      (when (setq val (assq 'line alist))
+        (goto-char (point-min))
+        (forward-line (string-to-number (cdr val))))
+      (when (setq val (assq 'column alist))
+        (move-to-column (string-to-number (cdr val)))))))
 
 (defun magik-session-filter-action-cb-mf (proc socketname)
   "Magik has started a method_finder PROC and tell Emacs what the SOCKETNAME is."

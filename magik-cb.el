@@ -1408,9 +1408,8 @@ If the one turned off is the first in the group, turn on the 2nd, else the 1st."
         (group magik-cb-flag-groups)
       (when (member str group)
         (let ((something-is-set-p nil))
-          (dolist (f group) (if (magik-cb-topic-on-p f) (setq something-is-set-p t)))
-          (if something-is-set-p
-              ()
+          (dolist (f group) (when (magik-cb-topic-on-p f) (setq something-is-set-p t)))
+          (unless something-is-set-p
             (magik-cb-toggle (if (equal str (cl-first group)) (cl-second group) (cl-first group)))))))))
 
 (defun magik-cb-set-all-topics (new-val)
