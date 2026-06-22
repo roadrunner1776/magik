@@ -1210,8 +1210,8 @@ Otherwise, point is left where it is."
   (let ((magik-mark-method-exchange nil)
         mark)
     (save-excursion
-      (setq mark (magik-mark-method t)
-            mark-active nil)
+      (setq mark (magik-mark-method t))
+      (deactivate-mark)
       (magik-transmit-region (point) mark))
     (cond ((eq magik-transmit-method-eom-mode 'end)
            (goto-char mark))
