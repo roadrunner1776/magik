@@ -806,7 +806,8 @@ Optional argument ARG .."
   (interactive "*")
   (when (derived-mode-p 'magik-session-mode)
     (error "Your Magik shell buffer has got into magik-mode! To recover, type `M-x magik-session-mode'.  Please report this bug"))
-  (if abbrev-mode (save-excursion (expand-abbrev)))
+  (when abbrev-mode
+    (save-excursion (expand-abbrev)))
   (if (save-excursion
         (back-to-indentation)
         (looking-at "[]})]\\|_else\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
@@ -865,11 +866,11 @@ you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recal
   (interactive
    (list
     (read-string "Method Name: " (current-word))
-    (if current-prefix-arg
-        (read-string "Class Name: "
-                     (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
+    (when current-prefix-arg
+      (read-string "Class Name: "
+                   (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
 
-  (if class nil
+  (unless class
     (setq class (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
   (let* ((method-cons (magik-method-name-type method))
          (method-root (car method-cons))
@@ -1019,7 +1020,8 @@ Optional argument NOMSG ..."
     (magik-forward-endmethod t)
     (push-mark (point) nomsg t)
     (magik-backward-method t))
-  (if magik-mark-method-exchange (exchange-point-and-mark))
+  (when magik-mark-method-exchange
+    (exchange-point-and-mark))
   (mark))
 
 (defun magik-copy-method ()
@@ -1083,11 +1085,10 @@ Optional argument GIS ..."
             (t ;no "on line" errors found.
              nil)))
 
-    (if pt
-        (progn
-          (pop-to-buffer gis)
-          (goto-char pt)
-          (magik-gis-error-goto)))))
+    (when pt
+      (pop-to-buffer gis)
+      (goto-char pt)
+      (magik-gis-error-goto))))
 
 (defun magik-perform-replace-no-set-mark (from to regexp-flag)
   "Like `perform-replace' but without setting the mark.
@@ -1145,20 +1146,23 @@ See `magik-mark-method-exchange' for more details."
 The construct can be a method, a proc, a def_slotted_exemplar or whatever.
 The rule is that the thing must start against the left margin."
   (interactive)
-  (let ((original-point (point))
-        (beg (point))
-        (stack nil))
+  (let
+      ((original-point (point))
+       (beg (point))
+       (stack nil))
     (when (re-search-backward "^\\w" nil t)
       (setq beg (point))
       (forward-line -1)
-      (while (and (not (bobp))
-                  (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
+      (while
+          (and (not (bobp))
+               (looking-at "[ \t]*#\\|_pragma\\|_private\\|_iter\\|_if\\|_over\\|_for\\|[ \t]*usage"))
         (setq beg (point))
         (forward-line -1))
       (goto-char beg)
-      (while (and (not (eobp))
-                  (or (< (point) original-point)
-                      stack))
+      (while
+          (and (not (eq (point) (point-max)))
+               (or (< (point) original-point)
+                   stack))
         (dolist (tok (magik-tokenise-line))
           (cond
            ((assoc (car tok) magik-begins-and-ends)
@@ -1206,7 +1210,8 @@ If \\='end, then point is left at the end of the method.
 Otherwise, point is left where it is."
   (interactive)
   ;;DEBUG (message "this %s, last %s" this-command last-command)
-  (if (eq last-command 'magik-transmit-method-first) (magik-forward-endmethod))
+  (when (eq last-command 'magik-transmit-method-first)
+    (magik-forward-endmethod))
   (let ((magik-mark-method-exchange nil)
         mark)
     (save-excursion
@@ -1507,8 +1512,8 @@ If PT is given, goto that char position."
           (while
               (and (looking-at regexp-str)
                    (zerop (forward-line -1))))
-          (if (not (looking-at regexp-str))
-              (forward-line 1))
+          (unless (looking-at regexp-str)
+            (forward-line 1))
           (setq beg (point))
           (while (and (looking-at regexp-str)
                       (zerop (forward-line 1))))
@@ -1704,11 +1709,11 @@ Argument END ..."
       (let ((starting-point (line-number-at-pos))
             (exemplar-point nil)
             (method-point nil))
-        (when (not (equal (search-backward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t) nil))
+        (unless (equal (search-backward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t) nil)
           (setq exemplar-point (line-number-at-pos)))
         (goto-char (point-min))
         (forward-line (1- starting-point))
-        (when (not (equal (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t) nil))
+        (unless (equal (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t) nil)
           (setq method-point (line-number-at-pos)))
         (when (or (not (equal exemplar-point nil))
                   (not (equal method-point nil)))
@@ -1890,8 +1895,8 @@ Prevents expansion inside strings and comments."
   "Abbrev table for Magik mode."
   :regexp "\\<\\([+[:word:]]+\\)")
 
-(if magik-under-as-char
-    (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
+(when magik-under-as-char
+  (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
 (modify-syntax-entry ?\\ "." magik-base-mode-syntax-table) ;; \ is not an escape character in magik mode.
 (modify-syntax-entry ?? "w" magik-base-mode-syntax-table)
 (modify-syntax-entry ?! "w" magik-base-mode-syntax-table)
