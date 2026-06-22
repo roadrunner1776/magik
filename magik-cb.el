@@ -1408,7 +1408,9 @@ If the one turned off is the first in the group, turn on the 2nd, else the 1st."
         (group magik-cb-flag-groups)
       (when (member str group)
         (let ((something-is-set-p nil))
-          (dolist (f group) (when (magik-cb-topic-on-p f) (setq something-is-set-p t)))
+          (dolist (f group)
+            (when (magik-cb-topic-on-p f)
+              (setq something-is-set-p t)))
           (unless something-is-set-p
             (magik-cb-toggle (if (equal str (cl-first group)) (cl-second group) (cl-first group)))))))))
 
@@ -1953,7 +1955,8 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb-unfold ()
   "Add more detail to the listing, by `unfolding' it."
   (interactive)
-  (unless (magik-cb-topic-on-p "show-methods") (magik-cb-toggle "show-methods"))
+  (unless (magik-cb-topic-on-p "show-methods")
+    (magik-cb-toggle "show-methods"))
   (cond
    ((not (magik-cb-topic-on-p "show-classes"))  (magik-cb-toggle "show-classes"))
    ((not (magik-cb-topic-on-p "show-args"))     (magik-cb-toggle "show-args"))
@@ -1966,7 +1969,8 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb-fold ()
   "Remove detail from the listing."
   (interactive)
-  (unless (magik-cb-topic-on-p "show-methods") (magik-cb-toggle "show-methods"))
+  (unless (magik-cb-topic-on-p "show-methods")
+    (magik-cb-toggle "show-methods"))
   (cond
    ((magik-cb-topic-on-p "show-topics")   (magik-cb-toggle "show-topics"))
    ((magik-cb-topic-on-p "show-comments") (magik-cb-toggle "show-comments"))

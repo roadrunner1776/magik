@@ -110,7 +110,8 @@ You can customize magik-loadlist-mode with the magik-loadlist-mode-hook.
                     (equal (substring file -6) ".magik"))
                (setq file (substring file 0 (- (length file) 6))))
               (t nil))
-        (when file (push (magik-loadlist-file-data file (line-beginning-position)) contents))
+        (when file
+          (push (magik-loadlist-file-data file (line-beginning-position)) contents))
         (forward-line)))
     contents))
 

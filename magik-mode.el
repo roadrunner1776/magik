@@ -806,7 +806,8 @@ Optional argument ARG .."
   (interactive "*")
   (when (derived-mode-p 'magik-session-mode)
     (error "Your Magik shell buffer has got into magik-mode! To recover, type `M-x magik-session-mode'.  Please report this bug"))
-  (when abbrev-mode (save-excursion (expand-abbrev)))
+  (when abbrev-mode
+    (save-excursion (expand-abbrev)))
   (if (save-excursion
         (back-to-indentation)
         (looking-at "[]})]\\|_else\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
@@ -1019,7 +1020,8 @@ Optional argument NOMSG ..."
     (magik-forward-endmethod t)
     (push-mark (point) nomsg t)
     (magik-backward-method t))
-  (when magik-mark-method-exchange (exchange-point-and-mark))
+  (when magik-mark-method-exchange
+    (exchange-point-and-mark))
   (mark))
 
 (defun magik-copy-method ()

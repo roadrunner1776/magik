@@ -652,7 +652,8 @@ if not already there."
   ;;MF We nuke the current cb first and reconnect later.
   (when (and magik-cb-dynamic (get-buffer magik-session-cb-buffer))
     (let ((magik-cb-process (get-buffer-process magik-session-cb-buffer)))
-      (when magik-cb-process (delete-process magik-cb-process)))
+      (when magik-cb-process
+        (delete-process magik-cb-process)))
     (process-send-string magik-session-process "_if method_finder _isnt _unset\n_then\n  method_finder.lazy_start?\n  method_finder.send_socket_to_emacs()\n_endif\n$\n"))
   (sit-for 0.01)
   (run-hooks 'magik-session-start-process-post-hook))
@@ -694,7 +695,8 @@ frame, just switch to that buffer, or prompt if more than one.  If
 there is not, prompt for a command to run, and then run it."
 
   (interactive)
-  (when command (setq magik-session-command command))
+  (when command
+    (setq magik-session-command command))
   (let (dir
         cmd
         args
@@ -968,7 +970,8 @@ Else (not in any cmd) recall line."
           (magik-session-send-region (marker-position p) (point)))
          ((magik-session--complete-magik-p p (point))
                                         ;          (insert "$\n") ;; paulw - remove additional <CR> which messes with pling variables
-          (when magik-session-auto-insert-dollar (insert "$\n"))
+          (when magik-session-auto-insert-dollar
+            (insert "$\n"))
           (delete-region (point) (point-max))
           (magik-session-send-region (marker-position p) (point)))))
        ((looking-at "[ \t\n]*\\$[ \t\n]*\\'")
