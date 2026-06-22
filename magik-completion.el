@@ -393,6 +393,9 @@ KEY is \"class.first-char\" to detect when to re-query.")
 (declare-function magik-cb-is-running "magik-cb")
 (declare-function magik-cb-temp-file-name "magik-cb")
 (declare-function magik-current-method-name "magik-mode")
+(declare-function magik-product-transmit-buffer "magik-product")
+(declare-function magik-module-transmit-buffer "magik-module")
+(declare-function magik-loadlist-transmit-buffer "magik-loadlist")
 (declare-function magik-transmit-region "magik-mode")
 
 (defvar magik-cb-coding-system)
@@ -946,19 +949,28 @@ Intended to be called after transmitting code to the session."
     magik-completion-at-point-keywords)
   "List of Magik CAPF functions, lowest priority first.")
 
+(defconst magik-completion--transmit-functions
+  '(magik-product-transmit-buffer
+    magik-module-transmit-buffer
+    magik-loadlist-transmit-buffer
+    magik-transmit-region)
+  "Functions that send code to a Magik session and should invalidate the cache.")
+
 (defun magik-completion--enable ()
   "Add Magik CAPF functions to the current buffer."
   (dolist (fn magik-completion--capf-functions)
     (add-hook 'completion-at-point-functions fn nil t))
-  (when (fboundp 'magik-transmit-region)
-    (advice-add 'magik-transmit-region :after #'magik-completion-invalidate-cache)))
+  (dolist (fn magik-completion--transmit-functions)
+    (when (fboundp fn)
+      (advice-add fn :after #'magik-completion-invalidate-cache))))
 
 (defun magik-completion--disable ()
   "Remove Magik CAPF functions from the current buffer."
   (dolist (fn magik-completion--capf-functions)
     (remove-hook 'completion-at-point-functions fn t))
-  (when (fboundp 'magik-transmit-region)
-    (advice-remove 'magik-transmit-region #'magik-completion-invalidate-cache)))
+  (dolist (fn magik-completion--transmit-functions)
+    (when (fboundp fn)
+      (advice-remove fn #'magik-completion-invalidate-cache))))
 
 (define-minor-mode magik-completion-mode
   "Toggle Magik `completion-at-point' support in the current buffer."
