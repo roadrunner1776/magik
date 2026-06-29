@@ -146,7 +146,7 @@ Listed by `magik-version' or `magik-version-file'."
   (let* ((definition (magik-version-at-version-definition))
          (stream (nth 0 definition))
          (smallworld-gis (nth 2 definition))
-         (buffer (concat "*gis " stream "*")))
+         (buffer (concat "*" magik-session-buffer-default-name " " stream "*")))
     (setq magik-smallworld-gis smallworld-gis)
     (magik-session buffer)
     (setq magik-version-current stream
@@ -344,7 +344,7 @@ Will set `gis-version-file' to FILE."
   (interactive
    (when (not (file-exists-p magik-version-file))
      (call-interactively 'magik-version-file-create)))
-  (set-buffer (get-buffer-create "*gis version selection*"))
+  (set-buffer (get-buffer-create (concat "*" magik-session-buffer-default-name " version selection*")))
   (magik-version-mode)
 
   (setq buffer-read-only nil)

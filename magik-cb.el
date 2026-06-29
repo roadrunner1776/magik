@@ -682,7 +682,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
         (magik-cb-alist     (sort (copy-alist magik-cb-buffer-alist); -1, -2, etc.
                                   #'(lambda (a b) (> (car a) (car b)))))
         cb-list)
-    ;; Order is such that CB of *gis* will be first see magik-session.el for more details.
+    ;; Order is such that CB of *magik* will be first see magik-session.el for more details.
     (dolist (c magik-cb-alist)
       (let ((i   (- (car c)))
             (buf (cdr c)))
@@ -1736,7 +1736,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb-modeline-flags ()
   "Return the propertized flag section of the Magik CB modeline.
 
-     *b  a  s  r  *d  <inh> *F  T  2 dp rs   *gis*"
+     *b  a  s  r  *d  <inh> *F  T  2 dp rs   *magik*"
   (let ((parts '()))
     ;; Core flags
     (dolist (flag '("basic" "advanced" "subclassable" "redefinable" "debug"))
