@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jcs090218/setup-emacs@3586c34483bee442d1293c9a428fa3da44421509
+      - uses: jcs090218/setup-emacs@54b61ac9c1d7011a54d2b6d66dedbcddf20e2fb9
         with:
           version: snapshot
 
