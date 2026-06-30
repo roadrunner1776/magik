@@ -443,7 +443,7 @@ Some keys bindings are changed with respect to a standard EMACS installation, at
 
 | Key | Function in standard EMACS | Change in Magik Mode package |
 | :---: | --- | --- |
-| <kbd>F2</kbd> | `2C-command`| globally changed to prefix key |
+| <kbd>F2</kbd> | `2C-command` | globally changed to prefix key |
 | <kbd>F3</kbd> | `kmacro-start-macro-or-insert-counter` | globally changed to prefix key |
 | <kbd>F4</kbd> | `kmacro-end-or-call-macro` | used in magik-mode and magik-session-mode as prefix key |
 
