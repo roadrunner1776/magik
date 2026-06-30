@@ -99,7 +99,7 @@ Used for switching to the first Smallworld session."
   :group 'magik-session
   :type '(choice string (const nil)))
 
-(defcustom magik-session-buffer-default-name "*magik*"
+(defcustom magik-session-buffer-default-name "magik"
   "*The default name of a Magik session buffer when creating new Magik sessions."
   :group 'magik-session
   :type 'string)
@@ -515,7 +515,7 @@ Return a list of all the components of the COMMAND."
 
 (define-derived-mode magik-session-mode nil "Magik Session"
   "Major mode to run a Magik session as a direct subprocess.
-The default name for a buffer running a session is \"*gis*\". The name of
+The default name for a buffer running a session is \"*magik*\". The name of
 the current session buffer is stored in the user option `magik-session-buffer`.
 There are many ways to recall previous commands (see the online
 help with \\[help-command]).
@@ -871,7 +871,7 @@ Locate the cursor to an offset OFFSET."
 (defun magik-session-send-region (beg end)
   "Record in `magik-session-prev-cmds' the region BEG to END and send to the gis.
 Also update `magik-session-cmd-num'.
-Also append the string to \" *history**gis*\"."
+Also append the string to \" *history**magik*\"."
   (save-excursion
     (let ((str (buffer-substring beg end)))
       (set-buffer (get-buffer-create (concat " *history*" (buffer-name))))
