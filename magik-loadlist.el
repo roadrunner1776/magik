@@ -83,7 +83,7 @@ You can customize magik-loadlist-mode with the magik-loadlist-mode-hook.
   `(,"Loadlist"
     [,"Refresh Buffer from Directory"    magik-loadlist-refresh-contents t]
     "---"
-    [,"Transmit Buffer"                  magik-loadlist-transmit         t]
+    [,"Transmit Buffer"                  magik-loadlist-transmit-buffer  t]
     "---"
     [,"Customize"                        magik-loadlist-customize        t]))
 
@@ -204,8 +204,8 @@ With a prefix ARG accept all changes without prompting."
         (message "No changes required in buffer")
       (message "Finished updating buffer"))))
 
-(defun magik-loadlist-transmit (&optional gis)
-  "Load the loadlist.txt into the GIS process."
+(defun magik-loadlist-transmit-buffer (&optional gis)
+  "Send current buffer to GIS."
   (interactive)
   (let* ((dir  (file-name-directory buffer-file-name))
          (file (file-name-nondirectory buffer-file-name))
@@ -249,7 +249,7 @@ is dropped."
 (progn
   ;; ------------------------ magik loadlist mode  ------------------------
 
-  (define-key magik-loadlist-mode-map (kbd "<f2> b")      'magik-loadlist-transmit)
+  (define-key magik-loadlist-mode-map (kbd "<f2> b") 'magik-loadlist-transmit-buffer)
   (define-key magik-loadlist-mode-map "\C-cr" 'magik-loadlist-refresh-contents))
 
 (provide 'magik-loadlist)

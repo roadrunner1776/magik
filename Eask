@@ -10,8 +10,6 @@
 (package-file "magik-mode.el")
 (files "*.el" "snippets")
 
-(script "test" "echo \"Error: no test specified\" && exit 1")
-
 (source "gnu")
 (source "melpa")
 
@@ -19,6 +17,8 @@
 (depends-on "compat")
 (depends-on "flycheck")
 (depends-on "yasnippet")
+
+(script "test" "eask test ert test/test-helper.el ./test/*-test.el")
 
 ;; do not try to compile magik-ts-mode.el if we are below 29.1
 (when (version< emacs-version "29.1")

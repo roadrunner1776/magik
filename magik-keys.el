@@ -64,7 +64,7 @@
 
   ;; (global-set-key (kbd "<f2> <f1>")   'sw-help-keys)
   ;; (global-set-key (kbd "<f2> [")      'toggle-debug)
-  (global-set-key (kbd "<f2> TAB")    'hippie-expand)
+
   (global-set-key (kbd "<f2> e")      'magik-electric-mode)
   ;; (global-set-key (kbd "<f2> k")      'sw-reload-dotemacs)
   (global-set-key (kbd "<f2> s")      'magik-version-selection)
