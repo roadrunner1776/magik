@@ -1212,6 +1212,7 @@ Otherwise, point is left where it is."
         mark)
     (save-excursion
       (setq mark (magik-mark-method t))
+      (deactivate-mark)
       (magik-transmit-region (point) mark))
     (cond ((eq magik-transmit-method-eom-mode 'end)
            (goto-char mark))
