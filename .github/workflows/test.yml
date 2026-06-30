@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jcs090218/setup-emacs@54b61ac9c1d7011a54d2b6d66dedbcddf20e2fb9
+      - uses: jcs090218/setup-emacs@v3
         with:
           version: ${{ matrix.emacs-version }}
 
