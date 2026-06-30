@@ -46,7 +46,7 @@ jobs:
         with:
           version: ${{ matrix.emacs-version }}
 
-      - uses: emacs-eask/setup-eask@fadcb22d38d93975c700e4e2e6c033e138030c87
+      - uses: emacs-eask/setup-eask@v3
         with:
           version: snapshot
 
