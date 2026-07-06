@@ -41,8 +41,11 @@
 
    :language 'magik
    :feature 'comment
+   :override t
    '((comment) @magik-comment-face
-     (documentation) @magik-doc-face)
+     (documentation) @magik-doc-face
+     ((comment) @magik-text-encoding-face
+      (:match "^#%[ \t]*text_encoding" @magik-text-encoding-face)))
 
    :language 'magik
    :feature 'type
