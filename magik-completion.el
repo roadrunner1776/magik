@@ -923,7 +923,7 @@ Returns (BEG . END) of the condition name being typed, or nil."
 
 ;;; --- Cache invalidation ---
 
-(defun magik-completion--invalidate-cache (&rest _args)
+(defun magik-completion--invalidate-cache ()
   "Invalidate all CB completion caches.
 Intended to be called after transmitting code to the session."
   (interactive)
