@@ -975,7 +975,7 @@ Intended to be called after transmitting code to the session."
     (remove-hook 'completion-at-point-functions fn t))
   (dolist (fn magik-completion--transmit-functions)
     (when (fboundp fn)
-      (advice-remove fn #'magik-completion-invalidate-cache))))
+      (advice-remove fn #'magik-completion--invalidate-cache))))
 
 (define-minor-mode magik-completion-mode
   "Toggle Magik `completion-at-point' support in the current buffer."
