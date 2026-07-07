@@ -923,10 +923,15 @@ Returns (BEG . END) of the condition name being typed, or nil."
 
 ;;; --- Cache invalidation ---
 
-(defun magik-completion-invalidate-cache (&rest _args)
+(defun magik-completion--invalidate-cache (&rest _args)
   "Invalidate all CB completion caches.
 Intended to be called after transmitting code to the session."
-  (interactive "r")
+  (interactive)
+  (magik-completion--invalidate-cache))
+
+(defun magik-completion--invalidate-cache (&rest _args)
+  "Invalidate all CB completion caches.
+Intended to be called after transmitting code to the session."
   (setq magik-completion--class-cache nil
         magik-completion--class-cache-loaded nil
         magik-completion--global-cache nil
@@ -962,7 +967,7 @@ Intended to be called after transmitting code to the session."
     (add-hook 'completion-at-point-functions fn nil t))
   (dolist (fn magik-completion--transmit-functions)
     (when (fboundp fn)
-      (advice-add fn :after #'magik-completion-invalidate-cache))))
+      (advice-add fn :after #'magik-completion--invalidate-cache))))
 
 (defun magik-completion--disable ()
   "Remove Magik CAPF functions from the current buffer."
