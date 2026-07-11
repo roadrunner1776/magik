@@ -786,6 +786,49 @@ Detects `object.meth' patterns and returns bounds of `meth'."
                           (memq (char-syntax pre-dot) '(?w ?_)))))
           (cons beg end))))))
 
+;;; --- Yasnippet template candidates ---
+
+(defcustom magik-completion-enable-snippets t
+  "When non-nil, offer yasnippet template keys as completion candidates.
+Completing a key expands the snippet template."
+  :type 'boolean
+  :group 'magik-completion)
+
+(declare-function yas--all-templates "yasnippet")
+(declare-function yas--get-snippet-tables "yasnippet")
+(declare-function yas--template-key "yasnippet")
+
+(defun magik-completion--snippet-templates ()
+  "Return the yasnippet templates active in the current buffer."
+  (when (and (bound-and-true-p yas-minor-mode)
+             (require 'yasnippet nil t))
+    (yas--all-templates (yas--get-snippet-tables major-mode))))
+
+(defun magik-completion--snippet-lookup (key)
+  "Return the active yasnippet template whose key is KEY, or nil."
+  (seq-find (lambda (template)
+              (equal (yas--template-key template) key))
+            (magik-completion--snippet-templates)))
+
+(defun magik-completion--snippet-exit-function (candidate status)
+  "Expand the yasnippet template with key CANDIDATE when STATUS is `finished'."
+  (when (and (eq status 'finished)
+             (fboundp 'yas-expand-snippet))
+    (when-let* ((template (magik-completion--snippet-lookup candidate)))
+      (delete-region (- (point) (length candidate)) (point))
+      (yas-expand-snippet template))))
+
+(defun magik-completion-at-point-snippets ()
+  "Completion-at-point function for yasnippet template keys."
+  (when magik-completion-enable-snippets
+    (when-let* ((bounds (magik-completion--bounds))
+                (templates (magik-completion--snippet-templates)))
+      (list (car bounds) (cdr bounds)
+            (delq nil (mapcar #'yas--template-key templates))
+            :exclusive 'no
+            :company-kind (lambda (_) 'snippet)
+            :exit-function #'magik-completion--snippet-exit-function))))
+
 ;;; --- Yasnippet post-completion ---
 
 (declare-function yas-expand-snippet "yasnippet")
@@ -990,7 +1033,8 @@ does not serve candidates from a previous session."
 ;;; --- Setup ---
 
 (defvar magik-completion--capf-functions
-  '(magik-completion-at-point-conditions
+  '(magik-completion-at-point-snippets
+    magik-completion-at-point-conditions
     magik-completion-at-point-global-procedures
     magik-completion-at-point-globals
     magik-completion-at-point-classes

@@ -251,6 +251,50 @@ Returns (ARGS OPTIONAL GATHER)."
     (should (eq buf1 buf2))
     (should (equal (with-current-buffer buf2 (buffer-string)) "second"))))
 
+;;; Yasnippet template candidates
+
+(defmacro magik-completion-test--with-snippet-buffer (&rest body)
+  "Eval BODY in a temp buffer with a test yasnippet defined and enabled.
+Skips the test when yasnippet is unavailable."
+  (declare (indent 0))
+  `(progn
+     (skip-unless (require 'yasnippet nil t))
+     (with-temp-buffer
+       (yas-define-snippets 'fundamental-mode
+                            '(("mkey" "left ${1:x} right" "test snippet")))
+       (yas-minor-mode 1)
+       ,@body)))
+
+(ert-deftest magik-completion-at-point-snippets--offers-keys ()
+  "Snippet keys matching the prefix are offered as candidates."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mk")
+    (let ((capf (magik-completion-at-point-snippets)))
+      (should capf)
+      (should (member "mkey" (nth 2 capf))))))
+
+(ert-deftest magik-completion-at-point-snippets--disabled-by-defcustom ()
+  "No snippet candidates when `magik-completion-enable-snippets' is nil."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mk")
+    (let ((magik-completion-enable-snippets nil))
+      (should-not (magik-completion-at-point-snippets)))))
+
+(ert-deftest magik-completion--snippet-exit-function--expands-template ()
+  "Completing a snippet key replaces it with the expanded template."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mkey")
+    (magik-completion--snippet-exit-function "mkey" 'finished)
+    (should (string-match-p "\\`left .* right\\'" (buffer-string)))
+    (should-not (string-match-p "mkey" (buffer-string)))))
+
+(ert-deftest magik-completion--snippet-exit-function--ignores-non-finished ()
+  "No expansion happens unless completion finished."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mkey")
+    (magik-completion--snippet-exit-function "mkey" 'exact)
+    (should (equal (buffer-string) "mkey"))))
+
 ;;; Session input-area gating
 
 (defvar magik-session-prompt)
