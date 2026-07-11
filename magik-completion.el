@@ -277,11 +277,29 @@ Returns a list of slot name strings."
 
 ;;; --- Prefix detection ---
 
+(defun magik-completion--available-p ()
+  "Return non-nil when completion may be offered at point.
+In Magik session buffers, completion is limited to the command
+input area after the last prompt."
+  (or (not (derived-mode-p 'magik-session-mode))
+      (magik-completion--session-input-p)))
+
+(defun magik-completion--session-input-p ()
+  "Return non-nil when point is after the last session prompt."
+  (and (boundp 'magik-session-prompt)
+       magik-session-prompt
+       (save-excursion
+         (let ((pos (point)))
+           (goto-char (point-max))
+           (and (re-search-backward magik-session-prompt nil t)
+                (>= pos (match-end 0)))))))
+
 (defun magik-completion--bounds ()
   "Return the bounds (BEG . END) of the Magik symbol at point.
 Returns nil if point is inside a comment or string."
   (let ((syntax (syntax-ppss)))
-    (when (and (not (nth 3 syntax))   ; not in string
+    (when (and (magik-completion--available-p)
+               (not (nth 3 syntax))   ; not in string
                (not (nth 4 syntax)))  ; not in comment
       (let ((end (point))
             (beg (save-excursion
@@ -296,7 +314,8 @@ Returns nil if point is inside a comment or string."
 (defun magik-completion--slot-bounds ()
   "Return bounds if point is completing a slot reference (after `.')."
   (let ((syntax (syntax-ppss)))
-    (when (and (not (nth 3 syntax))
+    (when (and (magik-completion--available-p)
+               (not (nth 3 syntax))
                (not (nth 4 syntax)))
       (let ((end (point))
             (beg (save-excursion
@@ -751,7 +770,8 @@ Searches backward for the enclosing _method and scans its doc block."
   "Return (BEG . END) for method name after a dot, or nil.
 Detects `object.meth' patterns and returns bounds of `meth'."
   (let ((syntax (syntax-ppss)))
-    (when (and (not (nth 3 syntax))
+    (when (and (magik-completion--available-p)
+               (not (nth 3 syntax))
                (not (nth 4 syntax)))
       (let ((end (point))
             (beg (save-excursion
@@ -900,7 +920,8 @@ Inserts parameters as yasnippet when STATUS is `finished'."
   "Return bounds if point is after `condition.raise(:'  or similar.
 Returns (BEG . END) of the condition name being typed, or nil."
   (let ((syntax (syntax-ppss)))
-    (when (and (not (nth 3 syntax))
+    (when (and (magik-completion--available-p)
+               (not (nth 3 syntax))
                (not (nth 4 syntax)))
       (save-excursion
         (let ((end (point))
@@ -952,6 +973,20 @@ Intended to be called after transmitting code to the session."
         magik-completion--condition-cache-loaded nil
         magik-completion--method-cache nil))
 
+(defun magik-completion--reset-session-state (&rest _args)
+  "Invalidate caches and kill all dedicated completion CB buffers.
+Called when a Magik session is killed or (re)started, so completion
+does not serve candidates from a previous session."
+  (magik-completion-invalidate-cache)
+  (dolist (buf (buffer-list))
+    (let ((name (buffer-name buf)))
+      (when (and name
+                 (string-prefix-p " *cb*" name)
+                 (string-suffix-p "*completion*" name))
+        (when-let* ((proc (get-buffer-process buf)))
+          (delete-process proc))
+        (kill-buffer buf)))))
+
 ;;; --- Setup ---
 
 (defvar magik-completion--capf-functions
@@ -979,7 +1014,12 @@ Intended to be called after transmitting code to the session."
     (add-hook 'completion-at-point-functions fn nil t))
   (dolist (fn magik-completion--transmit-functions)
     (when (fboundp fn)
-      (advice-add fn :after #'magik-completion-invalidate-cache))))
+      (advice-add fn :after #'magik-completion-invalidate-cache)))
+  ;; Forward advice: takes effect once magik-session is loaded.
+  (advice-add 'magik-session-kill-process :after
+              #'magik-completion--reset-session-state)
+  (add-hook 'magik-session-start-process-post-hook
+            #'magik-completion--reset-session-state))
 
 (defun magik-completion--disable ()
   "Remove Magik CAPF functions from the current buffer."
@@ -987,7 +1027,11 @@ Intended to be called after transmitting code to the session."
     (remove-hook 'completion-at-point-functions fn t))
   (dolist (fn magik-completion--transmit-functions)
     (when (fboundp fn)
-      (advice-remove fn #'magik-completion-invalidate-cache))))
+      (advice-remove fn #'magik-completion-invalidate-cache)))
+  (advice-remove 'magik-session-kill-process
+                 #'magik-completion--reset-session-state)
+  (remove-hook 'magik-session-start-process-post-hook
+               #'magik-completion--reset-session-state))
 
 (define-minor-mode magik-completion-mode
   "Toggle Magik `completion-at-point' support in the current buffer."

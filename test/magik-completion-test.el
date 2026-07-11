@@ -251,6 +251,38 @@ Returns (ARGS OPTIONAL GATHER)."
     (should (eq buf1 buf2))
     (should (equal (with-current-buffer buf2 (buffer-string)) "second"))))
 
+;;; Session input-area gating
+
+(defvar magik-session-prompt)
+
+(ert-deftest magik-completion--session-input-p--after-prompt ()
+  "Point in the command input area counts as typeable."
+  (let ((magik-session-prompt "Magik> "))
+    (with-temp-buffer
+      (insert "loading...\nMagik> hello")
+      (should (magik-completion--session-input-p)))))
+
+(ert-deftest magik-completion--session-input-p--in-scrollback ()
+  "Point inside session output is not typeable."
+  (let ((magik-session-prompt "Magik> "))
+    (with-temp-buffer
+      (insert "loading...\nMagik> hello")
+      (goto-char (point-min))
+      (should-not (magik-completion--session-input-p)))))
+
+(ert-deftest magik-completion--session-input-p--no-prompt-yet ()
+  "Without a prompt in the buffer there is no typeable area."
+  (let ((magik-session-prompt "Magik> "))
+    (with-temp-buffer
+      (insert "starting session...")
+      (should-not (magik-completion--session-input-p)))))
+
+(ert-deftest magik-completion--available-p--non-session-buffer ()
+  "Completion is available in ordinary buffers regardless of prompts."
+  (with-temp-buffer
+    (insert "some code")
+    (should (magik-completion--available-p))))
+
 ;;; magik-completion--ts-scan-variables
 
 (defconst magik-completion-test--ts-method "_method my_thing.compute(a_stream, count, _optional flags, _gather rest)
