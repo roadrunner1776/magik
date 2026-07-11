@@ -257,6 +257,7 @@ Returns (ARGS OPTIONAL GATHER)."
 	_local total << 0
 	_local (lo, hi) << (0, 10)
 	_constant limit << 5
+	_import counter
 	(x, y) << compute_pair()
 	_for item, idx _over a_stream.elements()
 	_loop
@@ -330,6 +331,22 @@ Skips the test when the Magik tree-sitter grammar is unavailable."
     (let ((vars (magik-completion--ts-scan-variables)))
       (dolist (var '("a_stream" "rest" "total" "lo" "item"))
         (should (member var vars))))))
+
+(ert-deftest magik-completion--ts-scan-variables--import-variables ()
+  "_import declarations are collected."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (should (member "counter" (magik-completion--ts-scan-variables)))))
+
+(ert-deftest magik-completion--regex-scan-variables--import-variables ()
+  "_import declarations are collected by the regex fallback scan."
+  (with-temp-buffer
+    (insert magik-completion-test--ts-method)
+    (goto-char (point-min))
+    (search-forward "outcome")
+    (let ((vars (magik-completion--regex-scan-variables)))
+      (should (member "counter" vars))
+      (should (member "a_stream" vars))
+      (should (member "total" vars)))))
 
 (ert-deftest magik-completion--ts-scan-variables--no-keywords-or-rhs ()
   "Keywords and right-hand sides of assignments are not offered."

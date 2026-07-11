@@ -193,8 +193,8 @@ Returns the updated VARIABLES list."
         (setq variables (magik-completion--ts-add-names
                          (magik-completion--ts-assignment-targets node)
                          limit variables)))
-       ;; _local/_constant declarations and _for loop variables
-       ((member type '("local" "constant" "iterator"))
+       ;; _local/_constant/_import declarations and _for loop variables
+       ((member type '("local" "constant" "import" "iterator"))
         (setq variables (magik-completion--ts-add-names
                          (magik-completion--ts-filter-children node "identifier")
                          limit variables)))))
@@ -237,7 +237,15 @@ Returns a list of variable name strings."
         (let ((vars-str (match-string-no-properties 1)))
           (dolist (v (split-string vars-str "[, \t]+" t))
             (unless (member v variables)
-              (push v variables))))))
+              (push v variables)))))
+      ;; Find _import declarations
+      (goto-char method-start)
+      (while (re-search-forward
+              "\\_<_import\\s-+\\([a-z_][a-z0-9_!?, \t]*\\)" limit t)
+        (dolist (v (split-string (match-string-no-properties 1) "[, \t]+" t))
+          (unless (or (string-prefix-p "_" v)
+                      (member v variables))
+            (push v variables)))))
     ;; Find method parameters
     (save-excursion
       (goto-char method-start)
