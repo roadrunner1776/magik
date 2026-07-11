@@ -1024,10 +1024,15 @@ Returns (BEG . END) of the condition name being typed, or nil."
 
 ;;; --- Cache invalidation ---
 
-(defun magik-completion-invalidate-cache (&rest _args)
+(defun magik-completion-invalidate-cache ()
+  "Invalidate all CB completion caches.
+Can be called after loading code in the session."
+  (interactive)
+  (magik-completion--invalidate-cache))
+
+(defun magik-completion--invalidate-cache (&rest _args)
   "Invalidate all CB completion caches.
 Intended to be called after transmitting code to the session."
-  (interactive "r")
   (setq magik-completion--class-cache nil
         magik-completion--class-cache-loaded nil
         magik-completion--global-cache nil
@@ -1078,7 +1083,7 @@ does not serve candidates from a previous session."
     (add-hook 'completion-at-point-functions fn nil t))
   (dolist (fn magik-completion--transmit-functions)
     (when (fboundp fn)
-      (advice-add fn :after #'magik-completion-invalidate-cache)))
+      (advice-add fn :after #'magik-completion--invalidate-cache)))
   ;; Forward advice: takes effect once magik-session is loaded.
   (advice-add 'magik-session-kill-process :after
               #'magik-completion--reset-session-state)
@@ -1091,7 +1096,7 @@ does not serve candidates from a previous session."
     (remove-hook 'completion-at-point-functions fn t))
   (dolist (fn magik-completion--transmit-functions)
     (when (fboundp fn)
-      (advice-remove fn #'magik-completion-invalidate-cache)))
+      (advice-remove fn #'magik-completion--invalidate-cache)))
   (advice-remove 'magik-session-kill-process
                  #'magik-completion--reset-session-state)
   (remove-hook 'magik-session-start-process-post-hook
