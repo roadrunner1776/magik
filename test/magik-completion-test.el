@@ -251,6 +251,55 @@ Returns (ARGS OPTIONAL GATHER)."
     (should (eq buf1 buf2))
     (should (equal (with-current-buffer buf2 (buffer-string)) "second"))))
 
+;;; Slot scanning
+
+(defconst magik-completion-test--two-exemplars "def_slotted_exemplar(:other_thing,
+	{
+		{:other_slot, _unset}
+	})
+$
+
+def_slotted_exemplar(:my_thing,
+	{
+		{:owner, _unset},
+		{:size, 1}
+	})
+$
+
+_method my_thing.compute()
+	_return .
+_endmethod
+$
+"
+  "Magik source with two exemplar definitions and one method.")
+
+(ert-deftest magik-completion--scan-slots--scoped-to-current-exemplar ()
+  "Inside a method, only the slots of that method's exemplar are offered."
+  (skip-unless (require 'magik-mode nil t))
+  (with-temp-buffer
+    (insert magik-completion-test--two-exemplars)
+    (goto-char (point-min))
+    (search-forward "_return .")
+    (let ((slots (magik-completion--scan-slots)))
+      (should (member "owner" slots))
+      (should (member "size" slots))
+      (should-not (member "other_slot" slots)))))
+
+(ert-deftest magik-completion--scan-slots--falls-back-to-whole-buffer ()
+  "Outside any method the whole buffer is scanned."
+  (with-temp-buffer
+    (insert "def_slotted_exemplar(:a_thing,\n\t{\n\t\t{:a_slot, _unset}\n\t})\n$\n")
+    (goto-char (point-max))
+    (should (member "a_slot" (magik-completion--scan-slots)))))
+
+(ert-deftest magik-completion--exemplar-definition-region--not-found ()
+  "Unknown or empty exemplar names yield no region."
+  (with-temp-buffer
+    (insert "def_slotted_exemplar(:a_thing, {})\n$\n")
+    (should-not (magik-completion--exemplar-definition-region "b_thing"))
+    (should-not (magik-completion--exemplar-definition-region ""))
+    (should-not (magik-completion--exemplar-definition-region nil))))
+
 ;;; Yasnippet template candidates
 
 (defmacro magik-completion-test--with-snippet-buffer (&rest body)

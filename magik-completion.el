@@ -262,14 +262,34 @@ Returns a list of variable name strings."
                 (push clean variables)))))))
     (nreverse variables)))
 
-(defun magik-completion--scan-slots ()
-  "Scan for slot names in the current file's exemplar definition.
-Returns a list of slot name strings."
-  (let ((slots '()))
+(defun magik-completion--exemplar-definition-region (exemplar)
+  "Return the (BEG . END) region defining EXEMPLAR in the current buffer.
+Finds the `def_slotted_exemplar'/`def_indexed_exemplar' form for
+EXEMPLAR, ending at the next `$' terminator.  Returns nil when
+EXEMPLAR is nil, empty, or not defined in this buffer."
+  (when (and exemplar (not (string-empty-p exemplar)))
     (save-excursion
       (goto-char (point-min))
+      (when (re-search-forward
+             (concat "def_\\(?:slotted\\|indexed\\)_exemplar\\s-*([ \t\n]*:"
+                     (regexp-quote exemplar) "\\_>")
+             nil t)
+        (cons (match-beginning 0)
+              (or (re-search-forward "^\\$" nil t) (point-max)))))))
+
+(defun magik-completion--scan-slots ()
+  "Scan for slot names of the exemplar the method at point belongs to.
+Slots are read from the matching exemplar definition when it can be
+found in the buffer; otherwise the whole buffer is scanned.
+Returns a list of slot name strings."
+  (let* ((exemplar (when (fboundp 'magik-current-method-name)
+                     (cadr (magik-current-method-name))))
+         (region (magik-completion--exemplar-definition-region exemplar))
+         (slots '()))
+    (save-excursion
+      (goto-char (or (car region) (point-min)))
       (while (re-search-forward
-              "{\\s-*:\\([a-z_][a-z0-9_!?]*\\)\\s-*," nil t)
+              "{\\s-*:\\([a-z_][a-z0-9_!?]*\\)\\s-*," (cdr region) t)
         (let ((slot (match-string-no-properties 1)))
           (unless (member slot slots)
             (push slot slots)))))
