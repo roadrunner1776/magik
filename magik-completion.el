@@ -38,7 +38,6 @@
 (declare-function treesit-node-type "treesit")
 (declare-function treesit-node-parent "treesit")
 (declare-function treesit-node-children "treesit")
-(declare-function treesit-node-child-by-field-name "treesit")
 (declare-function treesit-node-text "treesit")
 (declare-function treesit-node-start "treesit")
 
@@ -115,47 +114,73 @@ Returns a list of variable name strings."
       (magik-completion--ts-scan-variables)
     (magik-completion--regex-scan-variables)))
 
+(defconst magik-completion--ts-param-scopes '("method" "procedure")
+  "Tree-sitter node types that carry their own parameter list.")
+
+(defconst magik-completion--ts-local-scopes '("method" "procedure" "block")
+  "Tree-sitter node types that delimit a local variable scope.")
+
 (defun magik-completion--ts-scan-variables ()
   "Scan variables using tree-sitter for accurate scope detection.
 Returns a list of variable name strings visible at point."
   (let ((variables '())
         (node (treesit-node-at (point))))
-    ;; Walk up to find the enclosing method/proc/block
-    (when-let* ((scope-node (magik-completion--ts-enclosing-scope node)))
-      ;; Collect parameters from the method/proc signature
-      (setq variables (magik-completion--ts-collect-params scope-node variables))
-      ;; Collect local variables and assignments within scope, before point
-      (setq variables (magik-completion--ts-collect-locals scope-node variables)))
+    ;; Parameters come from the enclosing method or procedure, even
+    ;; when point is inside a nested block.
+    (when-let* ((scope (magik-completion--ts-enclosing-scope
+                        node magik-completion--ts-param-scopes)))
+      (setq variables (magik-completion--ts-collect-params scope variables)))
+    ;; Collect local variables and assignments within scope, before point.
+    (when-let* ((scope (magik-completion--ts-enclosing-scope
+                        node magik-completion--ts-local-scopes)))
+      (setq variables (magik-completion--ts-walk-for-assignments
+                       scope (point) variables)))
     (delete-dups variables)))
 
-(defun magik-completion--ts-enclosing-scope (node)
-  "Find the enclosing method, procedure, or block NODE."
+(defun magik-completion--ts-enclosing-scope (node types)
+  "Return the closest ancestor of NODE whose type is in TYPES."
   (let ((current node))
     (while (and current
-                (not (member (treesit-node-type current)
-                             '("method" "procedure" "block" "loop"))))
+                (not (member (treesit-node-type current) types)))
       (setq current (treesit-node-parent current)))
     current))
 
-(defun magik-completion--ts-collect-params (scope-node variables)
-  "Collect parameter names from SCOPE-NODE into VARIABLES list.
+(defun magik-completion--ts-filter-children (node type)
+  "Return NODE's children of TYPE."
+  (seq-filter (lambda (child) (equal (treesit-node-type child) type))
+              (treesit-node-children node)))
+
+(defun magik-completion--ts-add-names (nodes limit variables)
+  "Add the text of NODES to VARIABLES, skipping keywords and duplicates.
+When LIMIT is non-nil, only nodes starting before LIMIT are added.
 Returns the updated VARIABLES list."
-  (let ((params (treesit-node-children scope-node)))
-    (dolist (child params)
-      (when (equal (treesit-node-type child) "parameters")
-        (dolist (param (treesit-node-children child))
-          (when (member (treesit-node-type param) '("identifier" "parameter"))
-            (let ((name (treesit-node-text param t)))
-              (unless (or (string-prefix-p "_" name)
-                          (member name variables))
-                (push name variables))))))))
+  (dolist (node nodes)
+    (when (or (null limit) (< (treesit-node-start node) limit))
+      (let ((name (treesit-node-text node t)))
+        (unless (or (string-prefix-p "_" name)
+                    (member name variables))
+          (push name variables)))))
   variables)
 
-(defun magik-completion--ts-collect-locals (scope-node variables)
-  "Collect local variables from SCOPE-NODE that appear before point.
+(defun magik-completion--ts-collect-params (scope-node variables)
+  "Collect parameter names from SCOPE-NODE into VARIABLES list.
+Parameters are the `argument' children of a method or procedure node.
 Returns the updated VARIABLES list."
-  (let ((cursor-pos (point)))
-    (magik-completion--ts-walk-for-assignments scope-node cursor-pos variables)))
+  (magik-completion--ts-add-names
+   (magik-completion--ts-filter-children scope-node "argument")
+   nil variables))
+
+(defun magik-completion--ts-assignment-targets (node)
+  "Return the `variable' nodes assigned to by assignment NODE.
+The left-hand side is NODE's first child: a single variable or a
+parenthesized tuple of variables."
+  (let ((lhs (car (treesit-node-children node))))
+    (cond
+     ((null lhs) nil)
+     ((equal (treesit-node-type lhs) "variable")
+      (list lhs))
+     ((equal (treesit-node-type lhs) "parenthesized_expression")
+      (magik-completion--ts-filter-children lhs "variable")))))
 
 (defun magik-completion--ts-walk-for-assignments (node limit variables)
   "Walk NODE tree collecting variable names assigned before LIMIT position.
@@ -163,32 +188,16 @@ Returns the updated VARIABLES list."
   (when (and node (< (treesit-node-start node) limit))
     (let ((type (treesit-node-type node)))
       (cond
-       ;; Assignment: var << expr
+       ;; Assignment: var << expr, (a, b) << expr
        ((equal type "assignment")
-        (when-let* ((target (treesit-node-child-by-field-name node "variable"))
-                    (_ (< (treesit-node-start target) limit)))
-          (let ((name (treesit-node-text target t)))
-            (unless (or (string-prefix-p "_" name)
-                        (member name variables))
-              (push name variables)))))
-       ;; Local variable declaration
-       ((equal type "variable_declaration")
-        (dolist (child (treesit-node-children node))
-          (when (and (equal (treesit-node-type child) "identifier")
-                     (< (treesit-node-start child) limit))
-            (let ((name (treesit-node-text child t)))
-              (unless (or (string-prefix-p "_" name)
-                          (member name variables))
-                (push name variables))))))
-       ;; For loop: _for vars _over ...
-       ((equal type "iterator")
-        (dolist (child (treesit-node-children node))
-          (when (and (equal (treesit-node-type child) "identifier")
-                     (< (treesit-node-start child) limit))
-            (let ((name (treesit-node-text child t)))
-              (unless (or (string-prefix-p "_" name)
-                          (member name variables))
-                (push name variables))))))))
+        (setq variables (magik-completion--ts-add-names
+                         (magik-completion--ts-assignment-targets node)
+                         limit variables)))
+       ;; _local/_constant declarations and _for loop variables
+       ((member type '("local" "constant" "iterator"))
+        (setq variables (magik-completion--ts-add-names
+                         (magik-completion--ts-filter-children node "identifier")
+                         limit variables)))))
     ;; Recurse into children
     (dolist (child (treesit-node-children node))
       (when (< (treesit-node-start child) limit)

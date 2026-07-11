@@ -251,5 +251,92 @@ Returns (ARGS OPTIONAL GATHER)."
     (should (eq buf1 buf2))
     (should (equal (with-current-buffer buf2 (buffer-string)) "second"))))
 
+;;; magik-completion--ts-scan-variables
+
+(defconst magik-completion-test--ts-method "_method my_thing.compute(a_stream, count, _optional flags, _gather rest)
+	_local total << 0
+	_local (lo, hi) << (0, 10)
+	_constant limit << 5
+	(x, y) << compute_pair()
+	_for item, idx _over a_stream.elements()
+	_loop
+		total +<< item
+	_endloop
+	outcome
+_endmethod
+$
+"
+  "Magik source used by the tree-sitter variable scan tests.")
+
+(defmacro magik-completion-test--with-ts-buffer (content search &rest body)
+  "Eval BODY in a buffer with CONTENT parsed as Magik.
+Point is placed at the end of the first occurrence of SEARCH.
+Skips the test when the Magik tree-sitter grammar is unavailable."
+  (declare (indent 2))
+  `(progn
+     (skip-unless (and (require 'treesit nil t)
+                       (fboundp 'treesit-available-p)
+                       (treesit-available-p)
+                       (treesit-language-available-p 'magik)))
+     (with-temp-buffer
+       (insert ,content)
+       (treesit-parser-create 'magik)
+       (goto-char (point-min))
+       (search-forward ,search)
+       ,@body)))
+
+(ert-deftest magik-completion--ts-scan-variables--method-parameters ()
+  "Required, optional and gather parameters are all offered."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (dolist (param '("a_stream" "count" "flags" "rest"))
+        (should (member param vars))))))
+
+(ert-deftest magik-completion--ts-scan-variables--local-declarations ()
+  "_local and _constant declarations are collected, including tuples."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (dolist (var '("total" "lo" "hi" "limit"))
+        (should (member var vars))))))
+
+(ert-deftest magik-completion--ts-scan-variables--assignments ()
+  "Assigned variables are collected, including tuple assignment targets."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (should (member "x" vars))
+      (should (member "y" vars)))))
+
+(ert-deftest magik-completion--ts-scan-variables--loop-variables ()
+  "_for loop variables are collected."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (should (member "item" vars))
+      (should (member "idx" vars)))))
+
+(ert-deftest magik-completion--ts-scan-variables--respects-point ()
+  "Variables declared after point are not offered, parameters are."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method
+      "_local total << 0"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (should (member "a_stream" vars))
+      (should (member "total" vars))
+      (should-not (member "limit" vars))
+      (should-not (member "item" vars)))))
+
+(ert-deftest magik-completion--ts-scan-variables--inside-loop-body ()
+  "Parameters and outer locals stay visible inside a loop body."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method
+      "total +<< item"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (dolist (var '("a_stream" "rest" "total" "lo" "item"))
+        (should (member var vars))))))
+
+(ert-deftest magik-completion--ts-scan-variables--no-keywords-or-rhs ()
+  "Keywords and right-hand sides of assignments are not offered."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (should-not (member "compute_pair" vars))
+      (should-not (seq-some (lambda (v) (string-prefix-p "_" v)) vars)))))
+
 (provide 'magik-completion-test)
 ;;; magik-completion-test.el ends here
