@@ -17,7 +17,8 @@
 
 (depends-on "emacs" "24.4")
 (depends-on "compat")
-(depends-on "flycheck")
+(when (>= emacs-major-version 28)
+  (depends-on "flycheck"))
 (depends-on "yasnippet")
 
 (setq network-security-level 'low)  ; see https://github.com/jcs090218/setup-emacs-windows/issues/156#issuecomment-932956432
