@@ -19,6 +19,11 @@
 
 ;;; Code:
 
+;; Flycheck requires Emacs 28+; bail out early on older releases.
+(when (< emacs-major-version 28)
+  (provide 'magik-lint)
+  (signal 'file-error '("magik-lint requires Emacs 28 or later")))
+
 (require 'flycheck)
 
 (defun magik-lint--latest-version ()
