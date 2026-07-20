@@ -806,8 +806,8 @@ there is not, prompt for a command to run, and then run it."
 (defun magik-session-new-buffer ()
   "Start a new Magik session."
   (interactive)
-  (let ((current-prefix-arg t))
-    (call-interactively #'magik-session)))
+  (magik-session (generate-new-buffer-name
+                  (or magik-session-buffer magik-session-buffer-default-name))))
 
 (defun magik-session-kill-process ()
   "Kill the current Magik process."
