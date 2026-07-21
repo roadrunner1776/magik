@@ -302,7 +302,7 @@ With a prefix arg, ask user for current directory to use."
          (program (magik-aliases-program smallworld-gis))
          (args    magik-aliases-program-args)
          (file    (or file (buffer-file-name)))
-         (buf     "gis")
+         (buf     magik-session-buffer-default-name)
          (version (if (boundp 'magik-version-current)
                       (symbol-value 'magik-version-current))))
     (save-excursion

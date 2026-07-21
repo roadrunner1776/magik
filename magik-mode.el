@@ -1,6 +1,6 @@
 ;;; magik-mode.el --- Emacs major mode for Smallworld Magik files
 
-;; Package-Version: 0.6.0
+;; Package-Version: 0.6.5
 ;; Package-Requires: ((emacs "24.4") (compat "28.1") (yasnippet "0.14.0"))
 ;; URL: https://github.com/roadrunner1776/magik
 ;; Keywords: languages
@@ -37,6 +37,7 @@
 (require 'yasnippet)
 (require 'magik-doc-gen)
 (require 'magik-template)
+(require 'magik-completion)
 
 (defgroup magik nil
   "Customise Magik Language group."
@@ -111,6 +112,7 @@ concrete implementations."
     (abbrev-mode t)
     (yas-minor-mode t))
 
+  (magik-completion-setup)
   (imenu-add-menubar-index))
 
 ;;;###autoload
@@ -163,7 +165,6 @@ concrete implementations."
     "---"
     [,"Add Debug Statement"         magik-add-debug-statement     t]
     [,"Trace Statement"             magik-trace-curr-statement    t]
-    [,"Symbol Complete"   magik-symbol-complete         (magik-utils-buffer-mode-list 'magik-session-mode)]
     "---"
     [,"Comment Region"           magik-comment-region          t]
     [,"Uncomment Region"         magik-uncomment-region        t]
@@ -1216,6 +1217,7 @@ Otherwise, point is left where it is."
         mark)
     (save-excursion
       (setq mark (magik-mark-method t))
+      (deactivate-mark)
       (magik-transmit-region (point) mark))
     (cond ((eq magik-transmit-method-eom-mode 'end)
            (goto-char mark))
@@ -1557,28 +1559,7 @@ If PT is given, goto that char position."
         (exchange-point-and-mark))
     (magik-un-comment (count-lines (point) (mark t)))))
 
-(defun magik-symbol-complete (&optional buffer)
-  "Perform completion on Magik symbol preceding point.
-The symbol is compared against the symbols that exist in the Magik
-process running in the BUFFER named in the variable, `magik-session-buffer'.
 
-With a prefix arg, ask user for GIS buffer to use."
-  (interactive "*")
-  ;; the actual completion is done by the process filter: gis-filter-completion-action
-  (setq buffer (magik-utils-get-buffer-mode buffer
-                                            'magik-session-mode
-                                            "Enter Magik Session buffer:"
-                                            magik-session-buffer
-                                            'magik-session-buffer-alist-prefix-function))
-  (barf-if-no-gis buffer)
-
-  (if (equal (magik-utils--current-word) "")
-      (message "Doing a completion on the empty string would take too long")
-    (if (<= (length (magik-utils--current-word)) 2)
-        (message "Symbol is already complete or is too short."))
-    (process-send-string
-     (get-buffer-process buffer)
-     (concat "symbol_table.emacs_write_completions(\"" (magik-utils--current-word) "\")\n$\n"))))
 
 (defun magik-compare-methods (ignore-whitespace)
   "Compare Methods in two windows using \\[compare-windows].
@@ -2007,7 +1988,6 @@ Prevents expansion inside strings and comments."
   (define-key magik-base-mode-map (kbd "<f2> P") 'magik-file-pragma)
   (define-key magik-base-mode-map (kbd "<f2> p") 'magik-single-pragma)
 
-  (define-key magik-base-mode-map (kbd "<f4> <f4>") 'magik-symbol-complete)
   (define-key magik-base-mode-map (kbd "<f4> c") 'magik-copy-method)
   (define-key magik-base-mode-map (kbd "<f4> e") 'magik-ediff-methods)
   (define-key magik-base-mode-map (kbd "<f4> <f3>") 'magik-cb-magik-ediff-methods)

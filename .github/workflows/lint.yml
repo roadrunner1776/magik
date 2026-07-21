@@ -19,14 +19,14 @@ jobs:
   markdown-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: DavidAnson/markdownlint-cli2-action@v19
+      - uses: DavidAnson/markdownlint-cli2-action@v23
 
   codespell:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: codespell-project/actions-codespell@v2
         with:
@@ -35,13 +35,13 @@ jobs:
   emacs-indentation-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: jcs090218/setup-emacs@3586c34483bee442d1293c9a428fa3da44421509
+      - uses: jcs090218/setup-emacs@v3
         with:
           version: snapshot
 
-      - uses: emacs-eask/setup-eask@cc250315b6a3177fa27dbb5bb6a2a9d9b90b2ef7
+      - uses: emacs-eask/setup-eask@v3
         with:
           version: snapshot
 
