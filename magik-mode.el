@@ -1,6 +1,6 @@
 ;;; magik-mode.el --- Emacs major mode for Smallworld Magik files  -*- lexical-binding: t; -*-
 
-;; Package-Version: 0.4.1
+;; Package-Version: 0.6.5
 ;; Package-Requires: ((emacs "24.4") (compat "28.1") (yasnippet "0.14.0"))
 ;; URL: https://github.com/roadrunner1776/magik
 ;; Keywords: languages
@@ -27,18 +27,17 @@
 (eval-when-compile
   (require 'font-lock)
   (defvar msb-menu-cond)
-  (defvar ac-sources)
-  (defvar ac-prefix)
-  (defvar ac-modes)
   (require 'magik-indent)
   (require 'magik-electric)
   (require 'magik-pragma)
-  (require 'magik-doc-gen))
+  (require 'magik-utils))
 
 (require 'compat)
 (require 'imenu)
 (require 'yasnippet)
+(require 'magik-doc-gen)
 (require 'magik-template)
+(require 'magik-completion)
 
 (defgroup magik nil
   "Customise Magik Language group."
@@ -107,19 +106,13 @@ concrete implementations."
                imenu-generic-expression imenu-generic-expression
                imenu-create-index-function 'magik-imenu-create-index-function
                imenu-syntax-alist '((?_ . "w"))
-               ac-sources (append '(
-                                    magik-ac-class-method-source
-                                    magik-ac-dynamic-source
-                                    magik-ac-global-source
-                                    magik-ac-object-source
-                                    magik-ac-raise-condition-source)
-                                  (and (boundp 'ac-sources)
-                                       ac-sources))
-
                outline-regexp "\\(^\\(_abstract +\\|\\)\\(_private +\\|\\)\\(_iter +\\|\\)_method.*\\|.*\.\\(def_property\\|add_child\\)\\|.*\.define_\\(shared_variable\\|shared_constant\\|slot_access\\|slot_externally_\\(read\\|writ\\)able\\|property\\|interface\\|method_signature\\).*\\|^\\(\t*#+\>[^>]\\|def_\\(slotted\\|indexed\\)_exemplar\\|def_mixin\\|#% text_encoding\\|_global\\|read_\\(message\\|translator\\)_patch\\).*\\)")
 
-  (when magik-auto-abbrevs (abbrev-mode 1))
+  (when magik-auto-abbrevs
+    (abbrev-mode t)
+    (yas-minor-mode t))
 
+  (magik-completion-setup)
   (imenu-add-menubar-index))
 
 ;;;###autoload
@@ -172,14 +165,17 @@ concrete implementations."
     "---"
     [,"Add Debug Statement"         magik-add-debug-statement     t]
     [,"Trace Statement"             magik-trace-curr-statement    t]
-    [,"Symbol Complete"   magik-symbol-complete         (magik-utils-buffer-mode-list 'magik-session-mode)]
     "---"
     [,"Comment Region"           magik-comment-region          t]
     [,"Uncomment Region"         magik-uncomment-region        t]
     [,"Fill Comment"             magik-fill-public-comment     t]
     "---"
-    [,"Check sw-method-docs for method"      magik-single-sw-method-docs t]
-    [,"Check sw-method-docs for file"        magik-file-sw-method-docs   t]
+    [,"Check sw-method-doc for method" magik-single-method-sw-method-doc t]
+    [,"Check sw-method-doc for file"   magik-file-sw-method-doc       t]
+    [,"Check type-doc for method"      magik-single-method-type-doc   t]
+    [,"Check type-doc for exemplar"    magik-single-exemplar-type-doc t]
+    [,"Check type-doc for file"        magik-file-type-doc            t]
+    "---"
     [,"Check pragma for method/def_slotted_exemplar" magik-single-pragma t]
     [,"Check pragma for file"                        magik-file-pragma   t]
     "---"
@@ -264,14 +260,12 @@ concrete implementations."
 
 ;;; Font-lock configuration
 ;;
-;; Do not use :inherit because we want Emacs 20 support.
-;;
 ;; On Windows Emacsen 21 and earlier, there is a GDI Object based memory leak.
 ;; This has been tracked down to creating italic forms of the font.
 ;; However, bold italic forms do not appear affected,
 ;; so all color based italic fonts are also made bold too.
 (defgroup magik-faces nil
-  "Fontification colours for Magik."
+  "Faces for displaying text in Magik."
   :group 'magik)
 
 ;; font-lock-variable-use-face was introduced in Emacs 29.1.
@@ -447,24 +441,6 @@ concrete implementations."
   '((t (:inherit font-lock-warning-face)))
   "Font Lock mode face used to display write() statements."
   :group 'magik-faces)
-
-(defconst magik-regexp
-  '(("method" .
-     "^[_abstract\s|_private\s|_iter\s]*?_method")
-    ("method-with-arguments" .
-     "^[_abstract\s|_private\s|_iter\s]*?_method.*(\\([\0-\377[:nonascii:]]*?\\))")
-    ("assignment-method" .
-     "^[_abstract\s|_private\s|_iter\s]*?_method.*<<\s?\\(.*\\)")
-    ("endmethod" .
-     "^\\s-*_endmethod\\s-*\\(\n\\$\\s-*\\)?$")
-    ("method-argument" .
-     "_gather\\|_scatter\\|_optional")
-    ("pragma" .
-     "^_pragma(.*)")
-    ("def_slotted_exemplar" .
-     "^[sw:]?def_slotted_exemplar(.*"))
-  "List of regexp strings which can be used for searching.
-In a buffer searching for a Magik-specific.")
 
 (defvar magik-keyword-kleenean
   '("false" "true" "maybe")
@@ -671,62 +647,6 @@ Used by \\[magik-method-name-mode].")
 (defvar magik-method-name-set-text-function 'magik-method-name-set-text-properties
   "Function to use for setting the Mode line to include Method name.
 Function takes two arguments BUFFER and METHOD.")
-
-;; consider enabling refresh using auto-complete's 10 minute refresh idle timer?
-(defvar magik-ac-object-source-cache nil
-  "Cache of all Magik Objects for use in auto-complete-mode.
-Once initialised this variable is not refreshed.")
-
-(defvar magik-ac-object-source
-  '((init       . magik-ac-object-source-init)
-    (candidates . magik-ac-object-source-cache)
-    (prefix     . magik-object)
-    (requires   . 3)
-    (symbol     . "o"))
-  "Auto-complete mode source definition for listing all Magik Objects.
-Use auto-complete mode \"o\" symbol convention to represent an object.")
-
-(defvar magik-ac-class-method-source-cache nil
-  "Cache of all Magik methods on current class for use in auto-complete-mode.")
-
-(defvar magik-ac-class-method-source
-  '((init       . magik-ac-object-source-init)
-    (candidates . magik-ac-class-method-source)
-    (prefix     . magik-method)
-    (symbol     . "f"))
-  "Auto-complete mode source definition for listing methods on a given class.
-Use auto-complete mode \"f\" symbol convention to represent a function, method.")
-
-(defvar magik-ac-raise-condition-source-cache nil
-  "Cache of all Magik Conditions for use in auto-complete-mode.")
-
-(defvar magik-ac-raise-condition-source
-  '((init       . magik-ac-raise-condition-source-init)
-    (candidates . magik-ac-raise-condition-source-cache)
-    (prefix     . magik-condition)
-    (symbol     . "c"))
-  "Auto-complete mode source definition for listing known conditions.
-Uses auto-complete \"c\" symbol convention to represent a condition!")
-
-(defvar magik-ac-global-source-cache nil
-  "Cache of all Magik Globals for use in auto-complete-mode.
-Once initialised this variable is not refreshed.")
-
-(defvar magik-ac-dynamic-source
-  '((init       . magik-ac-global-source-init)
-    (candidates . magik-ac-global-source-cache)
-    (prefix     . magik-dynamic)
-    (symbol     . "d"))
-  "Auto-complete mode source definition for listing Magik language dynamics.
-Use auto-complete mode \"d\" symbol convention to represent.")
-
-(defvar magik-ac-global-source
-  '((init       . magik-ac-global-source-init)
-    (candidates . magik-ac-global-source-cache)
-                                        ;(requires   . 3)
-    (symbol     . "g"))
-  "Auto-complete mode source definition for listing all Magik Globals.
-Use auto-complete mode \"g\" symbol convention to represent a global.")
 
 (defun magik-customize ()
   "Open Customization buffer for Magik Mode."
@@ -1138,9 +1058,9 @@ e.g. (magik-function \"system.test\" \"file\" \\='unset 4) returns the string
 Argument CMD ...
 Optional argument ARGS ..."
 
-                                        ;process arg types: nil, string, other...
+  ;; process arg types: nil, string, other...
   (setq args (mapcar 'magik-function-convert args))
-                                        ;bring the command together adding commas between the arguments
+  ;; bring the command together adding commas between the arguments
   (concat cmd "(" (mapconcat 'identity args ", ") ")\n"))
 
 (defun magik-gis-error-goto (&optional gis)
@@ -1292,6 +1212,7 @@ Otherwise, point is left where it is."
         mark)
     (save-excursion
       (setq mark (magik-mark-method t))
+      (deactivate-mark)
       (magik-transmit-region (point) mark))
     (cond ((eq magik-transmit-method-eom-mode 'end)
            (goto-char mark))
@@ -1633,28 +1554,7 @@ If PT is given, goto that char position."
         (exchange-point-and-mark))
     (magik-un-comment (count-lines (point) (mark t)))))
 
-(defun magik-symbol-complete (&optional buffer)
-  "Perform completion on Magik symbol preceding point.
-The symbol is compared against the symbols that exist in the Magik
-process running in the BUFFER named in the variable, `magik-session-buffer'.
 
-With a prefix arg, ask user for GIS buffer to use."
-  (interactive "*")
-  ;; the actual completion is done by the process filter: gis-filter-completion-action
-  (setq buffer (magik-utils-get-buffer-mode buffer
-                                            'magik-session-mode
-                                            "Enter Magik Session buffer:"
-                                            magik-session-buffer
-                                            'magik-session-buffer-alist-prefix-function))
-  (barf-if-no-gis buffer)
-
-  (if (equal (magik-utils-curr-word) "")
-      (message "Doing a completion on the empty string would take too long")
-    (if (<= (length (magik-utils-curr-word)) 2)
-        (message "Symbol is already complete or is too short."))
-    (process-send-string
-     (get-buffer-process buffer)
-     (concat "symbol_table.emacs_write_completions(\"" (magik-utils-curr-word) "\")\n$\n"))))
 
 (defun magik-compare-methods (ignore-whitespace)
   "Compare Methods in two windows using \\[compare-windows].
@@ -1928,119 +1828,6 @@ provide extra control over the name that appears in the index."
       (nconc (delq main-element (delq 'dummy index-alist))
              (cdr main-element)))))
 
-(defun magik-ac-exemplar-near-point ()
-  "Get current exemplar near cursor position."
-  (save-excursion
-    (save-match-data
-      (let ((pt (1- (magik-ac-method-prefix)))
-            variable
-            exemplar)
-        (goto-char pt)
-        ;; Usefully skip over various syntax types:
-        (if (not (zerop (skip-syntax-backward "w_().")))
-            (setq variable (buffer-substring-no-properties (point) pt)))
-        (if variable
-            (setq exemplar (cond ((equal variable "_self")
-                                  (or (cadr (magik-current-method-name))
-                                      (file-name-sans-extension (buffer-name))))
-                                 ((member variable magik-ac-object-source-cache)
-                                  variable)
-                                 ((re-search-backward (concat (regexp-quote variable) "\\s-*^?<<[ \t\n]*\\(\\S-+\\)\\.new") nil t)
-                                  (buffer-substring-no-properties (match-beginning 1) (match-end 1)))
-                                 (t
-                                  nil))))
-        exemplar))))
-
-(defun magik-ac-class-method-source ()
-  "List of methods on a class.
-Uses a cache variable `magik-ac-class-method-source-cache'.
-All the methods beginning with the first character are returned and
-stored in the cache.  Thus subsequent characters refining the match are
-handled by auto-complete refining the list of all possible matches,
-without recourse to the class browser."
-  (let ((exemplar (magik-ac-exemplar-near-point))
-        (ac-prefix ac-prefix))
-    (if exemplar
-        (progn
-          (setq ac-prefix (concat exemplar  "." (if (> (length ac-prefix) 0) (substring ac-prefix 0 1))))
-          (if (and magik-ac-class-method-source-cache
-                   (equal (concat " " ac-prefix) (car magik-ac-class-method-source-cache)))
-              ;; Reuse cache.
-              magik-ac-class-method-source-cache
-            ;; reset cache
-            (setq magik-ac-class-method-source-cache (magik-cb-ac-method-candidates)))))))
-
-(defun magik-ac-object-source-init ()
-  "Initialisation function for obtaining all Magik Objects.
-For use in auto-complete-mode."
-  (if (magik-cb-ac-start-process)
-      (let ((ac-prefix "sw:object"))
-        (setq magik-ac-object-source-cache (magik-cb-ac-class-candidates)))))
-
-(defun magik-ac-object-prefix ()
-  "Detect if point is at a possible object, allowing for a package: prefix."
-  (let (pt)
-    (cond
-     ((re-search-backward "\\(\\sw+:\\)\\(\\sw+\\)\\=" nil t)
-      (match-beginning 2))
-     ((and (re-search-backward "\\Sw\\(\\sw+\\)\\=" nil t)
-           (not (eq (following-char) ?.))
-           (setq pt (match-beginning 1))
-           (not (equal ":" (buffer-substring-no-properties pt (1+ pt)))))
-      pt)
-     (t nil))))
-
-(defun magik-ac-method-prefix ()
-  "Detect if point is at . method point."
-  (if (re-search-backward "\\(_self\\|_clone\\|\\S-\\)\\.\\(\\sw+\\)\\=" nil t)
-      (match-beginning 2)))
-
-(defun magik-ac-raise-condition-source-init ()
-  "Initialisation function for obtaining all Magik Conditions.
-For use in auto-complete-mode.  Once initialised this variable is not refreshed."
-  (if (magik-cb-ac-start-process)
-      (let ((ac-prefix "<condition>."))
-        (if magik-ac-raise-condition-source-cache
-            ;; consider enabling refresh using auto-complete's 10 minute refresh idle timer?
-            magik-ac-raise-condition-source-cache
-          (setq magik-ac-raise-condition-source-cache (magik-cb-ac-method-candidates))))))
-
-(defun magik-ac-raise-condition-prefix ()
-  "Detect if point is at a condition.raise."
-  (if (re-search-backward "condition\\.raise(\\s-*:\\(\\sw+\\)\\=" nil t)
-      (match-beginning 1)))
-
-(defun magik-ac-global-source-init ()
-  "Initialisation function for obtaining all Magik Conditions.
-For use in auto-complete-mode.  Once initialised this variable is not refreshed."
-  (if (magik-cb-ac-start-process)
-      (let ((ac-prefix "<global>."))
-        (if magik-ac-global-source-cache
-            ;; consider enabling refresh using auto-complete's 10 minute refresh idle timer?
-            magik-ac-global-source-cache
-          (setq magik-ac-global-source-cache (magik-cb-ac-method-candidates))))))
-
-(defun magik-ac-dynamic-prefix ()
-  "Detect if point is at !..! dynamic point."
-  (let (pt)
-    (if (and (re-search-backward "\\Sw\\(!\\sw*\\)\\=" nil t)
-             (not (eq (following-char) ?.))
-             (setq pt (match-beginning 1))
-             (not (equal ":" (buffer-substring-no-properties pt (1+ pt)))))
-        pt)))
-
-(defun magik-ac-complete ()
-  "Auto-complete command for Magik entities."
-  (interactive)
-  (let ((ac 'auto-complete))
-    (when (fboundp ac)
-      (funcall ac '(
-                    magik-ac-class-method-source
-                    magik-ac-raise-condition-source
-                    magik-ac-dynamic-source
-                    magik-ac-object-source
-                    magik-ac-global-source)))))
-
 ;;; Smallworld Compatibility functions
 (defalias 'magik-point-on-pragma-line-p 'pragma-line-p)
 
@@ -2064,12 +1851,13 @@ Translate it and the closing bracket into the new \"{...}\" notation."
   (syntax-ppss-context (syntax-ppss)))
 
 (defun magik-yas-maybe-expand ()
-  "Expand `yasnippet` if possible, otherwise insert a space.
+  "Expand yasnippet if possible, otherwise insert a space.
 Prevents expansion inside strings and comments."
   (interactive)
-  (if (or (magik--in-string-or-comment-p)
-          (not (yas-expand)))
-      (self-insert-command 1)))
+  (when (or (magik--in-string-or-comment-p)
+            (not yas-minor-mode)
+            (not (yas-expand)))
+    (self-insert-command 1)))
 
 ;;; Package initialisation
 (define-abbrev-table 'magik-base-mode-abbrev-table
@@ -2156,18 +1944,6 @@ Prevents expansion inside strings and comments."
 (with-eval-after-load 'msb
   (magik-msb-configuration))
 
-;;Auto-complete configuration
-(defun magik-ac-configuration ()
-  "Configure Magik package for auto-complete mode."
-  (ac-define-prefix 'magik-dynamic 'magik-ac-dynamic-prefix)
-  (ac-define-prefix 'magik-condition 'magik-ac-raise-condition-prefix)
-  (ac-define-prefix 'magik-object 'magik-ac-object-prefix)
-  (ac-define-prefix 'magik-method 'magik-ac-method-prefix)
-  (setq ac-modes (append (list 'magik-mode) ac-modes)))
-
-(with-eval-after-load 'auto-complete
-  (magik-ac-configuration))
-
 ;;Flycheck configuration
 (with-eval-after-load 'flycheck
   (require 'magik-lint))
@@ -2202,12 +1978,11 @@ Prevents expansion inside strings and comments."
   (define-key magik-base-mode-map (kbd "<f2> <up>") 'magik-safe-backward-method)
   (define-key magik-base-mode-map (kbd "<f2> <down>") 'magik-safe-forward-method)
   (define-key magik-base-mode-map (kbd "<f2> $") 'magik-transmit-$-chunk)
-  (define-key magik-base-mode-map (kbd "<f2> D") 'magik-file-sw-method-docs)
-  (define-key magik-base-mode-map (kbd "<f2> d") 'magik-single-sw-method-docs)
+  (define-key magik-base-mode-map (kbd "<f2> D") 'magik-file-sw-method-doc)
+  (define-key magik-base-mode-map (kbd "<f2> d") 'magik-single-method-sw-method-doc)
   (define-key magik-base-mode-map (kbd "<f2> P") 'magik-file-pragma)
   (define-key magik-base-mode-map (kbd "<f2> p") 'magik-single-pragma)
 
-  (define-key magik-base-mode-map (kbd "<f4> <f4>") 'magik-symbol-complete)
   (define-key magik-base-mode-map (kbd "<f4> c") 'magik-copy-method)
   (define-key magik-base-mode-map (kbd "<f4> e") 'magik-ediff-methods)
   (define-key magik-base-mode-map (kbd "<f4> <f3>") 'magik-cb-magik-ediff-methods)

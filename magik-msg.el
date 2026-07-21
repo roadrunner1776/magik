@@ -40,19 +40,48 @@
   "Imenu generic expression for Magik Message mode.
 See `imenu-generic-expression'.")
 
+(defgroup magik-msg-faces nil
+  "Faces for displaying text in a Magik messages file."
+  :group 'magik-msg)
+
+(defface magik-msg-comment-face
+  '((t :inherit magik-comment-face))
+  "Font Lock mode face used to display comments."
+  :group 'magik-msg-faces)
+
+(defface magik-msg-language-id-face
+  '((t :inherit magik-constant-face))
+  "Font Lock mode face used to display the language id."
+  :group 'magik-msg-faces)
+
+(defface magik-msg-message-id-face
+  '((t :inherit magik-method-face))
+  "Font Lock mode face used to display the message id."
+  :group 'magik-msg-faces)
+
+(defface magik-msg-placeholder-face
+  '((t :inherit magik-variable-face))
+  "Font Lock mode face used to display placeholders inside a message."
+  :group 'magik-msg-faces)
+
+(defface magik-msg-text-encoding-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display the text encoding."
+  :group 'magik-msg-faces)
+
 ;; Font-lock configuration
 (defcustom magik-msg-font-lock-keywords
   (list
    '("^\\(:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)\\s-+\\(:\\sw+\\)"
-     (1 font-lock-function-name-face)
-     (3 font-lock-constant-face))
-   '("^\\([+]\\)\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)"
-     (1 font-lock-type-face)
-     (2 font-lock-keyword-face))
-   '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . font-lock-function-name-face)
-   '("^#%\\s-*text_encoding.*$" . font-lock-warning-face)
-   '("#[0-9]+" . font-lock-variable-name-face)
-   '("#.*" . font-lock-comment-face))
+     (1 'magik-msg-message-id-face)
+     (3 'magik-msg-language-id-face))
+   '("^\\([+]\\)\\s-+\\(\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?\\)" ;; This is obsolete in SW5
+     (1 'magik-operator-face)
+     (2 'magik-keyword-statements-face))
+   '("^:\\sw*\\(\\s$\\S$*\\s$\\sw*\\)?" . 'magik-msg-message-id-face)
+   '("^#%\\s-*text_encoding.*$" . 'magik-msg-text-encoding-face)
+   '("#\\([h@]?\\)[1-9]" . 'magik-msg-placeholder-face)
+   '("#[n|s|t|#]" . 'magik-msg-comment-face))
   "Default fontification of Magik Messages."
   :group 'magik-msg
   :type 'sexp)
@@ -129,13 +158,13 @@ You can customize msg-mode with the `magik-msg-mode-hook`.
 The GIS process used is either that given by BUF or
 the variable `magik-session-buffer'."
   (interactive)
-  (let ((gis (magik-utils-get-buffer-mode gis
-                                          'magik-session-mode
-                                          "Enter Magik Session buffer:"
-                                          magik-session-buffer
-                                          'magik-session-buffer-alist-prefix-function))
-        (process (barf-if-no-gis gis))
-        (filename (buffer-file-name)))
+  (let* ((gis (magik-utils-get-buffer-mode gis
+                                           'magik-session-mode
+                                           "Enter Magik Session buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (process (barf-if-no-gis gis))
+         (filename (buffer-file-name)))
     ;; Load messages
     (message "%s loaded in buffer %s." filename gis)
     (process-send-string
@@ -157,13 +186,13 @@ Only compile with the module this buffer is assocaiated with in a GIS process.
 The GIS process used is either that given by BUF or
 the variable `magik-session-buffer'."
   (interactive)
-  (let ((gis (magik-utils-get-buffer-mode gis
-                                          'magik-session-mode
-                                          "Enter Magik Session buffer:"
-                                          magik-session-buffer
-                                          'magik-session-buffer-alist-prefix-function))
-        (process (barf-if-no-gis gis))
-        (directory (file-name-directory (buffer-file-name))))
+  (let* ((gis (magik-utils-get-buffer-mode gis
+                                           'magik-session-mode
+                                           "Enter Magik Session buffer:"
+                                           magik-session-buffer
+                                           'magik-session-buffer-alist-prefix-function))
+         (process (barf-if-no-gis gis))
+         (directory (file-name-directory (buffer-file-name))))
     ;; Load messages
     (message "Compiling all module messages in %s. " gis)
     (process-send-string
@@ -174,7 +203,7 @@ the variable `magik-session-buffer'."
 
    module << sw_module_manager.locate_module(directory)
    _if module _isnt _unset
-   _then sw_module_manager.compile_messages(module)
+   _then module.compile_messages()
    _endif
       _endproc(%S)\n$\n"
       directory))

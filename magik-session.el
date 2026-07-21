@@ -87,7 +87,6 @@
 (require 'magik-mode)
 (require 'magik-indent)
 (require 'magik-pragma)
-(or (boundp 'ac-sources) (setq ac-sources nil))
 
 (defgroup magik-session nil
   "Customise Magik session group."
@@ -100,12 +99,12 @@ Used for switching to the first Smallworld session."
   :group 'magik-session
   :type '(choice string (const nil)))
 
-(defcustom magik-session-buffer-default-name "*gis*"
-  "*The default name of a Magik Session buffer when creating new Magik sessions."
+(defcustom magik-session-buffer-default-name "magik"
+  "*The default name of a Magik session buffer when creating new Magik sessions."
   :group 'magik-session
   :type 'string)
 
-(defcustom magik-session-prompt "Magik\\(\\|SF\\)> "
+(defcustom magik-session-prompt (regexp-opt `("Magik> " "MagikSF> " "Majestik> "))
   "String or Regular expression identifying the default Magik Prompt.
 If global value is nil, a Magik session will attempt to discover the current
 setting of the Magik Prompt by calling `magik-session-prompt-get'."
@@ -136,30 +135,52 @@ that use command string matching are not affected by this setting."
   :group 'magik-session
   :type 'boolean)
 
-(defcustom magik-session-font-lock-prompt-face 'font-lock-type-face
-  "*Face name used to display the Magik Prompt."
-  :group 'magik-session
-  :type 'face)
+(defgroup magik-session-faces nil
+  "Faces for displaying text in the Magik session."
+  :group 'magik-session)
 
-(defcustom magik-session-font-lock-error-face 'font-lock-warning-face
-  "*Face name used to display Error lines."
-  :group 'magik-session
-  :type 'face)
+(defface magik-session-error-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display Error lines."
+  :group 'magik-session-faces)
 
-(defcustom magik-session-font-lock-traceback-face 'font-lock-warning-face
-  "*Face name used to display Traceback lines."
+(defface magik-session-prompt-face
+  '((t :inherit font-lock-type-face)) ;; TODO: Switch to a Magik-specific face?
+  "Font Lock mode face used to display the Magik Prompt."
+  :group 'magik-session-faces)
+
+(defface magik-session-reference-face
+  '((t :inherit magik-global-reference-face))
+  "Font Lock mode face used to display global references."
+  :group 'magik-session-faces)
+
+(defface magik-session-traceback-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display Traceback lines."
+  :group 'magik-session-faces)
+
+(defface magik-session-warning-face
+  '((t :inherit magik-warning-face))
+  "Font Lock mode face used to display Warning lines."
+  :group 'magik-session-faces)
+
+(defcustom magik-session-strict-line-start t
+  "If non-nil, force matching of session output at the beginning of the line.
+If nil, allow matching anywhere in the line."
   :group 'magik-session
-  :type 'face)
+  :type 'boolean)
 
 (defcustom magik-session-font-lock-keywords
   (append
    magik-font-lock-keywords-1
    magik-font-lock-keywords-2
-   (list
-    '("^\\*\\*\\*\\* Error:.*$"      0 magik-session-font-lock-error-face t)
-    '("^\\*\\*\\*\\* Warning:.*$"    0 font-lock-warning-face t)
-    '("^---- traceback.* ----" . magik-session-font-lock-traceback-face)
-    '("^@.*$"                . font-lock-reference-face)))
+   (let ((prefix (if magik-session-strict-line-start "^" "")))
+     (list
+      `(,(concat prefix "\\*\\*\\*\\* Error.*$")          0 'magik-session-error-face t)
+      `(,(concat prefix "\\*\\*\\*\\* Warning.*$")        0 'magik-session-warning-face t)
+      `(,(concat prefix "\\*\\*\\*\\* Parser warning.*$") 0 'magik-session-warning-face t)
+      '("^---- traceback.* ----" . 'magik-session-traceback-face)
+      '("^@.*$"                   . 'magik-session-reference-face))))
   "Additional expressions to highlight in Magik mode."
   :group 'magik-session
   :type 'sexp)
@@ -294,14 +315,10 @@ It is offered as the default string for next time.")
 (defun magik-session-prompt-update-font-lock ()
   "Update the Font-lock variable `magik-session-font-lock-keywords'.
 Uses current `magik-session-prompt' setting as value."
-  (let ((entry (list (concat "^" magik-session-prompt) 0 magik-session-font-lock-prompt-face t)))
-    (if (member entry magik-session-font-lock-keywords)
-        nil ;; Already entered
-      (setq magik-session-font-lock-keywords (append magik-session-font-lock-keywords (list entry)))
-      (if (fboundp 'font-lock-set-defaults)
-          (progn  ;; Emacs 20 and later font-lock mode post-process its variables
-            (set 'font-lock-set-defaults nil)
-            (funcall 'font-lock-set-defaults))))))
+  (let ((entry (list (concat "^" magik-session-prompt) 0 ''magik-session-prompt-face t)))
+    (unless (member entry magik-session-font-lock-keywords)
+      (add-to-list 'magik-session-font-lock-keywords entry)
+      (font-lock-refresh-defaults))))
 
 (defun magik-session-prompt-get (&optional force-query-p)
   "If `magik-session-prompt' is nil, get the Magik session's command line prompt.
@@ -498,7 +515,7 @@ Return a list of all the components of the COMMAND."
 
 (define-derived-mode magik-session-mode nil "Magik Session"
   "Major mode to run a Magik session as a direct subprocess.
-The default name for a buffer running a session is \"*gis*\". The name of
+The default name for a buffer running a session is \"*magik*\". The name of
 the current session buffer is stored in the user option `magik-session-buffer`.
 There are many ways to recall previous commands (see the online
 help with \\[help-command]).
@@ -524,12 +541,6 @@ Entry to this mode runs `magik-session-mode-hook`.
                magik-transmit-debug-mode-line-string " #DEBUG"
                show-trailing-whitespace nil
                font-lock-defaults '(magik-session-font-lock-keywords nil t ((?_ . "w")))
-               ac-sources (append '(magik-ac-class-method-source
-                                    magik-ac-dynamic-source
-                                    magik-ac-global-source
-                                    magik-ac-object-source
-                                    magik-ac-raise-condition-source)
-                                  ac-sources)
                mode-line-process '(": %s")
                local-abbrev-table magik-base-mode-abbrev-table)
 
@@ -556,11 +567,13 @@ Entry to this mode runs `magik-session-mode-hook`.
   (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
     (erase-buffer))
 
-  (add-hook 'before-change-functions 'magik-session--prepare-for-edit-cmd nil t)
-  (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu nil t)
-  (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu nil t)
-  (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu nil t)
-  (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t))
+  (magik-completion-setup)
+
+  (add-hook 'before-change-functions #'magik-session--prepare-for-edit-cmd nil t)
+  (add-hook 'menu-bar-update-hook #'magik-session-update-magik-session-menu nil t)
+  (add-hook 'menu-bar-update-hook #'magik-session-update-tools-magik-gis-menu nil t)
+  (add-hook 'menu-bar-update-hook #'magik-session-update-tools-magik-shell-menu nil t)
+  (add-hook 'kill-buffer-hook #'magik-session-buffer-alist-remove nil t))
 
 (defvar magik-session-menu nil
   "Keymap for the Magik session buffer menu bar.")
@@ -577,7 +590,6 @@ Entry to this mode runs `magik-session-mode-hook`.
     [,"Unfold"                           magik-session-undisplay-history :active t :keys "<f2> <down>,   <f2> C-n"]
     "----"
     [,"Electric Template"                magik-explicit-electric-space           t]
-    [,"Symbol Complete"                  magik-symbol-complete                   t]
     ;; [,"Deep Print"                       magik-deep-print                      :active t :keys "<f2> x"]
     "----"
     [,"Previous Traceback"               magik-session-traceback-up              t]
@@ -696,14 +708,17 @@ there is not, prompt for a command to run, and then run it."
         (alias-buffer "*temp gis alias buffer*")
         (keepgoing t)
         (magik-session-start-process-pre-hook magik-session-start-process-pre-hook)
-        (buffer (magik-utils-get-buffer-mode (cond (buffer buffer)
-                                                   ((derived-mode-p 'magik-session-mode) (buffer-name))
-                                                   (t nil))
-                                             'magik-session-mode
-                                             "Enter Magik Session buffer:"
-                                             (or magik-session-buffer magik-session-buffer-default-name)
-                                             'magik-session-buffer-alist-prefix-function
-                                             (generate-new-buffer-name magik-session-buffer-default-name)))
+        (buffer (or
+                 (magik-utils-get-buffer-mode (cond (buffer buffer)
+                                                    ((derived-mode-p 'magik-session-mode) (buffer-name))
+                                                    (t nil))
+                                              'magik-session-mode
+                                              "Enter Magik Session buffer:"
+                                              (or magik-session-buffer magik-session-buffer-default-name)
+                                              'magik-session-buffer-alist-prefix-function
+                                              (generate-new-buffer-name magik-session-buffer-default-name)
+                                              t)
+                 (generate-new-buffer-name (or magik-session-buffer magik-session-buffer-default-name))))
         (rev-1920-regexp " +\\[rev\\(19\\|20\\)\\] +")
         (alias-subst-regexp "\\\\!\\(\\\\\\)?\\*"))
     (if (and (get-buffer-process buffer)
@@ -769,11 +784,13 @@ there is not, prompt for a command to run, and then run it."
       (unless (derived-mode-p 'magik-session-mode)
         (magik-session-mode))
       (goto-char (point-max))
-      (insert "\n" (current-time-string) "\n")
       (setq default-directory (expand-file-name
                                (file-name-as-directory
-                                (substitute-in-file-name dir))))
+                                (magik-utils-substitute-in-file-name dir))))
       (compat-call setq-local
+                   magik-smallworld-gis (or magik-smallworld-gis
+                                            (when (boundp 'magik-smallworld-gis-current)
+                                              (symbol-value 'magik-smallworld-gis-current)))
                    magik-session-current-command (copy-sequence magik-session-command)
                    magik-session-command-history (cons magik-session-current-command
                                                        (delete magik-session-current-command magik-session-command-history)))
@@ -781,16 +798,16 @@ there is not, prompt for a command to run, and then run it."
                                                         (delete magik-session-current-command magik-session-command-history)))
       (or (file-directory-p default-directory)
           (error "Directory does not exist: %s" default-directory))
-      (add-hook 'magik-session-start-process-pre-hook
-                (function (lambda () (insert magik-session-command ?\n ?\n)))
-                t)
-      (magik-session-start-process (magik-session-parse-gis-command (concat cmd " " args))))))
+
+      (insert (format "Startup time: %s\nCommand: %s\n" (current-time-string) magik-session-command))
+
+      (magik-session-start-process (magik-session-parse-gis-command (concat (magik-utils-substitute-in-file-name cmd) " " args))))))
 
 (defun magik-session-new-buffer ()
   "Start a new Magik session."
   (interactive)
   (let ((current-prefix-arg t))
-    (call-interactively 'gis)))
+    (call-interactively #'magik-session)))
 
 (defun magik-session-kill-process ()
   "Kill the current Magik process."
@@ -854,7 +871,7 @@ Locate the cursor to an offset OFFSET."
 (defun magik-session-send-region (beg end)
   "Record in `magik-session-prev-cmds' the region BEG to END and send to the gis.
 Also update `magik-session-cmd-num'.
-Also append the string to \" *history**gis*\"."
+Also append the string to \" *history**magik*\"."
   (save-excursion
     (let ((str (buffer-substring beg end)))
       (set-buffer (get-buffer-create (concat " *history*" (buffer-name))))
@@ -1476,9 +1493,6 @@ where MODE is the name of the major mode with the '-mode' postfix."
 (with-eval-after-load 'msb
   (magik-session-msb-configuration))
 
-(with-eval-after-load 'auto-complete
-  (add-to-list 'ac-modes 'magik-session-mode))
-
 (defvar magik-session-mode-error-map (make-sparse-keymap)
   "Keymap for Jumping to error messages.")
 
@@ -1508,7 +1522,6 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (define-key magik-session-mode-map (kbd "<f2> p")      'magik-session-recall-prev-matching-cmd)
   (define-key magik-session-mode-map (kbd "<f2> n")      'magik-session-recall-next-matching-cmd)
 
-  (define-key magik-session-mode-map (kbd "<f4> <f4>")   'magik-symbol-complete)
   (define-key magik-session-mode-map (kbd "<f4> <up>")   'magik-session-traceback-up)
   (define-key magik-session-mode-map (kbd "<f4> <down>") 'magik-session-traceback-down)
   (define-key magik-session-mode-map (kbd "<f4> $")      'magik-session-shell)

@@ -45,12 +45,17 @@ form the top section of the SW->Alias Files submenu."
   :group 'magik-aliases
   :type  '(repeat file))
 
-(defcustom magik-aliases-program "runalias.exe"
+(defcustom magik-aliases-environment-file (concat "environment" (when (eq system-type 'windows-nt) ".bat"))
+  "*Name of the environment file."
+  :group 'magik-aliases
+  :type  'string)
+
+(defcustom magik-aliases-program (concat "runalias" (when (eq system-type 'windows-nt) ".exe"))
   "*Program to process an alias file."
   :group 'magik-aliases
   :type  'string)
 
-(defcustom magik-aliases-program-path '("../bin/x86" "../../product/bin/x86")
+(defcustom magik-aliases-program-path '("../bin/x86" "../../product/bin/x86" "../bin/share")
   "*Path to `magik-aliases-program'.
 Setting this sets the default value.  When opening a gis_aliases file,
 the buffer local value of this variable will be set to the directory
@@ -102,14 +107,37 @@ If any function returns t, then the buffer is displayed."
    (list nil magik-aliases-definition-regexp 1))
   "Imenu generic expression for Aliases mode.  See `imenu-generic-expression'.")
 
+(defgroup magik-aliases-faces nil
+  "Faces for displaying text in a Magik aliases file."
+  :group 'magik-aliases)
+
+(defface magik-aliases-alias-name-face
+  '((t :inherit magik-method-face))
+  "Font Lock mode face used to display the alias name."
+  :group 'magik-aliases-faces)
+
+(defface magik-aliases-environment-variable-face
+  '((t :inherit magik-variable-face))
+  "Font Lock mode face used to display the environment variable."
+  :group 'magik-aliases-faces)
+
+(defface magik-aliases-environment-variable-placeholder-face
+  '((t :inherit magik-constant-face))
+  "Font Lock mode face used to display the environment variable placeholder."
+  :group 'magik-aliases-faces)
+
+(defface magik-aliases-property-key-face
+  '((t :inherit magik-keyword-arguments-face))
+  "Font Lock mode face used to display the property key."
+  :group 'magik-aliases-faces)
+
 ;; Font-lock configuration
 (defcustom magik-aliases-font-lock-keywords
   (list
-   (cons magik-aliases-definition-regexp 'font-lock-function-name-face)
-   '("^\\s-+\\([A-Z_]+\\)\\s-*:=" 1 font-lock-type-face)
-   '("^\\s-+\\([A-Z_0-9]+\\)\\s-*=" 1 font-lock-variable-name-face)
-   '("^\\s-+\\(\\sw+\\)\\s-*=" 1 font-lock-builtin-face)
-   '("\\s$\\sw+\\s$" . font-lock-constant-face))
+   (cons magik-aliases-definition-regexp ''magik-aliases-alias-name-face)
+   '("^\\s-+\\([A-Z_0-9]+\\)\\s-*[:=|=]" 1 'magik-aliases-environment-variable-face)
+   '("^\\s-+\\(\\sw+\\)\\s-*=" 1 'magik-aliases-property-key-face)
+   '("%[A-Z_0-9]+%" . 'magik-aliases-environment-variable-placeholder-face))
   "Default fontification of Aliases buffers."
   :group 'magik-aliases
   :type 'sexp)
@@ -139,10 +167,10 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
                require-final-newline t
                comment-start "#"
                comment-end ""
-               show-trailing-whitespace nil
                imenu-generic-expression magik-aliases-imenu-generic-expression
                font-lock-defaults '(magik-aliases-font-lock-keywords nil nil))
 
+  (add-hook 'read-only-mode-hook #'magik-aliases--update-show-trailing-whitespace nil t)
   (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
   (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
 
@@ -274,7 +302,7 @@ With a prefix arg, ask user for current directory to use."
          (program (magik-aliases-program smallworld-gis))
          (args    magik-aliases-program-args)
          (file    (or file (buffer-file-name)))
-         (buf     "gis")
+         (buf     magik-session-buffer-default-name)
          (version (if (boundp 'magik-version-current)
                       (symbol-value 'magik-version-current))))
     (save-excursion
@@ -283,7 +311,7 @@ With a prefix arg, ask user for current directory to use."
              (setq alias (match-string-no-properties 1)))
             (t
              (error "Can't find any alias definitions")))
-      (let ((env-file (file-name-concat (file-name-directory file) "environment.bat")))
+      (let ((env-file (file-name-concat (file-name-directory file) magik-aliases-environment-file)))
         (when (file-exists-p env-file)
           (setq args (append args (list "-e" env-file) nil))))
       (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last
@@ -296,12 +324,8 @@ With a prefix arg, ask user for current directory to use."
       (kill-buffer (current-buffer))
       (set-buffer buf)
       (magik-session-mode)
-      (setq magik-smallworld-gis smallworld-gis)
-
-      (insert (current-time-string) "\n")
-      (insert "Command: " program " ")
-      (mapc (function (lambda (s) (insert s " "))) args)
-      (setq default-directory dir
+      (setq magik-smallworld-gis smallworld-gis
+            default-directory dir
             args (append (list program) args))
       (compat-call setq-local
                    magik-session-current-command (mapconcat 'identity args " "))
@@ -309,7 +333,8 @@ With a prefix arg, ask user for current directory to use."
            (boundp 'magik-version-current)
            (set 'magik-version-current version))
 
-      (insert (format "\nCwd is: %s\n\n" default-directory))
+      (insert (format "Startup time: %s\nCommand: [%s] %s\n" (current-time-string) dir magik-session-current-command))
+
       (magik-session-start-process args))
     (if (magik-aliases-switch-to-buffer alias)
         (display-buffer buf))))
@@ -334,8 +359,7 @@ Returns nil if FILE can't be expanded."
   (condition-case nil
       (with-environment-variables (("SMALLWORLD_GIS" smallworld-gis))
         (expand-file-name
-         (substitute-in-file-name
-          (replace-regexp-in-string "\\%[^%]*\\%" (lambda (a) (concat "$" (substring a 1 -1))) file nil 'literal))))
+         (magik-utils-substitute-in-file-name file)))
     (error nil)))
 
 (defun magik--aliases-insert-default-product-path ()
@@ -375,7 +399,21 @@ LAYERED_PRODUCTS configuration file."
                 (when (file-exists-p (file-name-concat dir "config" "gis_aliases"))
                   (let ((lp-dir (cons lp dir)))
                     (or (member lp-dir alist) (push lp-dir alist)))))))
-        alist))))
+        (nreverse alist)))))
+
+(defun magik-aliases-all-layered-products (smallworld-gis)
+  "Return deduplicated alist of layered products for SMALLWORLD-GIS.
+Checks both the path derived from SMALLWORLD-GIS and the
+`SMALLWORLD_REGISTRY' environment variable."
+  (delete-dups
+   (append
+    (magik-aliases-layered-products-file
+     (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis)
+     smallworld-gis)
+    (when-let ((registry (getenv "SMALLWORLD_REGISTRY")))
+      (magik-aliases-layered-products-file
+       (file-name-concat registry "LAYERED_PRODUCTS")
+       smallworld-gis)))))
 
 (defun magik-aliases-layered-products-acp-path (file smallworld-gis)
   "Read LAYERED_PRODUCTS configuration file using SMALLWORLD-GIS.
@@ -408,6 +446,11 @@ configuration file and return paths to append to variable `exec-path'."
                 (if (file-directory-p etc-dir)
                     (push etc-dir paths)))))
         paths))))
+
+(defun magik-aliases--update-show-trailing-whitespace ()
+  "Set `show-trailing-whitespace' based on `buffer-read-only'.
+If `buffer-read-only' is t, set it to nil (and vice-versa)."
+  (setq-local show-trailing-whitespace (not buffer-read-only)))
 
 (defun magik-aliases-update-menu ()
   "Update the dynamic Aliases submenu."
@@ -442,8 +485,7 @@ configuration file and return paths to append to variable `exec-path'."
               ]
             default-files))
     (when smallworld-gis
-      (dolist (lp (magik-aliases-layered-products-file
-                   (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
+      (dolist (lp (magik-aliases-all-layered-products smallworld-gis))
         (push `[,(format "%s: %s" (car lp) (cdr lp))
                 (progn
                   (find-file ,(file-name-concat (cdr lp) "config" "gis_aliases"))
@@ -451,6 +493,7 @@ configuration file and return paths to append to variable `exec-path'."
                 ,(cdr lp)
                 ]
               lp-files))
+      (setq lp-files (nreverse lp-files))
       (push "---" lp-files))
 
     (cl-loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)

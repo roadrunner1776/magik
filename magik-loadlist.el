@@ -32,11 +32,25 @@ Initial ^ and final $ is automatically added in `loadlist-ignore'."
   :group 'magik-loadlist
   :type  '(repeat regexp))
 
+(defgroup magik-loadlist-faces nil
+  "Faces for displaying text in a Magik load_list file."
+  :group 'magik-loadlist)
+
+(defface magik-loadlist-file-face
+  '((t :inherit font-lock-variable-name-face)) ;; TODO: Switch to a Magik-specific face?
+  "Font Lock mode face used to display file name."
+  :group 'magik-loadlist-faces)
+
+(defface magik-loadlist-folder-face
+  '((t :inherit font-lock-keyword-face)) ;; TODO: Switch to a Magik-specific face?
+  "Font Lock mode face used to display folder name."
+  :group 'magik-loadlist-faces)
+
 ;; Font-lock configuration
 (defcustom magik-loadlist-font-lock-keywords
   (list
-   '("^.+\\([\\/]\\)" 0 font-lock-keyword-face)
-   '("^.+"            0 font-lock-variable-name-face))
+   '("^.+\\([\\/]\\)" 0 'magik-loadlist-folder-face)
+   '("^\\([^#]+\\)" 1 'magik-loadlist-file-face))
   "Default fontification of load_list.txt files."
   :group 'magik-loadlist
   :type 'sexp)
@@ -57,6 +71,7 @@ You can customize magik-loadlist-mode with the magik-loadlist-mode-hook.
   :abbrev-table nil
 
   (compat-call setq-local
+               comment-start-skip "#+ *"
                require-final-newline t
                font-lock-defaults '(magik-loadlist-font-lock-keywords nil t)))
 
@@ -68,7 +83,7 @@ You can customize magik-loadlist-mode with the magik-loadlist-mode-hook.
   `(,"Loadlist"
     [,"Refresh Buffer from Directory"    magik-loadlist-refresh-contents t]
     "---"
-    [,"Transmit Buffer"                  magik-loadlist-transmit         t]
+    [,"Transmit Buffer"                  magik-loadlist-transmit-buffer  t]
     "---"
     [,"Customize"                        magik-loadlist-customize        t]))
 
@@ -189,8 +204,8 @@ With a prefix ARG accept all changes without prompting."
         (message "No changes required in buffer")
       (message "Finished updating buffer"))))
 
-(defun magik-loadlist-transmit (&optional gis)
-  "Load the loadlist.txt into the GIS process."
+(defun magik-loadlist-transmit-buffer (&optional gis)
+  "Send current buffer to GIS."
   (interactive)
   (let* ((dir  (file-name-directory buffer-file-name))
          (file (file-name-nondirectory buffer-file-name))
@@ -229,11 +244,12 @@ is dropped."
 ;;; Package registration
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("load_list.txt\\'" . magik-loadlist-mode))
+(add-to-list 'auto-mode-alist '("patch_list.txt\\'" . magik-loadlist-mode))
 
 (progn
   ;; ------------------------ magik loadlist mode  ------------------------
 
-  (define-key magik-loadlist-mode-map (kbd "<f2> b")      'magik-loadlist-transmit)
+  (define-key magik-loadlist-mode-map (kbd "<f2> b") 'magik-loadlist-transmit-buffer)
   (define-key magik-loadlist-mode-map "\C-cr" 'magik-loadlist-refresh-contents))
 
 (provide 'magik-loadlist)

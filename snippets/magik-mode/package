@@ -3,6 +3,6 @@
 # key: pack
 # group: keywords
 # --
-_package ${1:user}
+_package ${1:`magik-yasnippet-default-package-name`}
 
 $0

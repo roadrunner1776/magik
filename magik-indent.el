@@ -27,8 +27,7 @@
 ;;; Code:
 
 (require 'compat)
-(eval-when-compile
-  (defvar magik-electric-templates-methods))
+(require 'magik-electric)
 
 (defcustom magik-indent-level 8
   "*How much to indent each nested level."

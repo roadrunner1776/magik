@@ -1,7 +1,7 @@
 ;; -*- mode: eask; lexical-binding: t -*-
 
 (package "magik-mode"
-         "0.4.1"
+         "0.6.5"
          "Emacs major mode for Smallworld Magik files")
 
 (website-url "https://github.com/roadrunner1776/magik")
@@ -10,13 +10,12 @@
 (package-file "magik-mode.el")
 (files "*.el" "snippets")
 
-(script "test" "echo \"Error: no test specified\" && exit 1")
+(script "test" "eask test ert test/test-helper.el ./test/*-test.el")
 
 (source "gnu")
 (source "melpa")
 
 (depends-on "emacs" "24.4")
-(depends-on "auto-complete")
 (depends-on "compat")
 (depends-on "flycheck")
 (depends-on "yasnippet")

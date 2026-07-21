@@ -2,10 +2,21 @@
 # name: def_mixin
 # key: def_mixin
 # group: object oriented
+# type: command
 # --
-`(magik-yasnippet-prev-pragma)`
-`(magik-yasnippet-documentation t)`
-def_mixin(:${1:`(magik-yasnippet-filename)`})
-$
+(let* ((snippet-content '())
+       (pragma-snippet (car (magik-yasnippet-pragma-snippet nil)))
+       (dollar-count (cadr (magik-yasnippet-pragma-snippet nil)))
+       (doc-string (magik-yasnippet-documentation))
+       (mixin-line (concat "def_mixin(:${" (number-to-string (+ dollar-count 1)) ":" (magik-yasnippet-filename) "})")))
 
-$0
+  (setq snippet-content
+	(delq nil
+              (list pragma-snippet
+		    (unless (string-empty-p doc-string) doc-string)
+		    mixin-line
+		    "$"
+		    ""
+		    "$0")))
+
+  (yas-expand-snippet (string-join snippet-content "\n")))
