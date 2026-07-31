@@ -251,5 +251,234 @@ Returns (ARGS OPTIONAL GATHER)."
     (should (eq buf1 buf2))
     (should (equal (with-current-buffer buf2 (buffer-string)) "second"))))
 
+;;; Slot scanning
+
+(defconst magik-completion-test--two-exemplars "def_slotted_exemplar(:other_thing,
+	{
+		{:other_slot, _unset}
+	})
+$
+
+def_slotted_exemplar(:my_thing,
+	{
+		{:owner, _unset},
+		{:size, 1}
+	})
+$
+
+_method my_thing.compute()
+	_return .
+_endmethod
+$
+"
+  "Magik source with two exemplar definitions and one method.")
+
+(ert-deftest magik-completion--scan-slots--scoped-to-current-exemplar ()
+  "Inside a method, only the slots of that method's exemplar are offered."
+  (skip-unless (require 'magik-mode nil t))
+  (with-temp-buffer
+    (insert magik-completion-test--two-exemplars)
+    (goto-char (point-min))
+    (search-forward "_return .")
+    (let ((slots (magik-completion--scan-slots)))
+      (should (member "owner" slots))
+      (should (member "size" slots))
+      (should-not (member "other_slot" slots)))))
+
+(ert-deftest magik-completion--scan-slots--falls-back-to-whole-buffer ()
+  "Outside any method the whole buffer is scanned."
+  (with-temp-buffer
+    (insert "def_slotted_exemplar(:a_thing,\n\t{\n\t\t{:a_slot, _unset}\n\t})\n$\n")
+    (goto-char (point-max))
+    (should (member "a_slot" (magik-completion--scan-slots)))))
+
+(ert-deftest magik-completion--exemplar-definition-region--not-found ()
+  "Unknown or empty exemplar names yield no region."
+  (with-temp-buffer
+    (insert "def_slotted_exemplar(:a_thing, {})\n$\n")
+    (should-not (magik-completion--exemplar-definition-region "b_thing"))
+    (should-not (magik-completion--exemplar-definition-region ""))
+    (should-not (magik-completion--exemplar-definition-region nil))))
+
+;;; Yasnippet template candidates
+
+(defmacro magik-completion-test--with-snippet-buffer (&rest body)
+  "Eval BODY in a temp buffer with a test yasnippet defined and enabled.
+Skips the test when yasnippet is unavailable."
+  (declare (indent 0))
+  `(progn
+     (skip-unless (require 'yasnippet nil t))
+     (with-temp-buffer
+       (yas-define-snippets 'fundamental-mode
+                            '(("mkey" "left ${1:x} right" "test snippet")))
+       (yas-minor-mode 1)
+       ,@body)))
+
+(ert-deftest magik-completion-at-point-snippets--offers-keys ()
+  "Snippet keys matching the prefix are offered as candidates."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mk")
+    (let ((capf (magik-completion-at-point-snippets)))
+      (should capf)
+      (should (member "mkey" (nth 2 capf))))))
+
+(ert-deftest magik-completion-at-point-snippets--disabled-by-defcustom ()
+  "No snippet candidates when `magik-completion-enable-snippets' is nil."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mk")
+    (let ((magik-completion-enable-snippets nil))
+      (should-not (magik-completion-at-point-snippets)))))
+
+(ert-deftest magik-completion--snippet-exit-function--expands-template ()
+  "Completing a snippet key replaces it with the expanded template."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mkey")
+    (magik-completion--snippet-exit-function "mkey" 'finished)
+    (should (string-match-p "\\`left .* right\\'" (buffer-string)))
+    (should-not (string-match-p "mkey" (buffer-string)))))
+
+(ert-deftest magik-completion--snippet-exit-function--ignores-non-finished ()
+  "No expansion happens unless completion finished."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mkey")
+    (magik-completion--snippet-exit-function "mkey" 'exact)
+    (should (equal (buffer-string) "mkey"))))
+
+;;; Session input-area gating
+
+(defvar magik-session-prompt)
+
+(ert-deftest magik-completion--session-input-p--after-prompt ()
+  "Point in the command input area counts as typeable."
+  (let ((magik-session-prompt "Magik> "))
+    (with-temp-buffer
+      (insert "loading...\nMagik> hello")
+      (should (magik-completion--session-input-p)))))
+
+(ert-deftest magik-completion--session-input-p--in-scrollback ()
+  "Point inside session output is not typeable."
+  (let ((magik-session-prompt "Magik> "))
+    (with-temp-buffer
+      (insert "loading...\nMagik> hello")
+      (goto-char (point-min))
+      (should-not (magik-completion--session-input-p)))))
+
+(ert-deftest magik-completion--session-input-p--no-prompt-yet ()
+  "Without a prompt in the buffer there is no typeable area."
+  (let ((magik-session-prompt "Magik> "))
+    (with-temp-buffer
+      (insert "starting session...")
+      (should-not (magik-completion--session-input-p)))))
+
+(ert-deftest magik-completion--available-p--non-session-buffer ()
+  "Completion is available in ordinary buffers regardless of prompts."
+  (with-temp-buffer
+    (insert "some code")
+    (should (magik-completion--available-p))))
+
+;;; magik-completion--ts-scan-variables
+
+(defconst magik-completion-test--ts-method "_method my_thing.compute(a_stream, count, _optional flags, _gather rest)
+	_local total << 0
+	_local (lo, hi) << (0, 10)
+	_constant limit << 5
+	_import counter
+	(x, y) << compute_pair()
+	_for item, idx _over a_stream.elements()
+	_loop
+		total +<< item
+	_endloop
+	outcome
+_endmethod
+$
+"
+  "Magik source used by the tree-sitter variable scan tests.")
+
+(defmacro magik-completion-test--with-ts-buffer (content search &rest body)
+  "Eval BODY in a buffer with CONTENT parsed as Magik.
+Point is placed at the end of the first occurrence of SEARCH.
+Skips the test when the Magik tree-sitter grammar is unavailable."
+  (declare (indent 2))
+  `(progn
+     (skip-unless (and (require 'treesit nil t)
+                       (fboundp 'treesit-available-p)
+                       (treesit-available-p)
+                       (treesit-language-available-p 'magik)))
+     (with-temp-buffer
+       (insert ,content)
+       (treesit-parser-create 'magik)
+       (goto-char (point-min))
+       (search-forward ,search)
+       ,@body)))
+
+(ert-deftest magik-completion--ts-scan-variables--method-parameters ()
+  "Required, optional and gather parameters are all offered."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (dolist (param '("a_stream" "count" "flags" "rest"))
+        (should (member param vars))))))
+
+(ert-deftest magik-completion--ts-scan-variables--local-declarations ()
+  "_local and _constant declarations are collected, including tuples."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (dolist (var '("total" "lo" "hi" "limit"))
+        (should (member var vars))))))
+
+(ert-deftest magik-completion--ts-scan-variables--assignments ()
+  "Assigned variables are collected, including tuple assignment targets."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (should (member "x" vars))
+      (should (member "y" vars)))))
+
+(ert-deftest magik-completion--ts-scan-variables--loop-variables ()
+  "_for loop variables are collected."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (should (member "item" vars))
+      (should (member "idx" vars)))))
+
+(ert-deftest magik-completion--ts-scan-variables--respects-point ()
+  "Variables declared after point are not offered, parameters are."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method
+      "_local total << 0"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (should (member "a_stream" vars))
+      (should (member "total" vars))
+      (should-not (member "limit" vars))
+      (should-not (member "item" vars)))))
+
+(ert-deftest magik-completion--ts-scan-variables--inside-loop-body ()
+  "Parameters and outer locals stay visible inside a loop body."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method
+      "total +<< item"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (dolist (var '("a_stream" "rest" "total" "lo" "item"))
+        (should (member var vars))))))
+
+(ert-deftest magik-completion--ts-scan-variables--import-variables ()
+  "_import declarations are collected."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (should (member "counter" (magik-completion--ts-scan-variables)))))
+
+(ert-deftest magik-completion--regex-scan-variables--import-variables ()
+  "_import declarations are collected by the regex fallback scan."
+  (with-temp-buffer
+    (insert magik-completion-test--ts-method)
+    (goto-char (point-min))
+    (search-forward "outcome")
+    (let ((vars (magik-completion--regex-scan-variables)))
+      (should (member "counter" vars))
+      (should (member "a_stream" vars))
+      (should (member "total" vars)))))
+
+(ert-deftest magik-completion--ts-scan-variables--no-keywords-or-rhs ()
+  "Keywords and right-hand sides of assignments are not offered."
+  (magik-completion-test--with-ts-buffer magik-completion-test--ts-method "outcome"
+    (let ((vars (magik-completion--ts-scan-variables)))
+      (should-not (member "compute_pair" vars))
+      (should-not (seq-some (lambda (v) (string-prefix-p "_" v)) vars)))))
+
 (provide 'magik-completion-test)
 ;;; magik-completion-test.el ends here

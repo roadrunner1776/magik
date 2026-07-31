@@ -38,7 +38,6 @@
 (declare-function treesit-node-type "treesit")
 (declare-function treesit-node-parent "treesit")
 (declare-function treesit-node-children "treesit")
-(declare-function treesit-node-child-by-field-name "treesit")
 (declare-function treesit-node-text "treesit")
 (declare-function treesit-node-start "treesit")
 
@@ -115,47 +114,73 @@ Returns a list of variable name strings."
       (magik-completion--ts-scan-variables)
     (magik-completion--regex-scan-variables)))
 
+(defconst magik-completion--ts-param-scopes '("method" "procedure")
+  "Tree-sitter node types that carry their own parameter list.")
+
+(defconst magik-completion--ts-local-scopes '("method" "procedure" "block")
+  "Tree-sitter node types that delimit a local variable scope.")
+
 (defun magik-completion--ts-scan-variables ()
   "Scan variables using tree-sitter for accurate scope detection.
 Returns a list of variable name strings visible at point."
   (let ((variables '())
         (node (treesit-node-at (point))))
-    ;; Walk up to find the enclosing method/proc/block
-    (when-let* ((scope-node (magik-completion--ts-enclosing-scope node)))
-      ;; Collect parameters from the method/proc signature
-      (setq variables (magik-completion--ts-collect-params scope-node variables))
-      ;; Collect local variables and assignments within scope, before point
-      (setq variables (magik-completion--ts-collect-locals scope-node variables)))
+    ;; Parameters come from the enclosing method or procedure, even
+    ;; when point is inside a nested block.
+    (when-let* ((scope (magik-completion--ts-enclosing-scope
+                        node magik-completion--ts-param-scopes)))
+      (setq variables (magik-completion--ts-collect-params scope variables)))
+    ;; Collect local variables and assignments within scope, before point.
+    (when-let* ((scope (magik-completion--ts-enclosing-scope
+                        node magik-completion--ts-local-scopes)))
+      (setq variables (magik-completion--ts-walk-for-assignments
+                       scope (point) variables)))
     (delete-dups variables)))
 
-(defun magik-completion--ts-enclosing-scope (node)
-  "Find the enclosing method, procedure, or block NODE."
+(defun magik-completion--ts-enclosing-scope (node types)
+  "Return the closest ancestor of NODE whose type is in TYPES."
   (let ((current node))
     (while (and current
-                (not (member (treesit-node-type current)
-                             '("method" "procedure" "block" "loop"))))
+                (not (member (treesit-node-type current) types)))
       (setq current (treesit-node-parent current)))
     current))
 
-(defun magik-completion--ts-collect-params (scope-node variables)
-  "Collect parameter names from SCOPE-NODE into VARIABLES list.
+(defun magik-completion--ts-filter-children (node type)
+  "Return NODE's children of TYPE."
+  (seq-filter (lambda (child) (equal (treesit-node-type child) type))
+              (treesit-node-children node)))
+
+(defun magik-completion--ts-add-names (nodes limit variables)
+  "Add the text of NODES to VARIABLES, skipping keywords and duplicates.
+When LIMIT is non-nil, only nodes starting before LIMIT are added.
 Returns the updated VARIABLES list."
-  (let ((params (treesit-node-children scope-node)))
-    (dolist (child params)
-      (when (equal (treesit-node-type child) "parameters")
-        (dolist (param (treesit-node-children child))
-          (when (member (treesit-node-type param) '("identifier" "parameter"))
-            (let ((name (treesit-node-text param t)))
-              (unless (or (string-prefix-p "_" name)
-                          (member name variables))
-                (push name variables))))))))
+  (dolist (node nodes)
+    (when (or (null limit) (< (treesit-node-start node) limit))
+      (let ((name (treesit-node-text node t)))
+        (unless (or (string-prefix-p "_" name)
+                    (member name variables))
+          (push name variables)))))
   variables)
 
-(defun magik-completion--ts-collect-locals (scope-node variables)
-  "Collect local variables from SCOPE-NODE that appear before point.
+(defun magik-completion--ts-collect-params (scope-node variables)
+  "Collect parameter names from SCOPE-NODE into VARIABLES list.
+Parameters are the `argument' children of a method or procedure node.
 Returns the updated VARIABLES list."
-  (let ((cursor-pos (point)))
-    (magik-completion--ts-walk-for-assignments scope-node cursor-pos variables)))
+  (magik-completion--ts-add-names
+   (magik-completion--ts-filter-children scope-node "argument")
+   nil variables))
+
+(defun magik-completion--ts-assignment-targets (node)
+  "Return the `variable' nodes assigned to by assignment NODE.
+The left-hand side is NODE's first child: a single variable or a
+parenthesized tuple of variables."
+  (let ((lhs (car (treesit-node-children node))))
+    (cond
+     ((null lhs) nil)
+     ((equal (treesit-node-type lhs) "variable")
+      (list lhs))
+     ((equal (treesit-node-type lhs) "parenthesized_expression")
+      (magik-completion--ts-filter-children lhs "variable")))))
 
 (defun magik-completion--ts-walk-for-assignments (node limit variables)
   "Walk NODE tree collecting variable names assigned before LIMIT position.
@@ -163,32 +188,16 @@ Returns the updated VARIABLES list."
   (when (and node (< (treesit-node-start node) limit))
     (let ((type (treesit-node-type node)))
       (cond
-       ;; Assignment: var << expr
+       ;; Assignment: var << expr, (a, b) << expr
        ((equal type "assignment")
-        (when-let* ((target (treesit-node-child-by-field-name node "variable"))
-                    (_ (< (treesit-node-start target) limit)))
-          (let ((name (treesit-node-text target t)))
-            (unless (or (string-prefix-p "_" name)
-                        (member name variables))
-              (push name variables)))))
-       ;; Local variable declaration
-       ((equal type "variable_declaration")
-        (dolist (child (treesit-node-children node))
-          (when (and (equal (treesit-node-type child) "identifier")
-                     (< (treesit-node-start child) limit))
-            (let ((name (treesit-node-text child t)))
-              (unless (or (string-prefix-p "_" name)
-                          (member name variables))
-                (push name variables))))))
-       ;; For loop: _for vars _over ...
-       ((equal type "iterator")
-        (dolist (child (treesit-node-children node))
-          (when (and (equal (treesit-node-type child) "identifier")
-                     (< (treesit-node-start child) limit))
-            (let ((name (treesit-node-text child t)))
-              (unless (or (string-prefix-p "_" name)
-                          (member name variables))
-                (push name variables))))))))
+        (setq variables (magik-completion--ts-add-names
+                         (magik-completion--ts-assignment-targets node)
+                         limit variables)))
+       ;; _local/_constant/_import declarations and _for loop variables
+       ((member type '("local" "constant" "import" "iterator"))
+        (setq variables (magik-completion--ts-add-names
+                         (magik-completion--ts-filter-children node "identifier")
+                         limit variables)))))
     ;; Recurse into children
     (dolist (child (treesit-node-children node))
       (when (< (treesit-node-start child) limit)
@@ -228,7 +237,15 @@ Returns a list of variable name strings."
         (let ((vars-str (match-string-no-properties 1)))
           (dolist (v (split-string vars-str "[, \t]+" t))
             (unless (member v variables)
-              (push v variables))))))
+              (push v variables)))))
+      ;; Find _import declarations
+      (goto-char method-start)
+      (while (re-search-forward
+              "\\_<_import\\s-+\\([a-z_][a-z0-9_!?, \t]*\\)" limit t)
+        (dolist (v (split-string (match-string-no-properties 1) "[, \t]+" t))
+          (unless (or (string-prefix-p "_" v)
+                      (member v variables))
+            (push v variables)))))
     ;; Find method parameters
     (save-excursion
       (goto-char method-start)
@@ -245,14 +262,34 @@ Returns a list of variable name strings."
                 (push clean variables)))))))
     (nreverse variables)))
 
-(defun magik-completion--scan-slots ()
-  "Scan for slot names in the current file's exemplar definition.
-Returns a list of slot name strings."
-  (let ((slots '()))
+(defun magik-completion--exemplar-definition-region (exemplar)
+  "Return the (BEG . END) region defining EXEMPLAR in the current buffer.
+Finds the `def_slotted_exemplar'/`def_indexed_exemplar' form for
+EXEMPLAR, ending at the next `$' terminator.  Returns nil when
+EXEMPLAR is nil, empty, or not defined in this buffer."
+  (when (and exemplar (not (string-empty-p exemplar)))
     (save-excursion
       (goto-char (point-min))
+      (when (re-search-forward
+             (concat "def_\\(?:slotted\\|indexed\\)_exemplar\\s-*([ \t\n]*:"
+                     (regexp-quote exemplar) "\\_>")
+             nil t)
+        (cons (match-beginning 0)
+              (or (re-search-forward "^\\$" nil t) (point-max)))))))
+
+(defun magik-completion--scan-slots ()
+  "Scan for slot names of the exemplar the method at point belongs to.
+Slots are read from the matching exemplar definition when it can be
+found in the buffer; otherwise the whole buffer is scanned.
+Returns a list of slot name strings."
+  (let* ((exemplar (when (fboundp 'magik-current-method-name)
+                     (cadr (magik-current-method-name))))
+         (region (magik-completion--exemplar-definition-region exemplar))
+         (slots '()))
+    (save-excursion
+      (goto-char (or (car region) (point-min)))
       (while (re-search-forward
-              "{\\s-*:\\([a-z_][a-z0-9_!?]*\\)\\s-*," nil t)
+              "{\\s-*:\\([a-z_][a-z0-9_!?]*\\)\\s-*," (cdr region) t)
         (let ((slot (match-string-no-properties 1)))
           (unless (member slot slots)
             (push slot slots)))))
@@ -260,11 +297,29 @@ Returns a list of slot name strings."
 
 ;;; --- Prefix detection ---
 
+(defun magik-completion--available-p ()
+  "Return non-nil when completion may be offered at point.
+In Magik session buffers, completion is limited to the command
+input area after the last prompt."
+  (or (not (derived-mode-p 'magik-session-mode))
+      (magik-completion--session-input-p)))
+
+(defun magik-completion--session-input-p ()
+  "Return non-nil when point is after the last session prompt."
+  (and (boundp 'magik-session-prompt)
+       magik-session-prompt
+       (save-excursion
+         (let ((pos (point)))
+           (goto-char (point-max))
+           (and (re-search-backward magik-session-prompt nil t)
+                (>= pos (match-end 0)))))))
+
 (defun magik-completion--bounds ()
   "Return the bounds (BEG . END) of the Magik symbol at point.
 Returns nil if point is inside a comment or string."
   (let ((syntax (syntax-ppss)))
-    (when (and (not (nth 3 syntax))   ; not in string
+    (when (and (magik-completion--available-p)
+               (not (nth 3 syntax))   ; not in string
                (not (nth 4 syntax)))  ; not in comment
       (let ((end (point))
             (beg (save-excursion
@@ -279,7 +334,8 @@ Returns nil if point is inside a comment or string."
 (defun magik-completion--slot-bounds ()
   "Return bounds if point is completing a slot reference (after `.')."
   (let ((syntax (syntax-ppss)))
-    (when (and (not (nth 3 syntax))
+    (when (and (magik-completion--available-p)
+               (not (nth 3 syntax))
                (not (nth 4 syntax)))
       (let ((end (point))
             (beg (save-excursion
@@ -734,7 +790,8 @@ Searches backward for the enclosing _method and scans its doc block."
   "Return (BEG . END) for method name after a dot, or nil.
 Detects `object.meth' patterns and returns bounds of `meth'."
   (let ((syntax (syntax-ppss)))
-    (when (and (not (nth 3 syntax))
+    (when (and (magik-completion--available-p)
+               (not (nth 3 syntax))
                (not (nth 4 syntax)))
       (let ((end (point))
             (beg (save-excursion
@@ -748,6 +805,49 @@ Detects `object.meth' patterns and returns bounds of `meth'."
                      (and pre-dot
                           (memq (char-syntax pre-dot) '(?w ?_)))))
           (cons beg end))))))
+
+;;; --- Yasnippet template candidates ---
+
+(defcustom magik-completion-enable-snippets t
+  "When non-nil, offer yasnippet template keys as completion candidates.
+Completing a key expands the snippet template."
+  :type 'boolean
+  :group 'magik-completion)
+
+(declare-function yas--all-templates "yasnippet")
+(declare-function yas--get-snippet-tables "yasnippet")
+(declare-function yas--template-key "yasnippet")
+
+(defun magik-completion--snippet-templates ()
+  "Return the yasnippet templates active in the current buffer."
+  (when (and (bound-and-true-p yas-minor-mode)
+             (require 'yasnippet nil t))
+    (yas--all-templates (yas--get-snippet-tables major-mode))))
+
+(defun magik-completion--snippet-lookup (key)
+  "Return the active yasnippet template whose key is KEY, or nil."
+  (seq-find (lambda (template)
+              (equal (yas--template-key template) key))
+            (magik-completion--snippet-templates)))
+
+(defun magik-completion--snippet-exit-function (candidate status)
+  "Expand the yasnippet template with key CANDIDATE when STATUS is `finished'."
+  (when (and (eq status 'finished)
+             (fboundp 'yas-expand-snippet))
+    (when-let* ((template (magik-completion--snippet-lookup candidate)))
+      (delete-region (- (point) (length candidate)) (point))
+      (yas-expand-snippet template))))
+
+(defun magik-completion-at-point-snippets ()
+  "Completion-at-point function for yasnippet template keys."
+  (when magik-completion-enable-snippets
+    (when-let* ((bounds (magik-completion--bounds))
+                (templates (magik-completion--snippet-templates)))
+      (list (car bounds) (cdr bounds)
+            (delq nil (mapcar #'yas--template-key templates))
+            :exclusive 'no
+            :company-kind (lambda (_) 'snippet)
+            :exit-function #'magik-completion--snippet-exit-function))))
 
 ;;; --- Yasnippet post-completion ---
 
@@ -883,7 +983,8 @@ Inserts parameters as yasnippet when STATUS is `finished'."
   "Return bounds if point is after `condition.raise(:'  or similar.
 Returns (BEG . END) of the condition name being typed, or nil."
   (let ((syntax (syntax-ppss)))
-    (when (and (not (nth 3 syntax))
+    (when (and (magik-completion--available-p)
+               (not (nth 3 syntax))
                (not (nth 4 syntax)))
       (save-excursion
         (let ((end (point))
@@ -940,10 +1041,25 @@ Intended to be called after transmitting code to the session."
         magik-completion--condition-cache-loaded nil
         magik-completion--method-cache nil))
 
+(defun magik-completion--reset-session-state (&rest _args)
+  "Invalidate caches and kill all dedicated completion CB buffers.
+Called when a Magik session is killed or (re)started, so completion
+does not serve candidates from a previous session."
+  (magik-completion-invalidate-cache)
+  (dolist (buf (buffer-list))
+    (let ((name (buffer-name buf)))
+      (when (and name
+                 (string-prefix-p " *cb*" name)
+                 (string-suffix-p "*completion*" name))
+        (when-let* ((proc (get-buffer-process buf)))
+          (delete-process proc))
+        (kill-buffer buf)))))
+
 ;;; --- Setup ---
 
 (defvar magik-completion--capf-functions
-  '(magik-completion-at-point-conditions
+  '(magik-completion-at-point-snippets
+    magik-completion-at-point-conditions
     magik-completion-at-point-global-procedures
     magik-completion-at-point-globals
     magik-completion-at-point-classes
@@ -967,7 +1083,12 @@ Intended to be called after transmitting code to the session."
     (add-hook 'completion-at-point-functions fn nil t))
   (dolist (fn magik-completion--transmit-functions)
     (when (fboundp fn)
-      (advice-add fn :after #'magik-completion--invalidate-cache))))
+      (advice-add fn :after #'magik-completion--invalidate-cache)))
+  ;; Forward advice: takes effect once magik-session is loaded.
+  (advice-add 'magik-session-kill-process :after
+              #'magik-completion--reset-session-state)
+  (add-hook 'magik-session-start-process-post-hook
+            #'magik-completion--reset-session-state))
 
 (defun magik-completion--disable ()
   "Remove Magik CAPF functions from the current buffer."
@@ -975,7 +1096,11 @@ Intended to be called after transmitting code to the session."
     (remove-hook 'completion-at-point-functions fn t))
   (dolist (fn magik-completion--transmit-functions)
     (when (fboundp fn)
-      (advice-remove fn #'magik-completion--invalidate-cache))))
+      (advice-remove fn #'magik-completion--invalidate-cache)))
+  (advice-remove 'magik-session-kill-process
+                 #'magik-completion--reset-session-state)
+  (remove-hook 'magik-session-start-process-post-hook
+               #'magik-completion--reset-session-state))
 
 (define-minor-mode magik-completion-mode
   "Toggle Magik `completion-at-point' support in the current buffer."
