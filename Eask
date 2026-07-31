@@ -17,8 +17,16 @@
 
 (depends-on "emacs" "24.4")
 (depends-on "compat")
-(depends-on "flycheck")
+(when (>= emacs-major-version 28)
+  (depends-on "flycheck"))
 (depends-on "yasnippet")
+
+;; do not try to compile magik-lint.el if we are below 28.2
+(when (version< emacs-version "28.2")
+  (add-hook 'eask-before-compile-hook
+    (lambda ()
+      (delete-file "magik-lint.el")
+      (eask-info "(Removed magik-lint, since it would not compile in Emacs below 28.2)"))))
 
 ;; do not try to compile magik-ts-mode.el if we are below 29.1
 (when (version< emacs-version "29.1")
