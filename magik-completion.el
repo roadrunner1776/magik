@@ -923,10 +923,15 @@ Returns (BEG . END) of the condition name being typed, or nil."
 
 ;;; --- Cache invalidation ---
 
-(defun magik-completion-invalidate-cache (&rest _args)
+(defun magik-completion-invalidate-cache ()
+  "Invalidate all CB completion caches.
+Can be called after loading code in the session."
+  (interactive)
+  (magik-completion--invalidate-cache))
+
+(defun magik-completion--invalidate-cache (&rest _args)
   "Invalidate all CB completion caches.
 Intended to be called after transmitting code to the session."
-  (interactive "r")
   (setq magik-completion--class-cache nil
         magik-completion--class-cache-loaded nil
         magik-completion--global-cache nil
@@ -962,7 +967,7 @@ Intended to be called after transmitting code to the session."
     (add-hook 'completion-at-point-functions fn nil t))
   (dolist (fn magik-completion--transmit-functions)
     (when (fboundp fn)
-      (advice-add fn :after #'magik-completion-invalidate-cache))))
+      (advice-add fn :after #'magik-completion--invalidate-cache))))
 
 (defun magik-completion--disable ()
   "Remove Magik CAPF functions from the current buffer."
@@ -970,7 +975,7 @@ Intended to be called after transmitting code to the session."
     (remove-hook 'completion-at-point-functions fn t))
   (dolist (fn magik-completion--transmit-functions)
     (when (fboundp fn)
-      (advice-remove fn #'magik-completion-invalidate-cache))))
+      (advice-remove fn #'magik-completion--invalidate-cache))))
 
 (define-minor-mode magik-completion-mode
   "Toggle Magik `completion-at-point' support in the current buffer."
