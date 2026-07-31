@@ -310,6 +310,11 @@ concrete implementations."
   "Font Lock mode face used to display comments."
   :group 'magik-faces)
 
+(defface magik-text-encoding-face
+  '((t (:inherit magik-comment-face :weight bold)))
+  "Font Lock mode face used to display the text encoding tag."
+  :group 'magik-faces)
+
 (defface magik-constant-face
   '((t (:inherit font-lock-constant-face)))
   "Font Lock mode face used to display constants."
@@ -535,7 +540,8 @@ constants which use the `font-lock-constant-face' face."
                  (mapconcat 'identity magik-warnings "\\|")
                  "\\)")
          0 ''magik-warning-face t)
-   '("^\\s-*##.*$" 0 'magik-doc-face t))
+   '("^\\s-*##.*$" 0 'magik-doc-face t)
+   '("^#%\\s-*text_encoding.*$" 0 'magik-text-encoding-face t))
   "Font lock setting for 2nd level of Magik fontification.
 Fontifies certain Magik language features like symbols, dynamics but does
 NOT fontify ANY Magik Keywords."
