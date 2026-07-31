@@ -30,6 +30,44 @@
 (require 'magik-session)
 (require 'magik-utils)
 
+(defgroup magik-trn nil
+  "Customise Magik Translation group."
+  :group 'magik
+  :group 'tools)
+
+(defgroup magik-trn-faces nil
+  "Faces for displaying text in a Magik Translation file."
+  :group 'magik-trn)
+
+(defface magik-trn-comment-face
+  '((t :inherit magik-comment-face))
+  "Font Lock mode face used to display comments."
+  :group 'magik-trn-faces)
+
+(defface magik-trn-type-face
+  '((t :inherit magik-class-face))
+  "Font Lock mode face used to display the translation type."
+  :group 'magik-trn-faces)
+
+(defface magik-trn-text-encoding-face
+  '((t :inherit magik-text-encoding-face))
+  "Font Lock mode face used to display the text encoding."
+  :group 'magik-trn-faces)
+
+(defvar magik-trn-keyword-types
+  '("external_name" "enumerator" "field_value")
+  "List of keywords relating to Magik Translation types to highlight for font-lock.")
+
+;; Font-lock configuration
+(defcustom magik-trn-font-lock-keywords
+  (list
+   (cons (concat "^\\(" (regexp-opt magik-trn-keyword-types t) "\\)\t") ''magik-trn-type-face)
+   '("^#.*$" 0 'magik-trn-comment-face t)
+   '("^#%\\s-*text_encoding.*$" 0 'magik-trn-text-encoding-face t))
+  "Default fontification of Magik Translation files."
+  :group 'magik-trn
+  :type 'sexp)
+
 ;;;###autoload
 (define-derived-mode magik-trn-mode nil "Translation"
   "Major mode for editing Magik Translation files.
@@ -41,7 +79,8 @@
 
   (compat-call setq-local
                require-final-newline t
-               indent-tabs-mode t))
+               indent-tabs-mode t
+               font-lock-defaults '(magik-trn-font-lock-keywords nil t)))
 
 (defvar magik-trn-menu nil
   "Keymap for the Magik Translation buffer menu bar.")

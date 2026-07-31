@@ -196,5 +196,36 @@
         (should (member "size" all-names))
         (should (member "new()" all-names))))))
 
+;;; magik-text-encoding-face (font-lock)
+
+(ert-deftest magik-text-encoding-face--spaced ()
+  (with-temp-buffer
+    (let ((font-lock-maximum-decoration t))
+      (magik-mode)
+      (insert "#% text_encoding = iso8859_1\n")
+      (insert "_package user\n")
+      (font-lock-ensure)
+      (goto-char (point-min))
+      (should (eq (get-text-property (point) 'face) 'magik-text-encoding-face)))))
+
+(ert-deftest magik-text-encoding-face--no-spaces ()
+  (with-temp-buffer
+    (let ((font-lock-maximum-decoration t))
+      (magik-mode)
+      (insert "#%text_encoding=utf8\n")
+      (insert "_package user\n")
+      (font-lock-ensure)
+      (goto-char (point-min))
+      (should (eq (get-text-property (point) 'face) 'magik-text-encoding-face)))))
+
+(ert-deftest magik-text-encoding-face--not-fontified-without-tag ()
+  (with-temp-buffer
+    (let ((font-lock-maximum-decoration t))
+      (magik-mode)
+      (insert "_package user\n")
+      (font-lock-ensure)
+      (goto-char (point-min))
+      (should-not (eq (get-text-property (point) 'face) 'magik-text-encoding-face)))))
+
 (provide 'magik-mode-test)
 ;;; magik-mode-test.el ends here
