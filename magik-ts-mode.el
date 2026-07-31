@@ -24,6 +24,11 @@
 
 ;;; Code:
 
+;; Tree-sitter support requires Emacs 29+; bail out early on older releases.
+(when (< emacs-major-version 29)
+  (provide 'magik-ts-mode)
+  (signal 'file-error '("magik-ts-mode requires Emacs 29 or later")))
+
 (require 'magik-mode)
 (require 'treesit)
 
