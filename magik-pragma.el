@@ -355,12 +355,11 @@ In which case we toggle through the various pragma options."
 DIRECTION indicates whether the values should change \\='forward or \\='backward
 relative the current setting and available values."
   ;;Handle the case where the pragma line is completely empty separately.
-  (if (save-excursion (beginning-of-line) (looking-at "_pragma()"))
-      (progn
-        ;;Insert classify_level and place point between ( and c.
-        (delete-region (match-beginning 0) (match-end 0))
-        (insert "_pragma(classify_level=)")
-        (backward-char 16)))
+  (when (save-excursion (beginning-of-line) (looking-at "_pragma()"))
+    ;;Insert classify_level and place point between ( and c.
+    (delete-region (match-beginning 0) (match-end 0))
+    (insert "_pragma(classify_level=)")
+    (backward-char 16))
 
   (magik-pragma-do-if-match magik-pragma-electric-toggle-list nil (eq direction 'backward)))
 

@@ -198,12 +198,11 @@ Use optional DIR to search for the template"
 (defun magik-template-initialise (type)
   "Insert template text from TYPE.
 Only the text in the template starting from a line matching ^# will be inserted."
-  (if type   ;; to strip out the preamble from the template.
-      (progn
-        (goto-char (point-min))
-        (or (re-search-forward "^#" nil t)
-            (error "The template file, %s, doesn't seem to have column-1 hash, #, character" (magik-template-file type)))
-        (delete-region (point-min) (1- (point)))))
+  (when type   ;; to strip out the preamble from the template.
+    (goto-char (point-min))
+    (or (re-search-forward "^#" nil t)
+        (error "The template file, %s, doesn't seem to have column-1 hash, #, character" (magik-template-file type)))
+    (delete-region (point-min) (1- (point))))
   (goto-char (point-max))
   (run-hooks 'magik-template-initialise-hook))
 
@@ -225,33 +224,33 @@ to predefine a template type to use for normal magik files."
   (let* ((type (or magik-template-file-type
                    (default-value 'magik-template-file-type))) ;default value used by magik-patch
          (template-file nil))
-    (if (derived-mode-p 'magik-base-mode)
-        (progn
-          (cl-loop for type-data in magik-template-file-type-alist
-                   for label         = (car type-data)
-                   for prompt        = (concat (format "Magik %s type:" label) " ")
-                   for test-function = (cadr type-data)
-                   for option-list   = (cddr type-data)
-                   until type
-                   if (or (and (functionp test-function) (funcall test-function))
-                          (eq t test-function))
-                   do (setq type (cdr (if (eq (length option-list) 1)
-                                          (car option-list)
-                                        (assoc (completing-read prompt
-                                                                option-list
-                                                                nil t nil nil
-                                                                (caar option-list))
-                                               option-list)))))
-          (setq magik-template-file-type (or type magik-template-file-type-default))
+    (when (derived-mode-p 'magik-base-mode)
+      (cl-loop for type-data in magik-template-file-type-alist
+               for label         = (car type-data)
+               for prompt        = (concat (format "Magik %s type:" label) " ")
+               for test-function = (cadr type-data)
+               for option-list   = (cddr type-data)
+               until type
+               if (or (and (functionp test-function) (funcall test-function))
+                      (eq t test-function))
+               do (setq type (cdr (if (eq (length option-list) 1)
+                                      (car option-list)
+                                    (assoc (completing-read prompt
+                                                            option-list
+                                                            nil t nil nil
+                                                            (caar option-list))
+                                           option-list)))))
+      (setq magik-template-file-type (or type magik-template-file-type-default))
 
-          (setq-default magik-template-file-type nil) ; reset default value
-          (setq template-file (magik-template-file magik-template-file-type))
-          (if (and template-file
-                   (file-exists-p template-file))
-              (let ((buffer-undo-list t)) ;prevent user accidentally undoing the insertion!
-                (erase-buffer)
-                (insert-file-contents template-file)
-                (magik-template-initialise magik-template-file-type)))))))
+      (setq-default magik-template-file-type nil) ; reset default value
+      (setq template-file (magik-template-file magik-template-file-type))
+      (when (and template-file
+                 (file-exists-p template-file))
+        (let ((buffer-undo-list t)) ;prevent user accidentally undoing the insertion!
+          (erase-buffer)
+          (insert-file-contents template-file)
+          (magik-template-initialise magik-template-file-type))))))
+
 (add-hook 'find-file-not-found-hooks 'magik-template-maybe-insert)
 
 ;;Ideally this function would be a bit more intelligent so that it did not require
