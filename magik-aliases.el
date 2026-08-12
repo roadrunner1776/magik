@@ -148,9 +148,6 @@ If any function returns t, then the buffer is displayed."
 (defvar magik-aliases-process-environment nil
   "Stored variable `process-environment' for executing Magik session command.")
 
-(defvar-local magik-aliases--original-local-map nil
-  "Stores the original local map before overriding for read-only.")
-
 (defun magik-aliases-customize ()
   "Open Customization buffer for Aliases Mode."
   (interactive)
@@ -159,6 +156,11 @@ If any function returns t, then the buffer is displayed."
 ;;;###autoload
 (define-derived-mode magik-aliases-mode nil "Aliases"
   "Major mode for editing Magik aliases files.
+
+When the buffer is read-only, it doubles as an alias selection buffer:
+SPC and <down> move to the next alias definition and q quits.  While the
+buffer is writable those keys keep their global meaning, so they insert
+themselves and move by line as usual.
 
 You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
 
@@ -175,8 +177,7 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
 
   (add-hook 'read-only-mode-hook #'magik-aliases--update-show-trailing-whitespace nil t)
   (add-hook 'menu-bar-update-hook 'magik-aliases-update-menu nil t)
-  (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t)
-  (add-hook 'read-only-mode-hook #'magik-aliases--update-keymap nil t))
+  (add-hook 'kill-buffer-hook 'magik-aliases-kill-buffer nil t))
 
 (defvar magik-aliases-menu nil
   "Menu for Aliases mode.")
@@ -198,20 +199,14 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
     (setq major-mode 'fundamental-mode) ;; prevent current buffer being listed.
     (magik-aliases-update-sw-menu)))
 
-(defun magik-aliases--update-keymap ()
-  "Update keymap bindings depending on `buffer-read-only'."
-  (if buffer-read-only
-      (progn
-        (unless magik-aliases--original-local-map
-          (setq magik-aliases--original-local-map (current-local-map)))
-        (let ((override-map (make-sparse-keymap)))
-          (define-key override-map " "            'magik-aliases-next)
-          (define-key override-map (kbd "<down>") 'magik-aliases-next)
-          (define-key override-map "q"            'magik-aliases-quit)
-          (use-local-map (make-composed-keymap override-map magik-aliases--original-local-map))))
-    (when magik-aliases--original-local-map
-      (use-local-map magik-aliases--original-local-map)
-      (setq magik-aliases--original-local-map nil))))
+(defun magik-aliases--read-only-binding (binding)
+  "Return BINDING when the buffer is read-only, nil otherwise.
+Used as a `menu-item' :filter, so that the alias selection keys only
+apply to a read-only buffer.  Returning nil leaves the key undefined in
+`magik-aliases-mode-map' and lookup falls through to the global map,
+where <down> is `next-line' (which honours `shift-select-mode', so
+<S-down> selects a region) and SPC and q self-insert."
+  (and buffer-read-only binding))
 
 (defun magik-aliases-next ()
   "Move point to next valid alias listed."
@@ -503,7 +498,6 @@ If `buffer-read-only' is t, set it to nil (and vice-versa)."
 
 ;;; Package initialisation
 (add-hook 'magik-aliases-mode-hook 'magik-aliases-update-sw-menu)
-(add-hook 'magik-aliases-mode-hook 'magik-aliases--update-keymap)
 
 (modify-syntax-entry ?_ "w" magik-aliases-mode-syntax-table)
 (modify-syntax-entry ?: "w" magik-aliases-mode-syntax-table)
@@ -535,7 +529,16 @@ If `buffer-read-only' is t, set it to nil (and vice-versa)."
 (progn
   ;; ------------------------ magik aliases mode ------------------------
 
-  (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program))
+  (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
+  (define-key magik-aliases-mode-map " "
+              '(menu-item "" magik-aliases-next
+                          :filter magik-aliases--read-only-binding))
+  (define-key magik-aliases-mode-map (kbd "<down>")
+              '(menu-item "" magik-aliases-next
+                          :filter magik-aliases--read-only-binding))
+  (define-key magik-aliases-mode-map "q"
+              '(menu-item "" magik-aliases-quit
+                          :filter magik-aliases--read-only-binding)))
 
 (provide 'magik-aliases)
 ;;; magik-aliases.el ends here
