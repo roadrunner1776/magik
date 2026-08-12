@@ -254,7 +254,7 @@ Argument DOCUMENTATION-FOUND is the count of existing documentation lines."
   (when (equal documentation-found 0)
     (insert "##\n"))
 
-  (insert (mapconcat (lambda (slot) (format "## @slot {:} %s\n" slot)) missing-slots)))
+  (insert (mapconcat (lambda (slot) (format "## @slot {:} %s\n" slot)) missing-slots "")))
 
 (defun magik--write-method-type-doc (missing-parameters starting-point documentation-found write-return)
   "Writer function for inserting type-doc for a single method.
@@ -271,12 +271,12 @@ Argument WRITE-RETURN indicates whether to insert @return documentation."
           (forward-line (1- starting-point))
           (when (equal documentation-found 0)
             (insert comment-line))
-          (insert (mapconcat (lambda (parameter) (format "\t## @param {:} %s\n" parameter)) missing-parameters))
+          (insert (mapconcat (lambda (parameter) (format "\t## @param {:} %s\n" parameter)) missing-parameters ""))
           (when write-return
             (insert return-line)))
       (goto-char (point-min))
       (forward-line (- starting-point 2))
-      (insert (mapconcat (lambda (parameter) (format "\t## @param {:} %s\n" parameter)) missing-parameters)))))
+      (insert (mapconcat (lambda (parameter) (format "\t## @param {:} %s\n" parameter)) missing-parameters "")))))
 
 (defun magik--write-sw-method-doc (missing-parameters starting-point documentation-found)
   "Writer function for inserting sw-method-doc for a single method.
@@ -290,11 +290,11 @@ Argument DOCUMENTATION-FOUND is the count of existing documentation lines."
         (forward-line (1- starting-point))
         (when (equal documentation-found 0)
           (insert "\t##\n"))
-        (insert (mapconcat (lambda (parameter) (format "\t## %s\n" (upcase parameter))) missing-parameters))
+        (insert (mapconcat (lambda (parameter) (format "\t## %s\n" (upcase parameter))) missing-parameters ""))
         (insert "\t##\n"))
     (goto-char (point-min))
     (forward-line (- starting-point 2))
-    (insert (mapconcat (lambda (parameter) (format "\t## %s\n" (upcase parameter))) missing-parameters))))
+    (insert (mapconcat (lambda (parameter) (format "\t## %s\n" (upcase parameter))) missing-parameters ""))))
 
 (provide 'magik-doc-gen)
 ;;; magik-doc-gen.el ends here

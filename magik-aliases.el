@@ -45,12 +45,17 @@ form the top section of the SW->Alias Files submenu."
   :group 'magik-aliases
   :type  '(repeat file))
 
-(defcustom magik-aliases-program "runalias.exe"
+(defcustom magik-aliases-environment-file (concat "environment" (when (eq system-type 'windows-nt) ".bat"))
+  "*Name of the environment file."
+  :group 'magik-aliases
+  :type  'string)
+
+(defcustom magik-aliases-program (concat "runalias" (when (eq system-type 'windows-nt) ".exe"))
   "*Program to process an alias file."
   :group 'magik-aliases
   :type  'string)
 
-(defcustom magik-aliases-program-path '("../bin/x86" "../../product/bin/x86")
+(defcustom magik-aliases-program-path '("../bin/x86" "../../product/bin/x86" "../bin/share")
   "*Path to `magik-aliases-program'.
 Setting this sets the default value.  When opening a gis_aliases file,
 the buffer local value of this variable will be set to the directory
@@ -291,7 +296,7 @@ With a prefix arg, ask user for current directory to use."
          (program (magik-aliases-program smallworld-gis))
          (args    magik-aliases-program-args)
          (file    (or file (buffer-file-name)))
-         (buf     "gis")
+         (buf     magik-session-buffer-default-name)
          (version (if (boundp 'magik-version-current)
                       (symbol-value 'magik-version-current))))
     (save-excursion
@@ -300,7 +305,7 @@ With a prefix arg, ask user for current directory to use."
              (setq alias (match-string-no-properties 1)))
             (t
              (error "Can't find any alias definitions")))
-      (let ((env-file (file-name-concat (file-name-directory file) "environment.bat")))
+      (let ((env-file (file-name-concat (file-name-directory file) magik-aliases-environment-file)))
         (when (file-exists-p env-file)
           (setq args (append args (list "-e" env-file) nil))))
       (setq args (append args (list "-a" file alias) nil)) ;; alias name MUST be last
@@ -388,7 +393,21 @@ LAYERED_PRODUCTS configuration file."
                 (when (file-exists-p (file-name-concat dir "config" "gis_aliases"))
                   (let ((lp-dir (cons lp dir)))
                     (or (member lp-dir alist) (push lp-dir alist)))))))
-        alist))))
+        (nreverse alist)))))
+
+(defun magik-aliases-all-layered-products (smallworld-gis)
+  "Return deduplicated alist of layered products for SMALLWORLD-GIS.
+Checks both the path derived from SMALLWORLD-GIS and the
+`SMALLWORLD_REGISTRY' environment variable."
+  (delete-dups
+   (append
+    (magik-aliases-layered-products-file
+     (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis)
+     smallworld-gis)
+    (when-let ((registry (getenv "SMALLWORLD_REGISTRY")))
+      (magik-aliases-layered-products-file
+       (file-name-concat registry "LAYERED_PRODUCTS")
+       smallworld-gis)))))
 
 (defun magik-aliases-layered-products-acp-path (file smallworld-gis)
   "Read LAYERED_PRODUCTS configuration file using SMALLWORLD-GIS.
@@ -460,8 +479,7 @@ If `buffer-read-only' is t, set it to nil (and vice-versa)."
               ]
             default-files))
     (when smallworld-gis
-      (dolist (lp (magik-aliases-layered-products-file
-                   (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
+      (dolist (lp (magik-aliases-all-layered-products smallworld-gis))
         (push `[,(format "%s: %s" (car lp) (cdr lp))
                 (progn
                   (find-file ,(file-name-concat (cdr lp) "config" "gis_aliases"))
@@ -469,6 +487,7 @@ If `buffer-read-only' is t, set it to nil (and vice-versa)."
                 ,(cdr lp)
                 ]
               lp-files))
+      (setq lp-files (nreverse lp-files))
       (push "---" lp-files))
 
     (cl-loop for buf in (magik-utils-buffer-mode-list 'magik-aliases-mode)

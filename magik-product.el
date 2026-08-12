@@ -68,11 +68,10 @@ See `imenu-generic-expression'.")
    '("^\\(\\sw+\\)\\s-*\\(config_product\\|customisation_product\\|layered_product\\)"
      (1 'magik-product-name-face)
      (2 'magik-product-type-face))
-   '("^\\(version\\)\\s-*\\([0-9]+\\(?:\\.[0-9]+\\)?\\(?:\\.[0-9]+\\)?\\)\\(.*\\)"
+   '("^\\(version\\)\\s-\\(.*\\)"
      (1 'magik-product-keyword-face)
-     (2 'magik-number-face)
-     (3 'magik-comment-face))
-   (list (concat "^\\<\\(" (mapconcat 'identity magik-product-keywords "\\|") "\\)") 0 ''magik-product-keyword-face t))
+     (2 'magik-number-face))
+   (list (concat "^\\<\\(" (mapconcat 'identity magik-product-keywords "\\|") "\\)\\>") 0 ''magik-product-keyword-face t))
   "Default fontification of product.def files."
   :group 'magik-product
   :type 'sexp)
@@ -105,6 +104,7 @@ You can customize Product Mode with the `magik-product-mode-hook`.
   :syntax-table nil
 
   (compat-call setq-local
+               comment-start-skip "#+ *"
                require-final-newline t
                imenu-generic-expression magik-product-imenu-generic-expression
                font-lock-defaults '(magik-product-font-lock-keywords nil t)))

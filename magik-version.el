@@ -56,6 +56,11 @@ Listed by `magik-version' or `magik-version-file'."
   :group 'magik-version
   :type  'string)
 
+(defcustom magik-version-validate-entries t
+  "Whether the file entries in the gis-version are checked."
+  :group 'magik-version
+  :type 'boolean)
+
 (defcustom magik-version-help "Select a Smallworld Core Product Installation.\n\nThe product you select will define the environment for any new Smallworld\nsessions that are started.\n\nTo make the selection, move the cursor to the line you want and press RETURN.\nOr press 'a' to open the gis_aliases file.\n\n\nPress 'q' to exit and do nothing.\n\n"
   "Help text displayed at top of gis_version buffer."
   :group 'magik-version
@@ -141,7 +146,7 @@ Listed by `magik-version' or `magik-version-file'."
   (let* ((definition (magik-version-at-version-definition))
          (stream (nth 0 definition))
          (smallworld-gis (nth 2 definition))
-         (buffer (concat "*gis " stream "*")))
+         (buffer (concat "*" magik-session-buffer-default-name " " stream "*")))
     (setq magik-smallworld-gis smallworld-gis)
     (magik-session buffer)
     (setq magik-version-current stream
@@ -157,7 +162,7 @@ has more than one aliases file available."
   (let* ((version-list (magik-version-at-version-definition))
          (stream (car version-list))
          (smallworld-gis (nth 2 version-list))
-         (lp-alist (magik-aliases-layered-products-file (magik-aliases-expand-file magik-aliases-layered-products-file smallworld-gis) smallworld-gis))
+         (lp-alist (magik-aliases-all-layered-products smallworld-gis))
          alias-file)
     (when (not stream)
       (error "Invalid selection"))
@@ -169,15 +174,17 @@ has more than one aliases file available."
                   (path (cdr (assoc lp lp-alist))))
              (when path
                (setq alias-file (file-name-concat path "config" "gis_aliases"))))))
-    (when alias-file
-      (kill-buffer (current-buffer))
-      (find-file alias-file)
-      (compat-call setq-local
-                   magik-smallworld-gis smallworld-gis
-                   magik-version-current stream)
-      (read-only-mode t)
-      (magik-aliases-next)
-      (set-buffer-modified-p nil))))
+    (if alias-file
+        (progn
+          (kill-buffer (current-buffer))
+          (find-file alias-file)
+          (compat-call setq-local
+                       magik-smallworld-gis smallworld-gis
+                       magik-version-current stream)
+          (read-only-mode t)
+          (magik-aliases-next)
+          (set-buffer-modified-p nil))
+      (error "Could not find alias file associated to: %s" smallworld-gis))))
 
 (defun magik-version-next ()
   "Move point to next valid version listed."
@@ -337,7 +344,7 @@ Will set `gis-version-file' to FILE."
   (interactive
    (when (not (file-exists-p magik-version-file))
      (call-interactively 'magik-version-file-create)))
-  (set-buffer (get-buffer-create "*gis version selection*"))
+  (set-buffer (get-buffer-create (concat "*" magik-session-buffer-default-name " version selection*")))
   (magik-version-mode)
 
   (setq buffer-read-only nil)
@@ -359,7 +366,8 @@ Will set `gis-version-file' to FILE."
         (insert " ")
         (cond ((string-match magik-version-invalid-string (match-string-no-properties 3))
                nil)
-              ((file-exists-p (match-string-no-properties 3))
+              ((or (not magik-version-validate-entries)
+                   (file-exists-p (match-string-no-properties 3)))
                nil)
               (t
                (goto-char (match-beginning 3))

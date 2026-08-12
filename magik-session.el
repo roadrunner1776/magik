@@ -99,12 +99,12 @@ Used for switching to the first Smallworld session."
   :group 'magik-session
   :type '(choice string (const nil)))
 
-(defcustom magik-session-buffer-default-name "*gis*"
-  "*The default name of a Magik Session buffer when creating new Magik sessions."
+(defcustom magik-session-buffer-default-name "magik"
+  "*The default name of a Magik session buffer when creating new Magik sessions."
   :group 'magik-session
   :type 'string)
 
-(defcustom magik-session-prompt "Magik\\(\\|SF\\)> "
+(defcustom magik-session-prompt (regexp-opt `("Magik> " "MagikSF> " "Majestik> "))
   "String or Regular expression identifying the default Magik Prompt.
 If global value is nil, a Magik session will attempt to discover the current
 setting of the Magik Prompt by calling `magik-session-prompt-get'."
@@ -515,7 +515,7 @@ Return a list of all the components of the COMMAND."
 
 (define-derived-mode magik-session-mode nil "Magik Session"
   "Major mode to run a Magik session as a direct subprocess.
-The default name for a buffer running a session is \"*gis*\". The name of
+The default name for a buffer running a session is \"*magik*\". The name of
 the current session buffer is stored in the user option `magik-session-buffer`.
 There are many ways to recall previous commands (see the online
 help with \\[help-command]).
@@ -567,11 +567,13 @@ Entry to this mode runs `magik-session-mode-hook`.
   (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
     (erase-buffer))
 
-  (add-hook 'before-change-functions 'magik-session--prepare-for-edit-cmd nil t)
-  (add-hook 'menu-bar-update-hook 'magik-session-update-magik-session-menu nil t)
-  (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-gis-menu nil t)
-  (add-hook 'menu-bar-update-hook 'magik-session-update-tools-magik-shell-menu nil t)
-  (add-hook 'kill-buffer-hook 'magik-session-buffer-alist-remove nil t))
+  (magik-completion-setup)
+
+  (add-hook 'before-change-functions #'magik-session--prepare-for-edit-cmd nil t)
+  (add-hook 'menu-bar-update-hook #'magik-session-update-magik-session-menu nil t)
+  (add-hook 'menu-bar-update-hook #'magik-session-update-tools-magik-gis-menu nil t)
+  (add-hook 'menu-bar-update-hook #'magik-session-update-tools-magik-shell-menu nil t)
+  (add-hook 'kill-buffer-hook #'magik-session-buffer-alist-remove nil t))
 
 (defvar magik-session-menu nil
   "Keymap for the Magik session buffer menu bar.")
@@ -588,7 +590,6 @@ Entry to this mode runs `magik-session-mode-hook`.
     [,"Unfold"                           magik-session-undisplay-history :active t :keys "<f2> <down>,   <f2> C-n"]
     "----"
     [,"Electric Template"                magik-explicit-electric-space           t]
-    [,"Symbol Complete"                  magik-symbol-complete                   t]
     ;; [,"Deep Print"                       magik-deep-print                      :active t :keys "<f2> x"]
     "----"
     [,"Previous Traceback"               magik-session-traceback-up              t]
@@ -805,8 +806,8 @@ there is not, prompt for a command to run, and then run it."
 (defun magik-session-new-buffer ()
   "Start a new Magik session."
   (interactive)
-  (let ((current-prefix-arg t))
-    (call-interactively #'magik-session)))
+  (magik-session (generate-new-buffer-name
+                  (or magik-session-buffer magik-session-buffer-default-name))))
 
 (defun magik-session-kill-process ()
   "Kill the current Magik process."
@@ -870,7 +871,7 @@ Locate the cursor to an offset OFFSET."
 (defun magik-session-send-region (beg end)
   "Record in `magik-session-prev-cmds' the region BEG to END and send to the gis.
 Also update `magik-session-cmd-num'.
-Also append the string to \" *history**gis*\"."
+Also append the string to \" *history**magik*\"."
   (save-excursion
     (let ((str (buffer-substring beg end)))
       (set-buffer (get-buffer-create (concat " *history*" (buffer-name))))
@@ -1521,7 +1522,6 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (define-key magik-session-mode-map (kbd "<f2> p")      'magik-session-recall-prev-matching-cmd)
   (define-key magik-session-mode-map (kbd "<f2> n")      'magik-session-recall-next-matching-cmd)
 
-  (define-key magik-session-mode-map (kbd "<f4> <f4>")   'magik-symbol-complete)
   (define-key magik-session-mode-map (kbd "<f4> <up>")   'magik-session-traceback-up)
   (define-key magik-session-mode-map (kbd "<f4> <down>") 'magik-session-traceback-down)
   (define-key magik-session-mode-map (kbd "<f4> $")      'magik-session-shell)

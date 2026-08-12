@@ -65,7 +65,7 @@ See `imenu-generic-expression'.")
   :group 'magik-msg-faces)
 
 (defface magik-msg-text-encoding-face
-  '((t :inherit magik-warning-face))
+  '((t :inherit magik-text-encoding-face))
   "Font Lock mode face used to display the text encoding."
   :group 'magik-msg-faces)
 

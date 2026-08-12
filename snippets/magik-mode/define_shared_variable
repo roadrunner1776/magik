@@ -2,17 +2,37 @@
 # name: define_shared_variable
 # key: define_shared_variable
 # group: define.object oriented
+# type: command
 # --
-`(magik-yasnippet-prev-pragma)`
-`(magik-yasnippet-documentation t)`
-`(magik-yasnippet-prev-class-name-with-dot)`define_shared_variable(:${1:name}, ${2:initial_value}, ${3:$$(yas-completing-read
-"Flavour?:
+(let* ((snippet-content '())
+       (pragma-snippet (car (magik-yasnippet-pragma-snippet nil)))
+       (dollar-count (cadr (magik-yasnippet-pragma-snippet nil)))
+       (doc-string (magik-yasnippet-documentation))
+       (variable-line
+        (concat
+         (magik-yasnippet-prev-class-name-with-dot) "define_shared_variable(:${"
+         (number-to-string (+ dollar-count 1))
+         ":name}, ${"
+         (number-to-string (+ dollar-count 2))
+         ":initial_value}, ${"
+         (number-to-string (+ dollar-count 3))
+         ":$$(yas-completing-read \"
+Flavour?:
 ##  flavour    get  set  boot
 ##  -------------------------
 ##  :private   pri  pri  pri
 ##  :public    pub  pub  pub
 ##  :readonly  pub  pri  pri
-" '(":private" ":public" ":readonly"))})
-$
+\"
+'(:private :public :readonly))})")))
 
-$0
+  (setq snippet-content
+        (delq nil
+              (list pragma-snippet
+                    (unless (string-empty-p doc-string) doc-string)
+                    variable-line
+                    "$"
+                    ""
+                    "$0")))
+
+  (yas-expand-snippet (string-join snippet-content "\n")))

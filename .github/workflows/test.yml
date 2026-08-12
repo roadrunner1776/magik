@@ -18,7 +18,6 @@ defaults:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
@@ -38,32 +37,34 @@ jobs:
         exclude:
           - os: macos-latest
             emacs-version: 27.2
-
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: jcs090218/setup-emacs@3586c34483bee442d1293c9a428fa3da44421509
+      - uses: actions/checkout@v7
+      - uses: jcs090218/setup-emacs@v3
         with:
           version: ${{ matrix.emacs-version }}
-
-      - uses: emacs-eask/setup-eask@cc250315b6a3177fa27dbb5bb6a2a9d9b90b2ef7
+      - uses: emacs-eask/setup-eask@v3
         with:
           version: snapshot
-
       - name: Run tests
+        id: test
+        continue-on-error: ${{ matrix.experimental }}
         run: |
           eask install-deps
           eask package
           eask install
           eask compile
-
+          eask run script test
+      - name: Report experimental failure
+        if: steps.test.outcome == 'failure' && matrix.experimental
+        run: echo "::warning::snapshot Emacs build failed but is experimental; not failing the job."
+  
   melpazoid:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Checkout melpazoid
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: riscy/melpazoid
           path: melpazoid
@@ -71,12 +72,12 @@ jobs:
           fetch-depth: 1
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
       - name: Cache pip
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}

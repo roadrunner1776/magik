@@ -482,6 +482,8 @@ Set METHOD and CLASS if given."
            t)
           ((and magik-session-buffer (get-buffer magik-session-buffer) (get-buffer-process magik-session-buffer))
            (setq gis magik-session-buffer))
+          ((not gis)
+           (error "There is no Magik Session running"))
           (t
            (setq smallworld-gis (buffer-local-value 'magik-smallworld-gis (get-buffer gis))
                  magik-cb-file (magik-cb-set-filename smallworld-gis)
@@ -617,6 +619,8 @@ To view the help on these variables type \\[describe-variable] and enter the var
 (defun magik-cb-gis-buffer (&optional buffer)
   "Return the Magik session process BUFFER associated with this Class Browser."
   (setq buffer (if (bufferp buffer) (buffer-name buffer) (or buffer (buffer-name))))
+  (when (string-prefix-p " " buffer)
+    (setq buffer (substring buffer 1)))
   (let ((magik-cb-bit (substring buffer 0 5)))
     (if (equal magik-cb-bit "*cb2*")
         (substring buffer 5)
@@ -680,7 +684,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
         (magik-cb-alist     (sort (copy-alist magik-cb-buffer-alist); -1, -2, etc.
                                   #'(lambda (a b) (> (car a) (car b)))))
         cb-list)
-    ;; Order is such that CB of *gis* will be first see magik-session.el for more details.
+    ;; Order is such that CB of *magik* will be first see magik-session.el for more details.
     (dolist (c magik-cb-alist)
       (let ((i   (- (car c)))
             (buf (cdr c)))
@@ -892,7 +896,7 @@ If FILTER is given then it is set on the process."
 
       ;; diagnostic to see if stuff is coming back from the C.
       (if magik-cb-debug
-          (let ((debug-buf (get-buffer-create (concat "*cb debug*" (buffer-name b)))))
+          (let ((debug-buf (get-buffer-create (concat " *cb debug*" (buffer-name b)))))
             (with-current-buffer debug-buf
               (insert s)
               (message "DEBUG output set to buffer %s" (buffer-name)))))
@@ -1490,7 +1494,7 @@ Be careful to preserve the position in \"*cb2*\"."
 
 (defun magik-cb2-buffer (&optional buffer)
   "Name of the CB2 BUFFER."
-  (get-buffer-create (concat "*cb2*" (magik-cb-gis-buffer buffer))))
+  (get-buffer-create (concat " *cb2*" (magik-cb-gis-buffer buffer))))
 
 (defun magik-cb2-get-window (mode)
   "Set up a window for \"*cb2*\".
@@ -1734,7 +1738,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
 (defun magik-cb-modeline-flags ()
   "Return the propertized flag section of the Magik CB modeline.
 
-     *b  a  s  r  *d  <inh> *F  T  2 dp rs   *gis*"
+     *b  a  s  r  *d  <inh> *F  T  2 dp rs   *magik*"
   (let ((parts '()))
     ;; Core flags
     (dolist (flag '("basic" "advanced" "subclassable" "redefinable" "debug"))
@@ -1983,7 +1987,9 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
   (save-excursion
     (let ((buffer-read-only nil))
       (magik-cb-set-buffer-m)
-      (erase-buffer)
+      (erase-buffer)))
+  (save-excursion
+    (let ((buffer-read-only nil))
       (magik-cb-set-buffer-c)
       (erase-buffer)))
   (dolist (x (magik-cb-topics))

@@ -3,12 +3,33 @@
 # key: define_condition
 # expand-env: ((yas-indent-line 'fixed))
 # group: condition
+# type: command
 # --
-`(magik-yasnippet-prev-pragma)`
-`(magik-yasnippet-documentation t)`
-condition.define_condition(:${1:condition_name},
-	:${2:parent_condition_name},
-	{${3:data_name_list}})
-$
+(let* ((snippet-content '())
+       (pragma-snippet (car (magik-yasnippet-pragma-snippet nil)))
+       (dollar-count (cadr (magik-yasnippet-pragma-snippet nil)))
+       (doc-string (magik-yasnippet-documentation))
+       (condition-line (concat
+			(magik-yasnippet-prev-class-name-with-dot)
+			"condition.define_condition(:${"
+			(number-to-string (+ dollar-count 1)) ":condition_name},"))
+       (parent-condition-line (concat
+			       ":${"
+			       (number-to-string (+ dollar-count 2)) ":parent_condition_name},"))
+       (data-list-line (concat
+			"{${"
+			(number-to-string (+ dollar-count 3)) ":data_name_list}})")))
 
-$0
+
+  (setq snippet-content
+	(delq nil
+              (list pragma-snippet
+		    (unless (string-empty-p doc-string) doc-string)
+		    condition-line
+		    parent-condition-line
+		    data-list-line
+		    "$"
+		    ""
+		    "$0")))
+
+  (yas-expand-snippet (string-join snippet-content "\n")))

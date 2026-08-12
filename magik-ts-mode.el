@@ -24,6 +24,11 @@
 
 ;;; Code:
 
+;; Tree-sitter support requires Emacs 29+; bail out early on older releases.
+(when (< emacs-major-version 29)
+  (provide 'magik-ts-mode)
+  (signal 'file-error '("magik-ts-mode requires Emacs 29 or later")))
+
 (require 'magik-mode)
 (require 'treesit)
 
@@ -41,8 +46,11 @@
 
    :language 'magik
    :feature 'comment
+   :override t
    '((comment) @magik-comment-face
-     (documentation) @magik-doc-face)
+     (documentation) @magik-doc-face
+     ((comment) @magik-text-encoding-face
+      (:match "^#%[ \t]*text_encoding" @magik-text-encoding-face)))
 
    :language 'magik
    :feature 'type
