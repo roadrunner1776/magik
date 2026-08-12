@@ -920,7 +920,7 @@ Copies the non-degenerate commands into it."
 (defun magik-session-beginning-of-line (&optional n)
   "Move point to beginning of Nth line or just after prompt.
 If command is repeated then place point at beginning of prompt."
-  (interactive "p")
+  (interactive "^p")
   (beginning-of-line n)
   ;;Only move to end of prompt if last-command was this one
   ;;AND a prefix key has not be used (n=1).
