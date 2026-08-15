@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: text_encoding
+# key: text_encoding
+# group: documentation
+# --
+#%text_encoding=${1:utf8}
+$0
