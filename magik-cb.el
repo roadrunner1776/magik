@@ -1520,11 +1520,16 @@ We also save some state for a clean exit."
 
        ((not (one-window-p t))
         ;; if there's 3 windows maybe we should try and zap the least wanted
-        ;; window.  For now we just zap the next in rotation.
-        (let
-            ((magik-cb2-win (next-window magik-cb-win 1)))
-          (set-window-buffer magik-cb2-win cb2)
-          (select-window magik-cb2-win)))
+        ;; window.  For now we just zap the next in rotation, skipping any
+        ;; dedicated windows, which refuse `set-window-buffer'.
+        (let ((magik-cb2-win (next-window magik-cb-win 1)))
+          (while (and (window-dedicated-p magik-cb2-win)
+                      (not (eq magik-cb2-win magik-cb-win)))
+            (setq magik-cb2-win (next-window magik-cb2-win 1)))
+          (if (window-dedicated-p magik-cb2-win)
+              (display-buffer cb2)
+            (set-window-buffer magik-cb2-win cb2)
+            (select-window magik-cb2-win))))
 
        ;; Now the 2 cases when "*cb*" is occupying the whole screen.
        ;; The aim is to leave "*cb*" in the half of the screen that was
