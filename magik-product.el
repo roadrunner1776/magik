@@ -159,7 +159,8 @@ You can customize Product Mode with the `magik-product-mode-hook`.
                                            'magik-session-buffer-alist-prefix-function))
          (process (barf-if-no-gis gis))
          (filename (buffer-file-name)))
-    (pop-to-buffer gis t)
+    (message "%s loaded in buffer %s." (magik-utils-product-name) gis)
+    (display-buffer gis t)
     (magik-product-transmit-add-product filename process)
     gis))
 
