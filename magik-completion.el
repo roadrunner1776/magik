@@ -1489,19 +1489,33 @@ from a dead session."
 the narrower dot- and condition-context backends.")
 
 (defconst magik-completion--transmit-functions
-  '(magik-product-transmit-buffer
-    magik-module-transmit-buffer
-    magik-loadlist-transmit-buffer
-    magik-transmit-region)
-  "Functions that send code to a Magik session and should invalidate the cache.")
+  '((magik-product-transmit-buffer . magik-product)
+    (magik-module-transmit-buffer . magik-module)
+    (magik-loadlist-transmit-buffer . magik-loadlist)
+    (magik-transmit-region . magik-mode))
+  "Alist of (FUNCTION . FEATURE) that send code to a Magik session.
+Each FUNCTION should invalidate the completion cache when called.
+FEATURE is the file defining FUNCTION, so advising it can be deferred
+until that file is actually loaded.")
+
+(defun magik-completion--advise-transmit-functions ()
+  "Advise every function in `magik-completion--transmit-functions'.
+This is done once, globally, independent of `magik-completion-mode':
+the completion cache is global state, not buffer-local, so a single
+buffer disabling the mode must not stop other buffers' transmitted
+code from invalidating it.  `with-eval-after-load' also ensures a
+function gets advised even if its defining file is loaded after this
+one, rather than only functions already bound at this point."
+  (dolist (entry magik-completion--transmit-functions)
+    (with-eval-after-load (cdr entry)
+      (advice-add (car entry) :after #'magik-completion--invalidate-cache))))
+
+(magik-completion--advise-transmit-functions)
 
 (defun magik-completion--enable ()
   "Add Magik CAPF functions to the current buffer."
   (dolist (fn magik-completion--capf-functions)
     (add-hook 'completion-at-point-functions fn nil t))
-  (dolist (fn magik-completion--transmit-functions)
-    (when (fboundp fn)
-      (advice-add fn :after #'magik-completion--invalidate-cache)))
   ;; Forward advice: takes effect once magik-session is loaded.
   (advice-add 'magik-session-kill-process :after
               #'magik-completion--reset-session-state)
@@ -1512,9 +1526,6 @@ the narrower dot- and condition-context backends.")
   "Remove Magik CAPF functions from the current buffer."
   (dolist (fn magik-completion--capf-functions)
     (remove-hook 'completion-at-point-functions fn t))
-  (dolist (fn magik-completion--transmit-functions)
-    (when (fboundp fn)
-      (advice-remove fn #'magik-completion--invalidate-cache)))
   (advice-remove 'magik-session-kill-process
                  #'magik-completion--reset-session-state)
   (remove-hook 'magik-session-start-process-post-hook
