@@ -211,12 +211,12 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
 (defun magik-aliases-next ()
   "Move point to next valid alias listed."
   (interactive)
-  (save-match-data)
-  (if (re-search-forward magik-aliases-definition-regexp nil t)
-      (forward-line)
-    (goto-char (point-min))
-    (when (re-search-forward magik-aliases-definition-regexp nil t)
-      (forward-line))))
+  (save-match-data
+    (if (re-search-forward magik-aliases-definition-regexp nil t)
+        (forward-line)
+      (goto-char (point-min))
+      (when (re-search-forward magik-aliases-definition-regexp nil t)
+        (forward-line)))))
 
 (defun magik-aliases-q ()
   "If buffer is read-only goto next alias, else insert q."
