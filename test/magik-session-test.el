@@ -55,5 +55,58 @@
     (let ((magik-session-buffer-alist nil))
       (should-not (magik-session-buffer-alist-remove)))))
 
+;;; magik-session-beginning-of-line
+
+(ert-deftest magik-session-beginning-of-line--moves-past-the-prompt ()
+  (with-temp-buffer
+    (magik-session-mode)
+    (insert "Magik> print(1)")
+    (let ((last-command nil))
+      (magik-session-beginning-of-line 1))
+    (should (equal (buffer-substring-no-properties (point) (point-max))
+                   "print(1)"))))
+
+(ert-deftest magik-session-beginning-of-line--repeated-goes-to-column-zero ()
+  "Repeating the command moves point right to the beginning of the line."
+  (with-temp-buffer
+    (magik-session-mode)
+    (insert "Magik> print(1)")
+    (let ((last-command 'magik-session-beginning-of-line))
+      (magik-session-beginning-of-line 1))
+    (should (= (point) (line-beginning-position)))))
+
+(ert-deftest magik-session-beginning-of-line--is-shift-select-aware ()
+  "Both preconditions for `shift-select-mode' must hold on C-S-a.
+Emacs only shift-translates C-S-a to C-a while C-S-a is unbound, and the
+command it lands on only extends the region when its interactive spec
+starts with `^'."
+  (with-temp-buffer
+    (magik-session-mode)
+    (should-not (lookup-key magik-session-mode-map (kbd "C-S-a")))
+    (let ((spec (cadr (interactive-form (key-binding (kbd "C-a"))))))
+      (should (stringp spec))
+      (should (string-prefix-p "^" spec)))))
+
+(ert-deftest magik-session-beginning-of-line--shift-selection-selects-command ()
+  "Pressing C-S-a selects back to the prompt, as it does in a shell buffer.
+The buffer has to be displayed, otherwise the key cannot be executed."
+  (let ((buffer (get-buffer-create "*magik-session-test*"))
+        (shift-select-mode t)
+        (transient-mark-mode t))
+    (unwind-protect
+        (save-window-excursion
+          (switch-to-buffer buffer)
+          (magik-session-mode)
+          (erase-buffer)
+          (insert "Magik> print(1)")
+          (goto-char (point-max))
+          (deactivate-mark)
+          (execute-kbd-macro (kbd "C-S-a"))
+          (should (region-active-p))
+          (should (equal (buffer-substring-no-properties
+                          (region-beginning) (region-end))
+                         "print(1)")))
+      (kill-buffer buffer))))
+
 (provide 'magik-session-test)
 ;;; magik-session-test.el ends here
