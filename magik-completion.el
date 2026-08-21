@@ -62,6 +62,11 @@ Set to nil before mode activation to disable, or use
   :type 'boolean
   :group 'magik-completion)
 
+(defcustom magik-completion-enable-characters t
+  "When non-nil, offer Magik character-literal names after `%'."
+  :type 'boolean
+  :group 'magik-completion)
+
 (defcustom magik-completion-insert-params t
   "When non-nil, insert method parameters as a yasnippet after completion."
   :type 'boolean
@@ -95,12 +100,97 @@ Set to nil before mode activation to disable, or use
   "List of Magik language keywords for completion.")
 
 (defconst magik-completion--builtins
-  '("bag" "char16_vector" "concurrent_hash_map" "condition" "date"
-    "equality_hash_table" "equality_set" "float" "gis_program_manager"
-    "hash_table" "integer" "property_list" "queue" "rope" "set"
-    "simple_vector" "smallworld_product" "sorted_collection" "stack"
-    "sw_module_manager" "symbol" "system")
-  "List of commonly used Magik built-in names for completion.")
+  (mapcar (lambda (name) (propertize name 'magik-package "sw"))
+          '("DummyClassForMixinMethodTable" "ace_theme_definition"
+            "alternative_access" "array_list" "attribute_layout"
+            "auth!access" "base64_mime_converter" "bignum"
+            "binary_operator" "byte_rope" "char16_string" "char16_vector"
+            "character" "class_info_manager" "collection_export_engine"
+            "colour_builder" "colour_value_manager" "compiler"
+            "compiler_info" "compound_command" "concurrent_hash_map"
+            "coords2h_rope" "coords3d_rope" "coords_rope"
+            "crc32_checksum" "credential_store"
+            "dash_pattern_value_manager" "database_pool_task_owner"
+            "database_undoable_command" "dataset_spatial_object_stream"
+            "dd_derived_field" "ds!areaindex" "ds!lanrootmap"
+            "ds!lanrootmap7" "ds_environment" "ds_simple_vector"
+            "dynamic_environment" "fill_percentage_value_manager" "float"
+            "float_rope" "generic_bit_rope" "gis_id" "global_variable"
+            "hatch_pattern_builder" "hatch_pattern_value_manager"
+            "heavy_thread" "indexed_pool_manager" "int!zip_output_stream"
+            "int64_rope" "integer_rope" "iter_perform_procedure"
+            "java_affine_transform" "java_buffered_image"
+            "java_file_dialog" "java_hash_set" "java_linked_hash_map"
+            "java_logger" "java_message_proxy" "java_skip_list_set"
+            "java_string" "jvm" "layout_document_properties"
+            "lazy_record_collection_stream" "light_thread"
+            "line_end_style_value_manager"
+            "line_join_style_value_manager" "line_width_value_manager"
+            "linked_list" "lru_cache_element" "magik_digest"
+            "magik_input_method_event" "magik_url"
+            "map_extent_prompt_dialog"
+            "map_plugin_view_defaults_options_panel"
+            "map_plugin_view_interaction_options_panel" "method"
+            "method_overwrites" "method_table" "mixin" "moj_stack_frame"
+            "options_dialog" "ordered_geometry_set" "osgi_bundle_manager"
+            "output" "package" "paper_size" "pbkdf2_digest"
+            "perform_procedure" "pixel_coords_rope" "pragma"
+            "predicate_any_all" "predicate_count_helper"
+            "predicate_join_helper" "predicate_navigate" "probe"
+            "probe_chain" "procedure" "random" "rational_b_spline"
+            "rational_b_spline_or_arc" "redacted_string"
+            "render_controller" "rope" "rope_mixin"
+            "sample_detail_filter" "sector" "sector_rope" "sector_z"
+            "short_integer_rope" "simple_xml_handler" "simple_xml_parser"
+            "simple_xml_serial_parser" "simple_xml_serial_reader"
+            "simple_xml_thing_ns" "slot_access_procedure"
+            "slot_descriptor" "spawner" "sub_package" "sw_cron_engine"
+            "sw_custom_draw_styler" "sw_custom_geometry_styler"
+            "sw_generic_task_owner" "sw_geometry_styler"
+            "sw_gui_task_owner" "sw_job_engine" "sw_job_engine_helper"
+            "sw_mapped_geom_style_discriminator"
+            "sw_mapping_message_style_discriminator"
+            "sw_parallel_task_owner" "sw_regexp"
+            "sw_simple_style_discriminator"
+            "sw_subcode_style_discriminator" "sw_task_owner"
+            "sw_uncacheable_style_geometry_styler"
+            "swdp_spatial_object_stream" "symbol" "sys!association"
+            "sys!java_magik_condition" "sys!java_magik_exception"
+            "sys!value_holder" "sys_slot_procedure" "system"
+            "tabular_choice_lister" "timer" "timer_task" "uint64_rope"
+            "unset" "xml_output_simple" "zip_entry" "zip_output_stream"))
+  "List of commonly used Magik built-in names for completion.
+All of these live in the `sw' package, so each name is tagged with
+that via a `magik-package' text property, for doc-buffer lookups.")
+
+(defconst magik-completion--character-names
+  '("nul" "soh" "stx" "etx" "eot" "enq" "ack" "bell" "bel" "alert"
+    "backspace" "bs" "tab" "ht" "newline" "lf" "linefeed" "vt"
+    "verticaltab" "formfeed" "ff" "return" "cr" "so" "si" "dle" "dc1"
+    "dc2" "dc3" "dc4" "nak" "syn" "etb" "can" "em" "sub" "escape" "esc"
+    "fs" "gs" "rs" "us" "space" "blank" "delete" "del" "rubout" "csi"
+    "nobreakspace" "exclamdown" "cent" "sterling" "currency" "yen"
+    "brokenbar" "section" "diaeresis" "copyright" "ordfeminine"
+    "guillemotleft" "notsign" "softhyphen" "registered" "macron"
+    "degree" "plusminus" "superscripttwo" "superscriptthree" "acute"
+    "mu" "paragraph" "centeredperiod" "cedilla" "superscriptone"
+    "masculine" "guillemotright" "onequarter" "onehalf" "threequarters"
+    "questiondown" "Agrave" "Aacute" "Acircumflex" "Atilde"
+    "Adiaeresis" "Aring" "AE" "Ccedilla" "Egrave" "Eacute"
+    "Ecircumflex" "Ediaeresis" "Igrave" "Iacute" "Icircumflex"
+    "Idiaeresis" "Eth" "Ntilde" "Ograve" "Oacute" "Ocircumflex"
+    "Otilde" "Odiaeresis" "multiply" "Ooblique" "Ugrave" "Uacute"
+    "Ucircumflex" "Udiaeresis" "Yacute" "Thorn" "ssharp"
+    "germandoubles" "agrave" "aacute" "acircumflex" "atilde"
+    "adiaeresis" "aring" "ae" "ccedilla" "egrave" "eacute"
+    "ecircumflex" "ediaeresis" "igrave" "iacute" "icircumflex"
+    "idiaeresis" "eth" "ntilde" "ograve" "oacute" "ocircumflex"
+    "otilde" "odiaeresis" "division" "oslash" "ugrave" "uacute"
+    "ucircumflex" "udiaeresis" "yacute" "thorn" "ydiaeresis" "ind"
+    "nel" "ssa" "esa" "hts" "htj" "vts" "pld" "plu" "ri" "ss2" "ss3"
+    "dcs" "pu1" "pu2" "sts" "cch" "mw" "spa" "epa" "st" "osc" "pm"
+    "apc" "nbs")
+  "List of Magik `%name' character-literal names for completion.")
 
 ;;; --- Variable scanning ---
 
@@ -125,12 +215,10 @@ Returns a list of variable name strings."
 Returns a list of variable name strings visible at point."
   (let ((variables '())
         (node (treesit-node-at (point))))
-    ;; Parameters come from the enclosing method or procedure, even
-    ;; when point is inside a nested block.
+    ;; Params come from the enclosing method/procedure even in a nested block.
     (when-let* ((scope (magik-completion--ts-enclosing-scope
                         node magik-completion--ts-param-scopes)))
       (setq variables (magik-completion--ts-collect-params scope variables)))
-    ;; Collect local variables and assignments within scope, before point.
     (when-let* ((scope (magik-completion--ts-enclosing-scope
                         node magik-completion--ts-local-scopes)))
       (setq variables (magik-completion--ts-walk-for-assignments
@@ -198,7 +286,6 @@ Returns the updated VARIABLES list."
         (setq variables (magik-completion--ts-add-names
                          (magik-completion--ts-filter-children node "identifier")
                          limit variables)))))
-    ;; Recurse into children
     (dolist (child (treesit-node-children node))
       (when (< (treesit-node-start child) limit)
         (setq variables (magik-completion--ts-walk-for-assignments child limit variables)))))
@@ -215,14 +302,12 @@ Returns a list of variable name strings."
                             (point-min))))
         (case-fold-search nil))
     (save-excursion
-      ;; Find _local declarations
       (goto-char method-start)
       (while (re-search-forward
               "\\_<_local\\s-+\\([a-z_][a-z0-9_!?]*\\)" limit t)
         (let ((var (match-string-no-properties 1)))
           (unless (member var variables)
             (push var variables))))
-      ;; Find << assignments (often introduces variables)
       (goto-char method-start)
       (while (re-search-forward
               "\\b\\([a-z_][a-z0-9_!?]*\\)\\s-*<<" limit t)
@@ -230,7 +315,6 @@ Returns a list of variable name strings."
           (unless (or (member var variables)
                       (string-prefix-p "_" var))
             (push var variables))))
-      ;; Find _for loop variables
       (goto-char method-start)
       (while (re-search-forward
               "\\_<_for\\s-+\\([a-z_][a-z0-9_!?, ]*\\)\\s-+_over" limit t)
@@ -238,7 +322,6 @@ Returns a list of variable name strings."
           (dolist (v (split-string vars-str "[, \t]+" t))
             (unless (member v variables)
               (push v variables)))))
-      ;; Find _import declarations
       (goto-char method-start)
       (while (re-search-forward
               "\\_<_import\\s-+\\([a-z_][a-z0-9_!?, \t]*\\)" limit t)
@@ -246,7 +329,6 @@ Returns a list of variable name strings."
           (unless (or (string-prefix-p "_" v)
                       (member v variables))
             (push v variables)))))
-    ;; Find method parameters
     (save-excursion
       (goto-char method-start)
       (when (re-search-forward
@@ -351,46 +433,56 @@ Returns nil if point is inside a comment or string."
                          (memq pre-dot '(?\s ?\t ?\n ?\( ?, ?\;)))))
           (cons beg end))))))
 
+(defun magik-completion--after-char-p (pos char)
+  "Return non-nil if POS is immediately preceded by CHAR."
+  (and (> pos (point-min))
+       (eq (char-before pos) char)))
+
+(defun magik-completion--character-bounds ()
+  "Return bounds if point is completing a `%name' character literal.
+Unlike sibling bounds functions, this allows an empty prefix (BEG == END)
+so the full candidate list appears immediately after a bare `%'."
+  (let ((syntax (syntax-ppss)))
+    (when (and (magik-completion--available-p)
+               (not (nth 3 syntax))
+               (not (nth 4 syntax)))
+      (let* ((end (point))
+             (beg (save-excursion
+                    (skip-chars-backward "a-zA-Z0-9")
+                    (point))))
+        (when (magik-completion--after-char-p beg ?%)
+          (cons beg end))))))
+
+(defun magik-completion--global-prefix-p (beg prefix)
+  "Return non-nil if PREFIX starting at BEG is eligible for global completion.
+This excludes `_' keywords and slot/method access after a `.'."
+  (not (or (string-prefix-p "_" prefix)
+           (and (> beg (point-min))
+                (eq (char-before beg) ?.)))))
+
+(defun magik-completion--typed-package (prefix)
+  "Return the package qualifier typed before a `:' in PREFIX, or nil.
+A leading colon with nothing before it (e.g. \":p\") is a symbol
+literal, not a package qualifier, so that case returns nil."
+  (when-let* ((colon (string-match ":" prefix))
+              ((> colon 0)))
+    (substring prefix 0 colon)))
+
+(defun magik-completion--qualify-candidate (package candidate)
+  "Return CANDIDATE prefixed with \"PACKAGE:\".
+Carries over CANDIDATE's own text properties onto the whole result,
+so code inspecting properties at position 0 (e.g. `magik-package',
+`magik-args') keeps working regardless of the added qualifier."
+  (let ((qualified (concat package ":" candidate)))
+    (add-text-properties 0 (length qualified) (text-properties-at 0 candidate) qualified)
+    qualified))
+
+(defun magik-completion--kind-annotation (kind)
+  "Return an :annotation-function labeling candidates \"(magik- KIND)\"."
+  (let ((text (format " (magik-%s)" kind)))
+    (lambda (_) text)))
+
 ;;; --- CAPF functions ---
-
-(defun magik-completion-at-point-keywords ()
-  "Completion-at-point function for Magik keywords."
-  (when magik-completion-enable-keywords
-    (when-let* ((bounds (magik-completion--bounds)))
-      (let ((beg (car bounds))
-            (end (cdr bounds))
-            (prefix (buffer-substring-no-properties (car bounds) (cdr bounds))))
-        (when (string-prefix-p "_" prefix)
-          (list beg end magik-completion--keywords
-                :exclusive 'no
-                :company-kind (lambda (_) 'keyword)))))))
-
-(defun magik-completion-at-point-builtins ()
-  "Completion-at-point function for Magik built-in names."
-  (when magik-completion-enable-keywords
-    (when-let* ((bounds (magik-completion--bounds)))
-      (let ((beg (car bounds))
-            (prefix (buffer-substring-no-properties (car bounds) (cdr bounds))))
-        (unless (or (string-prefix-p "_" prefix)
-                    (and (> beg (point-min))
-                         (eq (char-before beg) ?.)))
-          (list beg (cdr bounds) magik-completion--builtins
-                :exclusive 'no
-                :company-kind (lambda (_) 'constant)))))))
-
-(defun magik-completion-at-point-variables ()
-  "Completion-at-point function for local variables and parameters."
-  (when magik-completion-enable-variables
-    (when-let* ((bounds (magik-completion--bounds)))
-      (let ((beg (car bounds))
-            (prefix (buffer-substring-no-properties (car bounds) (cdr bounds))))
-        (unless (or (string-prefix-p "_" prefix)
-                    (and (> beg (point-min))
-                         (eq (char-before beg) ?.)))
-          (when-let* ((vars (magik-completion--scan-local-variables)))
-            (list beg (cdr bounds) vars
-                  :exclusive 'no
-                  :company-kind (lambda (_) 'variable))))))))
 
 (defun magik-completion-at-point-slots ()
   "Completion-at-point function for exemplar slot references."
@@ -398,7 +490,17 @@ Returns nil if point is inside a comment or string."
               (slots (magik-completion--scan-slots)))
     (list (car bounds) (cdr bounds) slots
           :exclusive 'no
-          :company-kind (lambda (_) 'field))))
+          :company-kind (lambda (_) 'slot)
+          :annotation-function (magik-completion--kind-annotation 'slot))))
+
+(defun magik-completion-at-point-character ()
+  "Completion-at-point function for `%name' character literals."
+  (when magik-completion-enable-characters
+    (when-let* ((bounds (magik-completion--character-bounds)))
+      (list (car bounds) (cdr bounds) magik-completion--character-names
+            :exclusive 'no
+            :company-kind (lambda (_) 'character)
+            :annotation-function (magik-completion--kind-annotation 'character)))))
 
 ;;; --- Class Browser integration ---
 
@@ -414,11 +516,34 @@ Returns nil if point is inside a comment or string."
 (defvar-local magik-completion--cb-filter-str ""
   "Accumulator for CB process filter output.")
 
+(defvar-local magik-completion--cb-ready-p nil
+  "When non-nil, a predicate checking whether cb is ready.
+Checks whetherthe current query's response
+\(`magik-completion--cb-filter-str'\) is complete.
+Used for queries whose responses aren't signalled by a control character.")
+
+(defvar-local magik-completion--cb-parse-fn nil
+  "When non-nil, the parser to use for the current query's response.
+overriding the default control-character dispatch.")
+
+(defvar-local magik-completion--cb-on-response nil
+  "Callback for the in-flight query; see `magik-completion--cb-dispatch'.")
+
+(defvar-local magik-completion--cb-queue nil
+  "FIFO of (COMMAND READY-P PARSE-FN ON-RESPONSE) queue.
+queries waiting behind the in-flight one on this connection.")
+
+(defvar-local magik-completion--cb-generation 0
+  "Bumped on every dispatch; lets a timeout tell if it's stale.")
+
 (defvar magik-completion--class-cache nil
   "Cache: list of all class/exemplar names from CB.")
 
 (defvar magik-completion--class-cache-loaded nil
   "Non-nil when the class cache has been populated.")
+
+(defvar magik-completion--class-fetch-pending nil
+  "Non-nil while a background class-cache fetch is in flight.")
 
 (defvar magik-completion--global-cache nil
   "Cache: list of all global/dynamic names from CB.")
@@ -426,17 +551,25 @@ Returns nil if point is inside a comment or string."
 (defvar magik-completion--global-cache-loaded nil
   "Non-nil when the global cache has been populated.")
 
+(defvar magik-completion--global-fetch-pending nil
+  "Non-nil while a background global-cache fetch is in flight.")
+
 (defvar magik-completion--method-cache nil
   "Cache: cons (KEY . CANDIDATES) for method completion.
 KEY is \"class.first-char\" to detect when to re-query.")
+
+(defvar magik-completion--method-fetch-pending nil
+  "Cache key currently being fetched in the background, or nil.")
 
 (defcustom magik-completion-enable-cb t
   "When non-nil, use the Class Browser for method/class/global completion."
   :type 'boolean
   :group 'magik-completion)
 
-(defcustom magik-completion-cb-timeout 2.0
-  "Timeout in seconds to wait for CB process responses."
+(defcustom magik-completion-cb-timeout 20.0
+  "Seconds to wait for a CB response before giving up and restarting.
+Non-blocking, so this can be generous: a fresh CB can be slow to
+answer its first query while `method_finder' loads its database."
   :type 'number
   :group 'magik-completion)
 
@@ -475,16 +608,35 @@ KEY is \"class.first-char\" to detect when to re-query.")
                 (_ (get-buffer-process buf)))
       buf)))
 
+(defun magik-completion--gis-session-idle-p (gis-buf)
+  "Return non-nil if the session in GIS-BUF is idle at its prompt.
+Checked before starting a CB connection, since that blocks until
+the session answers."
+  (with-current-buffer gis-buf
+    (when-let* ((proc (get-buffer-process gis-buf))
+                (mark-pos (marker-position (process-mark proc))))
+      (and (boundp 'magik-session-prompt)
+           magik-session-prompt
+           (save-excursion
+             (goto-char mark-pos)
+             (and (re-search-backward magik-session-prompt nil t)
+                  (save-match-data
+                    (save-excursion
+                      (goto-char (match-end 0))
+                      (skip-chars-forward " \t\n")
+                      (>= (point) mark-pos)))))))))
+
 (defun magik-completion--ensure-cb-process ()
-  "Ensure a dedicated CB process is running for completion.
-Returns the process object or nil if it cannot be started."
+  "Ensure a dedicated CB process is running."
   (when (and magik-completion-enable-cb
              (require 'magik-cb nil t))
     (if (and magik-completion--cb-process
              (process-live-p magik-completion--cb-process))
         magik-completion--cb-process
-      ;; Try to start one
-      (when-let* ((gis-buf (magik-completion--gis-buffer)))
+      ;; Try to start one, but only once the session is idle; otherwise
+      ;; this would block inside `magik-cb-get-process-create'.
+      (when-let* ((gis-buf (magik-completion--gis-buffer))
+                  ((magik-completion--gis-session-idle-p gis-buf)))
         (let* ((smallworld-gis (buffer-local-value
                                 'magik-smallworld-gis (get-buffer gis-buf)))
                (cb-buf (magik-completion--cb-buffer)))
@@ -499,6 +651,14 @@ Returns the process object or nil if it cannot be started."
                   (setq magik-completion--cb-process proc
                         magik-completion--cb-buffer-name
                         (buffer-name (process-buffer proc)))
+                  ;; Buffer may be reused after a restart; start clean.
+                  (with-current-buffer (process-buffer proc)
+                    (setq magik-completion--cb-candidates nil
+                          magik-completion--cb-filter-str ""
+                          magik-completion--cb-ready-p nil
+                          magik-completion--cb-parse-fn nil
+                          magik-completion--cb-on-response nil
+                          magik-completion--cb-queue nil))
                   proc))
             (error nil)))))))
 
@@ -507,7 +667,9 @@ Returns the process object or nil if it cannot be started."
 (defun magik-completion--cb-filter (proc str)
   "Process filter for the completion CB process PROC.
 Accumulates STR until a control char signals end of output,
-then parses the temp file."
+then parses the temp file.  When `magik-completion--cb-ready-p' is set,
+uses it and `magik-completion--cb-parse-fn' instead, for queries whose
+responses come directly over the connection with no control char."
   (when-let* ((buf (process-buffer proc))
               (_ (buffer-live-p buf)))
     (with-current-buffer buf
@@ -517,22 +679,139 @@ then parses the temp file."
                                           magik-cb-coding-system
                                         'utf-8)))
           (cond
+           (magik-completion--cb-ready-p
+            (when (funcall magik-completion--cb-ready-p magik-completion--cb-filter-str)
+              (let ((result (funcall magik-completion--cb-parse-fn
+                                     magik-completion--cb-filter-str)))
+                (setq magik-completion--cb-filter-str ""
+                      magik-completion--cb-ready-p nil
+                      magik-completion--cb-parse-fn nil)
+                (magik-completion--cb-deliver result))))
            ;; \C-e signals method list output ready
            ((string-match "\C-e" magik-completion--cb-filter-str)
             (setq magik-completion--cb-filter-str "")
             (let ((buffer-read-only nil))
               (erase-buffer)
               (insert-file-contents (magik-cb-temp-file-name proc) nil nil nil t))
-            (setq magik-completion--cb-candidates
-                  (magik-completion--parse-methods)))
+            (magik-completion--cb-deliver (magik-completion--parse-methods)))
            ;; \C-c signals class list output ready
            ((string-match "\C-c" magik-completion--cb-filter-str)
             (setq magik-completion--cb-filter-str "")
             (let ((buffer-read-only nil))
               (erase-buffer)
               (insert-file-contents (magik-cb-temp-file-name proc) nil nil nil t))
-            (setq magik-completion--cb-candidates
-                  (magik-completion--parse-classes))))))))
+            (magik-completion--cb-deliver (magik-completion--parse-classes))))))))
+
+;;; --- CB dispatch/delivery ---
+;;
+;; One connection, one command at a time (no request id to match a
+;; reply to); these serialize queries onto a per-connection queue and
+;; deliver each result via callback instead of blocking the caller.
+
+(defun magik-completion--cb-dispatch (buf command ready-p parse-fn on-response)
+  "Send COMMAND on the CB process owning BUF, without blocking.
+ON-RESPONSE gets the parsed result, or nil on timeout.  READY-P and
+PARSE-FN override the default dispatch, see `magik-completion--cb-filter'."
+  (let ((generation
+         (with-current-buffer buf
+           (setq magik-completion--cb-candidates 'pending
+                 magik-completion--cb-filter-str ""
+                 magik-completion--cb-ready-p ready-p
+                 magik-completion--cb-parse-fn parse-fn
+                 magik-completion--cb-on-response on-response)
+           (cl-incf magik-completion--cb-generation))))
+    (process-send-string (get-buffer-process buf) command)
+    (run-at-time magik-completion-cb-timeout nil
+                 #'magik-completion--cb-timeout buf generation)))
+
+(defun magik-completion--cb-timeout (buf generation)
+  "Give up on BUF's in-flight query if GENERATION is still current.
+Restart the connection so a late reply can't corrupt the next one."
+  (when (buffer-live-p buf)
+    (with-current-buffer buf
+      (when (and (= generation magik-completion--cb-generation)
+                 (eq magik-completion--cb-candidates 'pending))
+        (let ((callbacks (delq nil (cons magik-completion--cb-on-response
+                                         (mapcar (lambda (q) (nth 3 q))
+                                                 magik-completion--cb-queue))))
+              (proc (get-buffer-process buf)))
+          (setq magik-completion--cb-on-response nil
+                magik-completion--cb-queue nil
+                magik-completion--cb-candidates nil)
+          (when proc (delete-process proc))
+          (dolist (callback callbacks) (funcall callback nil)))))))
+
+(defun magik-completion--cb-deliver (result)
+  "Store RESULT as the in-flight query's outcome and notify its caller.
+Then dispatch the next queued query on this connection, if any."
+  (setq magik-completion--cb-candidates result)
+  (when-let* ((callback magik-completion--cb-on-response))
+    (setq magik-completion--cb-on-response nil)
+    (funcall callback result))
+  (when-let* ((next (pop magik-completion--cb-queue)))
+    (apply #'magik-completion--cb-dispatch (current-buffer) next)))
+
+(declare-function corfu--post-command "corfu")
+
+(defun magik-completion--nudge-doc-display ()
+  "Redisplay doc for the current candidate without restarting completion.
+No-op unless Corfu popupinfo is the active frontend."
+  (when (and completion-in-region-mode
+             (bound-and-true-p corfu-popupinfo-mode)
+             (fboundp 'corfu--post-command))
+    (ignore-errors (corfu--post-command))))
+
+(defun magik-completion--cb-query-async (command callback &optional ready-p parse-fn no-refresh)
+  "Send COMMAND to the CB without blocking.
+Return t if dispatched or queued, nil if no CB is available; CALLBACK
+gets the result later.  Unless NO-REFRESH (for doc-only fetches),
+completion is recomputed to show it.  READY-P/PARSE-FN override the
+default dispatch, see `magik-completion--cb-filter'."
+  (when-let* ((proc (magik-completion--ensure-cb-process))
+              (buf (process-buffer proc))
+              (_ (buffer-live-p buf)))
+    (let* ((requester (current-buffer))
+           (on-response
+            (lambda (result)
+              (run-at-time
+               0 nil
+               (lambda ()
+                 (when (buffer-live-p requester)
+                   (with-current-buffer requester
+                     (funcall callback result)
+                     (if no-refresh
+                         (magik-completion--nudge-doc-display)
+                       (when (and completion-in-region-mode
+                                  (fboundp 'completion-at-point))
+                         (ignore-errors (completion-at-point)))))))))))
+      (if (eq (buffer-local-value 'magik-completion--cb-candidates buf) 'pending)
+          (with-current-buffer buf
+            (setq magik-completion--cb-queue
+                  (append magik-completion--cb-queue
+                          (list (list command ready-p parse-fn on-response)))))
+        (magik-completion--cb-dispatch buf command ready-p parse-fn on-response)))
+    t))
+
+(defun magik-completion--cb-cached-fetch (cache-var loaded-var pending-var command)
+  "Return CACHE-VAR's value once LOADED-VAR is set.
+Otherwise fetch COMMAND in the background (unless PENDING-VAR is
+already set) and return nil.  Args are variable symbols, not values,
+to drive several CB caches."
+  (cond
+   ((symbol-value loaded-var) (symbol-value cache-var))
+   ((symbol-value pending-var) nil)
+   (t
+    (set pending-var t)
+    (unless (magik-completion--cb-query-async
+             command
+             (lambda (result)
+               (set pending-var nil)
+               (when result
+                 (set cache-var result)
+                 (set loaded-var t))))
+      ;; No CB available, so the callback never runs; clear it ourselves.
+      (set pending-var nil))
+    nil)))
 
 ;;; --- CB output parsing ---
 
@@ -629,83 +908,133 @@ Returns a list (REQUIRED OPTIONAL GATHER)."
 
 (defun magik-completion--parse-classes ()
   "Parse class/family output in current buffer.
-Returns a list of class name strings."
+Returns a list of class name strings, each propertized with its
+package under `magik-package' (e.g. \"sw\" for \"sw:rope\')."
   (let ((candidates '())
-        (regexp "\\(\\S-+:\\)\\(\\S-+\\)"))
+        (regexp "\\(\\S-+\\):\\(\\S-+\\)"))
     (goto-char (point-min))
     (save-match-data
       (while (re-search-forward regexp nil t)
-        (let ((name (match-string-no-properties 2)))
+        (let ((package (match-string-no-properties 1))
+              (name (match-string-no-properties 2)))
           (unless (member name candidates)
-            (push name candidates)))))
+            (push (propertize name 'magik-package package) candidates)))))
     (nreverse candidates)))
 
-;;; --- CB synchronous queries ---
+;;; --- Class comment queries ---
+;;
+;; `get_class_info comments <class>' answers directly over the connection
+;; with no control character: a line count N, then exactly N lines of
+;; comment text (or a single "method finder: Invalid class" line for an
+;; unknown class).  This needs its own readiness/parsing logic instead of
+;; the usual \C-e / \C-c + temp-file dispatch.
 
-(defun magik-completion--cb-query (command)
-  "Send COMMAND string to the CB process and wait for a response.
-Returns the candidates list or nil on timeout."
-  (when-let* ((proc (magik-completion--ensure-cb-process))
-              (buf (process-buffer proc))
-              (_ (buffer-live-p buf)))
-    (with-current-buffer buf
-      (setq magik-completion--cb-candidates 'pending
-            magik-completion--cb-filter-str ""))
-    (process-send-string proc command)
-    ;; Synchronous wait with timeout
-    (let ((deadline (+ (float-time) magik-completion-cb-timeout)))
-      (while (and (eq (buffer-local-value 'magik-completion--cb-candidates buf)
-                      'pending)
-                  (< (float-time) deadline)
-                  (process-live-p proc))
-        (accept-process-output proc 0.05)))
-    (let ((result (buffer-local-value 'magik-completion--cb-candidates buf)))
-      (if (eq result 'pending) nil result))))
+(defun magik-completion--class-comment-nth-line-end (str n)
+  "Return the buffer position in STR just after its Nth newline.
+Returns nil if STR has fewer than N newlines."
+  (let ((pos 0))
+    (catch 'done
+      (dotimes (_ n)
+        (let ((next (string-match "\n" str pos)))
+          (unless next (throw 'done nil))
+          (setq pos (1+ next))))
+      pos)))
+
+(defun magik-completion--class-comment-ready-p (str)
+  "Return non-nil once STR is a complete get_class_info comments response."
+  (when-let* ((first-nl (string-match "\n" str)))
+    (let ((count-str (substring str 0 first-nl)))
+      (if (string-match-p "\\`[0-9]+\\'" count-str)
+          (magik-completion--class-comment-nth-line-end
+           str (1+ (string-to-number count-str)))
+        t))))
+
+(defun magik-completion--parse-class-comment (str)
+  "Extract the comment text from a get_class_info comments response STR.
+Returns nil if the class has no comment or wasn't found."
+  (when-let* ((first-nl (string-match "\n" str))
+              (count-str (substring str 0 first-nl))
+              ((string-match-p "\\`[0-9]+\\'" count-str))
+              (n (string-to-number count-str))
+              ((not (zerop n)))
+              (body-end (magik-completion--class-comment-nth-line-end str (1+ n))))
+    (string-trim (substring str (1+ first-nl) body-end))))
+
+(defvar magik-completion--class-comment-cache (make-hash-table :test #'equal)
+  "Cache: qualified class name -> its comment text (or `none') from CB.")
+
+(defvar magik-completion--class-comment-fetch-pending nil
+  "Qualified class name currently being fetched, or nil.")
+
+(defun magik-completion--query-class-comment (class)
+  "Return CLASS's own comment from the CB, caching by CLASS.
+Kicks off a background fetch and returns nil when not yet cached."
+  (let ((cached (gethash class magik-completion--class-comment-cache 'missing)))
+    (cond
+     ((eq cached 'none) nil)
+     ((not (eq cached 'missing)) cached)
+     ((equal magik-completion--class-comment-fetch-pending class) nil)
+     (t
+      (setq magik-completion--class-comment-fetch-pending class)
+      (unless (magik-completion--cb-query-async
+               (concat "get_class_info comments " class "\n")
+               (lambda (result)
+                 (setq magik-completion--class-comment-fetch-pending nil)
+                 (puthash class (or result 'none) magik-completion--class-comment-cache))
+               #'magik-completion--class-comment-ready-p
+               #'magik-completion--parse-class-comment
+               t)
+        ;; No CB available right now: nothing will clear the flag.
+        (setq magik-completion--class-comment-fetch-pending nil))
+      nil))))
+
+;;; --- CB queries ---
 
 (defun magik-completion--query-methods (class prefix)
-  "Query methods on CLASS starting with PREFIX from CB.
-Returns list of method name strings."
+  "Return cached methods on CLASS starting with PREFIX.
+Otherwise fetch in the background and return nil."
   (let* ((char (if (string-empty-p prefix) "" (substring prefix 0 1)))
          (cache-key (concat class "." char)))
-    ;; Use cached result if same class+char
-    (if (and magik-completion--method-cache
-             (equal cache-key (car magik-completion--method-cache)))
-        (cdr magik-completion--method-cache)
-      (let* ((cmd (concat "method_name ^" char "\n"
-                          "unadd class \nadd class " class "$\n"
-                          "method_cut_off " (number-to-string magik-completion-cb-max-methods) "\n"
-                          "override_flags\nshow_classes\nshow_args\nshow_comments\n"
-                          "print_curr_methods\nshow_topics\n"))
-             (result (magik-completion--cb-query cmd)))
-        (when result
-          (setq magik-completion--method-cache (cons cache-key result)))
-        result))))
+    (cond
+     ((and magik-completion--method-cache
+           (equal cache-key (car magik-completion--method-cache)))
+      (cdr magik-completion--method-cache))
+     ((equal magik-completion--method-fetch-pending cache-key) nil)
+     (t
+      (setq magik-completion--method-fetch-pending cache-key)
+      (unless (magik-completion--cb-query-async
+               (concat "method_name ^" char "\n"
+                       "unadd class \nadd class " class "$\n"
+                       "method_cut_off " (number-to-string magik-completion-cb-max-methods) "\n"
+                       "override_flags\nshow_classes\nshow_args\nshow_comments\n"
+                       "print_curr_methods\nshow_topics\n")
+               (lambda (result)
+                 (setq magik-completion--method-fetch-pending nil)
+                 (when result
+                   (setq magik-completion--method-cache (cons cache-key result)))))
+        ;; No CB available right now: nothing will clear the flag.
+        (setq magik-completion--method-fetch-pending nil))
+      nil))))
 
 (defun magik-completion--query-classes ()
-  "Query all classes from the CB.  Caches the result."
-  (if magik-completion--class-cache-loaded
-      magik-completion--class-cache
-    (let* ((cmd "dont_override_flags\npr_family sw:object\n")
-           (result (magik-completion--cb-query cmd)))
-      (when result
-        (setq magik-completion--class-cache result
-              magik-completion--class-cache-loaded t))
-      result)))
+  "Return all classes from the CB, fetching in the background first."
+  (magik-completion--cb-cached-fetch
+   'magik-completion--class-cache
+   'magik-completion--class-cache-loaded
+   'magik-completion--class-fetch-pending
+   "dont_override_flags\npr_family sw:object\n"))
 
 (defun magik-completion--query-globals ()
-  "Query all globals from the CB.  Caches the result."
-  (if magik-completion--global-cache-loaded
-      magik-completion--global-cache
-    (let* ((cmd (concat "method_name ^\n"
-                        "unadd class \nadd class <global>\n"
-                        "method_cut_off " (number-to-string magik-completion-cb-max-methods) "\n"
-                        "override_flags\nshow_classes\nshow_args\n"
-                        "print_curr_methods\nshow_topics\n"))
-           (result (magik-completion--cb-query cmd)))
-      (when result
-        (setq magik-completion--global-cache result
-              magik-completion--global-cache-loaded t))
-      result)))
+  "Return all globals from the CB, fetching in the background first."
+  (magik-completion--cb-cached-fetch
+   'magik-completion--global-cache
+   'magik-completion--global-cache-loaded
+   'magik-completion--global-fetch-pending
+   (concat "method_name ^\n"
+           "unadd class \nadd class <global>\n"
+           "method_cut_off " (number-to-string magik-completion-cb-max-methods) "\n"
+           "override_flags\nshow_classes\nshow_args\nshow_comments\n"
+           "print_curr_methods\nshow_topics\n")))
 
 ;;; --- Exemplar type inference ---
 
@@ -732,9 +1061,8 @@ Returns exemplar name string or nil."
          ((and magik-completion--class-cache
                (member variable magik-completion--class-cache))
           variable)
-         ;; Fallback: pass variable name directly to CB.
-         ;; The method_finder handles unknown classes gracefully
-         ;; and this covers globals like gis_program_manager.
+         ;; Fallback: pass the name straight to CB, which covers globals
+         ;; like gis_program_manager and handles unknown classes gracefully.
          (t variable))))))
 
 (defun magik-completion--infer-from-assignment (variable)
@@ -838,17 +1166,6 @@ Completing a key expands the snippet template."
       (delete-region (- (point) (length candidate)) (point))
       (yas-expand-snippet template))))
 
-(defun magik-completion-at-point-snippets ()
-  "Completion-at-point function for yasnippet template keys."
-  (when magik-completion-enable-snippets
-    (when-let* ((bounds (magik-completion--bounds))
-                (templates (magik-completion--snippet-templates)))
-      (list (car bounds) (cdr bounds)
-            (delq nil (mapcar #'yas--template-key templates))
-            :exclusive 'no
-            :company-kind (lambda (_) 'snippet)
-            :exit-function #'magik-completion--snippet-exit-function))))
-
 ;;; --- Yasnippet post-completion ---
 
 (declare-function yas-expand-snippet "yasnippet")
@@ -861,9 +1178,7 @@ Returns a snippet string like \"(${1:arg1}, ${2:arg2})\" or nil."
            (optional-raw (get-text-property 0 'magik-optional candidate))
            (gather-raw (get-text-property 0 'magik-gather candidate))
            (optional (and magik-completion-insert-optional-params optional-raw))
-           ;; Only include gather when there are no skipped optional params
-           ;; before it — you can't pass gather args without first providing
-           ;; all positional optional args.
+           ;; Gather only valid if no optional params were skipped before it.
            (gather (and magik-completion-insert-gather-param
                         gather-raw
                         (or (null optional-raw) optional)
@@ -890,6 +1205,26 @@ Returns a snippet string like \"(${1:arg1}, ${2:arg2})\" or nil."
 (defun magik-completion--doc-buffer (candidate)
   "Return a documentation buffer for CANDIDATE, or nil if none available."
   (when-let* ((doc (get-text-property 0 'magik-documentation candidate)))
+    (with-current-buffer (get-buffer-create " *magik-completion-doc*")
+      (erase-buffer)
+      (insert doc)
+      (current-buffer))))
+
+(defun magik-completion--qualified-class-name (candidate)
+  "Return CANDIDATE qualified with its package, e.g. \"sw:rope\'.
+If CANDIDATE is already package-qualified it's used as-is;
+otherwise this falls back to its `magik-package' text property.
+`get_class_info' requires a package-qualified class name."
+  (cond
+   ((string-match-p ":" candidate) candidate)
+   ((get-text-property 0 'magik-package candidate)
+    (concat (get-text-property 0 'magik-package candidate) ":" candidate))
+   (t candidate)))
+
+(defun magik-completion--class-doc-buffer (candidate)
+  "Return a documentation buffer for class CANDIDATE, or nil if none available."
+  (when-let* ((doc (magik-completion--query-class-comment
+                     (magik-completion--qualified-class-name candidate))))
     (with-current-buffer (get-buffer-create " *magik-completion-doc*")
       (erase-buffer)
       (insert doc)
@@ -925,51 +1260,117 @@ Inserts parameters as yasnippet when STATUS is `finished'."
                   :company-kind (lambda (_) 'method)
                   :annotation-function
                   (lambda (c)
-                    (when-let* ((ann (get-text-property 0 'magik-annotation c)))
-                      (concat " " ann)))
+                    (concat (when-let* ((ann (get-text-property 0 'magik-annotation c)))
+                              (concat " " ann))
+                            " (magik-method)"))
                   :company-doc-buffer #'magik-completion--doc-buffer
                   :exit-function #'magik-completion--exit-function)))))))
 
-(defun magik-completion-at-point-classes ()
-  "Completion-at-point function for class/exemplar names via CB."
-  (when magik-completion-enable-cb
-    (when-let* ((bounds (magik-completion--bounds)))
-      (let ((beg (car bounds))
-            (prefix (buffer-substring-no-properties (car bounds) (cdr bounds))))
-        (unless (or (string-prefix-p "_" prefix)
-                    ;; Not after a dot — that's a method, not a class
-                    (and (> beg (point-min))
-                         (eq (char-before beg) ?.)))
-          (when-let* ((classes (magik-completion--query-classes)))
-            (list beg (cdr bounds) classes
-                  :exclusive 'no
-                  :company-kind (lambda (_) 'class))))))))
+(defun magik-completion--tag-kind (candidates kind)
+  "Return CANDIDATES with a `magik-kind' text property set to KIND.
+Existing text properties on each candidate (e.g. `magik-package') are
+preserved."
+  (mapcar (lambda (c) (propertize c 'magik-kind kind)) candidates))
 
-(defun magik-completion-at-point-globals ()
-  "Completion-at-point function for globals/dynamics via CB."
-  (when magik-completion-enable-cb
-    (when-let* ((bounds (magik-completion--bounds)))
-      (let ((prefix (buffer-substring-no-properties (car bounds) (cdr bounds))))
-        (when (string-prefix-p "!" prefix)
-          (when-let* ((globals (magik-completion--query-globals)))
-            (list (car bounds) (cdr bounds) globals
-                  :exclusive 'no
-                  :company-kind (lambda (_) 'variable))))))))
+(defun magik-completion--tag-global (candidate)
+  "Tag global CANDIDATE with its `magik-kind'.
+Bang-delimited names (e.g. \"!terminal!\") are Magik's convention for
+dynamic variables, so they're tagged `variable'; everything else is a
+global procedure, tagged `method'."
+  (propertize candidate 'magik-kind
+              (if (and (string-prefix-p "!" candidate)
+                       (string-suffix-p "!" candidate)
+                       (> (length candidate) 1))
+                  'variable
+                'method)))
 
-(defun magik-completion-at-point-global-procedures ()
-  "Completion-at-point function for global procedures via CB."
-  (when magik-completion-enable-cb
-    (when-let* ((bounds (magik-completion--bounds)))
-      (let ((beg (car bounds))
-            (prefix (buffer-substring-no-properties (car bounds) (cdr bounds))))
-        (unless (or (string-prefix-p "_" prefix)
-                    (and (> beg (point-min))
-                         (eq (char-before beg) ?.)))
-          (when-let* ((global-procedures (magik-completion--query-globals)))
-            (list beg (cdr bounds) global-procedures
-                  :exclusive 'no
-                  :exit-function #'magik-completion--exit-function
-                  :company-kind (lambda (_) 'method))))))))
+(defun magik-completion--symbol-table (qualifiable plain)
+  "Return a completion table over the union of QUALIFIABLE and PLAIN.
+QUALIFIABLE candidates (built-ins, classes, globals) also match
+package-qualified forms like \"sw:rope\" when the typed text has a
+`package:' qualifier, by generating qualified candidate strings on the
+fly (see `magik-completion--qualify-candidate').  PLAIN candidates
+\(local variables, snippet keys) are never package-qualified."
+  (lambda (string pred action)
+    (complete-with-action
+     action
+     (append
+      (if-let* ((package (magik-completion--typed-package string)))
+          (mapcar (lambda (c) (magik-completion--qualify-candidate package c))
+                  qualifiable)
+        qualifiable)
+      plain)
+     string pred)))
+
+(defun magik-completion--symbol-kind (candidate)
+  "Return CANDIDATE's `magik-kind' text property, for :company-kind."
+  (get-text-property 0 'magik-kind candidate))
+
+(defun magik-completion--symbol-annotation (candidate)
+  "Return an annotation for CANDIDATE based on its `magik-kind'."
+  (funcall (magik-completion--kind-annotation
+            (magik-completion--symbol-kind candidate))
+           candidate))
+
+(defun magik-completion--symbol-doc-buffer (candidate)
+  "Return a documentation buffer for CANDIDATE based on its `magik-kind'."
+  (pcase (magik-completion--symbol-kind candidate)
+    ((or 'constant 'class) (magik-completion--class-doc-buffer candidate))
+    ((or 'method 'variable) (magik-completion--doc-buffer candidate))))
+
+(defun magik-completion--symbol-exit-function (candidate status)
+  "Exit function for CANDIDATE based on its `magik-kind'.
+STATUS is passed through to the kind-specific handler."
+  (pcase (magik-completion--symbol-kind candidate)
+    ('method (magik-completion--exit-function candidate status))
+    ('snippet (magik-completion--snippet-exit-function candidate status))))
+
+(defun magik-completion-at-point-symbol ()
+  "Completion-at-point function for identifiers.
+Covers keywords, built-ins, local variables, classes, global
+procedures/dynamics, and yasnippet template keys."
+  (when-let* ((bounds (magik-completion--bounds))
+              (beg (car bounds))
+              (end (cdr bounds))
+              ;; `%name' is handled by `magik-completion-at-point-character';
+              ;; `@' is excluded outright.
+              ((not (or (magik-completion--after-char-p beg ?%)
+                        (magik-completion--after-char-p beg ?@))))
+              (prefix (buffer-substring-no-properties beg end)))
+    (cond
+     ((string-prefix-p "_" prefix)
+      (when magik-completion-enable-keywords
+        (list beg end magik-completion--keywords
+              :exclusive 'no
+              :company-kind (lambda (_) 'keyword)
+              :annotation-function (magik-completion--kind-annotation 'keyword))))
+     ((magik-completion--global-prefix-p beg prefix)
+      (let ((qualifiable
+             (append
+              (when magik-completion-enable-keywords
+                (magik-completion--tag-kind magik-completion--builtins 'constant))
+              (when magik-completion-enable-cb
+                (magik-completion--tag-kind (magik-completion--query-classes) 'class))
+              (when magik-completion-enable-cb
+                (mapcar #'magik-completion--tag-global
+                        (magik-completion--query-globals)))))
+            (plain
+             (append
+              (when magik-completion-enable-variables
+                (magik-completion--tag-kind
+                 (magik-completion--scan-local-variables) 'variable))
+              (when magik-completion-enable-snippets
+                (magik-completion--tag-kind
+                 (delq nil (mapcar #'yas--template-key
+                                    (magik-completion--snippet-templates)))
+                 'snippet)))))
+        (when (or qualifiable plain)
+          (list beg end (magik-completion--symbol-table qualifiable plain)
+                :exclusive 'no
+                :company-kind #'magik-completion--symbol-kind
+                :annotation-function #'magik-completion--symbol-annotation
+                :company-doc-buffer #'magik-completion--symbol-doc-buffer
+                :exit-function #'magik-completion--symbol-exit-function)))))))
 
 ;;; --- Condition completion ---
 
@@ -978,6 +1379,9 @@ Inserts parameters as yasnippet when STATUS is `finished'."
 
 (defvar magik-completion--condition-cache-loaded nil
   "Non-nil when the condition cache has been populated.")
+
+(defvar magik-completion--condition-fetch-pending nil
+  "Non-nil while a background condition-cache fetch is in flight.")
 
 (defun magik-completion--condition-bounds ()
   "Return bounds if point is after `condition.raise(:'  or similar.
@@ -999,19 +1403,16 @@ Returns (BEG . END) of the condition name being typed, or nil."
             (cons beg end)))))))
 
 (defun magik-completion--query-conditions ()
-  "Query all condition names from the CB.  Caches the result."
-  (if magik-completion--condition-cache-loaded
-      magik-completion--condition-cache
-    (let* ((cmd (concat "method_name ^\n"
-                        "unadd class \nadd class <condition>\n"
-                        "method_cut_off " (number-to-string magik-completion-cb-max-methods) "\n"
-                        "override_flags\nshow_classes\nshow_args\n"
-                        "print_curr_methods\nshow_topics\n"))
-           (result (magik-completion--cb-query cmd)))
-      (when result
-        (setq magik-completion--condition-cache result
-              magik-completion--condition-cache-loaded t))
-      result)))
+  "Return all condition names from the CB, fetching in the background first."
+  (magik-completion--cb-cached-fetch
+   'magik-completion--condition-cache
+   'magik-completion--condition-cache-loaded
+   'magik-completion--condition-fetch-pending
+   (concat "method_name ^\n"
+           "unadd class \nadd class <condition>\n"
+           "method_cut_off " (number-to-string magik-completion-cb-max-methods) "\n"
+           "override_flags\nshow_classes\nshow_args\n"
+           "print_curr_methods\nshow_topics\n")))
 
 (defun magik-completion-at-point-conditions ()
   "Completion-at-point function for condition names after `condition.raise(:'."
@@ -1020,7 +1421,8 @@ Returns (BEG . END) of the condition name being typed, or nil."
                 (conditions (magik-completion--query-conditions)))
       (list (car bounds) (cdr bounds) conditions
             :exclusive 'no
-            :company-kind (lambda (_) 'enum-member)))))
+            :company-kind (lambda (_) 'enum-member)
+            :annotation-function (magik-completion--kind-annotation 'enum-member)))))
 
 ;;; --- Cache invalidation ---
 
@@ -1035,18 +1437,36 @@ Can be called after loading code in the session."
 Intended to be called after transmitting code to the session."
   (setq magik-completion--class-cache nil
         magik-completion--class-cache-loaded nil
+        magik-completion--class-fetch-pending nil
         magik-completion--global-cache nil
         magik-completion--global-cache-loaded nil
+        magik-completion--global-fetch-pending nil
         magik-completion--condition-cache nil
         magik-completion--condition-cache-loaded nil
-        magik-completion--method-cache nil))
+        magik-completion--condition-fetch-pending nil
+        magik-completion--method-cache nil
+        magik-completion--method-fetch-pending nil
+        magik-completion--class-comment-fetch-pending nil)
+  (clrhash magik-completion--class-comment-cache))
 
 (defun magik-completion--reset-session-state (&rest _args)
   "Invalidate caches and kill all dedicated completion CB buffers.
-Called when a Magik session is killed or (re)started, so completion
-does not serve candidates from a previous session."
+Also clears the dedicated-CB-connection state of every buffer with
+`magik-completion-mode' enabled.  Called when a Magik session is
+killed or (re)started, so completion doesn't serve stale candidates
+from a dead session."
   (magik-completion-invalidate-cache)
   (dolist (buf (buffer-list))
+    (when (buffer-local-value 'magik-completion-mode buf)
+      (with-current-buffer buf
+        (setq magik-completion--cb-process nil
+              magik-completion--cb-buffer-name nil
+              magik-completion--cb-candidates nil
+              magik-completion--cb-filter-str ""
+              magik-completion--cb-ready-p nil
+              magik-completion--cb-parse-fn nil
+              magik-completion--cb-on-response nil
+              magik-completion--cb-queue nil)))
     (let ((name (buffer-name buf)))
       (when (and name
                  (string-prefix-p " *cb*" name)
@@ -1058,17 +1478,15 @@ does not serve candidates from a previous session."
 ;;; --- Setup ---
 
 (defvar magik-completion--capf-functions
-  '(magik-completion-at-point-snippets
-    magik-completion-at-point-conditions
-    magik-completion-at-point-global-procedures
-    magik-completion-at-point-globals
-    magik-completion-at-point-classes
+  '(magik-completion-at-point-conditions
     magik-completion-at-point-methods
     magik-completion-at-point-slots
-    magik-completion-at-point-variables
-    magik-completion-at-point-builtins
-    magik-completion-at-point-keywords)
-  "List of Magik CAPF functions, lowest priority first.")
+    magik-completion-at-point-character
+    magik-completion-at-point-symbol)
+  "List of Magik CAPF functions, lowest priority first.
+`magik-completion-at-point-symbol' is listed last so
+`magik-completion--enable' (which prepends each entry) tries it before
+the narrower dot- and condition-context backends.")
 
 (defconst magik-completion--transmit-functions
   '(magik-product-transmit-buffer
