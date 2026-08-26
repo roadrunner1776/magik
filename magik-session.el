@@ -429,6 +429,32 @@ Return a list of all the components of the COMMAND."
       (error "No Magik session buffer"))
     buf))
 
+(defun magik-session-buffer-alist-sorted ()
+  "Return a copy of `magik-session-buffer-alist' sorted by session number."
+  (sort (copy-alist magik-session-buffer-alist)
+        #'(lambda (a b) (< (car a) (car b)))))
+
+(defun magik-session-set-priority (buffer priority)
+  "Renumber Magik session BUFFER to PRIORITY in `magik-session-buffer-alist'.
+Lower numbers sort first in the Tools -> Magik menu, are reached with
+\\[magik-session] and a matching numeric prefix arg, and are preferred by
+`magik-completion' when picking which live session to query.  If another
+session already holds PRIORITY, the two swap numbers."
+  (interactive
+   (list (completing-read "Magik session buffer: "
+                          (magik-utils-buffer-mode-list 'magik-session-mode)
+                          nil t nil nil (buffer-name))
+         (read-number "New priority (1 = highest): " 1)))
+  (let ((entry (rassoc buffer magik-session-buffer-alist))
+        (other (assq priority magik-session-buffer-alist)))
+    (unless entry
+      (error "%s is not a registered Magik session buffer" buffer))
+    (let ((old-priority (car entry)))
+      (setcar entry priority)
+      (when (and other (not (eq other entry)))
+        (setcar other old-priority)))
+    (message "%s is now Magik session %d" buffer priority)))
+
 (defun magik-session-command-display (command)
   "Return shortened Magik session COMMAND suitable for display."
   (if (stringp command) ; defensive programming. Should be a string but need to avoid errors
@@ -445,8 +471,7 @@ Return a list of all the components of the COMMAND."
 
 (defun magik-session-update-tools-magik-gis-menu ()
   "Update Magik Session processes submenu in Tools -> Magik pulldown menu."
-  (let* ((magik-session-alist (sort (copy-alist magik-session-buffer-alist)
-                                    #'(lambda (a b) (< (car a) (car b)))))
+  (let* ((magik-session-alist (magik-session-buffer-alist-sorted))
          magik-session-list)
     (dolist (c magik-session-alist)
       (let ((i   (car c))
@@ -600,6 +625,7 @@ Entry to this mode runs `magik-session-mode-hook`.
     [,"External Shell Process"           magik-session-shell                     t]
     [,"Kill Magik Process"               magik-session-kill-process              (and magik-session-process
                                                                                       (eq (process-status magik-session-process) 'run))]
+    [,"Set Session Priority..."          magik-session-set-priority              t]
     (,"Magik Session Command History")
     "---"
     (,"Toggle..."
