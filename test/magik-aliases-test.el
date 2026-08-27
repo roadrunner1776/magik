@@ -118,6 +118,77 @@
 (ert-deftest magik-aliases-definition-regexp--rejects-indented-line ()
   (should-not (string-match-p magik-aliases-definition-regexp "  key: value")))
 
+;;; magik-aliases-mode-map read-only bindings
+
+(ert-deftest magik-aliases-mode-map--writable-buffer-keeps-global-bindings ()
+  "While the buffer is writable the selection keys keep their global meaning."
+  (with-temp-buffer
+    (magik-aliases-mode)
+    (should (eq (key-binding " ") 'self-insert-command))
+    (should (eq (key-binding "q") 'self-insert-command))
+    (should (eq (key-binding (kbd "<down>")) 'next-line))))
+
+(ert-deftest magik-aliases-mode-map--read-only-buffer-selects-aliases ()
+  "A read-only buffer doubles as an alias selection buffer."
+  (with-temp-buffer
+    (magik-aliases-mode)
+    (read-only-mode 1)
+    (should (eq (key-binding " ") 'magik-aliases-next))
+    (should (eq (key-binding (kbd "<down>")) 'magik-aliases-next))
+    (should (eq (key-binding "q") 'magik-aliases-quit))))
+
+(ert-deftest magik-aliases-mode-map--read-only-set-directly-selects-aliases ()
+  "The bindings follow `buffer-read-only', not the `read-only-mode' command.
+Code that sets `buffer-read-only' directly, `view-mode' for one, never
+runs `read-only-mode-hook'."
+  (with-temp-buffer
+    (magik-aliases-mode)
+    (setq buffer-read-only t)
+    (should (eq (key-binding " ") 'magik-aliases-next))
+    (should (eq (key-binding (kbd "<down>")) 'magik-aliases-next))
+    (should (eq (key-binding "q") 'magik-aliases-quit))))
+
+(ert-deftest magik-aliases-mode-map--toggling-read-only-restores-bindings ()
+  (with-temp-buffer
+    (magik-aliases-mode)
+    (read-only-mode 1)
+    (read-only-mode -1)
+    (should (eq (key-binding " ") 'self-insert-command))
+    (should (eq (key-binding (kbd "<down>")) 'next-line))))
+
+(ert-deftest magik-aliases-mode-map--shift-down-reaches-a-shift-aware-command ()
+  "Both preconditions for `shift-select-mode' must hold on <S-down>.
+Emacs only shift-translates <S-down> to <down> while <S-down> is unbound,
+and the command it lands on only extends the region when its interactive
+spec starts with `^'."
+  (with-temp-buffer
+    (magik-aliases-mode)
+    (should-not (lookup-key magik-aliases-mode-map (kbd "<S-down>")))
+    (let ((spec (cadr (interactive-form (key-binding (kbd "<down>"))))))
+      (should (stringp spec))
+      (should (string-prefix-p "^" spec)))))
+
+(ert-deftest magik-aliases-mode-map--shift-down-selects-region ()
+  "Pressing <S-down> in a writable buffer selects a region.
+The buffer has to be displayed, otherwise `next-line' cannot move."
+  (let ((buffer (get-buffer-create "*magik-aliases-test*"))
+        (shift-select-mode t)
+        (transient-mark-mode t))
+    (unwind-protect
+        (save-window-excursion
+          (switch-to-buffer buffer)
+          (magik-aliases-mode)
+          (erase-buffer)
+          (insert "alias_one:\n\tCOMMAND=x\n")
+          (goto-char (point-min))
+          (deactivate-mark)
+          (execute-kbd-macro (kbd "S-<down>"))
+          (should (region-active-p))
+          (should (equal (buffer-substring-no-properties
+                          (region-beginning) (region-end))
+                         "alias_one:\n")))
+      (kill-buffer buffer))))
+
 ;;; magik--aliases-layered-products-alist (internal)
 
 (ert-deftest magik--aliases-layered-products-alist--parses-entries ()
