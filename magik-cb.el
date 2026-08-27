@@ -677,12 +677,15 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
              (error "No Class Browser is running"))))
     buf))
 
+(defun magik-cb-buffer-alist-sorted ()
+  "Return a copy of `magik-cb-buffer-alist' sorted -1, -2, etc."
+  (sort (copy-alist magik-cb-buffer-alist)
+        #'(lambda (a b) (> (car a) (car b)))))
+
 (defun magik-cb-update-tools-magik-cb-menu ()
   "Update Class Browser Processes submenu in Tools -> Magik pulldown menu."
-  (let ((magik-cb-gis-alist (sort (copy-alist (symbol-value 'magik-session-buffer-alist))
-                                  #'(lambda (a b) (< (car a) (car b))))); 1, 2 etc.
-        (magik-cb-alist     (sort (copy-alist magik-cb-buffer-alist); -1, -2, etc.
-                                  #'(lambda (a b) (> (car a) (car b)))))
+  (let ((magik-cb-gis-alist (magik-session-buffer-alist-sorted))
+        (magik-cb-alist     (magik-cb-buffer-alist-sorted))
         cb-list)
     ;; Order is such that CB of *magik* will be first see magik-session.el for more details.
     (dolist (c magik-cb-alist)

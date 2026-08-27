@@ -586,9 +586,10 @@ answer its first query while `method_finder' loads its database."
 (declare-function magik-module-transmit-buffer "magik-module")
 (declare-function magik-loadlist-transmit-buffer "magik-loadlist")
 (declare-function magik-transmit-region "magik-mode")
+(declare-function magik-session-buffer-alist-sorted "magik-session")
 
 (defvar magik-cb-coding-system)
-(defvar magik-session-buffer)
+(defvar magik-session-buffer-alist)
 (defvar magik-session-prompt)
 (defvar magik-cb-in-keyword)
 
@@ -601,12 +602,11 @@ answer its first query while `method_finder' loads its database."
             (concat " *cb*" (buffer-name) "*completion*"))))
 
 (defun magik-completion--gis-buffer ()
-  "Return the active Magik session buffer name, or nil."
-  (when (boundp 'magik-session-buffer)
-    (when-let* ((buf magik-session-buffer)
-                (_ (get-buffer buf))
-                (_ (get-buffer-process buf)))
-      buf)))
+  "Return the lowest-numbered live Magik session buffer name, or nil."
+  (when (fboundp 'magik-session-buffer-alist-sorted)
+    (cl-loop for (_num . buf) in (magik-session-buffer-alist-sorted)
+             when (and buf (get-buffer buf) (get-buffer-process buf))
+             return buf)))
 
 (defun magik-completion--gis-session-idle-p (gis-buf)
   "Return non-nil if the session in GIS-BUF is idle at its prompt.
@@ -1452,9 +1452,8 @@ Intended to be called after transmitting code to the session."
 (defun magik-completion--reset-session-state (&rest _args)
   "Invalidate caches and kill all dedicated completion CB buffers.
 Also clears the dedicated-CB-connection state of every buffer with
-`magik-completion-mode' enabled.  Called when a Magik session is
-killed or (re)started, so completion doesn't serve stale candidates
-from a dead session."
+`magik-completion-mode' enabled.
+Invalidating cache twice helped with some caching issues."
   (magik-completion-invalidate-cache)
   (dolist (buf (buffer-list))
     (when (buffer-local-value 'magik-completion-mode buf)
@@ -1473,7 +1472,8 @@ from a dead session."
                  (string-suffix-p "*completion*" name))
         (when-let* ((proc (get-buffer-process buf)))
           (delete-process proc))
-        (kill-buffer buf)))))
+        (kill-buffer buf))))
+  (magik-completion-invalidate-cache))
 
 ;;; --- Setup ---
 
@@ -1519,6 +1519,8 @@ one, rather than only functions already bound at this point."
   ;; Forward advice: takes effect once magik-session is loaded.
   (advice-add 'magik-session-kill-process :after
               #'magik-completion--reset-session-state)
+  (advice-add 'magik-session-set-priority :after
+              #'magik-completion--reset-session-state)
   (add-hook 'magik-session-start-process-post-hook
             #'magik-completion--reset-session-state))
 
@@ -1527,6 +1529,8 @@ one, rather than only functions already bound at this point."
   (dolist (fn magik-completion--capf-functions)
     (remove-hook 'completion-at-point-functions fn t))
   (advice-remove 'magik-session-kill-process
+                 #'magik-completion--reset-session-state)
+  (advice-remove 'magik-session-set-priority
                  #'magik-completion--reset-session-state)
   (remove-hook 'magik-session-start-process-post-hook
                #'magik-completion--reset-session-state))
