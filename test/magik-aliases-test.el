@@ -55,6 +55,38 @@
       ;; The blank line is within alias_one's scope (backward search finds it)
       (should (stringp result)))))
 
+;;; magik-aliases-next
+
+(ert-deftest magik-aliases-next--moves-to-next-definition ()
+  (with-temp-buffer
+    (magik-aliases-mode)
+    (insert "alias_one:\n\tCOMMAND=x\nalias_two:\n\tCOMMAND=y\n")
+    (goto-char (point-min))
+    (magik-aliases-next)
+    (should (equal (buffer-substring-no-properties
+                    (line-beginning-position) (line-end-position))
+                   "\tCOMMAND=x"))))
+
+(ert-deftest magik-aliases-next--wraps-around-at-end-of-buffer ()
+  (with-temp-buffer
+    (magik-aliases-mode)
+    (insert "alias_one:\n\tCOMMAND=x\nalias_two:\n\tCOMMAND=y\n")
+    (goto-char (point-max))
+    (magik-aliases-next)
+    (should (equal (buffer-substring-no-properties
+                    (line-beginning-position) (line-end-position))
+                   "\tCOMMAND=x"))))
+
+(ert-deftest magik-aliases-next--preserves-match-data ()
+  "`magik-aliases-next' must not clobber the caller's match data."
+  (with-temp-buffer
+    (magik-aliases-mode)
+    (insert "alias_one:\n\tCOMMAND=x\nalias_two:\n\tCOMMAND=y\n")
+    (goto-char (point-min))
+    (should (string-match "\\(quick\\) brown" "the quick brown fox"))
+    (magik-aliases-next)
+    (should (equal (match-string 1 "the quick brown fox") "quick"))))
+
 ;;; magik-aliases-expand-file
 
 (ert-deftest magik-aliases-expand-file--expands-env-var ()

@@ -677,12 +677,15 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
              (error "No Class Browser is running"))))
     buf))
 
+(defun magik-cb-buffer-alist-sorted ()
+  "Return a copy of `magik-cb-buffer-alist' sorted -1, -2, etc."
+  (sort (copy-alist magik-cb-buffer-alist)
+        #'(lambda (a b) (> (car a) (car b)))))
+
 (defun magik-cb-update-tools-magik-cb-menu ()
   "Update Class Browser Processes submenu in Tools -> Magik pulldown menu."
-  (let ((magik-cb-gis-alist (sort (copy-alist (symbol-value 'magik-session-buffer-alist))
-                                  #'(lambda (a b) (< (car a) (car b))))); 1, 2 etc.
-        (magik-cb-alist     (sort (copy-alist magik-cb-buffer-alist); -1, -2, etc.
-                                  #'(lambda (a b) (> (car a) (car b)))))
+  (let ((magik-cb-gis-alist (magik-session-buffer-alist-sorted))
+        (magik-cb-alist     (magik-cb-buffer-alist-sorted))
         cb-list)
     ;; Order is such that CB of *magik* will be first see magik-session.el for more details.
     (dolist (c magik-cb-alist)
@@ -1520,11 +1523,10 @@ We also save some state for a clean exit."
 
        ((not (one-window-p t))
         ;; if there's 3 windows maybe we should try and zap the least wanted
-        ;; window.  For now we just zap the next in rotation.
-        (let
-            ((magik-cb2-win (next-window magik-cb-win 1)))
-          (set-window-buffer magik-cb2-win cb2)
-          (select-window magik-cb2-win)))
+        ;; window.  For now we just use some other existing window.
+        (select-window
+         (display-buffer cb2 '(display-buffer-use-some-window
+                                (inhibit-same-window . t)))))
 
        ;; Now the 2 cases when "*cb*" is occupying the whole screen.
        ;; The aim is to leave "*cb*" in the half of the screen that was

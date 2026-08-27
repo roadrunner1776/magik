@@ -211,12 +211,12 @@ where <down> is `next-line' (which honours `shift-select-mode', so
 (defun magik-aliases-next ()
   "Move point to next valid alias listed."
   (interactive)
-  (save-match-data)
-  (if (re-search-forward magik-aliases-definition-regexp nil t)
-      (forward-line)
-    (goto-char (point-min))
-    (when (re-search-forward magik-aliases-definition-regexp nil t)
-      (forward-line))))
+  (save-match-data
+    (if (re-search-forward magik-aliases-definition-regexp nil t)
+        (forward-line)
+      (goto-char (point-min))
+      (when (re-search-forward magik-aliases-definition-regexp nil t)
+        (forward-line)))))
 
 (defun magik-aliases-quit ()
   "Quit, without selecting anything, aliases selection mode."
