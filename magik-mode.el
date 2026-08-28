@@ -37,7 +37,6 @@
 (require 'yasnippet)
 (require 'magik-doc-gen)
 (require 'magik-template)
-(require 'magik-completion)
 
 (defgroup magik nil
   "Customise Magik Language group."

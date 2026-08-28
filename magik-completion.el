@@ -31,6 +31,10 @@
   (require 'cl-lib))
 
 (require 'magik-utils)
+(require 'magik-mode)
+(require 'magik-loadlist)
+(require 'magik-product)
+(require 'magik-module)
 
 ;; Tree-sitter functions (Emacs 29+, only used when available)
 (declare-function treesit-parser-list "treesit")
@@ -1485,6 +1489,7 @@ Invalidating cache twice helped with some caching issues."
     'magik-loadlist-transmit-buffer-post-hook
     'magik-transmit-region-post-hook))
 
+;;;###autoload
 (define-minor-mode magik-completion-mode
   "Toggle Magik completion in the current buffer."
   :lighter " MagikComp"
@@ -1500,6 +1505,7 @@ Invalidating cache twice helped with some caching issues."
   (dolist (fn magik-completion--capf-functions)
     (remove-hook 'completion-at-point-functions fn t)))
 
+;;;###autoload
 (define-globalized-minor-mode global-magik-completion-mode
   magik-completion-mode
   magik-completion--turn-on
