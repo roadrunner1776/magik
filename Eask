@@ -35,4 +35,16 @@
       (delete-file "magik-ts-mode.el")
       (eask-info "(Removed magik-ts-mode, since it would not compile in Emacs below 29.1)"))))
 
+;; Work around GNU bug#80180: Emacs 31's loaddefs-gen force-loads a
+;; scraped file with `load-suffixes' restricted to ".el" when it hits an
+;; unrecognized top-level macro (e.g. our autoloaded
+;; `global-magik-completion-mode' call). That restriction leaks into any
+;; autoload triggered while loading the file (e.g. `pcase'), which on
+;; distributions shipping gzip-compressed *.el next to *.elc (Debian,
+;; and CI's Nix-packaged Emacs) forces jka-compr to decompress its own
+;; source, recursing until Emacs's "Recursive load" guard trips.
+;; Loading the real jka-compr now, before that restriction is ever in
+;; effect, avoids the self-referential bootstrap.
+(require 'jka-compr)
+
 (setq network-security-level 'low)  ; see https://github.com/jcs090218/setup-emacs-windows/issues/156#issuecomment-932956432
