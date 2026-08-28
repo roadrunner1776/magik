@@ -31,10 +31,6 @@
   (require 'cl-lib))
 
 (require 'magik-utils)
-(require 'magik-mode)
-(require 'magik-loadlist)
-(require 'magik-product)
-(require 'magik-module)
 
 ;; Tree-sitter functions (Emacs 29+, only used when available)
 (declare-function treesit-parser-list "treesit")
@@ -1484,10 +1480,10 @@ Invalidating cache twice helped with some caching issues."
   "List of Magik CAPF functions, lowest priority first.")
 
 (defvar magik-completion--transmit-hooks
-  '('magik-product-transmit-buffer-post-hook
-    'magik-module-transmit-buffer-post-hook
-    'magik-loadlist-transmit-buffer-post-hook
-    'magik-transmit-region-post-hook))
+  '(magik-product-transmit-buffer-post-hook
+    magik-module-transmit-buffer-post-hook
+    magik-loadlist-transmit-buffer-post-hook
+    magik-transmit-region-post-hook))
 
 ;;;###autoload
 (define-minor-mode magik-completion-mode
@@ -1498,10 +1494,12 @@ Invalidating cache twice helped with some caching issues."
     (magik-completion--local-disable)))
 
 (defun magik-completion--local-enable ()
+  "Add the Magik CAPF functions to `completion-at-point-functions'."
   (dolist (fn magik-completion--capf-functions)
     (add-hook 'completion-at-point-functions fn t)))
 
 (defun magik-completion--local-disable ()
+  "Remove the Magik CAPF functions from `completion-at-point-functions'."
   (dolist (fn magik-completion--capf-functions)
     (remove-hook 'completion-at-point-functions fn t)))
 
@@ -1514,22 +1512,30 @@ Invalidating cache twice helped with some caching issues."
     (magik-completion--global-disable)))
 
 (defun magik-completion--turn-on ()
-  (when (derived-mode-p 'magik-mode)
+  "Turn on `magik-completion-mode' in Magik source and session buffers."
+  (when (derived-mode-p 'magik-base-mode 'magik-session-mode)
     (magik-completion-mode 1)))
 
 (defun magik-completion--global-enable ()
+  "Add the hooks backing `global-magik-completion-mode'."
   (add-hook 'magik-session-kill-process-post-hook
-            'magik-completion--reset-session-state nil t)
+            'magik-completion--reset-session-state)
   (add-hook 'magik-session-start-process-post-hook
-            'magik-completion--reset-session-state nil t)
+            'magik-completion--reset-session-state)
   (dolist (hook-var magik-completion--transmit-hooks)
     (add-hook hook-var 'magik-completion-invalidate-cache)))
 
 (defun magik-completion--global-disable ()
+  "Remove the hooks backing `global-magik-completion-mode'."
   (remove-hook 'magik-session-kill-process-post-hook
-               'magik-completion--reset-session-state t)
+               'magik-completion--reset-session-state)
   (remove-hook 'magik-session-start-process-post-hook
-               'magik-completion--reset-session-state t))
+               'magik-completion--reset-session-state)
+  (dolist (hook-var magik-completion--transmit-hooks)
+    (remove-hook hook-var 'magik-completion-invalidate-cache)))
 
-    (provide 'magik-completion)
+;;;###autoload
+(global-magik-completion-mode 1)
+
+(provide 'magik-completion)
 ;;; magik-completion.el ends here
