@@ -635,8 +635,7 @@ the session answers."
                (cb-buf (magik-completion--cb-buffer)))
           (condition-case nil
               (let ((proc (cl-letf (((symbol-function 'magik-cb-mode)
-                                        #'fundamental-mode
-                                     ))
+                                     'fundamental-mode))
                             (magik-cb-get-process-create
                              cb-buf
                              #'magik-completion--cb-filter
