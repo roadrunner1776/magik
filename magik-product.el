@@ -61,6 +61,11 @@ See `imenu-generic-expression'.")
   "Font Lock mode face used to display a product type."
   :group 'magik-product-faces)
 
+(defcustom magik-product-transmit-buffer-post-hook nil
+  "*Hook run after transmitting to the the process."
+  :group 'magik-product
+  :type 'hook)
+
 ;; Font-lock configuration
 (defcustom magik-product-font-lock-keywords
   (list
@@ -162,6 +167,7 @@ You can customize Product Mode with the `magik-product-mode-hook`.
     (message "%s loaded in buffer %s." (magik-utils-product-name) gis)
     (display-buffer gis t)
     (magik-product-transmit-add-product filename process)
+    (run-hooks 'magik-product-transmit-buffer-post-hook)
     gis))
 
 (defun magik-product-drag-n-drop-load (gis filename)

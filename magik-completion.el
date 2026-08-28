@@ -45,13 +45,6 @@
   "Completion-at-point support for Magik."
   :group 'magik)
 
-(defcustom magik-completion-enabled t
-  "When non-nil, enable Magik `completion-at-point'.
-Set to nil before mode activation to disable, or use
-`magik-completion-mode' to toggle interactively."
-  :type 'boolean
-  :group 'magik-completion)
-
 (defcustom magik-completion-enable-keywords t
   "When non-nil, include Magik keywords in completion candidates."
   :type 'boolean
@@ -642,7 +635,8 @@ the session answers."
                (cb-buf (magik-completion--cb-buffer)))
           (condition-case nil
               (let ((proc (cl-letf (((symbol-function 'magik-cb-mode)
-                                     #'fundamental-mode))
+                                        #'fundamental-mode
+                                     ))
                             (magik-cb-get-process-create
                              cb-buf
                              #'magik-completion--cb-filter
@@ -722,7 +716,7 @@ PARSE-FN override the default dispatch, see `magik-completion--cb-filter'."
            (cl-incf magik-completion--cb-generation))))
     (process-send-string (get-buffer-process buf) command)
     (run-at-time magik-completion-cb-timeout nil
-                 #'magik-completion--cb-timeout buf generation)))
+                 'magik-completion--cb-timeout buf generation)))
 
 (defun magik-completion--cb-timeout (buf generation)
   "Give up on BUF's in-flight query if GENERATION is still current.
@@ -749,7 +743,7 @@ Then dispatch the next queued query on this connection, if any."
     (setq magik-completion--cb-on-response nil)
     (funcall callback result))
   (when-let* ((next (pop magik-completion--cb-queue)))
-    (apply #'magik-completion--cb-dispatch (current-buffer) next)))
+    (apply 'magik-completion--cb-dispatch (current-buffer) next)))
 
 (declare-function corfu--post-command "corfu")
 
@@ -960,7 +954,7 @@ Returns nil if the class has no comment or wasn't found."
               (body-end (magik-completion--class-comment-nth-line-end str (1+ n))))
     (string-trim (substring str (1+ first-nl) body-end))))
 
-(defvar magik-completion--class-comment-cache (make-hash-table :test #'equal)
+(defvar magik-completion--class-comment-cache (make-hash-table :test 'equal)
   "Cache: qualified class name -> its comment text (or `none') from CB.")
 
 (defvar magik-completion--class-comment-fetch-pending nil
@@ -1263,8 +1257,8 @@ Inserts parameters as yasnippet when STATUS is `finished'."
                     (concat (when-let* ((ann (get-text-property 0 'magik-annotation c)))
                               (concat " " ann))
                             " (magik-method)"))
-                  :company-doc-buffer #'magik-completion--doc-buffer
-                  :exit-function #'magik-completion--exit-function)))))))
+                  :company-doc-buffer 'magik-completion--doc-buffer
+                  :exit-function 'magik-completion--exit-function)))))))
 
 (defun magik-completion--tag-kind (candidates kind)
   "Return CANDIDATES with a `magik-kind' text property set to KIND.
@@ -1352,7 +1346,7 @@ procedures/dynamics, and yasnippet template keys."
               (when magik-completion-enable-cb
                 (magik-completion--tag-kind (magik-completion--query-classes) 'class))
               (when magik-completion-enable-cb
-                (mapcar #'magik-completion--tag-global
+                (mapcar 'magik-completion--tag-global
                         (magik-completion--query-globals)))))
             (plain
              (append
@@ -1361,16 +1355,16 @@ procedures/dynamics, and yasnippet template keys."
                  (magik-completion--scan-local-variables) 'variable))
               (when magik-completion-enable-snippets
                 (magik-completion--tag-kind
-                 (delq nil (mapcar #'yas--template-key
+                 (delq nil (mapcar 'yas--template-key
                                     (magik-completion--snippet-templates)))
                  'snippet)))))
         (when (or qualifiable plain)
           (list beg end (magik-completion--symbol-table qualifiable plain)
                 :exclusive 'no
-                :company-kind #'magik-completion--symbol-kind
-                :annotation-function #'magik-completion--symbol-annotation
-                :company-doc-buffer #'magik-completion--symbol-doc-buffer
-                :exit-function #'magik-completion--symbol-exit-function)))))))
+                :company-kind 'magik-completion--symbol-kind
+                :annotation-function 'magik-completion--symbol-annotation
+                :company-doc-buffer 'magik-completion--symbol-doc-buffer
+                :exit-function 'magik-completion--symbol-exit-function)))))))
 
 ;;; --- Condition completion ---
 
@@ -1483,66 +1477,53 @@ Invalidating cache twice helped with some caching issues."
     magik-completion-at-point-slots
     magik-completion-at-point-character
     magik-completion-at-point-symbol)
-  "List of Magik CAPF functions, lowest priority first.
-`magik-completion-at-point-symbol' is listed last so
-`magik-completion--enable' (which prepends each entry) tries it before
-the narrower dot- and condition-context backends.")
+  "List of Magik CAPF functions, lowest priority first.")
 
-(defconst magik-completion--transmit-functions
-  '((magik-product-transmit-buffer . magik-product)
-    (magik-module-transmit-buffer . magik-module)
-    (magik-loadlist-transmit-buffer . magik-loadlist)
-    (magik-transmit-region . magik-mode))
-  "Alist of (FUNCTION . FEATURE) that send code to a Magik session.
-Each FUNCTION should invalidate the completion cache when called.
-FEATURE is the file defining FUNCTION, so advising it can be deferred
-until that file is actually loaded.")
-
-(defun magik-completion--advise-transmit-functions ()
-  "Advise every function in `magik-completion--transmit-functions'.
-This is done once, globally, independent of `magik-completion-mode':
-the completion cache is global state, not buffer-local, so a single
-buffer disabling the mode must not stop other buffers' transmitted
-code from invalidating it.  `with-eval-after-load' also ensures a
-function gets advised even if its defining file is loaded after this
-one, rather than only functions already bound at this point."
-  (dolist (entry magik-completion--transmit-functions)
-    (with-eval-after-load (cdr entry)
-      (advice-add (car entry) :after #'magik-completion--invalidate-cache))))
-
-(magik-completion--advise-transmit-functions)
-
-(defun magik-completion--enable ()
-  "Add Magik CAPF functions to the current buffer."
-  (dolist (fn magik-completion--capf-functions)
-    (add-hook 'completion-at-point-functions fn nil t))
-  (add-hook 'magik-session-kill-process-post-hook
-            #'magik-completion--reset-session-state nil t)
-  (add-hook 'magik-session-start-process-post-hook
-            #'magik-completion--reset-session-state nil t))
-
-(defun magik-completion--disable ()
-  "Remove Magik CAPF functions from the current buffer."
-  (dolist (fn magik-completion--capf-functions)
-    (remove-hook 'completion-at-point-functions fn t))
-  (remove-hook 'magik-session-kill-process-post-hook
-            #'magik-completion--reset-session-state t)
-  (remove-hook 'magik-session-start-process-post-hook
-               #'magik-completion--reset-session-state t))
+(defvar magik-completion--transmit-hooks
+  '('magik-product-transmit-buffer-post-hook
+    'magik-module-transmit-buffer-post-hook
+    'magik-loadlist-transmit-buffer-post-hook
+    'magik-transmit-region-post-hook))
 
 (define-minor-mode magik-completion-mode
-  "Toggle Magik `completion-at-point' support in the current buffer."
-  :lighter " MagikC"
+  "Toggle Magik completion in the current buffer."
+  :lighter " MagikComp"
   (if magik-completion-mode
-      (magik-completion--enable)
-    (magik-completion--disable)))
+      (magik-completion--local-enable)
+    (magik-completion--local-disable)))
 
-(defun magik-completion-setup ()
-  "Add Magik CAPF functions to the current buffer.
-Intended to be called from `magik-mode-hook' or `magik-session-mode-hook'.
-Respects `magik-completion-enabled'."
-  (when magik-completion-enabled
+(defun magik-completion--local-enable ()
+  (dolist (fn magik-completion--capf-functions)
+    (add-hook 'completion-at-point-functions fn t)))
+
+(defun magik-completion--local-disable ()
+  (dolist (fn magik-completion--capf-functions)
+    (remove-hook 'completion-at-point-functions fn t)))
+
+(define-globalized-minor-mode global-magik-completion-mode
+  magik-completion-mode
+  magik-completion--turn-on
+  (if global-magik-completion-mode
+      (magik-completion--global-enable)
+    (magik-completion--global-disable)))
+
+(defun magik-completion--turn-on ()
+  (when (derived-mode-p 'magik-mode)
     (magik-completion-mode 1)))
 
-(provide 'magik-completion)
+(defun magik-completion--global-enable ()
+  (add-hook 'magik-session-kill-process-post-hook
+            'magik-completion--reset-session-state nil t)
+  (add-hook 'magik-session-start-process-post-hook
+            'magik-completion--reset-session-state nil t)
+  (dolist (hook-var magik-completion--transmit-hooks)
+    (add-hook hook-var 'magik-completion-invalidate-cache)))
+
+(defun magik-completion--global-disable ()
+  (remove-hook 'magik-session-kill-process-post-hook
+               'magik-completion--reset-session-state t)
+  (remove-hook 'magik-session-start-process-post-hook
+               'magik-completion--reset-session-state t))
+
+    (provide 'magik-completion)
 ;;; magik-completion.el ends here
