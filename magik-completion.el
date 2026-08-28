@@ -1516,24 +1516,19 @@ one, rather than only functions already bound at this point."
   "Add Magik CAPF functions to the current buffer."
   (dolist (fn magik-completion--capf-functions)
     (add-hook 'completion-at-point-functions fn nil t))
-  ;; Forward advice: takes effect once magik-session is loaded.
-  (advice-add 'magik-session-kill-process :after
-              #'magik-completion--reset-session-state)
-  (advice-add 'magik-session-set-priority :after
-              #'magik-completion--reset-session-state)
+  (add-hook 'magik-session-kill-process-post-hook
+            #'magik-completion--reset-session-state nil t)
   (add-hook 'magik-session-start-process-post-hook
-            #'magik-completion--reset-session-state))
+            #'magik-completion--reset-session-state nil t))
 
 (defun magik-completion--disable ()
   "Remove Magik CAPF functions from the current buffer."
   (dolist (fn magik-completion--capf-functions)
     (remove-hook 'completion-at-point-functions fn t))
-  (advice-remove 'magik-session-kill-process
-                 #'magik-completion--reset-session-state)
-  (advice-remove 'magik-session-set-priority
-                 #'magik-completion--reset-session-state)
+  (remove-hook 'magik-session-kill-process-post-hook
+            #'magik-completion--reset-session-state t)
   (remove-hook 'magik-session-start-process-post-hook
-               #'magik-completion--reset-session-state))
+               #'magik-completion--reset-session-state t))
 
 (define-minor-mode magik-completion-mode
   "Toggle Magik `completion-at-point' support in the current buffer."

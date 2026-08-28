@@ -195,6 +195,16 @@ If nil, allow matching anywhere in the line."
   :group 'magik-session
   :type 'hook)
 
+(defcustom magik-session-kill-process-pre-hook nil
+  "*Hook run before killing the process."
+  :group 'magik-session
+  :type 'hook)
+
+(defcustom magik-session-kill-process-post-hook nil
+  "*Hook run after killing the process."
+  :group 'magik-session
+  :type 'hook)
+
 (defcustom magik-session-auto-insert-dollar nil
   "If t, automatically insert a $ after each valid Magik statement."
   :group 'magik-session
@@ -838,6 +848,7 @@ there is not, prompt for a command to run, and then run it."
 (defun magik-session-kill-process ()
   "Kill the current Magik process."
   (interactive)
+  (run-hooks 'magik-session-kill-process-pre-hook)
   (if (and magik-session-process
            (eq (process-status magik-session-process) 'run)
            (y-or-n-p "Kill the Magik process? "))
@@ -845,7 +856,9 @@ there is not, prompt for a command to run, and then run it."
         (kill-process magik-session-process)
         (sit-for 0.1)
         (if (eq status (process-status magik-session-process))
-            (insert "\nMagik is still busy and will exit at an appropriate point. Please be patient... \n")))))
+            (insert "\nMagik is still busy and will exit at an appropriate point. Please be patient... \n"))
+        (run-hooks 'magik-session-kill-process-post-hook)
+        )))
 
 (defun magik-session-query-interrupt-shell-subjob ()
   "Ask and then `comint-interrupt-subjob'."
