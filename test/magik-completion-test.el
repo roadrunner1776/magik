@@ -9,6 +9,8 @@
 
 (require 'test-helper)
 (require 'cl-lib)
+(require 'magik-mode)
+(require 'magik-session)
 (require 'magik-completion)
 
 ;;; Helpers
@@ -852,6 +854,63 @@ subprocess buffers still holds alongside the new per-buffer reset."
       (rename-buffer " *cb*fake.magik*completion*"))
     (magik-completion--reset-session-state)
     (should-not (get-buffer " *cb*fake.magik*completion*"))))
+
+;;; global-magik-completion-mode
+
+(defmacro magik-completion-test--with-global-mode (&rest body)
+  "Eval BODY with `global-magik-completion-mode' enabled.
+Always disables it again afterwards, regardless of errors, so a
+failing assertion here cannot leak the global toggle into unrelated
+tests that run later in the same Emacs process."
+  (declare (indent 0))
+  `(unwind-protect
+       (progn
+         (global-magik-completion-mode 1)
+         ,@body)
+     (global-magik-completion-mode -1)))
+
+(ert-deftest global-magik-completion-mode--enables-in-existing-magik-mode-buffer ()
+  "Enabling the global mode turns on the local mode in a Magik buffer
+that already exists at the time it's enabled."
+  (with-temp-buffer
+    (magik-mode)
+    (magik-completion-test--with-global-mode
+      (should magik-completion-mode))))
+
+(ert-deftest global-magik-completion-mode--enables-in-new-magik-mode-buffer ()
+  "A Magik buffer created after the global mode is already on gets the
+local mode turned on automatically."
+  (magik-completion-test--with-global-mode
+    (with-temp-buffer
+      (magik-mode)
+      (should magik-completion-mode))))
+
+(ert-deftest global-magik-completion-mode--enables-in-magik-session-mode-buffer ()
+  "The global mode also turns on the local mode in Magik session buffers."
+  (magik-completion-test--with-global-mode
+    (with-temp-buffer
+      (magik-session-mode)
+      (should magik-completion-mode))))
+
+(ert-deftest global-magik-completion-mode--does-not-enable-in-unrelated-buffer ()
+  "Buffers whose major mode is unrelated to Magik are left alone."
+  (magik-completion-test--with-global-mode
+    (with-temp-buffer
+      (fundamental-mode)
+      (should-not magik-completion-mode))))
+
+(ert-deftest global-magik-completion-mode--disabling-turns-off-local-mode ()
+  "Disabling the global mode turns the local mode back off in a buffer
+where it was enabled through it."
+  (with-temp-buffer
+    (magik-mode)
+    (unwind-protect
+        (progn
+          (global-magik-completion-mode 1)
+          (should magik-completion-mode)
+          (global-magik-completion-mode -1)
+          (should-not magik-completion-mode))
+      (global-magik-completion-mode -1))))
 
 (provide 'magik-completion-test)
 ;;; magik-completion-test.el ends here

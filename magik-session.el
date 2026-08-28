@@ -195,6 +195,21 @@ If nil, allow matching anywhere in the line."
   :group 'magik-session
   :type 'hook)
 
+(defcustom magik-session-kill-process-pre-hook nil
+  "*Hook run before killing the process."
+  :group 'magik-session
+  :type 'hook)
+
+(defcustom magik-session-kill-process-post-hook nil
+  "*Hook run after killing the process."
+  :group 'magik-session
+  :type 'hook)
+
+(defcustom magik-session-set-priority-post-hook nil
+  "*Hook run after changing the magik session priority."
+  :group 'magik-session
+  :type 'hook)
+
 (defcustom magik-session-auto-insert-dollar nil
   "If t, automatically insert a $ after each valid Magik statement."
   :group 'magik-session
@@ -453,7 +468,8 @@ session already holds PRIORITY, the two swap numbers."
       (setcar entry priority)
       (when (and other (not (eq other entry)))
         (setcar other old-priority)))
-    (message "%s is now Magik session %d" buffer priority)))
+    (message "%s is now Magik session %d" buffer priority))
+  (run-hooks 'magik-session-set-priority-post-hook))
 
 (defun magik-session-command-display (command)
   "Return shortened Magik session COMMAND suitable for display."
@@ -591,8 +607,6 @@ Entry to this mode runs `magik-session-mode-hook`.
 
   (with-current-buffer (get-buffer-create (concat " *filter*" (buffer-name)))
     (erase-buffer))
-
-  (magik-completion-setup)
 
   (add-hook 'before-change-functions #'magik-session--prepare-for-edit-cmd nil t)
   (add-hook 'menu-bar-update-hook #'magik-session-update-magik-session-menu nil t)
@@ -838,6 +852,7 @@ there is not, prompt for a command to run, and then run it."
 (defun magik-session-kill-process ()
   "Kill the current Magik process."
   (interactive)
+  (run-hooks 'magik-session-kill-process-pre-hook)
   (if (and magik-session-process
            (eq (process-status magik-session-process) 'run)
            (y-or-n-p "Kill the Magik process? "))
@@ -845,7 +860,9 @@ there is not, prompt for a command to run, and then run it."
         (kill-process magik-session-process)
         (sit-for 0.1)
         (if (eq status (process-status magik-session-process))
-            (insert "\nMagik is still busy and will exit at an appropriate point. Please be patient... \n")))))
+            (insert "\nMagik is still busy and will exit at an appropriate point. Please be patient... \n"))
+        (run-hooks 'magik-session-kill-process-post-hook)
+        )))
 
 (defun magik-session-query-interrupt-shell-subjob ()
   "Ask and then `comint-interrupt-subjob'."

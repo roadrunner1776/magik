@@ -29,7 +29,81 @@ The alternative, and recommended, way of installing [magik-mode](https://github.
 
 ### Automatic completion support
 
-Automatic completion support is no longer provided by this package. Please refer to the [magik-company](https://github.com/reinierkof/magik-company) package for this functionality.
+Automatic completion is supported by this package. By default it is **on**.
+
+Tested frontends are corfu and company. Orderless is inheritly used and needs a minor configuration to work with dynamics.
+
+#### Orderless configuration
+
+```emacs-lisp
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion))))
+  :hook ((magik-completion-mode) .
+         (lambda ()
+           "Disable the `!' orderless dispatcher."
+           (setq-local orderless-affix-dispatch-alist
+                       (assoc-delete-all ?! (copy-alist orderless-affix-dispatch-alist))))))
+```
+
+#### Recommended corfu package configuration
+
+```emacs-lisp
+(use-package corfu
+  :custom
+  (corfu-auto t)
+  (corfu-auto-delay 0.05)
+  (corfu-auto-prefix 2)
+  (corfu-cycle t)
+  (corfu-preselect 'prompt)
+  :init
+  (global-corfu-mode))
+
+(use-package corfu-popupinfo
+  :after corfu
+  :ensure nil
+  :custom
+  (corfu-popupinfo-delay '(0.5 . 0.3))
+  (corfu-popupinfo-max-width 80)
+  (corfu-popupinfo-max-height 20)
+  :init
+  (corfu-popupinfo-mode))
+```
+
+#### Recommended company package configuration
+
+```emacs-lisp
+(use-package company
+  :diminish
+  :hook (after-init . global-company-mode)
+  :custom
+  (company-backends '(company-capf))
+  (company-idle-delay 0.05)
+  (company-minimum-prefix-length 2)
+  (company-selection-wrap-around t)
+  (company-tooltip-align-annotations t)
+  (company-require-match nil))
+
+(use-package company-quickhelp
+  :after company
+  :hook (after-init . company-quickhelp-mode)
+  :custom
+  (company-quickhelp-delay 0.5))
+```
+
+#### Don't want completions?
+
+Well here's what you need to do:
+
+```emacs-lisp
+(use-package magik-mode
+  :ensure t
+  :config
+  (global-magik-completion-mode -1)
+  (magik-global-bindings)
+  (magik-menu-set-menus))
+```
 
 ### Global keys
 

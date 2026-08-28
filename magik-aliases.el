@@ -157,6 +157,11 @@ If any function returns t, then the buffer is displayed."
 (define-derived-mode magik-aliases-mode nil "Aliases"
   "Major mode for editing Magik aliases files.
 
+When the buffer is read-only, it doubles as an alias selection buffer:
+SPC and <down> move to the next alias definition and q quits.  While the
+buffer is writable those keys keep their global meaning, so they insert
+themselves and move by line as usual.
+
 You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
 
 \\{magik-aliases-mode-map}"
@@ -194,19 +199,14 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
     (setq major-mode 'fundamental-mode) ;; prevent current buffer being listed.
     (magik-aliases-update-sw-menu)))
 
-(defun magik-aliases-n ()
-  "If buffer is read-only goto next alias, else insert SPC."
-  (interactive)
-  (if buffer-read-only
-      (magik-aliases-next)
-    (magik-aliases-insert " ")))
-
-(defun magik-aliases-down ()
-  "If buffer is read-only goto next alias, else insert <down>."
-  (interactive)
-  (if buffer-read-only
-      (magik-aliases-next)
-    (forward-line)))
+(defun magik-aliases--read-only-binding (binding)
+  "Return BINDING when the buffer is read-only, nil otherwise.
+Used as a `menu-item' :filter, so that the alias selection keys only
+apply to a read-only buffer.  Returning nil leaves the key undefined in
+`magik-aliases-mode-map' and lookup falls through to the global map,
+where <down> is `next-line' (which honours `shift-select-mode', so
+<S-down> selects a region) and SPC and q self-insert."
+  (and buffer-read-only binding))
 
 (defun magik-aliases-next ()
   "Move point to next valid alias listed."
@@ -218,21 +218,10 @@ You can customise `magik-aliases-mode' with the `magik-aliases-mode-hook'.
       (when (re-search-forward magik-aliases-definition-regexp nil t)
         (forward-line)))))
 
-(defun magik-aliases-q ()
-  "If buffer is read-only goto next alias, else insert q."
-  (interactive)
-  (if buffer-read-only
-      (magik-aliases-quit)
-    (magik-aliases-insert "q")))
-
 (defun magik-aliases-quit ()
   "Quit, without selecting anything, aliases selection mode."
   (interactive)
   (kill-buffer (current-buffer)))
-
-(defun magik-aliases-insert (arg)
-  "Insert ARG at point."
-  (insert arg))
 
 (defun magik-aliases-list ()
   "Return list of alias definitions."
@@ -541,9 +530,15 @@ If `buffer-read-only' is t, set it to nil (and vice-versa)."
   ;; ------------------------ magik aliases mode ------------------------
 
   (define-key magik-aliases-mode-map (kbd "<S-return>") 'magik-aliases-run-program)
-  (define-key magik-aliases-mode-map " "                'magik-aliases-n)
-  (define-key magik-aliases-mode-map (kbd "<down>")     'magik-aliases-down)
-  (define-key magik-aliases-mode-map "q"                'magik-aliases-q))
+  (define-key magik-aliases-mode-map " "
+              '(menu-item "" magik-aliases-next
+                          :filter magik-aliases--read-only-binding))
+  (define-key magik-aliases-mode-map (kbd "<down>")
+              '(menu-item "" magik-aliases-next
+                          :filter magik-aliases--read-only-binding))
+  (define-key magik-aliases-mode-map "q"
+              '(menu-item "" magik-aliases-quit
+                          :filter magik-aliases--read-only-binding)))
 
 (provide 'magik-aliases)
 ;;; magik-aliases.el ends here

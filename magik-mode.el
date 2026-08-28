@@ -48,6 +48,11 @@
   :group 'magik
   :type  'boolean)
 
+(defcustom magik-transmit-region-post-hook nil
+  "*Hook run after transmitting to the the process."
+  :group 'magik
+  :type 'hook)
+
 (defcustom magik-under-as-char t
   "*Non-nil means that the _ (underline) should be treated as word char."
   :group 'magik
@@ -112,7 +117,6 @@ concrete implementations."
     (abbrev-mode t)
     (yas-minor-mode t))
 
-  (magik-completion-setup)
   (imenu-add-menubar-index))
 
 ;;;###autoload
@@ -1251,7 +1255,8 @@ Magik, another file shall be written."
      (magik-package-line))
    (lambda (f) (magik-function "load_file" f 'unset (or (buffer-file-name) 'unset)))
    (lambda (f) (magik-function "system.unlink" f 'false 'true))
-   beg))
+   beg)
+  (run-hooks 'magik-transmit-region-post-hook))
 (defalias 'transmit-region-to-magik 'magik-transmit-region)
 
 (defun magik-package-line ()
