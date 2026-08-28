@@ -205,6 +205,11 @@ If nil, allow matching anywhere in the line."
   :group 'magik-session
   :type 'hook)
 
+(defcustom magik-session-set-priority-post-hook nil
+  "*Hook run after changing the magik session priority."
+  :group 'magik-session
+  :type 'hook)
+
 (defcustom magik-session-auto-insert-dollar nil
   "If t, automatically insert a $ after each valid Magik statement."
   :group 'magik-session
@@ -463,7 +468,8 @@ session already holds PRIORITY, the two swap numbers."
       (setcar entry priority)
       (when (and other (not (eq other entry)))
         (setcar other old-priority)))
-    (message "%s is now Magik session %d" buffer priority)))
+    (message "%s is now Magik session %d" buffer priority))
+  (run-hooks 'magik-session-set-priority-post-hook))
 
 (defun magik-session-command-display (command)
   "Return shortened Magik session COMMAND suitable for display."

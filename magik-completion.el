@@ -1521,6 +1521,8 @@ Invalidating cache twice helped with some caching issues."
             'magik-completion--reset-session-state)
   (add-hook 'magik-session-start-process-post-hook
             'magik-completion--reset-session-state)
+  (add-hook 'magik-session-set-priority-post-hook
+            'magik-completion--reset-session-state)
   (dolist (hook-var magik-completion--transmit-hooks)
     (add-hook hook-var 'magik-completion-invalidate-cache)))
 
@@ -1529,6 +1531,8 @@ Invalidating cache twice helped with some caching issues."
   (remove-hook 'magik-session-kill-process-post-hook
                'magik-completion--reset-session-state)
   (remove-hook 'magik-session-start-process-post-hook
+               'magik-completion--reset-session-state)
+  (remove-hook 'magik-session-set-priority-post-hook
                'magik-completion--reset-session-state)
   (dolist (hook-var magik-completion--transmit-hooks)
     (remove-hook hook-var 'magik-completion-invalidate-cache)))
