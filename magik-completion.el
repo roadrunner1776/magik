@@ -1495,7 +1495,7 @@ Invalidating cache twice helped with some caching issues."
 (defun magik-completion--local-enable ()
   "Add the Magik CAPF functions to `completion-at-point-functions'."
   (dolist (fn magik-completion--capf-functions)
-    (add-hook 'completion-at-point-functions fn t)))
+    (add-hook 'completion-at-point-functions fn nil t)))
 
 (defun magik-completion--local-disable ()
   "Remove the Magik CAPF functions from `completion-at-point-functions'."
