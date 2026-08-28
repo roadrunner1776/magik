@@ -32,6 +32,11 @@ Initial ^ and final $ is automatically added in `loadlist-ignore'."
   :group 'magik-loadlist
   :type  '(repeat regexp))
 
+(defcustom magik-loadlist-transmit-buffer-post-hook nil
+  "*Hook run after transmitting to the the process."
+  :group 'magik-loadlist
+  :type 'hook)
+
 (defgroup magik-loadlist-faces nil
   "Faces for displaying text in a Magik load_list file."
   :group 'magik-loadlist)
@@ -220,7 +225,8 @@ With a prefix ARG accept all changes without prompting."
      process
      (concat
       (magik-function "load_file_list" dir 'unset file)
-      "$\n"))))
+      "$\n"))
+    (run-hooks 'magik-loadlist-transmit-buffer-post-hook)))
 
 (defun magik-loadlist-drag-n-drop-load (gis filename)
   "Interface to Drag and Drop GIS mode.

@@ -43,6 +43,11 @@
   :group 'magik-module
   :type  'boolean)
 
+(defcustom magik-module-transmit-buffer-post-hook nil
+  "*Hook run after transmitting to the the process."
+  :group 'magik-module
+  :type 'hook)
+
 ;; Imenu configuration
 (defvar magik-module-imenu-generic-expression
   '((nil "^\\(\\sw+\\)\\s-*\n\\(.\\|\n\\)*\nend\\s-*$" 1))
@@ -303,6 +308,7 @@ a standalone module."
     (message "%s loaded in buffer %s." (magik-utils-module-name) gis)
     (display-buffer gis t)
     (magik-module-transmit-load-module filename process)
+    (run-hooks 'magik-module-transmit-buffer-post-hook)
     gis))
 
 (defun magik-module-drag-n-drop-load (gis filename)
