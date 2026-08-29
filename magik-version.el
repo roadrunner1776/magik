@@ -359,7 +359,7 @@ Will set `gis-version-file' to FILE."
       (goto-char (point-min))
 
       (when (search-forward "-------" nil t)
-        (forward-line 1)) ;; Skip a header
+        (forward-line 1)) ;skip a header
       (while (re-search-forward magik-version-match nil t)
         (beginning-of-line)
         (forward-char 1)
@@ -385,7 +385,7 @@ Will set `gis-version-file' to FILE."
   (compat-call setq-local magik-version-position (point))
   (save-match-data
     (when (search-forward "-------" nil t)
-      (setq magik-version-position (point)))) ;; Skip a header
+      (setq magik-version-position (point)))) ;skip a header
 
   (setq buffer-read-only t)
   (set-buffer-modified-p nil)

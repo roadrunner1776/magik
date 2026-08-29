@@ -723,7 +723,7 @@ If `cb-process' is not nil, returns that irrespective of given BUFFER."
                          "method_finder.send_socket_to_emacs()\n$\n")
     (while (and (null magik-cb--mf-socket-synchronised) (not (zerop i)))
       (when (= i 100)
-        (message "The Magik Session process in buffer %s is busy... Please wait for CB to start" buffer)
+        (message "The Magik session process in buffer %s is busy... Please wait for CB to start" buffer)
         (sleep-for 0.01))
 
       (if (or (not (zerop (% i 1000)))
