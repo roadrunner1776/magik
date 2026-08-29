@@ -971,7 +971,7 @@ in \"*cb2*\" and note that \"*cb2*\" is now in family mode."
                                         ;(erase-buffer)
     (insert-file-contents (magik-cb-temp-file-name p) nil nil nil t)
     (when (search-forward "\C-l" nil t)
-      (backward-delete-char 1)
+      (delete-char -1)
       (insert "\n\n\n"))
     (goto-char (point-min))
     (when (re-search-forward "^[^ ]" nil t)
@@ -1287,7 +1287,7 @@ separated by spaces."
 ;;
 ;; magik-cb-set-topic (str new-val)
 ;; magik-cb-send-topic (str)
-;; magik-cb-display-topic (str)     PROVIDED "*cb2*" EXISTS AND IS IN TOPIC MODE.
+;; magik-cb-display-topic (topic)     PROVIDED "*cb2*" EXISTS AND IS IN TOPIC MODE.
 ;;
 ;; magik-cb-toggle (str)        SET, SEND and DISPLAY.
 ;;

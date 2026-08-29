@@ -106,7 +106,7 @@ Complete the documentation using type-doc format."
           (goto-char start-point)
           (when (search-backward-regexp regex nil t)
             (let ((current-point (point)))
-              (when (or (not closest-point) 
+              (when (or (not closest-point)
                         (< (- start-point current-point) closest-point))
                 (setq closest-point (- start-point current-point)
                       match-point current-point
@@ -152,7 +152,7 @@ Argument METHOD-STRING is the string with the method contents."
           missing-parameters (delq nil (delete-dups missing-parameters)))
 
     (dolist (parameter parameters)
-      (when (and (not (equal parameter "")) 
+      (when (and (not (equal parameter ""))
                  (not (member (upcase parameter) parameters-in-documentation)))
         (push parameter missing-parameters)))
     (setq missing-parameters (reverse missing-parameters))
@@ -244,7 +244,7 @@ Argument METHOD-STRING is the string with the method contents."
           missing-slots (delq nil (delete-dups missing-slots)))
 
     (dolist (slot slots)
-      (when (and (not (equal slot "")) 
+      (when (and (not (equal slot ""))
                  (not (member slot slots-in-documentation)))
         (push slot missing-slots)))
 
