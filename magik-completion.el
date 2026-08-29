@@ -1537,7 +1537,6 @@ Invalidating cache twice helped with some caching issues."
   (dolist (hook-var magik-completion--transmit-hooks)
     (remove-hook hook-var 'magik-completion-invalidate-cache)))
 
-;;;###autoload
 (global-magik-completion-mode 1)
 
 (provide 'magik-completion)
