@@ -37,6 +37,10 @@ jobs:
         exclude:
           - os: macos-latest
             emacs-version: 27.2
+          # windows-latest/31.1 excluded until jcs090218/setup-emacs-windows
+          # supports it: https://github.com/jcs090218/setup-emacs-windows/pull/471
+          - os: windows-latest
+            emacs-version: 31.1
     steps:
       - uses: actions/checkout@v7
       - uses: jcs090218/setup-emacs@v3
