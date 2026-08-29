@@ -35,10 +35,11 @@ jobs:
             emacs-version: snapshot
             experimental: true
         exclude:
+          # macos-latest is aarch64-darwin; purcell/nix-emacs-ci has no
+          # Emacs 27.2 build for that platform.
           - os: macos-latest
             emacs-version: 27.2
-          # windows-latest/31.1 excluded until jcs090218/setup-emacs-windows
-          # supports it: https://github.com/jcs090218/setup-emacs-windows/pull/471
+          # windows-latest/31.1 excluded until jcs090218/setup-emacs-windows supports it
           - os: windows-latest
             emacs-version: 31.1
     steps:
@@ -61,7 +62,7 @@ jobs:
       - name: Report experimental failure
         if: steps.test.outcome == 'failure' && matrix.experimental
         run: echo "::warning::snapshot Emacs build failed but is experimental; not failing the job."
-  
+
   melpazoid:
     runs-on: ubuntu-latest
     steps:
