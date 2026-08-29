@@ -1714,12 +1714,10 @@ Argument END ..."
 (defun magik-parse-pragma ()
   "Helper function for inserting pragma."
   (let ((ending-point (line-number-at-pos))
-        (starting-point 0)
         (search-result nil))
     (save-excursion
       (search-backward-regexp "^\\$" nil t)
-      (setq starting-point (line-number-at-pos)
-            search-result (search-forward-regexp (cdr (assoc "pragma" magik-regexp)) nil t))
+      (setq search-result (search-forward-regexp (cdr (assoc "pragma" magik-regexp)) nil t))
       (when (or (and (not (equal search-result nil))
                      (< ending-point (line-number-at-pos)))
                 (equal search-result nil))
@@ -1774,7 +1772,7 @@ This function is modified from `imenu--generic-function' to basically
 provide extra control over the name that appears in the index."
 
   (let ((index-alist (list 'dummy))
-        prev-pos beg
+        beg
         (case-fold-search imenu-case-fold-search)
         (old-table (syntax-table))
         (table (copy-syntax-table (syntax-table)))
