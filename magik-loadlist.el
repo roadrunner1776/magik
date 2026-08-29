@@ -21,6 +21,7 @@
 
 (require 'compat)
 (require 'font-lock)
+(require 'magik-mode)
 
 (defgroup magik-loadlist nil
   "Customise Magik load_list.txt files group."

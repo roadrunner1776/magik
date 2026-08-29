@@ -10,6 +10,18 @@
 (require 'magik-loadlist)
 (require 'magik-msg)
 
+;;; magik-loadlist faces
+
+(ert-deftest magik-loadlist-file-face--resolves ()
+  "The face must resolve on its own, without the caller having loaded
+`magik-mode' first (see `magik-loadlist''s own require of `magik-mode')."
+  (should (facep 'magik-loadlist-file-face)))
+
+(ert-deftest magik-loadlist-folder-face--resolves ()
+  "The face must resolve on its own, without the caller having loaded
+`magik-mode' first (see `magik-loadlist''s own require of `magik-mode')."
+  (should (facep 'magik-loadlist-folder-face)))
+
 ;;; magik-loadlist-file-data
 
 (ert-deftest magik-loadlist-file-data--lowercases-name ()
