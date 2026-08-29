@@ -19,6 +19,8 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (require 'sort))
 (require 'cl-lib)
 (require 'seq)
 
