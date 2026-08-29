@@ -145,7 +145,7 @@ that use command string matching are not affected by this setting."
   :group 'magik-session-faces)
 
 (defface magik-session-prompt-face
-  '((t :inherit font-lock-type-face)) ;; TODO: Switch to a Magik-specific face?
+  '((t :inherit magik-class-face))
   "Font Lock mode face used to display the Magik Prompt."
   :group 'magik-session-faces)
 

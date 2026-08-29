@@ -42,12 +42,12 @@ Initial ^ and final $ is automatically added in `loadlist-ignore'."
   :group 'magik-loadlist)
 
 (defface magik-loadlist-file-face
-  '((t :inherit font-lock-variable-name-face)) ;; TODO: Switch to a Magik-specific face?
+  '((t :inherit magik-variable-face))
   "Font Lock mode face used to display file name."
   :group 'magik-loadlist-faces)
 
 (defface magik-loadlist-folder-face
-  '((t :inherit font-lock-keyword-face)) ;; TODO: Switch to a Magik-specific face?
+  '((t :inherit magik-keyword-statements-face))
   "Font Lock mode face used to display folder name."
   :group 'magik-loadlist-faces)
 
