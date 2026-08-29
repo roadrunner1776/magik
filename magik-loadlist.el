@@ -124,7 +124,7 @@ You can customize magik-loadlist-mode with the magik-loadlist-mode-hook.
   "Return list of DATA describing FILE."
   (let ((lc (downcase file)))
     (list lc
-          (if (equal file lc) nil file) ;used to check for case differences for UNIX
+          (unless (equal file lc) file) ;used to check for case differences for UNIX
           data)))
 
 (defun magik-loadlist-ignore (file)

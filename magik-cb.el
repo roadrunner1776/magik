@@ -436,7 +436,7 @@ Set METHOD and CLASS if given."
           ((and ;List of *visible* cb-mode *and* magik-session-mode buffers.
             (setq bufs
                   (delete nil
-                          (mapcar (function (lambda (b) (if (cdr b) b)))
+                          (mapcar (function (lambda (b) (when (cdr b) b)))
                                   (setq visible-bufs
                                         (magik-utils-buffer-visible-list '(magik-cb-mode magik-session-mode))))))
             ;;restrict list to those whose cdr is t.
@@ -447,8 +447,7 @@ Set METHOD and CLASS if given."
                      "Enter Class Browser or Magik Session buffer:"
                      visible-bufs 'cdr t)))
             (not (equal buffer "")))
-           (if (equal (substring buffer 0 4) "*cb*")
-               nil ;;Selected a CB buffer
+           (unless (equal (substring buffer 0 4) "*cb*") ;;Selected a CB buffer
              (setq gis buffer
                    buffer (concat "*cb*" buffer))))
           ((and
@@ -470,15 +469,14 @@ Set METHOD and CLASS if given."
             (not (equal buffer "")))
            (select-frame-set-input-focus
             (window-frame (get-buffer-window buffer 'visible)))
-           (if (equal (substring buffer 0 4) "*cb*")
-               nil ;;Selected a CB buffer
+           (unless (equal (substring buffer 0 4) "*cb*") ;;Selected a CB buffer
              (setq gis buffer
                    buffer (concat "*cb*"  buffer))))
           ((setq buffer (magik-utils-get-buffer-mode nil
                                                      'magik-cb-mode
                                                      "Enter Class Browser buffer:"
                                                      (let ((magik-cb (concat "*cb*" magik-session-buffer)))
-                                                       (if (get-buffer magik-cb) magik-cb))))
+                                                       (when (get-buffer magik-cb) magik-cb))))
            t)
           ((and magik-session-buffer (get-buffer magik-session-buffer) (get-buffer-process magik-session-buffer))
            (setq gis magik-session-buffer))
@@ -783,13 +781,13 @@ If FILTER is given then it is set on the process."
              (let ((socketname (magik-cb-gis-get-mf-socketname gis-proc)))
                (if socketname
                    (compat-call setq-local magik-cb-process (magik-cb-start-process buffer smallworld-gis "mf_connector" "-e" socketname))
-                 (if buffer
-                     (with-current-buffer buffer
-                       (let ((buffer-read-only nil))
-                         (goto-char (point-max))
-                         (insert "\n\n*** Can't start the Class Browser. ***\n The Magik session hasn't started a method_finder.\n Perhaps there was no '.mf' file next to your image file.\n")
-                         (ding) (ding) (ding)
-                         (error "Can't start CB using mf_connector")))))))
+                 (when buffer
+                   (with-current-buffer buffer
+                     (let ((buffer-read-only nil))
+                       (goto-char (point-max))
+                       (insert "\n\n*** Can't start the Class Browser. ***\n The Magik session hasn't started a method_finder.\n Perhaps there was no '.mf' file next to your image file.\n")
+                       (ding) (ding) (ding)
+                       (error "Can't start CB using mf_connector")))))))
             (cb-file
              ;; otherwise start our own method_finder.
              (compat-call setq-local magik-cb-process (magik-cb-start-process buffer
@@ -874,10 +872,9 @@ If FILTER is given then it is set on the process."
     (with-current-buffer (get-buffer-create " *mf header")
       (erase-buffer)
       (insert-file-contents ans nil 0 4)
-      (if (or (equal (buffer-string) "mfcb")
-              (equal (buffer-string) "bcfm")
-              (y-or-n-p (format "`%s' doesn't seem to be a method_finder file.  Load anyway? " ans)))
-          ()
+      (unless (or (equal (buffer-string) "mfcb")
+                  (equal (buffer-string) "bcfm")
+                  (y-or-n-p (format "`%s' doesn't seem to be a method_finder file.  Load anyway? " ans)))
         (error "%s not loaded" ans)))
     ans))
 
@@ -981,8 +978,8 @@ in \"*cb2*\" and note that \"*cb2*\" is now in family mode."
       (backward-char))
     (compat-call setq-local magik-cb2-mode 'family)
 
-    (if (get-buffer-window (current-buffer))
-        (set-window-point (get-buffer-window (current-buffer)) (point)))))
+    (when (get-buffer-window (current-buffer))
+      (set-window-point (get-buffer-window (current-buffer)) (point)))))
 
 (defun magik-cb-goto-method (jump-str other-window-p) ;; ??? %env% ??? unix filenames on NT etc.
   "Deal with a control character coming back from the C.
@@ -1028,8 +1025,7 @@ separated by spaces."
 
 (defun magik-cb-new-topic (str)
   "Add the topic, STR, to cb-topics."
-  (if (magik-cb-topic-elt str)
-      nil
+  (unless (magik-cb-topic-elt str)
     (let ((truncated-str str)
           (cb2 (magik-cb2-buffer))
           (topics (magik-cb-topics)))
@@ -1167,12 +1163,12 @@ separated by spaces."
     (set-buffer (get-buffer-create cb2))
     (unless (derived-mode-p 'magik-cb2-mode)
       (magik-cb2-mode))
-    (if (magik-cb2-get-window 'topic) ;YUCK relies on buffer not being displayed...
-        (let ((buffer-read-only nil))
-          (compat-call setq-local magik-cb2-mode 'topic)
-          (erase-buffer)
-          (magik-cb-insert-topics-and-flags)
-          (goto-char topic-pos)))))
+    (when (magik-cb2-get-window 'topic) ;YUCK relies on buffer not being displayed...
+      (let ((buffer-read-only nil))
+        (compat-call setq-local magik-cb2-mode 'topic)
+        (erase-buffer)
+        (magik-cb-insert-topics-and-flags)
+        (goto-char topic-pos)))))
 
 (defun magik-cb-insert-topics-and-flags ()
   "Write the topics and flags and the current + signs into the current buffer."
@@ -1319,9 +1315,9 @@ It is an topic rather than a flag if it's not in magik-cb-initial-topics."
   (let ((ans t))
     (dolist (x (magik-cb-topics))
       (let ((str (cl-first x)))
-        (if (and (magik-cb-is-a-topic str)
-                 (not (magik-cb-topic-on-p str)))
-            (setq ans nil))))
+        (when (and (magik-cb-is-a-topic str)
+                   (not (magik-cb-topic-on-p str)))
+          (setq ans nil))))
     ans))
 
 (defun magik-cb-set-topic (str new-val)
@@ -1408,8 +1404,7 @@ inherit-from-\"obj\" - display methods on object too."
 (defun magik-cb-make-sure-something-is-on (str)
   "Make sure that some flag from the group of flags containing STR is on.
 If the one turned off is the first in the group, turn on the 2nd, else the 1st."
-  (if (magik-cb-topic-on-p str)
-      nil
+  (unless (magik-cb-topic-on-p str)
     (dolist
         (group magik-cb-flag-groups)
       (when (member str group)
@@ -2040,8 +2035,7 @@ Copied to \"*cb*\" and \"*cb2*\" modelines and put in a (') character."
                   (completing-read
                    "Enter Class Browser buffer: "
                    bufs nil t))))
-     (if (equal buffer "")
-         nil
+     (unless (equal buffer "")
        (list buffer))))
   (let* ((method-exemplar-block (magik-current-method-name))
          (method  (elt method-exemplar-block 0))

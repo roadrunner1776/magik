@@ -292,8 +292,8 @@ With a prefix arg, ask user for current directory to use."
          (args    magik-aliases-program-args)
          (file    (or file (buffer-file-name)))
          (buf     magik-session-buffer-default-name)
-         (version (if (boundp 'magik-version-current)
-                      (symbol-value 'magik-version-current))))
+         (version (when (boundp 'magik-version-current)
+                    (symbol-value 'magik-version-current))))
     (save-excursion
       (cond (alias nil)
             ((re-search-backward magik-aliases-definition-regexp nil t)

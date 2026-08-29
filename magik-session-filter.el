@@ -69,20 +69,20 @@ FUNCTION takes one argument, the string after the action character."
              (with-current-buffer (get-buffer-create filter-buf)
                (insert (if n (substring str 0 n) str))
                (message "Filtering Magik output...(%s chars)" (number-to-string (point-max))))
-             (if n
-                 (condition-case err
-                     (magik-session-filter-action
-                      proc
-                      (with-current-buffer (get-buffer-create filter-buf)
-                        (prog1
-                            (buffer-string)
-                          (erase-buffer))))
-                   (error
-                    (with-current-buffer buf
-                      (setq n nil
-                            str ""
-                            magik-session-filter-state "\C-a")
-                      (message "Error: %s" (error-message-string err)))))))
+             (when n
+               (condition-case err
+                   (magik-session-filter-action
+                    proc
+                    (with-current-buffer (get-buffer-create filter-buf)
+                      (prog1
+                          (buffer-string)
+                        (erase-buffer))))
+                 (error
+                  (with-current-buffer buf
+                    (setq n nil
+                          str ""
+                          magik-session-filter-state "\C-a")
+                    (message "Error: %s" (error-message-string err)))))))
             ((equal (magik-session-filter-get-state buf) "\C-a")
              (with-current-buffer buf (magik-session-filter-insert buf proc n str)))
             (t

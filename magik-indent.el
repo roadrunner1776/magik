@@ -114,8 +114,7 @@ E.g. like \"_else\" and \"_endif\".")
   "Move back a line skipping white-space lines.
 White-space lines are lines with only spaces tabs and comments.
 Return t if we succeed."
-  (if (eq (forward-line -1) -1)
-      nil
+  (unless (eq (forward-line -1) -1)
     (while
         (and (looking-at "[ \t]*[#\n]")
              (zerop (forward-line -1))))
@@ -246,9 +245,9 @@ and this line doesn't start with something like \"_endif\" or \"}\" or \"_then\"
         (if (and (member (car found-tok) '("_proc" "_method" "_iter" "_private" "_abstract"))
                  (equal last-str "\n"))
             (+ (current-column) magik-indent-level)
-          (if (or (not (member (car found-tok) '("_if" "_elif")))
-                  (not (equal last-str "\n")))
-              (magik--forward-token))
+          (when (or (not (member (car found-tok) '("_if" "_elif")))
+                    (not (equal last-str "\n")))
+            (magik--forward-token))
           (if (and (equal (car found-tok) "\n")
                    (not (equal last-str "\n")))
               (+ (current-column) magik-indent-level)
@@ -264,8 +263,8 @@ the lowest level-operators."
   (let
       ((toks (reverse (magik-tokenise-region (line-beginning-position) (point))))
        (magik-stack nil))  ; stack of ends looking for begins.
-    (if (equal (car (car toks)) "\n")
-        (pop toks))
+    (when (equal (car (car toks)) "\n")
+      (pop toks))
     (while
         (and (progn
                (while
@@ -420,8 +419,7 @@ Add a newline token unless the last token is an operator."
                       (number-to-string (point))))
               (t
                (setq new-state state)))
-        (if (eq new-state 'stay)
-            ()
+        (unless (eq new-state 'stay)
           (cond
            ((eq new-state 'neutral)
             (push (cons (buffer-substring-no-properties token-start (point)) token-start)

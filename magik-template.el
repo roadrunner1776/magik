@@ -250,7 +250,6 @@ to predefine a template type to use for normal magik files."
           (erase-buffer)
           (insert-file-contents template-file)
           (magik-template-initialise magik-template-file-type))))))
-
 (add-hook 'find-file-not-found-hooks 'magik-template-maybe-insert)
 
 ;;Ideally this function would be a bit more intelligent so that it did not require
@@ -265,8 +264,8 @@ Modify this function to return a suitable match for the various templates
 you have.
 
 This hook should come last."
-  (if (re-search-forward "^_package " nil t)
-      'default))
+  (when (re-search-forward "^_package " nil t)
+    'default))
 
 (add-hook  'magik-template-file-type-hook 'magik-template-file-type-p t)
 
