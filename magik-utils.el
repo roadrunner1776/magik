@@ -1,4 +1,4 @@
-;;; magik-utils.el --- programming utils for the Magik lisp.  -*- lexical-binding: t; -*-
+;;; magik-utils.el --- programming utils for the Magik lisp.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
