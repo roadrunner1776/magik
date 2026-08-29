@@ -439,12 +439,12 @@ SELECTED-DEFINITION is the definition using the easy-menu or the current line."
   "Return version details if the point is at a version definition.
 The return value is a list (STREAM VERSION SMALLWORLD_GIS), or nil if
 no (valid) match is found."
-  (if (< (point) magik-version-position)
-      (error "No Environment at this point"))
-  (if (save-excursion
-        (beginning-of-line)
-        (search-forward magik-version-invalid-string (line-end-position) t))
-      (error "You have selected an (invalid) Environment"))
+  (when (< (point) magik-version-position)
+    (error "No Environment at this point"))
+  (when (save-excursion
+          (beginning-of-line)
+          (search-forward magik-version-invalid-string (line-end-position) t))
+    (error "You have selected an (invalid) Environment"))
   (save-excursion
     (beginning-of-line)
     (save-match-data
@@ -494,8 +494,8 @@ by the current Smallworld version."
       ;;remove previous SW paths using magik-version-sw-list
       ;;remove new SW paths first then prepend them.
       (dolist (p (append sw-list magik-version-sw-path-list))
-        (if (member p new-list)
-            (setq new-list (delete p new-list))))
+        (when (member p new-list)
+          (setq new-list (delete p new-list))))
       (setq magik-version-sw-path-list (cl-copy-list sw-list)
             new (mapconcat 'directory-file-name
                            (append sw-list new-list)

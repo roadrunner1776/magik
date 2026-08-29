@@ -112,8 +112,8 @@ Also being able to make up a data structure means that it is easy to
 add new things to test for.
 
 Returns nil if no change or the list (CURRENT-ELEM NEXT-ELEM) elements."
-  (if reverse
-      (setq list (reverse list)))
+  (when reverse
+    (setq list (reverse list)))
   (let* ((len          (1- (length list)))
          (first-elem   (elt list 0))
          (current-elem nil)
@@ -185,8 +185,7 @@ This is used for searching for the end of a template.")
   "Regexp that matches any indented Template for deprecated methods.")
 
 ;;Make a regexp to match template when indented. ie. insert \s-* at front of every none empty line.
-(if magik-pragma-deprecated-template-re  ;;Already defined so do nothing.
-    nil
+(unless magik-pragma-deprecated-template-re  ;;Already defined so do nothing.
   (setq magik-pragma-deprecated-template-re magik-pragma-deprecated-template)
   (let (start)
     (while (string-match "^\\(\\s-*\\)\\S-+" magik-pragma-deprecated-template-re start)
@@ -263,19 +262,19 @@ wish to remove it otherwise the template is removed silently."
   (save-excursion
     (search-forward ")") ; find end of _pragma statement
     (forward-line 1)
-    (if (magik-pragma-goto-magik-deprecated-template)
-        (let ((start nil)
-              (end nil))
-          (if (looking-at magik-pragma-deprecated-template-re)
-              ;;No changes made just remove whole template
-              (delete-region (match-beginning 0) (match-end 0))
-            (and (looking-at (concat "\\s-*" magik-pragma-deprecated-template-start))
-                 (setq start (match-beginning 0)))
-            (setq end (re-search-forward (concat "\\s-*" magik-pragma-deprecated-template-end) nil t))
-            (and start
-                 end
-                 (y-or-n-p "Remove modified deprecated comments? ")
-                 (delete-region start end)))))))
+    (when (magik-pragma-goto-magik-deprecated-template)
+      (let ((start nil)
+            (end nil))
+        (if (looking-at magik-pragma-deprecated-template-re)
+            ;;No changes made just remove whole template
+            (delete-region (match-beginning 0) (match-end 0))
+          (and (looking-at (concat "\\s-*" magik-pragma-deprecated-template-start))
+               (setq start (match-beginning 0)))
+          (setq end (re-search-forward (concat "\\s-*" magik-pragma-deprecated-template-end) nil t))
+          (and start
+               end
+               (y-or-n-p "Remove modified deprecated comments? ")
+               (delete-region start end)))))))
 
 ;;;;;;;;;;;;;;;;;;;; Pragma toggle options ;;;;;;;;;;;;;;;;;;;
 
@@ -355,12 +354,11 @@ In which case we toggle through the various pragma options."
 DIRECTION indicates whether the values should change \\='forward or \\='backward
 relative the current setting and available values."
   ;;Handle the case where the pragma line is completely empty separately.
-  (if (save-excursion (beginning-of-line) (looking-at "_pragma()"))
-      (progn
-        ;;Insert classify_level and place point between ( and c.
-        (delete-region (match-beginning 0) (match-end 0))
-        (insert "_pragma(classify_level=)")
-        (backward-char 16)))
+  (when (save-excursion (beginning-of-line) (looking-at "_pragma()"))
+    ;;Insert classify_level and place point between ( and c.
+    (delete-region (match-beginning 0) (match-end 0))
+    (insert "_pragma(classify_level=)")
+    (backward-char 16))
 
   (magik-pragma-do-if-match magik-pragma-electric-toggle-list nil (eq direction 'backward)))
 

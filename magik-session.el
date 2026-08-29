@@ -281,8 +281,7 @@ clean out naff markers.")
   "Syntax table in use for parsing quotes in magik-session-command.")
 
 ;; Create the syntax table
-(if magik-session-command-syntax-table
-    ()
+(unless magik-session-command-syntax-table
   (setq magik-session-command-syntax-table (make-syntax-table))
   ;; Allow embedded environment variables in Windows %% and Unix $ or ${} formats
   (modify-syntax-entry ?$  "w"  magik-session-command-syntax-table)
@@ -415,8 +414,8 @@ Return a list of all the components of the COMMAND."
 
                         (forward-sexp)
                         (setq substr (buffer-substring start-char (point)))
-                        (if (string-match "[\"\']$" substr) ;strip end-quote if any
-                            (setq substr (substring substr 0 (match-beginning 0))))
+                        (when (string-match "[\"\']$" substr) ;strip end-quote if any
+                          (setq substr (substring substr 0 (match-beginning 0))))
                                         ;Now look for embedded environment variables
                         (setq substr (substitute-in-file-name substr)))
                    collect substr
@@ -429,10 +428,9 @@ Return a list of all the components of the COMMAND."
 (defun magik-session-buffer-alist-remove ()
   "Remove current buffer from `magik-session-buffer-alist'."
   (let ((c (rassoc (buffer-name) magik-session-buffer-alist)))
-    (if c
-        (progn
-          (setcdr c nil)
-          (car c)))))
+    (when c
+      (setcdr c nil)
+      (car c))))
 
 (defun magik-session-buffer-alist-prefix-function (arg mode predicate)
   "Function to process prefix keys when used with \\[magik-session]."
@@ -473,17 +471,17 @@ session already holds PRIORITY, the two swap numbers."
 
 (defun magik-session-command-display (command)
   "Return shortened Magik session COMMAND suitable for display."
-  (if (stringp command) ; defensive programming. Should be a string but need to avoid errors
-      (let              ; because this function is called in a menu-update-hook
-          ((command-len (- (min (length command) magik-session-command-history-max-length)))
-           (label ""))
-        (save-match-data
-          (if (string-match "^\\[[^\]]*\\]" command)
-              (setq label
-                    (concat (magik-utils-file-name-display (match-string 0 command)
-                                                           magik-session-command-history-max-length-dir)
-                            "..."))))
-        (concat label (substring command (+ command-len (length label)))))))
+  (when (stringp command) ; defensive programming. Should be a string but need to avoid errors
+    (let              ; because this function is called in a menu-update-hook
+        ((command-len (- (min (length command) magik-session-command-history-max-length)))
+         (label ""))
+      (save-match-data
+        (when (string-match "^\\[[^\]]*\\]" command)
+          (setq label
+                (concat (magik-utils-file-name-display (match-string 0 command)
+                                                       magik-session-command-history-max-length-dir)
+                        "..."))))
+      (concat label (substring command (+ command-len (length label)))))))
 
 (defun magik-session-update-tools-magik-gis-menu ()
   "Update Magik Session processes submenu in Tools -> Magik pulldown menu."
@@ -492,13 +490,13 @@ session already holds PRIORITY, the two swap numbers."
     (dolist (c magik-session-alist)
       (let ((i   (car c))
             (buf (cdr c)))
-        (if buf
-            (setq magik-session-list
-                  (append magik-session-list
-                          (list (vector buf
-                                        (list 'display-buffer buf)
-                                        ':active t
-                                        ':keys (format "M-%d f2 z" i))))))))
+        (when buf
+          (setq magik-session-list
+                (append magik-session-list
+                        (list (vector buf
+                                      (list 'display-buffer buf)
+                                      ':active t
+                                      ':keys (format "M-%d f2 z" i))))))))
     ;;Magik session buffers ordered according to when they were started.
     ;;killed session numbers are reused.
     (easy-menu-change (list "Tools" "Magik")
@@ -528,16 +526,16 @@ session already holds PRIORITY, the two swap numbers."
                  (list ':help (purecopy command)))
                 command-list)))
 
-      (if (get-buffer-process (buffer-name))
-          (setq command-list
-                (append command-list
-                        (list "---"
-                              (apply 'vector (magik-session-command-display magik-session-current-command)
-                                     'ignore ':active nil (list ':key-sequence nil
-                                                                ':help (purecopy magik-session-current-command)))
-                              (apply 'vector "Start New Magik Session" 'magik-session-new-buffer
-                                     ':active t
-                                     ':keys '("C-u f2 z"))))))
+      (when (get-buffer-process (buffer-name))
+        (setq command-list
+              (append command-list
+                      (list "---"
+                            (apply 'vector (magik-session-command-display magik-session-current-command)
+                                   'ignore ':active nil (list ':key-sequence nil
+                                                              ':help (purecopy magik-session-current-command)))
+                            (apply 'vector "Start New Magik Session" 'magik-session-new-buffer
+                                   ':active t
+                                   ':keys '("C-u f2 z"))))))
 
       (easy-menu-change (list "Magik Session")
                         "Magik Session Command History"
@@ -694,7 +692,7 @@ if not already there."
   ;;MF We nuke the current cb first and reconnect later.
   (when (and magik-cb-dynamic (get-buffer magik-session-cb-buffer))
     (let ((magik-cb-process (get-buffer-process magik-session-cb-buffer)))
-      (if magik-cb-process (delete-process magik-cb-process)))
+      (when magik-cb-process (delete-process magik-cb-process)))
     (process-send-string magik-session-process "_if method_finder _isnt _unset\n_then\n  method_finder.lazy_start?\n  method_finder.send_socket_to_emacs()\n_endif\n$\n"))
   (sit-for 0.01)
   (run-hooks 'magik-session-start-process-post-hook))
@@ -736,7 +734,7 @@ frame, just switch to that buffer, or prompt if more than one.  If
 there is not, prompt for a command to run, and then run it."
 
   (interactive)
-  (if command (setq magik-session-command command))
+  (when command (setq magik-session-command command))
   (let (dir
         cmd
         args
@@ -789,10 +787,9 @@ there is not, prompt for a command to run, and then run it."
                     (read-string "Magik command: "
                                  (car command-history)
                                  'command-history)))
-          (if (string-match rev-1920-regexp magik-session-command)
-              (progn
-                (setq keepgoing t)
-                (setq magik-session-command (sub magik-session-command rev-1920-regexp " "))))
+          (when (string-match rev-1920-regexp magik-session-command)
+            (setq keepgoing t)
+            (setq magik-session-command (sub magik-session-command rev-1920-regexp " ")))
           (or (eq (string-match "\\[" magik-session-command) 0)
               (setq magik-session-command (concat "[" default-directory "] " magik-session-command)))
           (string-match "\\[\\([^\]]*\\)\\] *\\([^ ]*\\) *\\(.*\\)" magik-session-command)
@@ -801,22 +798,21 @@ there is not, prompt for a command to run, and then run it."
                 args (substring magik-session-command (match-beginning 3) (match-end 3)))
 
           (goto-char (point-min))
-          (if (re-search-forward (concat "^alias[ \t]+" (regexp-quote cmd) "[ \t]+") nil t)
-              (progn
-                (setq keepgoing t)
-                (setq alias-beg (match-end 0))
-                (goto-char alias-beg)
-                (if (looking-at "['\"]")
-                    (progn
-                      (cl-incf alias-beg)
-                      (end-of-line)
-                      (re-search-backward "['\"]"))
-                  (end-of-line))
-                (setq alias-expansion (buffer-substring alias-beg (point)))
-                (or (string-match alias-subst-regexp alias-expansion)
-                    (setq alias-expansion (concat alias-expansion " \\!*")))
-                (setq alias-expansion (sub alias-expansion alias-subst-regexp args))
-                (setq magik-session-command (concat "[" dir "] " alias-expansion)))))
+          (when (re-search-forward (concat "^alias[ \t]+" (regexp-quote cmd) "[ \t]+") nil t)
+            (setq keepgoing t)
+            (setq alias-beg (match-end 0))
+            (goto-char alias-beg)
+            (if (looking-at "['\"]")
+                (progn
+                  (cl-incf alias-beg)
+                  (end-of-line)
+                  (re-search-backward "['\"]"))
+              (end-of-line))
+            (setq alias-expansion (buffer-substring alias-beg (point)))
+            (or (string-match alias-subst-regexp alias-expansion)
+                (setq alias-expansion (concat alias-expansion " \\!*")))
+            (setq alias-expansion (sub alias-expansion alias-subst-regexp args))
+            (setq magik-session-command (concat "[" dir "] " alias-expansion))))
 
         (kill-buffer alias-buffer))
 
@@ -853,40 +849,40 @@ there is not, prompt for a command to run, and then run it."
   "Kill the current Magik process."
   (interactive)
   (run-hooks 'magik-session-kill-process-pre-hook)
-  (if (and magik-session-process
-           (eq (process-status magik-session-process) 'run)
-           (y-or-n-p "Kill the Magik process? "))
-      (let ((status (process-status magik-session-process)))
-        (kill-process magik-session-process)
-        (sit-for 0.1)
-        (if (eq status (process-status magik-session-process))
-            (insert "\nMagik is still busy and will exit at an appropriate point. Please be patient... \n"))
-        (run-hooks 'magik-session-kill-process-post-hook)
-        )))
+  (when (and magik-session-process
+             (eq (process-status magik-session-process) 'run)
+             (y-or-n-p "Kill the Magik process? "))
+    (let ((status (process-status magik-session-process)))
+      (kill-process magik-session-process)
+      (sit-for 0.1)
+      (when (eq status (process-status magik-session-process))
+        (insert "\nMagik is still busy and will exit at an appropriate point. Please be patient... \n"))
+      (run-hooks 'magik-session-kill-process-post-hook)
+      )))
 
 (defun magik-session-query-interrupt-shell-subjob ()
   "Ask and then `comint-interrupt-subjob'."
   (interactive)
-  (if (y-or-n-p "Kill the Magik process? ")
-      (comint-kill-subjob)))
+  (when (y-or-n-p "Kill the Magik process? ")
+    (comint-kill-subjob)))
 
 (defun magik-session-query-quit-shell-subjob ()
   "Ask and then `comint-quit-subjob'."
   (interactive)
-  (if (y-or-n-p "Kill the Magik process? ")
-      (comint-quit-subjob)))
+  (when (y-or-n-p "Kill the Magik process? ")
+    (comint-quit-subjob)))
 
 (defun magik-session-query-stop-shell-subjob ()
   "Ask and then `comint-stop-subjob'."
   (interactive)
-  (if (y-or-n-p "Suspend the Magik process? ")
-      (comint-stop-subjob)))
+  (when (y-or-n-p "Suspend the Magik process? ")
+    (comint-stop-subjob)))
 
 (defun magik-session-query-shell-send-eof ()
   "Ask and then `comint-send-eof'."
   (interactive)
-  (if (y-or-n-p "Send EOF to the Magik process? ")
-      (comint-send-eof)))
+  (when (y-or-n-p "Send EOF to the Magik process? ")
+    (comint-send-eof)))
 
 ;; R E C A L L I N G   C O M M A N D S
 ;; ___________________________________
@@ -906,10 +902,10 @@ Locate the cursor to an offset OFFSET."
        (len (length str)))
     (insert str)
     (forward-char (- (max 0 (min len offset)) len))
-    (if (pos-visible-in-window-p)
-        (while
-            (not (pos-visible-in-window-p (point-max)))
-          (scroll-up 1)))))
+    (when (pos-visible-in-window-p)
+      (while
+          (not (pos-visible-in-window-p (point-max)))
+        (scroll-up 1)))))
 
 (defun magik-session-send-region (beg end)
   "Record in `magik-session-prev-cmds' the region BEG to END and send to the gis.
@@ -924,8 +920,8 @@ Also append the string to \" *history**magik*\"."
         (insert str "\n")
         (goto-char orig-point))))
   (let ((n magik-session-no-of-cmds))
-    (if (= n (length magik-session-prev-cmds))
-        (magik-session--make-new-cmds-vec))
+    (when (= n (length magik-session-prev-cmds))
+      (magik-session--make-new-cmds-vec))
     (setq n magik-session-no-of-cmds)   ;; aaargh! I had forgotten this line and had a horrible intermittent bug.
     ;; NB: we are keeping a null marker at the end and this must be moved along.
     (aset magik-session-prev-cmds n (aref magik-session-prev-cmds (1- n)))
@@ -997,7 +993,7 @@ Else (not in any cmd) recall line."
                                  (car (aref magik-session-prev-cmds n)))))
 
      ((>= (point) p)
-      (if abbrev-mode (save-excursion (expand-abbrev)))
+      (when abbrev-mode (save-excursion (expand-abbrev)))
       (cond
        ((looking-at "[ \t\n]*\\'")  ; at end of curr. cmd.
         (newline arg)
@@ -1013,7 +1009,7 @@ Else (not in any cmd) recall line."
           (magik-session-send-region (marker-position p) (point)))
          ((magik-session--complete-magik-p p (point))
                                         ;          (insert "$\n") ;; paulw - remove additional <CR> which messes with pling variables
-          (if magik-session-auto-insert-dollar (insert "$\n"))
+          (when magik-session-auto-insert-dollar (insert "$\n"))
           (delete-region (point) (point-max))
           (magik-session-send-region (marker-position p) (point)))))
        ((looking-at "[ \t\n]*\\$[ \t\n]*\\'")
@@ -1048,7 +1044,7 @@ Also write a message saying why the magik is not complete."
           (progn
             (let
                 ((toks (magik-tokenise-region-no-eol-nor-point-min (point) (min (line-end-position) end))))
-              (if toks (setq last-tok (car (last toks))))
+              (when toks (setq last-tok (car (last toks))))
               (dolist (tok toks)
                 (cond
                  ((or (and (equal (car stack) "_for")    (equal (car tok) "_over"))
@@ -1100,27 +1096,27 @@ Being in the prompt before the command counts too.  We do this by binary search.
 (defun magik-session--get-curr-cmd-num-2 (min max)
   "Return the num of the command that point is in.
 Return nil if it isn't in the half-open range [MIN, MAX)."
-  (if (> max min)
-      (let*
-          ((mid (/ (+ min max) 2))
-           (pair (aref magik-session-prev-cmds mid))
-           (p (point)))
-        (cond
-         ((or (null (marker-buffer (car pair))))
+  (when (> max min)
+    (let*
+        ((mid (/ (+ min max) 2))
+         (pair (aref magik-session-prev-cmds mid))
+         (p (point)))
+      (cond
+       ((or (null (marker-buffer (car pair))))
                                         ;(= (car pair) (cdr pair)))
-          (magik-session--get-curr-cmd-num-2 (1+ mid) max))
-         ((save-excursion
-            (goto-char (car pair))
-            (beginning-of-line)
-            (and (>= p (point))
-                 (< p (cdr pair))))
-          mid)
-         ((>= p (cdr pair))
-          (magik-session--get-curr-cmd-num-2 (1+ mid) max))
-         ((< p (car pair))
-          (magik-session--get-curr-cmd-num-2 min mid))
-         (t
-          (error "Sorry... Confused command recall"))))))
+        (magik-session--get-curr-cmd-num-2 (1+ mid) max))
+       ((save-excursion
+          (goto-char (car pair))
+          (beginning-of-line)
+          (and (>= p (point))
+               (< p (cdr pair))))
+        mid)
+       ((>= p (cdr pair))
+        (magik-session--get-curr-cmd-num-2 (1+ mid) max))
+       ((< p (car pair))
+        (magik-session--get-curr-cmd-num-2 min mid))
+       (t
+        (error "Sorry... Confused command recall"))))))
 
 (defun magik-session--prepare-for-edit-cmd (_beg _end)
   "If we're in a previous command, replace any current command with this one."
@@ -1254,8 +1250,8 @@ If ARG is null, use a default of `magik-session-history-length'."
           (and (< i magik-session-no-of-cmds)
                (not (marker-buffer (car (aref magik-session-prev-cmds i)))))
         (cl-incf i))
-      (if (= i (1- magik-session-no-of-cmds))
-          (error "No commands to fold"))
+      (when (= i (1- magik-session-no-of-cmds))
+        (error "No commands to fold"))
       ;; we now have the index of the first command to fold.
       (message "Folding the last %s commands..." (number-to-string arg))
       (goto-char (car (aref magik-session-prev-cmds i)))
@@ -1265,16 +1261,14 @@ If ARG is null, use a default of `magik-session-history-length'."
       (while
           (< j (1- magik-session-no-of-cmds))
         (goto-char (car (aref magik-session-prev-cmds j)))
-        (if (re-search-backward "[\r\n]" nil t)
-            (progn
-              (insert ?\n)
-              (delete-char 1)))
+        (when (re-search-backward "[\r\n]" nil t)
+          (insert ?\n)
+          (delete-char 1))
         (cl-incf j))
       (goto-char (point-max))
-      (if (search-backward "\r" nil t)
-          (progn
-            (insert ?\n)
-            (delete-char 1)))
+      (when (search-backward "\r" nil t)
+        (insert ?\n)
+        (delete-char 1))
       (message "Folding the last %s commands...Done" (number-to-string arg))
       (goto-char p)
       (set-buffer b))))
@@ -1298,8 +1292,8 @@ If ARG is null, use a default of `magik-session-history-length'."
           (and (< i magik-session-no-of-cmds)
                (not (marker-buffer (car (aref magik-session-prev-cmds i)))))
         (cl-incf i))
-      (if (= i (1- magik-session-no-of-cmds))
-          (error "No commands to unfold"))
+      (when (= i (1- magik-session-no-of-cmds))
+        (error "No commands to unfold"))
       ;; we now have the index of the first command to unfold.
       (message "Unfolding the last %s commands..." (number-to-string arg))
       (goto-char (car (aref magik-session-prev-cmds i)))
@@ -1369,8 +1363,8 @@ If ARG is null, use a default of `magik-session-history-length'."
         (end-of-line)
         (forward-word -1)
         (setq line (+ line (string-to-number (current-word))))
-        (if (re-search-forward "^\\s-*\\^" nil t)
-            (setq col (1- (length (match-string 0)))))))
+        (when (re-search-forward "^\\s-*\\^" nil t)
+          (setq col (1- (length (match-string 0)))))))
     (cons line col)))
 
 (defun magik-session-error-goto ()
@@ -1385,18 +1379,17 @@ If ARG is null, use a default of `magik-session-history-length'."
         (magik-session-error-narrow-region)
         (save-excursion
           (beginning-of-line)
-          (if (looking-at (concat "^\\*\\*\\*\\*.*" "on line" " \\([0-9]+\\)$"))
-              (progn
-                (setq line-col (magik-session-error-line-col (string-to-number (match-string-no-properties 1)))
-                      file (and (save-excursion (re-search-backward "Loading \\(.*\\)" nil t))
-                                (match-string-no-properties 1)))
-                (if (file-exists-p file)
-                    (setq buf (or (find-buffer-visiting file) (find-file-noselect file)))
-                  (if (re-search-backward "^\\*\\*\\*\\* Emacs: buffer=\\(.*\\) file=\\(.*\\) position=\\([0-9]+\\)" nil t)
-                      (setq buf  (match-string-no-properties 1)
-                            file (match-string-no-properties 2)
-                            pos  (string-to-number (match-string-no-properties 3))
-                            line-adjust -4))))))))
+          (when (looking-at (concat "^\\*\\*\\*\\*.*" "on line" " \\([0-9]+\\)$"))
+            (setq line-col (magik-session-error-line-col (string-to-number (match-string-no-properties 1)))
+                  file (and (save-excursion (re-search-backward "Loading \\(.*\\)" nil t))
+                            (match-string-no-properties 1)))
+            (if (file-exists-p file)
+                (setq buf (or (find-buffer-visiting file) (find-file-noselect file)))
+              (when (re-search-backward "^\\*\\*\\*\\* Emacs: buffer=\\(.*\\) file=\\(.*\\) position=\\([0-9]+\\)" nil t)
+                (setq buf  (match-string-no-properties 1)
+                      file (match-string-no-properties 2)
+                      pos  (string-to-number (match-string-no-properties 3))
+                      line-adjust -4)))))))
     (or file
         (error "No Error on this line to go to"))
     (pop-to-buffer buf)
@@ -1421,9 +1414,9 @@ Query first for \"**** Error\"."
   (save-excursion
     (goto-char (point-max))
     (if (search-backward "\n**** Error" nil t)
-        (if (y-or-n-p (concat (format "Print the last traceback (%s lines)?"
-                                      (number-to-string (count-lines (point) (point-max)))) " "))
-            (magik-session-print-region-and-fold (point) (point-max) nil))
+        (when (y-or-n-p (concat (format "Print the last traceback (%s lines)?"
+                                        (number-to-string (count-lines (point) (point-max)))) " "))
+          (magik-session-print-region-and-fold (point) (point-max) nil))
       (error "Couldn't find a line starting with '**** Error' - nothing printed" ))))
 
 (defun magik-session-traceback-save ()
@@ -1483,18 +1476,18 @@ where MODE is the name of the major mode with the '-mode' postfix."
     ;;hopefully the tests are done in the cheapest, most efficient order
     ;;but gis-drag-n-drop-mode is checked last in case user has set
     ;;up a per-buffer Drag 'n' drop mode
-    (if (and (listp last-input-event)
-             (eq (car last-input-event) 'drag-n-drop)
-             (setq fn (intern (concat (substring (symbol-name major-mode) 0 -5)
-                                      "-drag-n-drop-load")))
-             (fboundp fn)
-             (windowp (caadr last-input-event))
-             (setq gis (window-buffer (caadr last-input-event)))
-             (with-current-buffer gis
+    (when (and (listp last-input-event)
+               (eq (car last-input-event) 'drag-n-drop)
+               (setq fn (intern (concat (substring (symbol-name major-mode) 0 -5)
+                                        "-drag-n-drop-load")))
+               (fboundp fn)
+               (windowp (caadr last-input-event))
+               (setq gis (window-buffer (caadr last-input-event)))
+               (with-current-buffer gis
 
-               (and magik-session-drag-n-drop-mode
-                    (derived-mode-p 'magik-session-mode))))
-        (funcall fn gis (buffer-file-name)))))
+                 (and magik-session-drag-n-drop-mode
+                      (derived-mode-p 'magik-session-mode))))
+      (funcall fn gis (buffer-file-name)))))
 
 (defun magik-session-disable-save ()
   "Like `save-buffer', but does nothing in magik-session-mode."
