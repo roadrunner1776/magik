@@ -35,11 +35,10 @@ jobs:
             emacs-version: snapshot
             experimental: true
         exclude:
-          # macos-latest is aarch64-darwin; purcell/nix-emacs-ci has no
-          # Emacs 27.2 build for that platform.
+          # macos-latest is aarch64-darwin; purcell/nix-emacs-ci has no Emacs 27.2 build for that platform.
           - os: macos-latest
             emacs-version: 27.2
-          # windows-latest/31.1 excluded until jcs090218/setup-emacs-windows supports it
+          # windows-latest/31.1 excluded until jcs090218/setup-emacs-windows supports it.
           - os: windows-latest
             emacs-version: 31.1
     steps:
