@@ -336,12 +336,12 @@ Not used yet.")
   :group 'magik-cb-faces)
 
 (defface magik-cb2-thermometer-on-face
-  '((t :inherit font-lock-type-face)) ;; TODO: Switch to a Magik-specific face?
+  '((t :inherit magik-class-face))
   "Font Lock mode face used to display a thermometer variable that is on."
   :group 'magik-cb-faces)
 
 (defface magik-cb2-thermometer-off-face
-  '((t :inherit font-lock-constant-face)) ;; TODO: Switch to a Magik-specific face?
+  '((t :inherit magik-constant-face))
   "Font Lock mode face used to display a thermometer variable that is off."
   :group 'magik-cb-faces)
 
