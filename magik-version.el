@@ -287,8 +287,8 @@ installation directory suitable for selection."
   (let ((path
          (file-truename (read-directory-name "Enter product directory for Core installation: "))))
     (setq path (directory-file-name path))
-    (if (eq system-type 'windows-nt)
-        (subst-char-in-string ?/ ?\\ path t))
+    (when (eq system-type 'windows-nt)
+      (subst-char-in-string ?/ ?\\ path t))
     path))
 
 (defun magik-version-file-add (root name version)
@@ -299,13 +299,13 @@ installation directory suitable for selection."
           (root (magik-version-read-smallworld-gis))
           (product-version-file (file-name-concat (file-name-as-directory root) "config" "PRODUCT_VERSION"))
           name version)
-     (if (file-exists-p product-version-file)
-         (with-current-buffer (get-buffer-create " *product_version*")
-           (erase-buffer)
-           (insert-file-contents product-version-file)
-           (goto-char (point-min))
-           (setq version (current-word)
-                 name    version)))
+     (when (file-exists-p product-version-file)
+       (with-current-buffer (get-buffer-create " *product_version*")
+         (erase-buffer)
+         (insert-file-contents product-version-file)
+         (goto-char (point-min))
+         (setq version (current-word)
+               name    version)))
      (list root
            (read-no-blanks-input "Enter name for this installation: " name)
            (read-no-blanks-input "Enter version number of this installation: " version))))
@@ -323,7 +323,7 @@ installation directory suitable for selection."
 (defun magik-version-file-open ()
   "Open the magik-version-file to edit."
   (interactive
-   (when (not (file-exists-p magik-version-file))
+   (unless (file-exists-p magik-version-file)
      (call-interactively 'magik-version-file-create)))
   (find-file magik-version-file))
 
@@ -333,7 +333,7 @@ Called if no magik-version program exists or `gis-version-file' is nil.
 Will set `gis-version-file' to FILE."
   (interactive)
   (find-file magik-version-file)
-  (when (not (file-exists-p magik-version-file))
+  (unless (file-exists-p magik-version-file)
     (insert magik-version-file-header)
     (call-interactively 'magik-version-file-add)
     (save-buffer))
@@ -342,7 +342,7 @@ Will set `gis-version-file' to FILE."
 (defun magik-version-selection ()
   "Display a list of possible gis products for the user to choose between."
   (interactive
-   (when (not (file-exists-p magik-version-file))
+   (unless (file-exists-p magik-version-file)
      (call-interactively 'magik-version-file-create)))
   (set-buffer (get-buffer-create (concat "*" magik-session-buffer-default-name " version selection*")))
   (magik-version-mode)
@@ -350,15 +350,15 @@ Will set `gis-version-file' to FILE."
   (setq buffer-read-only nil)
   (erase-buffer)
   (insert magik-version-help)
-  (if (and magik-version-file magik-version-help-file-add)
-      (insert "\n" magik-version-help-file-add "\n"))
+  (when (and magik-version-file magik-version-help-file-add)
+    (insert "\n" magik-version-help-file-add "\n"))
 
   (save-excursion
     (save-match-data
       (insert-file-contents magik-version-file)
       (goto-char (point-min))
 
-      (if (search-forward "-------" nil t) (forward-line 1)) ;skip a header
+      (when (search-forward "-------" nil t) (forward-line 1)) ;skip a header
       (while (re-search-forward magik-version-match nil t)
         (beginning-of-line)
         (forward-char 1)
@@ -373,18 +373,17 @@ Will set `gis-version-file' to FILE."
                (goto-char (match-beginning 3))
                (insert magik-version-invalid-string " "))))))
 
-  (if (stringp magik-version-current)
-      (save-excursion
-        (save-match-data
-          (if (re-search-forward (concat "^. " magik-version-current " ") nil t)
-              (progn
-                (beginning-of-line)
-                (delete-char 1)
-                (insert "*"))))))
+  (when (stringp magik-version-current)
+    (save-excursion
+      (save-match-data
+        (when (re-search-forward (concat "^. " magik-version-current " ") nil t)
+          (beginning-of-line)
+          (delete-char 1)
+          (insert "*")))))
 
   (compat-call setq-local magik-version-position (point))
   (save-match-data
-    (if (search-forward "-------" nil t) (setq magik-version-position (point)))) ;skip a header
+    (when (search-forward "-------" nil t) (setq magik-version-position (point)))) ;skip a header
 
   (setq buffer-read-only t)
   (set-buffer-modified-p nil)
@@ -399,10 +398,10 @@ Will set `gis-version-file' to FILE."
 (defun magik-version-display-title ()
   "Modify the Frame and Icon titles according to the Environment."
   (interactive)
-  (if magik-version-frame-title-format
-      (setq frame-title-format magik-version-frame-title-format))
-  (if magik-version-icon-title-format
-      (setq icon-title-format  magik-version-icon-title-format)))
+  (when magik-version-frame-title-format
+    (setq frame-title-format magik-version-frame-title-format))
+  (when magik-version-icon-title-format
+    (setq icon-title-format  magik-version-icon-title-format)))
 
 (defun magik-version-disable-read-only-mode ()
   "Like `read-only-mode', but does nothing in magik-version-mode."
@@ -439,12 +438,12 @@ SELECTED-DEFINITION is the definition using the easy-menu or the current line."
   "Return version details if the point is at a version definition.
 The return value is a list (STREAM VERSION SMALLWORLD_GIS), or nil if
 no (valid) match is found."
-  (if (< (point) magik-version-position)
-      (error "No Environment at this point"))
-  (if (save-excursion
-        (beginning-of-line)
-        (search-forward magik-version-invalid-string (line-end-position) t))
-      (error "You have selected an (invalid) Environment"))
+  (when (< (point) magik-version-position)
+    (error "No Environment at this point"))
+  (when (save-excursion
+          (beginning-of-line)
+          (search-forward magik-version-invalid-string (line-end-position) t))
+    (error "You have selected an (invalid) Environment"))
   (save-excursion
     (beginning-of-line)
     (save-match-data
@@ -494,8 +493,8 @@ by the current Smallworld version."
       ;;remove previous SW paths using magik-version-sw-list
       ;;remove new SW paths first then prepend them.
       (dolist (p (append sw-list magik-version-sw-path-list))
-        (if (member p new-list)
-            (setq new-list (delete p new-list))))
+        (when (member p new-list)
+          (setq new-list (delete p new-list))))
       (setq magik-version-sw-path-list (cl-copy-list sw-list)
             new (mapconcat 'directory-file-name
                            (append sw-list new-list)

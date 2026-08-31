@@ -675,12 +675,12 @@ Function takes two arguments BUFFER and METHOD.")
          (last-tok (car (last toks)))
          (last-tok-pos (cdr last-tok)))
       (backward-word 1)
-      (if (and (eq (point) last-tok-pos)
-               (/= (preceding-char) ?.))
-          (insert ?_))
-      (if (and (derived-mode-p 'magik-base-mode)
-               (looking-at "_else\\|_elif\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
-          (magik-indent-command)))))
+      (when (and (eq (point) last-tok-pos)
+                 (/= (preceding-char) ?.))
+        (insert ?_))
+      (when (and (derived-mode-p 'magik-base-mode)
+                 (looking-at "_else\\|_elif\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
+        (magik-indent-command)))))
 
 ;;Actually only used by the Magik-Patch minor mode but we need a hook here
 ;;because a function must be referred to in font-lock-defaults.
@@ -759,8 +759,8 @@ Function takes two arguments BUFFER and METHOD.")
                           (point-max))))
           (goto-char end)
           (setq end (line-beginning-position 2))
-          (if (and (>= end code-start) (< beg code-start))
-              (setq beg code-start))
+          (when (and (>= end code-start) (< beg code-start))
+            (setq beg code-start))
           (when (and (>= beg code-start)
                      (>= end code-start))
             ;; Now do the fontification.
@@ -770,8 +770,8 @@ Function takes two arguments BUFFER and METHOD.")
             (font-lock-fontify-keywords-region beg end loudly)))
       ;; Clean up.
       (set-syntax-table old-syntax-table))
-    (if (and (not modified) (buffer-modified-p))
-        (set-buffer-modified-p nil))))
+    (when (and (not modified) (buffer-modified-p))
+      (set-buffer-modified-p nil))))
 
 (defun magik-toggle-transmit-debug-p (&optional arg)
   "Toggle transmission of #DEBUG statements in Magik code.
@@ -817,11 +817,12 @@ Optional argument ARG .."
   (interactive "*")
   (when (derived-mode-p 'magik-session-mode)
     (error "Your Magik shell buffer has got into magik-mode! To recover, type `M-x magik-session-mode'.  Please report this bug"))
-  (if abbrev-mode (save-excursion (expand-abbrev)))
-  (if (save-excursion
-        (back-to-indentation)
-        (looking-at "[]})]\\|_else\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
-      (magik-indent-command))
+  (when abbrev-mode
+    (save-excursion (expand-abbrev)))
+  (when (save-excursion
+          (back-to-indentation)
+          (looking-at "[]})]\\|_else\\|_finally\\|_using\\|_with\\|_when\\|_protection\\|_end"))
+    (magik-indent-command))
   (newline-and-indent))
 
 (defun magik-indent-line ()
@@ -833,14 +834,13 @@ Optional argument ARG .."
     (setq beg (point))
     (skip-chars-forward " \t")
     (setq change (- indent (current-column)))
-    (if (zerop change)
-        nil
+    (unless (zerop change)
       (delete-region beg (point))
       (indent-to indent))
     ;; if the initial point was within the inden, leave point at the indent,
     ;; otherwise back to where we where
-    (if (> (- (point-max) pos) (point))
-        (goto-char (- (point-max) pos)))))
+    (when (> (- (point-max) pos) (point))
+      (goto-char (- (point-max) pos)))))
 
 ;; bound to TAB in magik mode.
 (defun magik-indent-command ()
@@ -876,11 +876,11 @@ you can use \\[isearch-forward-regexp] and use \\[isearch-ring-retreat] to recal
   (interactive
    (list
     (read-string "Method Name: " (current-word))
-    (if current-prefix-arg
-        (read-string "Class Name: "
-                     (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
+    (when current-prefix-arg
+      (read-string "Class Name: "
+                   (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))))
 
-  (if class nil
+  (unless class
     (setq class (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
   (let* ((method-cons (magik-method-name-type method))
          (method-root (car method-cons))
@@ -1030,7 +1030,8 @@ Optional argument NOMSG ..."
     (magik-forward-endmethod t)
     (push-mark (point) nomsg t)
     (magik-backward-method t))
-  (if magik-mark-method-exchange (exchange-point-and-mark))
+  (when magik-mark-method-exchange
+    (exchange-point-and-mark))
   (mark))
 
 (defun magik-copy-method ()
@@ -1094,11 +1095,10 @@ Optional argument GIS ..."
             (t ;no "on line" errors found.
              nil)))
 
-    (if pt
-        (progn
-          (pop-to-buffer gis)
-          (goto-char pt)
-          (magik-gis-error-goto)))))
+    (when pt
+      (pop-to-buffer gis)
+      (goto-char pt)
+      (magik-gis-error-goto))))
 
 (defun magik-perform-replace-no-set-mark (from to regexp-flag)
   "Like `perform-replace' but without setting the mark.
@@ -1217,7 +1217,8 @@ If \\='end, then point is left at the end of the method.
 Otherwise, point is left where it is."
   (interactive)
   ;;DEBUG (message "this %s, last %s" this-command last-command)
-  (if (eq last-command 'magik-transmit-method-first) (magik-forward-endmethod))
+  (when (eq last-command 'magik-transmit-method-first)
+    (magik-forward-endmethod))
   (let ((magik-mark-method-exchange nil)
         mark)
     (save-excursion
@@ -1265,10 +1266,10 @@ Magik, another file shall be written."
   ;;Start from the current line and search backwards.
   ;;We are not usually interested in _package statements after point.
   (save-match-data
-    (if (re-search-backward "^\\s-*\\(_package \\w+\\)\\s-*$" nil t)
-        (concat (buffer-substring-no-properties
-                 (match-beginning 1) (match-end 1))
-                "\n"))))
+    (when (re-search-backward "^\\s-*\\(_package \\w+\\)\\s-*$" nil t)
+      (concat (buffer-substring-no-properties
+               (match-beginning 1) (match-end 1))
+              "\n"))))
 
 (defun magik-transmit-string (str package do-magik-command tidy-magik-command &optional start gis process)
   "Generalised function to send code to Magik via a temporary file.
@@ -1499,33 +1500,33 @@ If PT is given, goto that char position."
   "Fill a comment paragraph."
   (interactive "*")
   (save-excursion
-    (if (progn
-          (back-to-indentation)
-          (looking-at "\\(##?\\)[ \t]+[^ \t\n]"))
-        (let*
-            ((comment-str (match-string 1))
-             (regexp-str (concat
-                          "[ \t]*"
-                          comment-str
-                          "[ \t]+[^ \t\n]"))
-             beg
-             (fill-prefix
-              (concat (progn
-                        (back-to-indentation)
-                        (buffer-substring-no-properties (line-beginning-position) (point)))
-                      comment-str
-                      " "))
-             (fill-column (+ (current-column) 63)))
-          (beginning-of-line)
-          (while
-              (and (looking-at regexp-str)
-                   (zerop (forward-line -1))))
-          (if (not (looking-at regexp-str))
-              (forward-line 1))
-          (setq beg (point))
-          (while (and (looking-at regexp-str)
-                      (zerop (forward-line 1))))
-          (fill-region-as-paragraph beg (point))))))
+    (when (progn
+            (back-to-indentation)
+            (looking-at "\\(##?\\)[ \t]+[^ \t\n]"))
+      (let*
+          ((comment-str (match-string 1))
+           (regexp-str (concat
+                        "[ \t]*"
+                        comment-str
+                        "[ \t]+[^ \t\n]"))
+           beg
+           (fill-prefix
+            (concat (progn
+                      (back-to-indentation)
+                      (buffer-substring-no-properties (line-beginning-position) (point)))
+                    comment-str
+                    " "))
+           (fill-column (+ (current-column) 63)))
+        (beginning-of-line)
+        (while
+            (and (looking-at regexp-str)
+                 (zerop (forward-line -1))))
+        (unless (looking-at regexp-str)
+          (forward-line 1))
+        (setq beg (point))
+        (while (and (looking-at regexp-str)
+                    (zerop (forward-line 1))))
+        (fill-region-as-paragraph beg (point))))))
 
 ;;; Mods to do commenting and uncommenting in magik code (Sarfaraz).
 ;; AJM: TODO Use comment-dwim what about Emacs 19 and 20???
@@ -1545,24 +1546,24 @@ If PT is given, goto that char position."
     (cl-decf nlines)
     (beginning-of-line 1)
     (skip-chars-forward "\t")
-    (if (char-equal (char-after (point)) ?#)
-        (delete-char 1))
+    (when (char-equal (char-after (point)) ?#)
+      (delete-char 1))
     (forward-line 1)))
 
 (defun magik-comment-region()
   "Puts # in first column of each line in the region."
   (interactive "*")
   (save-excursion
-    (if (> (point) (mark t))
-        (exchange-point-and-mark))
+    (when (> (point) (mark t))
+      (exchange-point-and-mark))
     (magik-comment (count-lines (point) (mark t)))))
 
 (defun magik-uncomment-region()
   "Remove # in first column of each line in the region."
   (interactive "*")
   (save-excursion
-    (if (> (point) (mark t))
-        (exchange-point-and-mark))
+    (when (> (point) (mark t))
+      (exchange-point-and-mark))
     (magik-un-comment (count-lines (point) (mark t)))))
 
 
@@ -1696,11 +1697,11 @@ Argument END ..."
       (let ((starting-point (line-number-at-pos))
             (exemplar-point nil)
             (method-point nil))
-        (when (not (equal (search-backward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t) nil))
+        (unless (equal (search-backward-regexp (cdr (assoc "def_slotted_exemplar" magik-regexp)) nil t) nil)
           (setq exemplar-point (line-number-at-pos)))
         (goto-char (point-min))
         (forward-line (1- starting-point))
-        (when (not (equal (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t) nil))
+        (unless (equal (search-backward-regexp (cdr (assoc "method" magik-regexp)) nil t) nil)
           (setq method-point (line-number-at-pos)))
         (when (or (not (equal exemplar-point nil))
                   (not (equal method-point nil)))
@@ -1817,8 +1818,8 @@ provide extra control over the name that appears in the index."
                        (setq item (apply function rest))
                      ;;We have a simply index
                      (setq beg (match-beginning index))
-                     (if imenu-use-markers
-                         (setq beg (copy-marker beg)))
+                     (when imenu-use-markers
+                       (setq beg (copy-marker beg)))
                      (setq item (cons (match-string-no-properties index)
                                       beg)))
                    ;; Insert the item unless it is already present.
@@ -1831,9 +1832,9 @@ provide extra control over the name that appears in the index."
     ;; This is in case one submenu gets items from two different regexps.
     (let ((tail index-alist))
       (while tail
-        (if (listp (car tail))
-            (setcdr (car tail)
-                    (sort (cdr (car tail)) 'imenu--sort-by-position)))
+        (when (listp (car tail))
+          (setcdr (car tail)
+                  (sort (cdr (car tail)) 'imenu--sort-by-position)))
         (setq tail (cdr tail))))
     (let ((main-element (assq nil index-alist)))
       (nconc (delq main-element (delq 'dummy index-alist))
@@ -1882,8 +1883,8 @@ Prevents expansion inside strings and comments."
   "Abbrev table for Magik mode."
   :regexp "\\<\\([+[:word:]]+\\)")
 
-(if magik-under-as-char
-    (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
+(when magik-under-as-char
+  (modify-syntax-entry ?_ "w" magik-base-mode-syntax-table))
 (modify-syntax-entry ?\\ "." magik-base-mode-syntax-table) ;; \ is not an escape character in magik mode.
 (modify-syntax-entry ?? "w" magik-base-mode-syntax-table)
 (modify-syntax-entry ?! "w" magik-base-mode-syntax-table)

@@ -114,8 +114,7 @@ E.g. like \"_else\" and \"_endif\".")
   "Move back a line skipping white-space lines.
 White-space lines are lines with only spaces tabs and comments.
 Return t if we succeed."
-  (if (eq (forward-line -1) -1)
-      nil
+  (unless (eq (forward-line -1) -1)
     (while
         (and (looking-at "[ \t]*[#\n]")
              (zerop (forward-line -1))))
@@ -246,9 +245,9 @@ and this line doesn't start with something like \"_endif\" or \"}\" or \"_then\"
         (if (and (member (car found-tok) '("_proc" "_method" "_iter" "_private" "_abstract"))
                  (equal last-str "\n"))
             (+ (current-column) magik-indent-level)
-          (if (or (not (member (car found-tok) '("_if" "_elif")))
-                  (not (equal last-str "\n")))
-              (magik--forward-token))
+          (when (or (not (member (car found-tok) '("_if" "_elif")))
+                    (not (equal last-str "\n")))
+            (magik--forward-token))
           (if (and (equal (car found-tok) "\n")
                    (not (equal last-str "\n")))
               (+ (current-column) magik-indent-level)
@@ -264,8 +263,8 @@ the lowest level-operators."
   (let
       ((toks (reverse (magik-tokenise-region (line-beginning-position) (point))))
        (magik-stack nil))  ; stack of ends looking for begins.
-    (if (equal (car (car toks)) "\n")
-        (pop toks))
+    (when (equal (car (car toks)) "\n")
+      (pop toks))
     (while
         (and (progn
                (while
@@ -371,11 +370,10 @@ Skips EOL tokens."
         ;; there is another token on this line, so goto there.
         (goto-char (cdr (cl-second toks)))
       (while
-          (and
-           (eq (forward-line) 0)
-           (null (setq toks (magik-tokenise-line-no-eol-nor-point-min)))))
-      (if toks
-          (goto-char (cdr (car toks)))))))
+          (and (eq (forward-line) 0)
+               (null (setq toks (magik-tokenise-line-no-eol-nor-point-min)))))
+      (when toks
+        (goto-char (cdr (car toks)))))))
 
 ;; T O K E N I S A T I O N
 ;; _______________________
@@ -421,8 +419,7 @@ Add a newline token unless the last token is an operator."
                       (number-to-string (point))))
               (t
                (setq new-state state)))
-        (if (eq new-state 'stay)
-            ()
+        (unless (eq new-state 'stay)
           (cond
            ((eq new-state 'neutral)
             (push (cons (buffer-substring-no-properties token-start (point)) token-start)
@@ -431,39 +428,36 @@ Add a newline token unless the last token is an operator."
             (setq token-start (point))))
           (setq state new-state)
           (setq arr (cdr (assq state magik-state-table)))
-          (if (eq state 'neutral)
-              (backward-char)))
+          (when (eq state 'neutral)
+            (backward-char)))
         (if (eobp)
             (setq reached-the-end t)
           (forward-char)))
       (backward-char)  ; 'cos we over-stepped in order to the last token.
-      (if (and ans
-               (eq (aref (car (car ans)) 0) ?@))
-          (pop ans))
+      (when (and ans
+                 (eq (aref (car (car ans)) 0) ?@))
+        (pop ans))
       (or (assoc (car (car ans)) magik-operator-precedences)
           (push (cons "\n" (line-end-position)) ans))
       (setq ans (reverse ans))
-      (if (not (magik--skip-blank-lines-backward))
-          (push (cons "point-min" (point-min)) ans))
+      (unless (magik--skip-blank-lines-backward)
+        (push (cons "point-min" (point-min)) ans))
       ans)))
 
 (defun magik-tokenise-region-no-eol (start end)
   "Like `magik-tokenise-region' but with EOL tokens chopped off.
 START and END specify the region."
-  (let
-      ((reverse_ans (reverse (magik-tokenise-region start end))))
-
-    (if (equal (car (car reverse_ans)) "\n")
-        (pop reverse_ans))
+  (let ((reverse_ans (reverse (magik-tokenise-region start end))))
+    (when (equal (car (car reverse_ans)) "\n")
+      (pop reverse_ans))
     (reverse reverse_ans)))
 
 (defun magik-tokenise-region-no-eol-nor-point-min (start end)
   "Like `magik-tokenise-region' but with EOL/BOB tokens taken out.
 START and END specify the region."
-  (let
-      ((ans (magik-tokenise-region-no-eol start end)))
-    (if (equal (car (car ans)) "point-min")
-        (pop ans))
+  (let ((ans (magik-tokenise-region-no-eol start end)))
+    (when (equal (car (car ans)) "point-min")
+      (pop ans))
     ans))
 
 (defun magik-tokenise-line-no-eol-nor-point-min ()

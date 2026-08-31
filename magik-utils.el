@@ -145,16 +145,14 @@ Returns a list of paths, or nil if none are found."
   (save-excursion
     (while (looking-at "\\sw\\|\\s_")
       (forward-char 1))
-    (if (re-search-backward "\\sw\\|\\s_" nil t)
-        (progn
-          (forward-char 1)
-          (buffer-substring (point)
-                            (progn
-                              (forward-sexp -1)
-                              (while (looking-at "\\s'")
-                                (forward-char 1))
-                              (point))))
-      nil)))
+    (when (re-search-backward "\\sw\\|\\s_" nil t)
+      (forward-char 1)
+      (buffer-substring (point)
+                        (progn
+                          (forward-sexp -1)
+                          (while (looking-at "\\s'")
+                            (forward-char 1))
+                          (point))))))
 
 (defun magik-utils-substitute-in-file-name (string)
   "Return STRING suitable for `expand-file-name' to expand environment variables."

@@ -108,12 +108,12 @@
 If it's the first '#' and the previous line starts with '#', align with it."
   (interactive "*p")
   (self-insert-command char)
-  (if (save-excursion
-        (and (progn (back-to-indentation) (eq (following-char) ?#))
-             (eq (forward-line -1) 0)
-             (progn (back-to-indentation) (eq (following-char) ?#))
-             (current-column)))
-      (magik-indent-command)))
+  (when (save-excursion
+          (and (progn (back-to-indentation) (eq (following-char) ?#))
+               (eq (forward-line -1) 0)
+               (progn (back-to-indentation) (eq (following-char) ?#))
+               (current-column)))
+    (magik-indent-command)))
 
 (defun magik-insert-pragma ()
   "Insert a Magik pragma statement on the current line."
@@ -144,10 +144,10 @@ If it's the first '#' and the previous line starts with '#', align with it."
 
     ;;Since we now allow for _ in templates for def_slotted_exemplar etc.
     ;;we have to remove any initial _ for normal magik keywords
-    (if (and (> (length str) 0)
-             (equal (substring str 0 1) "_"))
-        (setq str (substring str 1)
-              len (length str)))
+    (when (and (> (length str) 0)
+               (equal (substring str 0 1) "_"))
+      (setq str (substring str 1)
+            len (length str)))
     (setq keyword (all-completions str magik-electric-templates))
     (cond ((null keyword)
            nil)
@@ -162,8 +162,8 @@ If it's the first '#' and the previous line starts with '#', align with it."
         (progn
           (save-excursion
             (skip-chars-backward "a-zA-Z_")
-            (if (eq (following-char) ?_)
-                (delete-char 1)))
+            (when (eq (following-char) ?_)
+              (delete-char 1)))
           (insert (substring keyword len))
           (magik-electric-space 1 t))
       (error "There is no template for %s" str))))
@@ -280,16 +280,16 @@ If it's the first '#' and the previous line starts with '#', align with it."
                 ((re-search-backward "def_mixin\\s-*(\\(\\s-\\|\n\\)*:\\(\\(\\sw\\|_\\)+\\)" nil t)
                  (setq class (match-string 2)))
                 (t nil)))
-        (if (and class
-                 (eq line 'prev_class_name))
-            (insert class "."))
-        (if (and class
-                 (eq line 'prev_class_name_as_symbol))
-            (insert ":" class))))
+        (when (and class
+                   (eq line 'prev_class_name))
+          (insert class "."))
+        (when (and class
+                   (eq line 'prev_class_name_as_symbol))
+          (insert ":" class))))
      ((eq line 'filename_as_symbol)
       (let ((name (if (not (buffer-file-name)) "" (file-name-nondirectory (buffer-file-name)))))
-        (if (string-match "\\.magik$" name)
-            (setq name (substring name 0 (- (length name) 6))))
+        (when (string-match "\\.magik$" name)
+          (setq name (substring name 0 (- (length name) 6))))
         (insert ":" name)))
      ((eq (string-to-char line) ?\t)
       (indent-to (+ col magik-indent-level))
