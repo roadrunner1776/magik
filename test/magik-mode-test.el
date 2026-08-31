@@ -227,5 +227,168 @@
       (goto-char (point-min))
       (should-not (eq (get-text-property (point) 'face) 'magik-text-encoding-face)))))
 
+;;; outline-regexp
+
+(ert-deftest magik-outline-regexp--matches-with-space ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "#% text_encoding = iso8859_1"))))
+
+(ert-deftest magik-outline-regexp--matches-without-space ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "#%text_encoding=utf8"))))
+
+;; _method variants
+
+(ert-deftest magik-outline-regexp--matches-method-definition ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "_method foo.bar()"))))
+
+(ert-deftest magik-outline-regexp--matches-plain-method ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "_method some_engine.some_method_name()"))))
+
+(ert-deftest magik-outline-regexp--matches-private-method ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "_private _method my_exemplar.some_slot"))))
+
+(ert-deftest magik-outline-regexp--matches-abstract-private-iter-method ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "_abstract _private _iter _method foo.bar()"))))
+
+;; .def_property / .add_child
+
+(ert-deftest magik-outline-regexp--matches-def-property ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "my_exemplar.def_property( :foo, :bar )"))))
+
+(ert-deftest magik-outline-regexp--matches-add-child ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "a_tree.add_child( a_child )"))))
+
+;; .define_* variants
+
+(ert-deftest magik-outline-regexp--matches-define-shared-variable ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p
+             outline-regexp
+             "my_dialog.define_shared_variable(:active?,  _true, :public)"))))
+
+(ert-deftest magik-outline-regexp--matches-define-shared-constant ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p
+             outline-regexp
+             "my_dialog.define_shared_constant( :help_id, 60560, :public )"))))
+
+(ert-deftest magik-outline-regexp--matches-define-slot-access ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p
+             outline-regexp
+             "my_exemplar.define_slot_access(:some_slot, :writable)"))))
+
+(ert-deftest magik-outline-regexp--matches-define-slot-externally-readable ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p
+             outline-regexp
+             "my_exemplar.define_slot_externally_readable(:some_slot)"))))
+
+(ert-deftest magik-outline-regexp--matches-define-slot-externally-writable ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p
+             outline-regexp
+             "my_exemplar.define_slot_externally_writable(:log?)"))))
+
+(ert-deftest magik-outline-regexp--matches-define-property ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p
+             outline-regexp
+             "my_exemplar.define_property( :some_property, _unset)"))))
+
+(ert-deftest magik-outline-regexp--matches-define-interface ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p
+             outline-regexp
+             "my_exemplar.define_interface(:exported_properties, _unset)"))))
+
+(ert-deftest magik-outline-regexp--matches-define-method-signature ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p
+             outline-regexp
+             "my_exemplar.define_method_signature( :some_method|()|, _unset)"))))
+
+;; def_slotted_exemplar / def_indexed_exemplar / def_mixin, _global,
+;; read_message_patch / read_translator_patch
+
+(ert-deftest magik-outline-regexp--matches-def-slotted-exemplar ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p
+             outline-regexp
+             "def_slotted_exemplar(:my_exemplar, {{:some_slot, _unset}}, {:some_mixin})"))))
+
+(ert-deftest magik-outline-regexp--matches-def-mixin ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "def_mixin(:my_mixin)"))))
+
+(ert-deftest magik-outline-regexp--matches-global ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "_global my_global << _proc @my_global( some_arg )"))))
+
+(ert-deftest magik-outline-regexp--matches-read-message-patch ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "read_message_patch(:my_application)"))))
+
+;; "#>" doc-comment heading markers.  A single "#" plus one or more ">"
+;; denotes increasingly nested heading levels, mirroring the "*", "**",
+;; "***" convention of Outline mode.
+
+(ert-deftest magik-outline-regexp--matches-single-level-doc-marker ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "#> Heading"))))
+
+(ert-deftest magik-outline-regexp--matches-double-gt-doc-marker ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "#>> _self.some_method()"))))
+
+(ert-deftest magik-outline-regexp--matches-double-hash-double-gt-doc-marker ()
+  (with-temp-buffer
+    (magik-mode)
+    (should (string-match-p outline-regexp "##>> _self.some_other_method(arg,"))))
+
+;; Negative cases
+
+(ert-deftest magik-outline-regexp--does-not-match-plain-code ()
+  (with-temp-buffer
+    (magik-mode)
+    (should-not (string-match-p outline-regexp "a << b + c"))))
+
+(ert-deftest magik-outline-regexp--define-branch-dot-is-a-literal-dot ()
+  "The \".*\\.\" before \"def_property\"/\"define_*\" must require a real
+literal \".\" separator, not match on an arbitrary character in its place."
+  (with-temp-buffer
+    (magik-mode)
+    (should-not (string-match-p outline-regexp "obj?def_property(:foo)"))
+    (should (string-match-p outline-regexp "obj.def_property(:foo)"))))
+
 (provide 'magik-mode-test)
 ;;; magik-mode-test.el ends here
