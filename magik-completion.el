@@ -1338,25 +1338,30 @@ procedures/dynamics, and yasnippet template keys."
               :company-kind (lambda (_) 'keyword)
               :annotation-function (magik-completion--kind-annotation 'keyword))))
      ((magik-completion--global-prefix-p beg prefix)
-      (let ((qualifiable
-             (append
-              (when magik-completion-enable-keywords
-                (magik-completion--tag-kind magik-completion--builtins 'constant))
-              (when magik-completion-enable-cb
-                (magik-completion--tag-kind (magik-completion--query-classes) 'class))
-              (when magik-completion-enable-cb
-                (mapcar 'magik-completion--tag-global
-                        (magik-completion--query-globals)))))
-            (plain
-             (append
-              (when magik-completion-enable-variables
-                (magik-completion--tag-kind
-                 (magik-completion--scan-local-variables) 'variable))
+      (let* ((snippet-keys
               (when magik-completion-enable-snippets
-                (magik-completion--tag-kind
-                 (delq nil (mapcar 'yas--template-key
-                                    (magik-completion--snippet-templates)))
-                 'snippet)))))
+                (delq nil (mapcar 'yas--template-key
+                                   (magik-completion--snippet-templates)))))
+             (qualifiable
+              (append
+               (when magik-completion-enable-keywords
+                 (magik-completion--tag-kind magik-completion--builtins 'constant))
+               (when magik-completion-enable-cb
+                 (magik-completion--tag-kind
+                  (seq-remove (lambda (c) (member c snippet-keys))
+                              (magik-completion--query-classes))
+                  'class))
+               (when magik-completion-enable-cb
+                 (mapcar 'magik-completion--tag-global
+                         (seq-remove (lambda (c) (member c snippet-keys))
+                                     (magik-completion--query-globals))))))
+             (plain
+              (append
+               (when magik-completion-enable-variables
+                 (magik-completion--tag-kind
+                  (magik-completion--scan-local-variables) 'variable))
+               (when magik-completion-enable-snippets
+                 (magik-completion--tag-kind snippet-keys 'snippet)))))
         (when (or qualifiable plain)
           (list beg end (magik-completion--symbol-table qualifiable plain)
                 :exclusive 'no
