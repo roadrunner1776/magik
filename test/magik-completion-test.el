@@ -205,6 +205,26 @@ Returns (ARGS OPTIONAL GATHER)."
   (should (equal (magik-completion-test--parse-args "thing iter_method OPT GATH args")
                  '(("thing" "iter_method") nil ("args")))))
 
+(ert-deftest magik-completion--parse-args-line--question-mark-suffixed-names ()
+  "Required param names ending in `?' must be kept whole, not truncated."
+  (should (equal (magik-completion-test--parse-args "yes? no?")
+                 '(("yes?" "no?") nil nil))))
+
+(ert-deftest magik-completion--parse-args-line--bang-suffixed-optional-name ()
+  "Optional param names ending in `!' must be kept whole, not truncated."
+  (should (equal (magik-completion-test--parse-args "OPT flag!")
+                 '(nil ("flag!") nil))))
+
+(ert-deftest magik-completion--parse-args-line--question-mark-names-without-cb-mode ()
+  "Parsing must not depend on `magik-cb-mode' syntax table being active.
+The real CB completion process buffer is created in `fundamental-mode'
+\(see `magik-completion--ensure-cb-process'), where `?' and `!' are not
+word-syntax characters, so the parser must not rely on `skip-syntax-forward'."
+  (with-temp-buffer
+    (insert " yes? no?\n")
+    (should (equal (magik-completion--parse-args-line (point-min))
+                   '(("yes?" "no?") nil nil)))))
+
 (ert-deftest magik-completion--parse-args-line--gather-no-trailing-newlines ()
   "Gather param name must not include trailing newlines from the CB buffer."
   (with-temp-buffer
