@@ -876,10 +876,9 @@ Returns a list (REQUIRED OPTIONAL GATHER)."
            ((looking-at "OPT ")
             (setq opt t)
             (goto-char (match-end 0)))
-           ((> (skip-syntax-forward "w_") 0)
-            (let ((name (buffer-substring-no-properties
-                         (save-excursion (skip-syntax-backward "w_") (point))
-                         (point))))
+           ((looking-at "[[:alnum:]_?!]+")
+            (let ((name (match-string-no-properties 0)))
+              (goto-char (match-end 0))
               (if opt
                   (push name optional)
                 (push name args)))
