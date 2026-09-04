@@ -408,7 +408,8 @@ Returns nil if point is inside a comment or string."
           (cons beg end))))))
 
 (defun magik-completion--slot-bounds ()
-  "Return bounds if point is completing a slot reference (after `.')."
+  "Return bounds if point is completing a slot reference (after `.').
+Allows an empty prefix (BEG == END) right after the dot."
   (let ((syntax (syntax-ppss)))
     (when (and (magik-completion--available-p)
                (not (nth 3 syntax))
@@ -417,8 +418,7 @@ Returns nil if point is inside a comment or string."
             (beg (save-excursion
                    (skip-chars-backward "a-zA-Z0-9_!?")
                    (point))))
-        (when (and (< beg end)
-                   (> beg (point-min))
+        (when (and (> beg (point-min))
                    (eq (char-before beg) ?.)
                    ;; slot access: preceding char before . is not a word char
                    ;; (i.e. it's `.slot` not `obj.method`)
@@ -484,6 +484,7 @@ so code inspecting properties at position 0 (e.g. `magik-package',
               (slots (magik-completion--scan-slots)))
     (list (car bounds) (cdr bounds) slots
           :exclusive 'no
+          :company-prefix-length t
           :company-kind (lambda (_) 'property)
           :annotation-function (magik-completion--kind-annotation 'slot))))
 
