@@ -1561,6 +1561,7 @@ where MODE is the name of the major mode with the '-mode' postfix."
   (define-key magik-session-mode-map (kbd "<f2> \C-n")   'magik-session-undisplay-history)
   (define-key magik-session-mode-map (kbd "<f2> =")      'magik-session-traceback-print)
   (define-key magik-session-mode-map (kbd "<f2> f")      'magik-session-filter-toggle-filter)
+  (define-key magik-session-mode-map (kbd "<f2> i")      'magik-completion-invalidate-cache)
   (define-key magik-session-mode-map (kbd "<f2> p")      'magik-session-recall-prev-matching-cmd)
   (define-key magik-session-mode-map (kbd "<f2> n")      'magik-session-recall-next-matching-cmd)
 

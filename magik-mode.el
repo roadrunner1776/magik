@@ -1990,6 +1990,7 @@ Prevents expansion inside strings and comments."
   (define-key magik-base-mode-map (kbd "<f2> $") 'magik-transmit-$-chunk)
   (define-key magik-base-mode-map (kbd "<f2> D") 'magik-file-sw-method-doc)
   (define-key magik-base-mode-map (kbd "<f2> d") 'magik-single-method-sw-method-doc)
+  (define-key magik-base-mode-map (kbd "<f2> i") 'magik-completion-invalidate-cache)
   (define-key magik-base-mode-map (kbd "<f2> P") 'magik-file-pragma)
   (define-key magik-base-mode-map (kbd "<f2> p") 'magik-single-pragma)
 

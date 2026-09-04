@@ -174,6 +174,7 @@ Major mode for running a Magik session as a direct sub-process. Provides command
 | <kbd>F2</kbd>-<kbd>↓</kbd> or <kbd>F2</kbd>-<kbd>C-n</kbd> | Unfold buffer. |
 | <kbd>F2</kbd>-<kbd>=</kbd> | Print last traceback. |
 | <kbd>F2</kbd>-<kbd>f</kbd> | Toggle output filter. |
+| <kbd>F2</kbd>-<kbd>i</kbd> | Invalidate completion caches. |
 | <kbd>F2</kbd>-<kbd>p</kbd> | Recall previous command matching current input. |
 | <kbd>F2</kbd>-<kbd>n</kbd> | Recall next command matching current input. |
 | <kbd>F4</kbd>-<kbd>F4</kbd> | Complete symbol at point. |
@@ -213,6 +214,7 @@ Support for imenu. Try: `(add-hook 'magik-mode-hook 'imenu-add-menubar-index)`
 | <kbd>M-↑</kbd> or <kbd>F2</kbd>-<kbd>↑</kbd> | Move to previous method. |
 | <kbd>M-↓</kbd> or <kbd>F2</kbd>-<kbd>↓</kbd> | Move to next method. |
 | <kbd>F2</kbd>-<kbd>$</kbd> | Transmit current `$` chunk to session. |
+| <kbd>F2</kbd>-<kbd>i</kbd> | Invalidate completion caches. |
 | <kbd>F2</kbd>-<kbd>d</kbd> | Check documentation for method at point. |
 | <kbd>F2</kbd>-<kbd>D</kbd> | Check documentation for all methods in file. |
 | <kbd>F2</kbd>-<kbd>p</kbd> | Check pragma for method at point. |
