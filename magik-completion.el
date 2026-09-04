@@ -483,7 +483,7 @@ so code inspecting properties at position 0 (e.g. `magik-package',
               (slots (magik-completion--scan-slots)))
     (list (car bounds) (cdr bounds) slots
           :exclusive 'no
-          :company-kind (lambda (_) 'slot)
+          :company-kind (lambda (_) 'property)
           :annotation-function (magik-completion--kind-annotation 'slot))))
 
 (defun magik-completion-at-point-character ()
