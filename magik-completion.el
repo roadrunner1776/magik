@@ -192,10 +192,11 @@ that via a `magik-package' text property, for doc-buffer lookups.")
 Uses tree-sitter for scope-aware scanning when available,
 falls back to regex-based scanning otherwise.
 Returns a list of variable name strings."
-  (if (and (fboundp 'treesit-parser-list)
-           (treesit-parser-list))
-      (magik-completion--ts-scan-variables)
-    (magik-completion--regex-scan-variables)))
+  (unless (derived-mode-p 'magik-session-mode)
+    (if (and (fboundp 'treesit-parser-list)
+             (treesit-parser-list))
+        (magik-completion--ts-scan-variables)
+      (magik-completion--regex-scan-variables))))
 
 (defconst magik-completion--ts-param-scopes '("method" "procedure")
   "Tree-sitter node types that carry their own parameter list.")
@@ -769,9 +770,9 @@ default dispatch, see `magik-completion--cb-filter'."
               (run-at-time
                0 nil
                (lambda ()
+                 (funcall callback result)
                  (when (buffer-live-p requester)
                    (with-current-buffer requester
-                     (funcall callback result)
                      (if no-refresh
                          (magik-completion--nudge-doc-display)
                        (when (and completion-in-region-mode

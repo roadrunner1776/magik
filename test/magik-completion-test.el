@@ -518,6 +518,19 @@ Skips the test when yasnippet is unavailable."
     (insert "some code")
     (should (magik-completion--available-p))))
 
+;;; magik-completion--scan-local-variables
+
+(ert-deftest magik-completion--scan-local-variables--skipped-in-session-mode ()
+  "Local-variable scanning is skipped entirely in a Magik session
+buffer: prompt input is never inside a `_method'/`_proc', so there's
+no enclosing scope to scan, and unlike a source file, a session
+buffer's transcript can be huge -- scanning it for no benefit is what
+made typing stutter there."
+  (with-temp-buffer
+    (magik-session-mode)
+    (insert "_method foo.bar()\n  _local x << 1\n  x")
+    (should-not (magik-completion--scan-local-variables))))
+
 ;;; magik-completion--ts-scan-variables
 
 (defconst magik-completion-test--ts-method "_method my_thing.compute(a_stream, count, _optional flags, _gather rest)
@@ -700,6 +713,25 @@ so stale output can't corrupt a later query."
                  (lambda () (not (eq result 'never-called))) proc))
         (should-not result)
         (should-not (process-live-p proc))))))
+
+(ert-deftest magik-completion--cb-query-async--callback-runs-after-requester-killed ()
+  "CALLBACK must run even if the requesting buffer was killed before the
+CB replied.  CALLBACK clears pending-fetch flags and populates caches
+\(global state, not tied to any buffer\); if it were skipped, those
+flags would stay stuck forever, blocking every buffer from ever
+fetching that cache again -- exactly the \"cache stays empty until I
+invalidate-cache\" symptom this is a regression test for."
+  (magik-completion-test--with-fake-cb proc
+    (let ((result 'never-called)
+          (requester (generate-new-buffer " *test-requester*")))
+      (with-current-buffer requester
+        (should (magik-completion--cb-query-async
+                 "PING\n" (lambda (r) (setq result r))
+                 (lambda (str) (string-match-p "\n" str)) #'string-trim)))
+      (kill-buffer requester)
+      (should (magik-completion-test--wait-until
+               (lambda () (not (eq result 'never-called))) proc))
+      (should (equal result "PING")))))
 
 (ert-deftest magik-completion--cb-cached-fetch--dispatches-once-then-caches ()
   "The first call marks a fetch pending and dispatches it; a call made
