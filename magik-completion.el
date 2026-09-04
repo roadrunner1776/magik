@@ -123,11 +123,11 @@
             "magik_input_method_event" "magik_url"
             "map_extent_prompt_dialog"
             "map_plugin_view_defaults_options_panel"
-            "map_plugin_view_interaction_options_panel" "method"
+            "map_plugin_view_interaction_options_panel"
             "method_overwrites" "method_table" "mixin" "moj_stack_frame"
             "options_dialog" "ordered_geometry_set" "osgi_bundle_manager"
             "output" "package" "paper_size" "pbkdf2_digest"
-            "perform_procedure" "pixel_coords_rope" "pragma"
+            "perform_procedure" "pixel_coords_rope"
             "predicate_any_all" "predicate_count_helper"
             "predicate_join_helper" "predicate_navigate" "probe"
             "probe_chain" "procedure" "random" "rational_b_spline"
@@ -1338,25 +1338,30 @@ procedures/dynamics, and yasnippet template keys."
               :company-kind (lambda (_) 'keyword)
               :annotation-function (magik-completion--kind-annotation 'keyword))))
      ((magik-completion--global-prefix-p beg prefix)
-      (let ((qualifiable
-             (append
-              (when magik-completion-enable-keywords
-                (magik-completion--tag-kind magik-completion--builtins 'constant))
-              (when magik-completion-enable-cb
-                (magik-completion--tag-kind (magik-completion--query-classes) 'class))
-              (when magik-completion-enable-cb
-                (mapcar 'magik-completion--tag-global
-                        (magik-completion--query-globals)))))
-            (plain
-             (append
-              (when magik-completion-enable-variables
-                (magik-completion--tag-kind
-                 (magik-completion--scan-local-variables) 'variable))
+      (let* ((snippet-keys
               (when magik-completion-enable-snippets
-                (magik-completion--tag-kind
-                 (delq nil (mapcar 'yas--template-key
-                                    (magik-completion--snippet-templates)))
-                 'snippet)))))
+                (delq nil (mapcar 'yas--template-key
+                                   (magik-completion--snippet-templates)))))
+             (qualifiable
+              (append
+               (when magik-completion-enable-keywords
+                 (magik-completion--tag-kind magik-completion--builtins 'constant))
+               (when magik-completion-enable-cb
+                 (magik-completion--tag-kind
+                  (seq-remove (lambda (c) (member c snippet-keys))
+                              (magik-completion--query-classes))
+                  'class))
+               (when magik-completion-enable-cb
+                 (mapcar 'magik-completion--tag-global
+                         (seq-remove (lambda (c) (member c snippet-keys))
+                                     (magik-completion--query-globals))))))
+             (plain
+              (append
+               (when magik-completion-enable-variables
+                 (magik-completion--tag-kind
+                  (magik-completion--scan-local-variables) 'variable))
+               (when magik-completion-enable-snippets
+                 (magik-completion--tag-kind snippet-keys 'snippet)))))
         (when (or qualifiable plain)
           (list beg end (magik-completion--symbol-table qualifiable plain)
                 :exclusive 'no

@@ -486,6 +486,59 @@ Skips the test when yasnippet is unavailable."
     (magik-completion--snippet-exit-function "mkey" 'exact)
     (should (equal (buffer-string) "mkey"))))
 
+;;; Snippet keys suppress colliding globals/procs/classes
+
+(ert-deftest magik-completion-at-point-symbol--snippet-suppresses-matching-global ()
+  "A global/proc sharing a snippet's key is dropped; the snippet wins."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mk")
+    (let ((magik-completion-enable-cb t))
+      (cl-letf (((symbol-function 'magik-completion--query-globals)
+                 (lambda () '("mkey")))
+                ((symbol-function 'magik-completion--query-classes)
+                 (lambda () nil)))
+        (let* ((capf (magik-completion-at-point-symbol))
+               (cands (all-completions "mkey" (nth 2 capf))))
+          (should (equal (mapcar (lambda (c) (get-text-property 0 'magik-kind c))
+                                  cands)
+                         '(snippet))))))))
+
+(ert-deftest magik-completion-at-point-symbol--snippet-suppresses-matching-class ()
+  "A class sharing a snippet's key is dropped; the snippet wins."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mk")
+    (let ((magik-completion-enable-cb t))
+      (cl-letf (((symbol-function 'magik-completion--query-globals)
+                 (lambda () nil))
+                ((symbol-function 'magik-completion--query-classes)
+                 (lambda () '("mkey"))))
+        (let* ((capf (magik-completion-at-point-symbol))
+               (cands (all-completions "mkey" (nth 2 capf))))
+          (should (equal (mapcar (lambda (c) (get-text-property 0 'magik-kind c))
+                                  cands)
+                         '(snippet))))))))
+
+(ert-deftest magik-completion-at-point-symbol--non-colliding-global-still-offered ()
+  "A global/proc that doesn't share a snippet's key is unaffected."
+  (magik-completion-test--with-snippet-buffer
+    (insert "mk")
+    (let ((magik-completion-enable-cb t))
+      (cl-letf (((symbol-function 'magik-completion--query-globals)
+                 (lambda () '("mk_other")))
+                ((symbol-function 'magik-completion--query-classes)
+                 (lambda () nil)))
+        (let* ((capf (magik-completion-at-point-symbol))
+               (cands (all-completions "mk" (nth 2 capf))))
+          (should (member "mk_other" cands))
+          (should (member "mkey" cands)))))))
+
+(ert-deftest magik-completion--builtins--excludes-names-colliding-with-shipped-snippets ()
+  "`method' and `pragma' are shipped magik-mode snippet keys, so they
+must not also appear in the static builtins list (they'd otherwise
+always be shadowed by the snippet)."
+  (should-not (member "method" magik-completion--builtins))
+  (should-not (member "pragma" magik-completion--builtins)))
+
 ;;; Session input-area gating
 
 (defvar magik-session-prompt)
