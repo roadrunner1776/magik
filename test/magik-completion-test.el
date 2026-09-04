@@ -323,6 +323,46 @@ $
     (should-not (magik-completion--exemplar-definition-region ""))
     (should-not (magik-completion--exemplar-definition-region nil))))
 
+;;; Slot bounds detection
+
+(ert-deftest magik-completion--slot-bounds--bare-dot-offers-empty-prefix ()
+  "A bare `.' with no receiver offers the full slot list immediately."
+  (with-temp-buffer
+    (insert magik-completion-test--two-exemplars)
+    (goto-char (point-min))
+    (search-forward "_return .")
+    (should (equal (magik-completion--slot-bounds) (cons (point) (point))))))
+
+(ert-deftest magik-completion--slot-bounds--narrows-to-typed-prefix ()
+  "Typing \".s\" after a bare dot still bounds just the \"s\" prefix."
+  (with-temp-buffer
+    (insert magik-completion-test--two-exemplars)
+    (goto-char (point-min))
+    (search-forward "_return .")
+    (insert "s")
+    (should (equal (magik-completion--slot-bounds) (cons (1- (point)) (point))))))
+
+(ert-deftest magik-completion--slot-bounds--receiver-before-dot-offers-nothing ()
+  "A `.' preceded by a receiver is method access, not slot access."
+  (with-temp-buffer
+    (magik-mode)
+    (insert "pseudo_area.")
+    (should-not (magik-completion--slot-bounds))))
+
+(ert-deftest magik-completion-at-point-slots--bare-dot-sets-company-prefix-length ()
+  "Marks the result as satisfying any frontend minimum-prefix-length."
+  (with-temp-buffer
+    (insert magik-completion-test--two-exemplars)
+    (goto-char (point-min))
+    (search-forward "_return .")
+    (let ((capf (magik-completion-at-point-slots)))
+      (should capf)
+      (should (equal (list (nth 0 capf) (nth 1 capf)) (list (point) (point))))
+      (should (member "owner" (nth 2 capf)))
+      (should (member "size" (nth 2 capf)))
+      (should-not (member "other_slot" (nth 2 capf)))
+      (should (eq (plist-get (nthcdr 3 capf) :company-prefix-length) t)))))
+
 ;;; Package-qualified completion
 
 (ert-deftest magik-completion--typed-package--qualified-prefix ()
