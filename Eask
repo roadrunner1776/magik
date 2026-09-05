@@ -1,7 +1,7 @@
 ;; -*- mode: eask; lexical-binding: t -*-
 
 (package "magik-mode"
-         "0.6.5"
+         "0.6.6"
          "Emacs major mode for Smallworld Magik files")
 
 (website-url "https://github.com/roadrunner1776/magik")
