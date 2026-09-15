@@ -353,13 +353,15 @@ EXEMPLAR is nil, empty, or not defined in this buffer."
         (cons (match-beginning 0)
               (or (re-search-forward "^\\$" nil t) (point-max)))))))
 
-(defun magik-completion--scan-slots ()
-  "Scan for slot names of the exemplar the method at point belongs to.
+(defun magik-completion--scan-slots (&optional exemplar)
+  "Scan for slot names of EXEMPLAR.
+When EXEMPLAR is nil, use the exemplar of the method at point instead.
 Slots are read from the matching exemplar definition when it can be
 found in the buffer; otherwise no slots are returned.  Returns a list
 of slot name strings."
-  (let* ((exemplar (when (fboundp 'magik-current-method-name)
-                     (cadr (magik-current-method-name))))
+  (let* ((exemplar (or exemplar
+                        (when (fboundp 'magik-current-method-name)
+                          (cadr (magik-current-method-name)))))
          (region (magik-completion--exemplar-definition-region exemplar))
          (slots '()))
     (when region
@@ -409,8 +411,16 @@ Returns nil if point is inside a comment or string."
           (cons beg end))))))
 
 (defun magik-completion--slot-bounds ()
-  "Return bounds if point is completing a slot reference (after `.').
-Allows an empty prefix (BEG == END) right after the dot."
+  "Return ((BEG . END) . EXEMPLAR) if point is completing a slot reference.
+Two forms are recognized:
+- a bare `.' (optionally with a partial slot name), for implicit
+  `_self' slot access inside a method body.  EXEMPLAR is nil, meaning
+  \"use the current method's exemplar\" (see `magik-completion--scan-slots').
+- `RECEIVER.define_slot_access(:partial', restricted to the first
+  argument.  RECEIVER must be an explicit exemplar name, or
+  `_self'/`_clone'/`_super' (resolved to the current method's
+  exemplar).  EXEMPLAR is the resolved exemplar name string.
+Allows an empty prefix (BEG == END) right after `.' or `('."
   (let ((syntax (syntax-ppss)))
     (when (and (magik-completion--available-p)
                (not (nth 3 syntax))
@@ -419,14 +429,29 @@ Allows an empty prefix (BEG == END) right after the dot."
             (beg (save-excursion
                    (skip-chars-backward "a-zA-Z0-9_!?")
                    (point))))
-        (when (and (> beg (point-min))
-                   (eq (char-before beg) ?.)
-                   ;; slot access: preceding char before . is not a word char
-                   ;; (i.e. it's `.slot` not `obj.method`)
-                   (let ((pre-dot (char-before (1- beg))))
-                     (or (null pre-dot)
-                         (memq pre-dot '(?\s ?\t ?\n ?\( ?, ?\;)))))
-          (cons beg end))))))
+        (cond
+         ;; RECEIVER.define_slot_access(:partial -- first argument only
+         ((and (eq (char-before beg) ?:)
+               (save-excursion
+                 (goto-char (1- beg))
+                 (re-search-backward
+                  "\\_<\\([a-zA-Z_][a-zA-Z0-9_!?]*\\)\\.define_slot_access(\\s-*\\="
+                  (line-beginning-position) t)))
+          (let ((receiver (match-string-no-properties 1)))
+            (cons (cons beg end)
+                  (if (member receiver '("_self" "_clone" "_super"))
+                      (when (fboundp 'magik-current-method-name)
+                        (cadr (magik-current-method-name)))
+                    receiver))))
+         ;; bare `.' -- implicit self-slot access
+         ((and (> beg (point-min))
+               (eq (char-before beg) ?.)
+               ;; slot access: preceding char before . is not a word char
+               ;; (i.e. it's `.slot` not `obj.method`)
+               (let ((pre-dot (char-before (1- beg))))
+                 (or (null pre-dot)
+                     (memq pre-dot '(?\s ?\t ?\n ?\( ?, ?\;)))))
+          (cons (cons beg end) nil)))))))
 
 (defun magik-completion--after-char-p (pos char)
   "Return non-nil if POS is immediately preceded by CHAR."
@@ -481,8 +506,9 @@ so code inspecting properties at position 0 (e.g. `magik-package',
 
 (defun magik-completion-at-point-slots ()
   "Completion-at-point function for exemplar slot references."
-  (when-let* ((bounds (magik-completion--slot-bounds))
-              (slots (magik-completion--scan-slots)))
+  (when-let* ((ctx (magik-completion--slot-bounds))
+              (bounds (car ctx))
+              (slots (magik-completion--scan-slots (cdr ctx))))
     (list (car bounds) (cdr bounds) slots
           :exclusive 'no
           :company-prefix-length t

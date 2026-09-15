@@ -324,6 +324,16 @@ call), as in the case that motivated this test."
     (goto-char (point-max))
     (should-not (magik-completion--scan-slots))))
 
+(ert-deftest magik-completion--scan-slots--explicit-exemplar-argument ()
+  "An explicit EXEMPLAR argument is used regardless of the current method."
+  (with-temp-buffer
+    (insert magik-completion-test--two-exemplars)
+    (goto-char (point-min))
+    (let ((slots (magik-completion--scan-slots "my_thing")))
+      (should (member "owner" slots))
+      (should (member "size" slots))
+      (should-not (member "other_slot" slots)))))
+
 (ert-deftest magik-completion--exemplar-definition-region--not-found ()
   "Unknown or empty exemplar names yield no region."
   (with-temp-buffer
@@ -340,7 +350,7 @@ call), as in the case that motivated this test."
     (insert magik-completion-test--two-exemplars)
     (goto-char (point-min))
     (search-forward "_return .")
-    (should (equal (magik-completion--slot-bounds) (cons (point) (point))))))
+    (should (equal (magik-completion--slot-bounds) (cons (cons (point) (point)) nil)))))
 
 (ert-deftest magik-completion--slot-bounds--narrows-to-typed-prefix ()
   "Typing \".s\" after a bare dot still bounds just the \"s\" prefix."
@@ -349,13 +359,48 @@ call), as in the case that motivated this test."
     (goto-char (point-min))
     (search-forward "_return .")
     (insert "s")
-    (should (equal (magik-completion--slot-bounds) (cons (1- (point)) (point))))))
+    (should (equal (magik-completion--slot-bounds) (cons (cons (1- (point)) (point)) nil)))))
 
 (ert-deftest magik-completion--slot-bounds--receiver-before-dot-offers-nothing ()
   "A `.' preceded by a receiver is method access, not slot access."
   (with-temp-buffer
     (magik-mode)
     (insert "pseudo_area.")
+    (should-not (magik-completion--slot-bounds))))
+
+(ert-deftest magik-completion--slot-bounds--define-slot-access-explicit-receiver ()
+  "The first argument of `RECEIVER.define_slot_access(' resolves RECEIVER
+as the exemplar, independent of the current method."
+  (with-temp-buffer
+    (insert magik-completion-test--two-exemplars)
+    (goto-char (point-max))
+    (insert "my_thing.define_slot_access(:sl")
+    (should (equal (magik-completion--slot-bounds)
+                   (cons (cons (- (point) 2) (point)) "my_thing")))))
+
+(ert-deftest magik-completion--slot-bounds--define-slot-access-self-receiver ()
+  "`_self.define_slot_access(' resolves to the current method's exemplar."
+  (skip-unless (require 'magik-mode nil t))
+  (with-temp-buffer
+    (insert "def_slotted_exemplar(:my_thing,\n\t{\n\t\t{:owner, _unset},\n\t\t{:size, 1}\n\t})\n$\n\n"
+            "_method my_thing.setup()\n"
+            "\t_self.define_slot_access(:\n"
+            "_endmethod\n$\n")
+    (goto-char (point-min))
+    (search-forward "_self.define_slot_access(:")
+    (should (equal (magik-completion--slot-bounds)
+                   (cons (cons (point) (point)) "my_thing")))))
+
+(ert-deftest magik-completion--slot-bounds--define-slot-access-second-argument-offers-nothing ()
+  "The second argument of `define_slot_access' is not completed as a slot."
+  (with-temp-buffer
+    (insert "my_thing.define_slot_access(:owner, :pub")
+    (should-not (magik-completion--slot-bounds))))
+
+(ert-deftest magik-completion--slot-bounds--define-slot-access-other-call-offers-nothing ()
+  "Only `define_slot_access' triggers this completion, not similar calls."
+  (with-temp-buffer
+    (insert "my_thing.define_slot_externally_readable(:")
     (should-not (magik-completion--slot-bounds))))
 
 (ert-deftest magik-completion-at-point-slots--bare-dot-sets-company-prefix-length ()
@@ -371,6 +416,35 @@ call), as in the case that motivated this test."
       (should (member "size" (nth 2 capf)))
       (should-not (member "other_slot" (nth 2 capf)))
       (should (eq (plist-get (nthcdr 3 capf) :company-prefix-length) t)))))
+
+(ert-deftest magik-completion-at-point-slots--define-slot-access-explicit-receiver ()
+  "Completes the first argument of `define_slot_access' from an explicit receiver."
+  (with-temp-buffer
+    (insert magik-completion-test--two-exemplars)
+    (goto-char (point-max))
+    (insert "my_thing.define_slot_access(:")
+    (let ((capf (magik-completion-at-point-slots)))
+      (should capf)
+      (should (equal (list (nth 0 capf) (nth 1 capf)) (list (point) (point))))
+      (should (member "owner" (nth 2 capf)))
+      (should (member "size" (nth 2 capf)))
+      (should-not (member "other_slot" (nth 2 capf)))
+      (should (eq (funcall (plist-get (nthcdr 3 capf) :company-kind) "owner") 'property)))))
+
+(ert-deftest magik-completion-at-point-slots--define-slot-access-self-receiver ()
+  "Completes the first argument of `define_slot_access' from `_self'."
+  (skip-unless (require 'magik-mode nil t))
+  (with-temp-buffer
+    (insert "def_slotted_exemplar(:my_thing,\n\t{\n\t\t{:owner, _unset},\n\t\t{:size, 1}\n\t})\n$\n\n"
+            "_method my_thing.setup()\n"
+            "\t_self.define_slot_access(:\n"
+            "_endmethod\n$\n")
+    (goto-char (point-min))
+    (search-forward "_self.define_slot_access(:")
+    (let ((capf (magik-completion-at-point-slots)))
+      (should capf)
+      (should (member "owner" (nth 2 capf)))
+      (should (member "size" (nth 2 capf))))))
 
 ;;; Package-qualified completion
 
