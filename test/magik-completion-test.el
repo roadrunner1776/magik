@@ -68,11 +68,12 @@ GATHER a list with the gather arg name, START-SIG is \"(\" or nil."
 
 ;;; --- no params (method takes parens but nothing inside)
 
-(ert-deftest magik-completion--build-param-snippet--no-params-inserts-parens ()
-  "Method with start-sig but no params inserts empty parens."
+(ert-deftest magik-completion--build-param-snippet--no-params-returns-nil ()
+  "Method with start-sig but no params has nothing left to insert: the
+parens are already part of the candidate text."
   (let ((cand (magik-completion-test--candidate nil nil nil "(")))
     (magik-completion-test--with-settings t t t
-      (should (equal (magik-completion--build-param-snippet cand) "()")))))
+      (should-not (magik-completion--build-param-snippet cand)))))
 
 ;;; --- optional params only
 
@@ -84,10 +85,10 @@ GATHER a list with the gather arg name, START-SIG is \"(\" or nil."
                      "(${1:dataset_name})$0")))))
 
 (ert-deftest magik-completion--build-param-snippet--optional-only-excluded ()
-  "Optional-only method with insert-optional=nil produces empty parens."
+  "Optional-only method with insert-optional=nil has nothing to insert."
   (let ((cand (magik-completion-test--candidate nil '("dataset_name") nil "(")))
     (magik-completion-test--with-settings t nil t
-      (should (equal (magik-completion--build-param-snippet cand) "()")))))
+      (should-not (magik-completion--build-param-snippet cand)))))
 
 (ert-deftest magik-completion--build-param-snippet--multiple-optional-included ()
   "Multiple optional params all appear when included."
@@ -106,10 +107,10 @@ GATHER a list with the gather arg name, START-SIG is \"(\" or nil."
                      "(${1:args})$0")))))
 
 (ert-deftest magik-completion--build-param-snippet--gather-only-excluded ()
-  "Gather-only method with insert-gather=nil produces empty parens."
+  "Gather-only method with insert-gather=nil has nothing to insert."
   (let ((cand (magik-completion-test--candidate nil nil '("args") "(")))
     (magik-completion-test--with-settings t t nil
-      (should (equal (magik-completion--build-param-snippet cand) "()")))))
+      (should-not (magik-completion--build-param-snippet cand)))))
 
 ;;; --- required + gather
 
@@ -139,11 +140,10 @@ GATHER a list with the gather arg name, START-SIG is \"(\" or nil."
 (ert-deftest magik-completion--build-param-snippet--optional-excluded-suppresses-gather ()
   "Gather suppressed when preceding optional params are excluded.
 Passing gather args without the optional positional arg is a positional
-error in Magik, so we fall back to empty parens rather than a misleading
-snippet."
+error in Magik, so nothing is inserted rather than a misleading snippet."
   (let ((cand (magik-completion-test--candidate nil '("new_name") '("new_properties") "(")))
     (magik-completion-test--with-settings t nil t
-      (should (equal (magik-completion--build-param-snippet cand) "()")))))
+      (should-not (magik-completion--build-param-snippet cand)))))
 
 ;;; --- required + optional + gather
 
@@ -232,6 +232,91 @@ word-syntax characters, so the parser must not rely on `skip-syntax-forward'."
     (insert " GATH args\n\n        ## Some comment\n")
     (let ((result (magik-completion--parse-args-line (point-min))))
       (should (equal (caddr result) '("args"))))))
+
+;;; magik-completion--parse-methods
+
+(defun magik-completion-test--parse-methods (text)
+  "Parse TEXT as CB method-finder output, returning the candidate list."
+  (with-temp-buffer
+    (insert text)
+    (magik-completion--parse-methods)))
+
+(defconst magik-completion-test--paren-and-paren-less-methods
+  (concat "something  IN  rope  basic\n $\n\n"
+          "something()  IN  rope  basic\n $\n\n")
+  "CB output for a class defining both `something' and `something()'.")
+
+(ert-deftest magik-completion--parse-methods--paren-and-paren-less-are-distinct-candidates ()
+  (should (= (length (magik-completion-test--parse-methods
+                      magik-completion-test--paren-and-paren-less-methods))
+             2)))
+
+(ert-deftest magik-completion--parse-methods--candidate-text-shows-explicit-parens ()
+  "The explicit-() variant is shown in the popup as `something()', not
+just `something', so the two candidates are visibly different."
+  (let ((cands (magik-completion-test--parse-methods
+                magik-completion-test--paren-and-paren-less-methods)))
+    (should (equal (nth 0 cands) "something"))
+    (should (equal (nth 1 cands) "something()"))))
+
+(ert-deftest magik-completion--parse-methods--paren-less-has-no-start-signature ()
+  (let ((cands (magik-completion-test--parse-methods
+                magik-completion-test--paren-and-paren-less-methods)))
+    (should-not (get-text-property 0 'magik-start-signature (nth 0 cands)))))
+
+(ert-deftest magik-completion--parse-methods--dedupes-literal-repeat ()
+  (let ((cands (magik-completion-test--parse-methods
+                (concat "something  IN  rope  basic\n $\n\n"
+                        "something  IN  rope  basic\n $\n\n"))))
+    (should (= (length cands) 1))))
+
+(ert-deftest magik-completion--parse-methods--any-method-needing-parens-shows-them ()
+  "A method that takes real arguments also shows `()' in the popup,
+even though its raw CB name has no bare (paren-less) sibling."
+  (let* ((cands (magik-completion-test--parse-methods
+                 "does_this_complete()  IN  rope  basic\n yes? no?\n\n"))
+         (cand (car cands)))
+    (should (equal cand "does_this_complete()"))
+    (should (equal (get-text-property 0 'magik-start-signature cand) "("))
+    (should (equal (get-text-property 0 'magik-args cand) '("yes?" "no?")))))
+
+(ert-deftest magik-completion--build-param-snippet--zero-arg-explicit-parens-returns-nil ()
+  "Nothing more to insert for `something()': the parens are already
+part of the candidate text and there are no params to fill in."
+  (let ((cand (propertize "something()" 'magik-start-signature "(")))
+    (magik-completion-test--with-settings t t t
+      (should-not (magik-completion--build-param-snippet cand)))))
+
+(ert-deftest magik-completion--build-param-snippet--explicit-parens-with-args-still-snippets ()
+  (let ((cand (propertize "does_this_complete()"
+                          'magik-args '("yes?" "no?")
+                          'magik-start-signature "(")))
+    (magik-completion-test--with-settings t t t
+      (should (equal (magik-completion--build-param-snippet cand)
+                     "(${1:yes?}, ${2:no?})$0")))))
+
+;;; magik-completion--exit-function
+
+(ert-deftest magik-completion--exit-function--expands-args-into-auto-inserted-parens ()
+  "Accepting `does_this_complete()' replaces its auto-inserted empty
+parens with the real argument snippet."
+  (skip-unless (require 'yasnippet nil t))
+  (with-temp-buffer
+    (yas-minor-mode 1)
+    (insert (propertize "does_this_complete()"
+                        'magik-args '("yes?" "no?")
+                        'magik-start-signature "("))
+    (magik-completion--exit-function (buffer-string) 'finished)
+    (should (equal (buffer-string) "does_this_complete(yes?, no?)"))))
+
+(ert-deftest magik-completion--exit-function--leaves-zero-arg-parens-untouched ()
+  "Accepting `something()' with no params leaves the buffer as-is."
+  (skip-unless (require 'yasnippet nil t))
+  (with-temp-buffer
+    (yas-minor-mode 1)
+    (insert (propertize "something()" 'magik-start-signature "("))
+    (magik-completion--exit-function (buffer-string) 'finished)
+    (should (equal (buffer-string) "something()"))))
 
 ;;; magik-completion--doc-buffer
 

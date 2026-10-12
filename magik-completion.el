@@ -833,18 +833,16 @@ Returns a list of propertized candidate strings."
                       (replace-regexp-in-string "^[ \t]+## ?" "" raw)))
                (parsed-args (magik-completion--parse-args-line
                              (match-beginning 4)))
+               (has-args (or (car parsed-args) (cadr parsed-args) (caddr parsed-args)))
+               (explicit-parens-p (string-suffix-p "()" method-raw))
+               (assignment-p (string-suffix-p "<<" method-raw))
+               (needs-parens (and (not assignment-p) (or explicit-parens-p has-args)))
                (annotation (magik-completion--format-annotation
                             class classify args-str))
-               ;; Strip trailing () or << from method name for insertion
-               (start-sig (cond
-                           ((string-suffix-p "()" method-raw) "(")
-                           ((string-suffix-p "<<" method-raw) nil)
-                           ((or (car parsed-args) (cadr parsed-args) (caddr parsed-args)) "(")
-                           (t nil)))
+               (start-sig (and needs-parens "("))
                (method (cond
-                        ((string-suffix-p "()" method-raw)
-                         (substring method-raw 0 -2))
-                        (t method-raw))))
+                        ((or explicit-parens-p (not needs-parens)) method-raw)
+                        (t (concat method-raw "()")))))
           (unless (or (string-empty-p method)
                       (string-match-p "\\`\\s-" method)
                       (member method candidates))
@@ -1184,14 +1182,12 @@ Returns a snippet string like \"(${1:arg1}, ${2:arg2})\" or nil."
                                  gather)))
            (idx 0))
       (cond
-       (start-sig
-        (if all-params
-            (let ((fields (mapcar (lambda (p)
-                                    (cl-incf idx)
-                                    (format "${%d:%s}" idx p))
-                                  all-params)))
-              (concat start-sig (string-join fields ", ") ")$0"))
-          "()"))
+       ((and start-sig all-params)
+        (let ((fields (mapcar (lambda (p)
+                                 (cl-incf idx)
+                                 (format "${%d:%s}" idx p))
+                               all-params)))
+          (concat start-sig (string-join fields ", ") ")$0")))
        ((string-suffix-p "<<" candidate)
         (when-let* ((val (or (car args) (car optional-raw))))
           (concat " " (format "${1:%s}" val) "$0")))))))
@@ -1233,6 +1229,8 @@ Inserts parameters as yasnippet when STATUS is `finished'."
              (require 'yasnippet nil t)
              (fboundp 'yas-expand-snippet))
     (when-let* ((snippet (magik-completion--build-param-snippet candidate)))
+      (when (string-suffix-p "()" candidate)
+        (delete-region (- (point) 2) (point)))
       (yas-expand-snippet snippet))))
 
 ;;; --- CB-backed CAPF functions ---
