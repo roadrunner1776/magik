@@ -54,8 +54,15 @@ jobs:
         continue-on-error: ${{ matrix.experimental }}
         run: |
           eask install-deps
-          eask package
-          eask install
+          # `eask package` installs the latest package-build from MELPA, which
+          # requires Emacs 29.1 since 5.1.0, so skip packaging on older Emacs.
+          # The tests load from the source tree and don't need the package.
+          if [[ "${{ matrix.emacs-version }}" =~ ^2[78]\. ]]; then
+            echo "::notice::Skipping eask package/install: package-build requires Emacs 29.1+"
+          else
+            eask package
+            eask install
+          fi
           eask compile
           eask run script test
       - name: Report experimental failure
