@@ -1,4 +1,4 @@
-;;; magik-template.el --- Provide a simple template file capability for Magik mode
+;;; magik-template.el --- Provide a simple template file capability for Magik mode  -*- lexical-binding: t; -*-
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
